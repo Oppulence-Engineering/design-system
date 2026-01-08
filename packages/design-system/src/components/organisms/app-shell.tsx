@@ -1,5 +1,5 @@
 import { cva, type VariantProps } from 'class-variance-authority';
-import { PanelLeftIcon, SearchIcon } from 'lucide-react';
+import { ChevronRightIcon, PanelLeftIcon, SearchIcon } from 'lucide-react';
 import * as React from 'react';
 
 import { Kbd } from '../atoms/kbd';
@@ -8,9 +8,14 @@ import { InputGroup, InputGroupAddon, InputGroupInput } from '../molecules/input
 // ============ CONTEXT ============
 
 type AppShellContextProps = {
+  /** Desktop sidebar expanded state */
   sidebarOpen: boolean;
   setSidebarOpen: (open: boolean) => void;
   toggleSidebar: () => void;
+  /** Mobile drawer open state (separate from desktop) */
+  mobileDrawerOpen: boolean;
+  setMobileDrawerOpen: (open: boolean) => void;
+  toggleMobileDrawer: () => void;
 };
 
 const AppShellContext = React.createContext<AppShellContextProps | null>(null);
@@ -26,7 +31,7 @@ function useAppShell() {
 // ============ VARIANTS ============
 
 const appShellNavbarVariants = cva(
-  'flex h-14 shrink-0 items-center gap-2 bg-muted px-4',
+  'flex h-14 shrink-0 items-center gap-2 bg-background/50 border-b border-border/50 px-4',
   {
     variants: {
       position: {
@@ -42,7 +47,7 @@ const appShellNavbarVariants = cva(
 );
 
 const appShellSidebarVariants = cva(
-  'shrink-0 bg-muted p-2 h-full overflow-hidden hidden md:flex md:flex-col',
+  'shrink-0 bg-muted p-2 h-full overflow-hidden hidden md:flex md:flex-col rounded-l-lg',
   {
     variants: {
       width: {
@@ -132,6 +137,17 @@ interface AppShellUserMenuProps extends Omit<React.ComponentProps<'div'>, 'class
 
 interface AppShellBodyProps extends Omit<React.ComponentProps<'div'>, 'className'> {}
 
+interface AppShellRailProps extends Omit<React.ComponentProps<'div'>, 'className'> {
+  /** Show the sidebar toggle button in the rail */
+  showSidebarToggle?: boolean;
+}
+
+interface AppShellRailItemProps extends Omit<React.ComponentProps<'button'>, 'className'> {
+  isActive?: boolean;
+  icon: React.ReactNode;
+  label?: string;
+}
+
 // ============ COMPONENTS ============
 
 function AppShell({
@@ -141,8 +157,12 @@ function AppShell({
   children,
   ...props
 }: AppShellProps) {
+  // Desktop sidebar state
   const [_sidebarOpen, _setSidebarOpen] = React.useState(defaultSidebarOpen);
   const sidebarOpen = sidebarOpenProp ?? _sidebarOpen;
+
+  // Mobile drawer state (always starts closed)
+  const [mobileDrawerOpen, setMobileDrawerOpen] = React.useState(false);
 
   const setSidebarOpen = React.useCallback(
     (open: boolean) => {
@@ -159,13 +179,33 @@ function AppShell({
     setSidebarOpen(!sidebarOpen);
   }, [sidebarOpen, setSidebarOpen]);
 
+  const toggleMobileDrawer = React.useCallback(() => {
+    setMobileDrawerOpen(!mobileDrawerOpen);
+  }, [mobileDrawerOpen]);
+
+  // Listen for Cmd+\ to toggle sidebar
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === '\\' && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        setSidebarOpen(!sidebarOpen);
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [sidebarOpen, setSidebarOpen]);
+
   const contextValue = React.useMemo<AppShellContextProps>(
     () => ({
       sidebarOpen,
       setSidebarOpen,
       toggleSidebar,
+      mobileDrawerOpen,
+      setMobileDrawerOpen,
+      toggleMobileDrawer,
     }),
-    [sidebarOpen, setSidebarOpen, toggleSidebar],
+    [sidebarOpen, setSidebarOpen, toggleSidebar, mobileDrawerOpen, toggleMobileDrawer],
   );
 
   return (
@@ -191,18 +231,18 @@ function AppShellNavbar({
   children,
   ...props
 }: AppShellNavbarProps) {
-  const { toggleSidebar, sidebarOpen } = useAppShell();
+  const { toggleSidebar, sidebarOpen, toggleMobileDrawer } = useAppShell();
 
   return (
     <header data-slot="app-shell-navbar" className={`${appShellNavbarVariants({ position })} relative`} {...props}>
       {/* Left section: sidebar toggle + start content */}
       <div className="flex items-center gap-2 z-10">
-        {/* Mobile hamburger menu - always visible on mobile */}
+        {/* Mobile hamburger menu - always visible on mobile, controls mobile drawer */}
         <button
           type="button"
-          onClick={toggleSidebar}
+          onClick={toggleMobileDrawer}
           className="inline-flex md:hidden size-8 items-center justify-center rounded-md hover:bg-background/50"
-          aria-label="Toggle sidebar"
+          aria-label="Toggle menu"
         >
           <PanelLeftIcon className="size-4" />
         </button>
@@ -244,28 +284,75 @@ function AppShellBody({ children, ...props }: AppShellBodyProps) {
   );
 }
 
+function AppShellRail({ showSidebarToggle = true, children, ...props }: AppShellRailProps) {
+  const { sidebarOpen, toggleSidebar } = useAppShell();
+
+  return (
+    <div
+      data-slot="app-shell-rail"
+      className="hidden md:flex flex-col items-center w-14 shrink-0 bg-background/50 border-r border-border/50 py-2 gap-1"
+      {...props}
+    >
+      {/* App/module items */}
+      <div className="flex flex-col items-center gap-1 flex-1">
+        {children}
+      </div>
+      {/* Sidebar toggle at bottom */}
+      {showSidebarToggle && (
+        <button
+          type="button"
+          onClick={toggleSidebar}
+          className="flex size-10 items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-background/50 transition-colors"
+          aria-label={sidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
+        >
+          <PanelLeftIcon className={`size-5 transition-transform ${sidebarOpen ? '' : 'rotate-180'}`} />
+        </button>
+      )}
+    </div>
+  );
+}
+
+function AppShellRailItem({ isActive, icon, label, ...props }: AppShellRailItemProps) {
+  return (
+    <button
+      data-slot="app-shell-rail-item"
+      data-active={isActive}
+      className={`flex size-10 items-center justify-center rounded-md transition-colors ${
+        isActive
+          ? 'bg-background text-foreground shadow-sm'
+          : 'text-muted-foreground hover:text-foreground hover:bg-background/50'
+      }`}
+      title={label}
+      aria-label={label}
+      {...props}
+    >
+      <span className="size-5 [&>svg]:size-5">{icon}</span>
+    </button>
+  );
+}
+
 function AppShellSidebar({
   width = 'default',
   collapsible = true,
   children,
   ...props
 }: AppShellSidebarProps) {
-  const { sidebarOpen, setSidebarOpen } = useAppShell();
+  const { sidebarOpen, mobileDrawerOpen, setMobileDrawerOpen } = useAppShell();
 
   return (
     <>
       {/* Mobile overlay backdrop */}
-      {sidebarOpen && (
+      {mobileDrawerOpen && (
         <div
           className="fixed inset-0 z-40 bg-black/50 md:hidden"
-          onClick={() => setSidebarOpen(false)}
+          onClick={() => setMobileDrawerOpen(false)}
         />
       )}
       {/* Mobile sidebar - slide over */}
       <aside
         data-slot="app-shell-sidebar-mobile"
         className={`fixed inset-y-0 left-0 z-50 w-64 bg-muted p-2 transform transition-transform duration-200 ease-in-out md:hidden ${
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+          mobileDrawerOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
         {...props}
       >
@@ -393,6 +480,8 @@ export {
   AppShellNavFooter,
   AppShellNavGroup,
   AppShellNavItem,
+  AppShellRail,
+  AppShellRailItem,
   AppShellSearch,
   AppShellSidebar,
   AppShellUserMenu,

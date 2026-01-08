@@ -8,7 +8,8 @@ import {
   AppShellNavFooter,
   AppShellNavGroup,
   AppShellNavItem,
-  AppShellSearch,
+  AppShellRail,
+  AppShellRailItem,
   AppShellSidebar,
   AppShellUserMenu,
   Avatar,
@@ -18,12 +19,15 @@ import {
   Button,
   Card,
   CardContent,
+  CommandSearch,
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  Grid,
   Heading,
   HStack,
   PageHeader,
@@ -37,14 +41,18 @@ import {
 import {
   BellIcon,
   BookOpenIcon,
+  BriefcaseIcon,
   ChevronDownIcon,
   CodeIcon,
+  CreditCardIcon,
   HomeIcon,
   KeyIcon,
   LayoutDashboardIcon,
   LogOutIcon,
   PanelLeftIcon,
+  PieChartIcon,
   SettingsIcon,
+  ShieldCheckIcon,
   UserIcon,
   UsersIcon,
 } from 'lucide-react';
@@ -73,15 +81,62 @@ const OrgSelector = () => (
       </Button>
     </DropdownMenuTrigger>
     <DropdownMenuContent align="start">
-      <DropdownMenuLabel>Organizations</DropdownMenuLabel>
+      <DropdownMenuGroup>
+        <DropdownMenuLabel>Organizations</DropdownMenuLabel>
+        <DropdownMenuItem>
+          <div className="size-4 rounded bg-emerald-500" />
+          Personal
+        </DropdownMenuItem>
+        <DropdownMenuItem>
+          <div className="size-4 rounded bg-blue-500" />
+          Acme Corp
+        </DropdownMenuItem>
+      </DropdownMenuGroup>
+    </DropdownMenuContent>
+  </DropdownMenu>
+);
+
+const LogoIcon = () => (
+  <div className="flex size-7 items-center justify-center rounded-md bg-primary text-primary-foreground text-sm font-bold">
+    C
+  </div>
+);
+
+const ProjectSelector = () => (
+  <DropdownMenu>
+    <DropdownMenuTrigger>
+      <button
+        type="button"
+        className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-sm font-medium hover:bg-background/50 transition-colors"
+      >
+        <div className="size-2 rounded-full bg-blue-500" />
+        Acme Corp
+        <ChevronDownIcon className="size-3 text-muted-foreground" />
+      </button>
+    </DropdownMenuTrigger>
+    <DropdownMenuContent align="start" style={{ minWidth: '220px' }}>
+      <DropdownMenuGroup>
+        <DropdownMenuLabel>Projects</DropdownMenuLabel>
+        <DropdownMenuItem>
+          <div className="size-2 rounded-full bg-blue-500" />
+          <span className="flex-1">Acme Corp</span>
+          <span className="text-xs text-muted-foreground">Pro</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem>
+          <div className="size-2 rounded-full bg-purple-500" />
+          <span className="flex-1">Side Project</span>
+          <span className="text-xs text-muted-foreground">Free</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem>
+          <div className="size-2 rounded-full bg-orange-500" />
+          <span className="flex-1">Personal</span>
+          <span className="text-xs text-muted-foreground">Free</span>
+        </DropdownMenuItem>
+      </DropdownMenuGroup>
       <DropdownMenuSeparator />
       <DropdownMenuItem>
-        <div className="size-4 rounded bg-emerald-500" />
-        Personal
-      </DropdownMenuItem>
-      <DropdownMenuItem>
-        <div className="size-4 rounded bg-blue-500" />
-        Acme Corp
+        <KeyIcon className="size-4" />
+        Create new project
       </DropdownMenuItem>
     </DropdownMenuContent>
   </DropdownMenu>
@@ -89,12 +144,38 @@ const OrgSelector = () => (
 
 const Logo = () => (
   <HStack gap="sm" align="center">
-    <div className="flex size-7 items-center justify-center rounded-md bg-primary text-primary-foreground text-sm font-bold">
-      C
-    </div>
-    <Text weight="semibold" size="sm">Comp</Text>
+    <LogoIcon />
+    <ProjectSelector />
   </HStack>
 );
+
+const searchGroups = [
+  {
+    id: 'pages',
+    label: 'Pages',
+    items: [
+      { id: 'overview', label: 'Overview', icon: <HomeIcon className="size-4" />, shortcut: '⌘1' },
+      { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboardIcon className="size-4" />, shortcut: '⌘2' },
+      { id: 'settings', label: 'Settings', icon: <SettingsIcon className="size-4" />, shortcut: '⌘,' },
+    ],
+  },
+  {
+    id: 'actions',
+    label: 'Actions',
+    items: [
+      { id: 'new-project', label: 'Create new project', icon: <KeyIcon className="size-4" /> },
+      { id: 'invite-team', label: 'Invite team member', icon: <UsersIcon className="size-4" /> },
+    ],
+  },
+  {
+    id: 'help',
+    label: 'Help',
+    items: [
+      { id: 'docs', label: 'Documentation', icon: <BookOpenIcon className="size-4" /> },
+      { id: 'api', label: 'API Reference', icon: <CodeIcon className="size-4" /> },
+    ],
+  },
+];
 
 const SidebarNav = () => {
   const { toggleSidebar } = useAppShell();
@@ -121,6 +202,24 @@ const SidebarNav = () => {
   );
 };
 
+const RailSidebarNav = () => (
+  <>
+    <AppShellNav>
+      <AppShellNavGroup label="HR">
+        <AppShellNavItem icon={<UsersIcon />} isActive>Employees</AppShellNavItem>
+        <AppShellNavItem icon={<BriefcaseIcon />}>Recruiting</AppShellNavItem>
+        <AppShellNavItem icon={<BookOpenIcon />}>Learning</AppShellNavItem>
+      </AppShellNavGroup>
+      <AppShellNavGroup label="Manage">
+        <AppShellNavItem icon={<SettingsIcon />}>Settings</AppShellNavItem>
+      </AppShellNavGroup>
+    </AppShellNav>
+    <AppShellNavFooter>
+      <AppShellNavItem icon={<BookOpenIcon />}>Help</AppShellNavItem>
+    </AppShellNavFooter>
+  </>
+);
+
 const UserMenuDemo = () => (
   <DropdownMenu>
     <DropdownMenuTrigger>
@@ -132,16 +231,17 @@ const UserMenuDemo = () => (
       </Button>
     </DropdownMenuTrigger>
     <DropdownMenuContent align="end">
-      <DropdownMenuLabel>My Account</DropdownMenuLabel>
-      <DropdownMenuSeparator />
-      <DropdownMenuItem>
-        <UserIcon />
-        Profile
-      </DropdownMenuItem>
-      <DropdownMenuItem>
-        <SettingsIcon />
-        Settings
-      </DropdownMenuItem>
+      <DropdownMenuGroup>
+        <DropdownMenuLabel>My Account</DropdownMenuLabel>
+        <DropdownMenuItem>
+          <UserIcon />
+          Profile
+        </DropdownMenuItem>
+        <DropdownMenuItem>
+          <SettingsIcon />
+          Settings
+        </DropdownMenuItem>
+      </DropdownMenuGroup>
       <DropdownMenuSeparator />
       <DropdownMenuItem>
         <LogOutIcon />
@@ -157,7 +257,7 @@ export const Default: Story = {
       <AppShellNavbar
         showSidebarToggle={false}
         startContent={<Logo />}
-        centerContent={<AppShellSearch />}
+        centerContent={<CommandSearch groups={searchGroups} placeholder="Search..." />}
         endContent={
           <AppShellUserMenu>
             <Button variant="ghost" size="icon-sm">
@@ -307,6 +407,47 @@ export const WideSidebar: Story = {
   ),
 };
 
+export const WithRail: Story = {
+  render: () => (
+    <AppShell>
+      <AppShellNavbar
+        showSidebarToggle={false}
+        startContent={<Logo />}
+        centerContent={<CommandSearch groups={searchGroups} placeholder="Search..." />}
+        endContent={
+          <AppShellUserMenu>
+            <Button variant="ghost" size="icon-sm">
+              <BellIcon />
+            </Button>
+            <UserMenuDemo />
+          </AppShellUserMenu>
+        }
+      />
+      <AppShellBody>
+        <AppShellRail>
+          <AppShellRailItem icon={<UsersIcon />} label="HR" isActive />
+          <AppShellRailItem icon={<CreditCardIcon />} label="Finance" />
+          <AppShellRailItem icon={<ShieldCheckIcon />} label="Compliance" />
+          <AppShellRailItem icon={<PieChartIcon />} label="Analytics" />
+          <AppShellRailItem icon={<SettingsIcon />} label="Settings" />
+        </AppShellRail>
+        <AppShellSidebar collapsible>
+          <RailSidebarNav />
+        </AppShellSidebar>
+        <AppShellContent>
+          <PageHeader title="Employees">
+            <PageHeaderDescription>Manage your team members and their information.</PageHeaderDescription>
+            <PageHeaderActions>
+              <Button>Add Employee</Button>
+            </PageHeaderActions>
+          </PageHeader>
+          <Text>Rippling-style layout with app rail on the left. Use <strong>⌘\</strong> to toggle the sidebar.</Text>
+        </AppShellContent>
+      </AppShellBody>
+    </AppShell>
+  ),
+};
+
 export const WithPageLayoutContainer: Story = {
   render: () => (
     <AppShell>
@@ -373,7 +514,7 @@ export const WithPageLayoutFullWidth: Story = {
                 Full-width layout for data-heavy pages like dashboards.
               </PageHeaderDescription>
             </PageHeader>
-            <div className="grid grid-cols-4 gap-4">
+            <Grid cols="4" gap="4">
               {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
                 <Card key={i}>
                   <CardContent>
@@ -384,7 +525,7 @@ export const WithPageLayoutFullWidth: Story = {
                   </CardContent>
                 </Card>
               ))}
-            </div>
+            </Grid>
           </PageLayout>
         </AppShellContent>
       </AppShellBody>
