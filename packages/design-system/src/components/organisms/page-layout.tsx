@@ -1,21 +1,13 @@
 import { cva, type VariantProps } from 'class-variance-authority';
 import * as React from 'react';
 
+import { cn } from '../../../lib/utils';
+
 const pageLayoutVariants = cva('min-h-dvh bg-background text-foreground', {
   variants: {
     variant: {
       default: 'flex flex-col',
       center: 'flex items-center justify-center',
-    },
-    contentWidth: {
-      auto: '',
-      sm: 'w-full max-w-sm',
-      md: 'w-full max-w-md',
-      lg: 'w-full max-w-lg',
-      xl: 'w-full max-w-xl',
-      '2xl': 'w-full max-w-2xl',
-      '3xl': 'w-full max-w-3xl',
-      full: 'w-full max-w-full',
     },
     padding: {
       none: '',
@@ -26,20 +18,45 @@ const pageLayoutVariants = cva('min-h-dvh bg-background text-foreground', {
   },
   defaultVariants: {
     variant: 'default',
-    contentWidth: 'auto',
     padding: 'default',
   },
 });
 
+const containerVariants = cva('mx-auto w-full', {
+  variants: {
+    maxWidth: {
+      sm: 'max-w-screen-sm', // 640px
+      md: 'max-w-screen-md', // 768px
+      lg: 'max-w-screen-lg', // 1024px
+      xl: 'max-w-[1200px]',
+      '2xl': 'max-w-[1400px]',
+    },
+  },
+  defaultVariants: {
+    maxWidth: 'xl',
+  },
+});
+
 interface PageLayoutProps
-  extends
-    Omit<React.ComponentProps<'div'>, 'className' | 'children'>,
+  extends Omit<React.ComponentProps<'div'>, 'className' | 'children'>,
     VariantProps<typeof pageLayoutVariants> {
   children?: React.ReactNode;
+  /** Whether to wrap content in a centered container. Defaults to true. */
+  container?: boolean;
+  /** Max width of the container. Only applies when container is true. */
+  maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl';
 }
 
-function PageLayout({ variant, padding, contentWidth, children, ...props }: PageLayoutProps) {
-  const resolvedContentWidth = contentWidth ?? (variant === 'center' ? 'lg' : 'auto');
+function PageLayout({
+  variant,
+  padding,
+  container = true,
+  maxWidth,
+  children,
+  ...props
+}: PageLayoutProps) {
+  // For center variant, default to smaller max-width (sm) for auth-style pages
+  const resolvedMaxWidth = maxWidth ?? (variant === 'center' ? 'sm' : 'lg');
 
   return (
     <div
@@ -48,10 +65,13 @@ function PageLayout({ variant, padding, contentWidth, children, ...props }: Page
       className={pageLayoutVariants({ variant, padding })}
       {...props}
     >
-      {resolvedContentWidth !== 'auto' ? (
+      {container ? (
         <div
-          data-slot="page-layout-content"
-          className={pageLayoutVariants({ contentWidth: resolvedContentWidth })}
+          data-slot="page-layout-container"
+          className={cn(
+            containerVariants({ maxWidth: resolvedMaxWidth }),
+            variant === 'center' && 'flex items-center justify-center'
+          )}
         >
           {children}
         </div>

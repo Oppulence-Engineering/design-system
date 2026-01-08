@@ -16,6 +16,8 @@ import {
   AvatarImage,
   Badge,
   Button,
+  Card,
+  CardContent,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -27,6 +29,8 @@ import {
   PageHeader,
   PageHeaderActions,
   PageHeaderDescription,
+  PageLayout,
+  Stack,
   Text,
   useAppShell,
 } from '@trycompai/design-system';
@@ -297,6 +301,91 @@ export const WideSidebar: Story = {
         <AppShellContent>
           <Heading level="1">Wide Sidebar</Heading>
           <Text variant="muted">Using width="lg" for a wider sidebar.</Text>
+        </AppShellContent>
+      </AppShellBody>
+    </AppShell>
+  ),
+};
+
+export const WithPageLayoutContainer: Story = {
+  render: () => (
+    <AppShell>
+      <AppShellNavbar
+        showSidebarToggle={false}
+        startContent={<Logo />}
+        endContent={<UserMenuDemo />}
+      />
+      <AppShellBody>
+        <AppShellSidebar>
+          <SidebarNav />
+        </AppShellSidebar>
+        <AppShellContent padding="none">
+          <PageLayout padding="default">
+            <PageHeader title="Settings">
+              <PageHeaderDescription>
+                Content is centered with a max-width container.
+              </PageHeaderDescription>
+              <PageHeaderActions>
+                <Button>Save Changes</Button>
+              </PageHeaderActions>
+            </PageHeader>
+            <Stack gap="4">
+              <Card>
+                <CardContent>
+                  <Stack gap="xs">
+                    <Heading level="3">General Settings</Heading>
+                    <Text variant="muted">Configure your account preferences.</Text>
+                  </Stack>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent>
+                  <Stack gap="xs">
+                    <Heading level="3">Notifications</Heading>
+                    <Text variant="muted">Manage how you receive notifications.</Text>
+                  </Stack>
+                </CardContent>
+              </Card>
+            </Stack>
+          </PageLayout>
+        </AppShellContent>
+      </AppShellBody>
+    </AppShell>
+  ),
+};
+
+export const WithPageLayoutFullWidth: Story = {
+  render: () => (
+    <AppShell>
+      <AppShellNavbar
+        showSidebarToggle={false}
+        startContent={<Logo />}
+        endContent={<UserMenuDemo />}
+      />
+      <AppShellBody>
+        <AppShellSidebar>
+          <SidebarNav />
+        </AppShellSidebar>
+        <AppShellContent padding="none">
+          <PageLayout container={false} padding="default">
+            <PageHeader title="Dashboard">
+              <PageHeaderDescription>
+                Full-width layout for data-heavy pages like dashboards.
+              </PageHeaderDescription>
+            </PageHeader>
+            <div className="grid grid-cols-4 gap-4">
+              {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+                <Card key={i}>
+                  <CardContent>
+                    <Stack align="center" gap="xs">
+                      <Text weight="medium">Metric {i}</Text>
+                      <Text variant="muted">Value</Text>
+                    </Stack>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </PageLayout>
         </AppShellContent>
       </AppShellBody>
     </AppShell>

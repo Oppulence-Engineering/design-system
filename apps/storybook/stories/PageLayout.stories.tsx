@@ -1,10 +1,14 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import {
+  Avatar,
+  AvatarFallback,
   Button,
   Card,
   CardContent,
   CardHeader,
+  Grid,
   Heading,
+  HStack,
   PageLayout,
   Stack,
   Text,
@@ -26,6 +30,13 @@ const meta = {
       control: 'select',
       options: ['none', 'sm', 'default', 'lg'],
     },
+    container: {
+      control: 'boolean',
+    },
+    maxWidth: {
+      control: 'select',
+      options: ['sm', 'md', 'lg', 'xl', '2xl'],
+    },
   },
 } satisfies Meta<typeof PageLayout>;
 
@@ -34,96 +45,131 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   render: () => (
-    <div className="min-h-[400px]">
-      <PageLayout variant="default" padding="default">
-        <div className="max-w-4xl">
-          <Stack gap="6">
-            <Heading level="1">Page Title</Heading>
-            <Text variant="muted">
-              This is a default page layout with content flowing from top.
-            </Text>
-            <Card>
+    <PageLayout>
+      <Stack gap="6">
+        <Heading level="1">Page Title</Heading>
+        <Text variant="muted">
+          Content is centered with a max-width container by default. Resize the window to see the
+          effect.
+        </Text>
+        <Card>
+          <CardContent>
+            <Text>Page content goes here</Text>
+          </CardContent>
+        </Card>
+      </Stack>
+    </PageLayout>
+  ),
+};
+
+export const FullWidth: Story = {
+  render: () => (
+    <PageLayout container={false}>
+      <Stack gap="6">
+        <Heading level="1">Full Width Page</Heading>
+        <Text variant="muted">
+          This page has no container - content stretches to full width. Useful for dashboards, maps,
+          or custom layouts.
+        </Text>
+        <Grid cols="4" gap="4">
+          {[1, 2, 3, 4].map((i) => (
+            <Card key={i}>
               <CardContent>
-                <div className="py-4">
-                  <Text>Page content goes here</Text>
-                </div>
+                <Stack align="center">
+                  <Text>Card {i}</Text>
+                </Stack>
               </CardContent>
             </Card>
-          </Stack>
-        </div>
-      </PageLayout>
-    </div>
+          ))}
+        </Grid>
+      </Stack>
+    </PageLayout>
   ),
 };
 
 export const Centered: Story = {
   render: () => (
-    <div className="min-h-[400px]">
-      <PageLayout variant="center" contentWidth="md">
-        <Card width="full">
-          <CardHeader>
-            <div className="flex flex-col items-center gap-1 text-center">
-              <Heading level="2">Sign In</Heading>
-              <Text variant="muted">Welcome back! Please sign in to continue.</Text>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <Stack gap="3">
-              <Button width="full">Sign In with Email</Button>
-              <Button variant="outline" width="full">
-                Continue with Google
-              </Button>
-            </Stack>
-          </CardContent>
-        </Card>
-      </PageLayout>
-    </div>
+    <PageLayout variant="center">
+      <Card width="full">
+        <CardHeader>
+          <Stack align="center" gap="xs">
+            <Heading level="2">Sign In</Heading>
+            <Text variant="muted">Welcome back! Please sign in to continue.</Text>
+          </Stack>
+        </CardHeader>
+        <CardContent>
+          <Stack gap="3">
+            <Button width="full">Sign In with Email</Button>
+            <Button variant="outline" width="full">
+              Continue with Google
+            </Button>
+          </Stack>
+        </CardContent>
+      </Card>
+    </PageLayout>
   ),
 };
 
 export const AuthPage: Story = {
   render: () => (
-    <div className="min-h-[500px]">
-      <PageLayout variant="center" padding="lg" contentWidth="lg">
-        <Card width="full">
-          <CardHeader>
-            <div className="flex flex-col items-center gap-3 text-center">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-                <span className="text-xl font-bold text-primary">A</span>
-              </div>
-              <Stack align="center" gap="xs">
-                <Heading level="1">Create an account</Heading>
-                <Text variant="muted">Get started with your free account today</Text>
-              </Stack>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <Stack gap="4">
-              <Button width="full">Sign up with Email</Button>
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
-                </div>
-              </div>
-              <Stack direction="row" gap="2">
-                <div className="flex-1">
-                  <Button variant="outline" width="full">
-                    Google
-                  </Button>
-                </div>
-                <div className="flex-1">
-                  <Button variant="outline" width="full">
-                    GitHub
-                  </Button>
-                </div>
-              </Stack>
+    <PageLayout variant="center" padding="lg" maxWidth="lg">
+      <Card width="full">
+        <CardHeader>
+          <Stack align="center" gap="md">
+            <Avatar size="lg">
+              <AvatarFallback>A</AvatarFallback>
+            </Avatar>
+            <Stack align="center" gap="xs">
+              <Heading level="1">Create an account</Heading>
+              <Text variant="muted">Get started with your free account today</Text>
             </Stack>
-          </CardContent>
-        </Card>
-      </PageLayout>
-    </div>
+          </Stack>
+        </CardHeader>
+        <CardContent>
+          <Stack gap="4">
+            <Button width="full">Sign up with Email</Button>
+            <HStack gap="2" align="center">
+              <hr className="flex-1" />
+              <Text variant="muted" size="xs">
+                Or continue with
+              </Text>
+              <hr className="flex-1" />
+            </HStack>
+            <HStack gap="2">
+              <Button variant="outline" width="full">
+                Google
+              </Button>
+              <Button variant="outline" width="full">
+                GitHub
+              </Button>
+            </HStack>
+          </Stack>
+        </CardContent>
+      </Card>
+    </PageLayout>
+  ),
+};
+
+export const CustomMaxWidth: Story = {
+  render: () => (
+    <PageLayout maxWidth="2xl">
+      <Stack gap="6">
+        <Heading level="1">Wide Container</Heading>
+        <Text variant="muted">
+          This page uses a wider max-width (1400px) for more content-heavy pages.
+        </Text>
+        <Grid cols="3" gap="4">
+          {[1, 2, 3].map((i) => (
+            <Card key={i}>
+              <CardContent>
+                <Stack align="center">
+                  <Text>Wide Card {i}</Text>
+                </Stack>
+              </CardContent>
+            </Card>
+          ))}
+        </Grid>
+      </Stack>
+    </PageLayout>
   ),
 };
