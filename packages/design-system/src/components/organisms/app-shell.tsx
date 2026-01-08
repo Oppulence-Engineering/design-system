@@ -290,7 +290,7 @@ function AppShellRail({ showSidebarToggle = true, children, ...props }: AppShell
   return (
     <div
       data-slot="app-shell-rail"
-      className="hidden md:flex flex-col items-center w-14 shrink-0 bg-muted py-2 gap-1"
+      className="hidden md:flex flex-col items-center w-14 shrink-0 bg-background/50 border-r border-border/50 py-2 gap-1"
       {...props}
     >
       {/* App/module items */}
