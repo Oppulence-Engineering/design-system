@@ -1,17 +1,24 @@
 {
-  "name": "my-turborepo",
+  "name": "@trycompai/design-system-monorepo",
   "private": true,
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "check-types": "turbo run check-types"
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "storybook": "turbo run dev --filter=@comp/storybook"
   },
   "devDependencies": {
     "prettier": "^3.7.4",
     "turbo": "^2.7.1",
     "typescript": "5.9.2"
+  },
+  "pnpm": {
+    "overrides": {
+      "esbuild": "0.25.12"
+    }
   },
   "packageManager": "pnpm@9.0.0",
   "engines": {

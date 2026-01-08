@@ -1,0 +1,27 @@
+[11:52:08.345] [INFO] storybook v10.1.11
+[11:52:09.216] [ERROR] [38;2;241;97;97mSB_CORE-SERVER_0007 (MainFileEvaluationError): Storybook couldn't evaluate your .storybook/main.ts file.
+
+Original error:
+Error: The service was stopped
+    at /Users/marfuen/code/design-system/node_modules/.pnpm/esbuild@0.27.2/node_modules/esbuild/lib/main.js:718:38
+    at responseCallbacks.<computed> (/Users/marfuen/code/design-system/node_modules/.pnpm/esbuild@0.27.2/node_modules/esbuild/lib/main.js:603:9)
+    at Socket.afterClose (/Users/marfuen/code/design-system/node_modules/.pnpm/esbuild@0.27.2/node_modules/esbuild/lib/main.js:594:28)
+    at Socket.emit (node:events:519:35)
+    at endReadableNT (node:internal/streams/readable:1696:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)[39m
+    at loadMainConfig (file:///Users/marfuen/code/design-system/node_modules/.pnpm/storybook@10.1.11_@testing-library+dom@10.4.1_prettier@3.7.4_react-dom@19.2.3_react@19.2.3__react@19.2.3/node_modules/storybook/dist/_node-chunks/chunk-Q4DOC7HF.js:11701:11)
+    at async buildDevStandalone (file:///Users/marfuen/code/design-system/node_modules/.pnpm/storybook@10.1.11_@testing-library+dom@10.4.1_prettier@3.7.4_react-dom@19.2.3_react@19.2.3__react@19.2.3/node_modules/storybook/dist/core-server/index.js:7149:16)
+    at async withTelemetry (file:///Users/marfuen/code/design-system/node_modules/.pnpm/storybook@10.1.11_@testing-library+dom@10.4.1_prettier@3.7.4_react-dom@19.2.3_react@19.2.3__react@19.2.3/node_modules/storybook/dist/_node-chunks/chunk-2372JZ52.js:209:12)
+    at async dev (file:///Users/marfuen/code/design-system/node_modules/.pnpm/storybook@10.1.11_@testing-library+dom@10.4.1_prettier@3.7.4_react-dom@19.2.3_react@19.2.3__react@19.2.3/node_modules/storybook/dist/bin/core.js:2734:3)
+    at async _Command.<anonymous> (file:///Users/marfuen/code/design-system/node_modules/.pnpm/storybook@10.1.11_@testing-library+dom@10.4.1_prettier@3.7.4_react-dom@19.2.3_react@19.2.3__react@19.2.3/node_modules/storybook/dist/bin/core.js:2801:92)
+[11:52:09.217] [WARN] Broken build, fix the error above.
+You may need to refresh the browser.
+[11:52:09.221] [WARN]   Failed to load preset: "/Users/marfuen/code/design-system/apps/storybook/.storybook/main.ts"
+[11:52:09.221] [ERROR] [38;2;241;97;97mError: The service was stopped[39m
+    at /Users/marfuen/code/design-system/node_modules/.pnpm/esbuild@0.27.2/node_modules/esbuild/lib/main.js:718:38
+    at responseCallbacks.<computed> (/Users/marfuen/code/design-system/node_modules/.pnpm/esbuild@0.27.2/node_modules/esbuild/lib/main.js:603:9)
+    at Socket.afterClose (/Users/marfuen/code/design-system/node_modules/.pnpm/esbuild@0.27.2/node_modules/esbuild/lib/main.js:594:28)
+    at Socket.emit (node:events:519:35)
+    at endReadableNT (node:internal/streams/readable:1696:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+[11:52:09.223] [INFO] Storybook collects completely anonymous usage telemetry. We use it to shape Storybook's roadmap and prioritize features. You can learn more, including how to opt out, at https://storybook.js.org/telemetry
