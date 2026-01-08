@@ -246,8 +246,8 @@ function AppShellNavbar({
         >
           <PanelLeftIcon className="size-4" />
         </button>
-        {/* Desktop toggle - visible when sidebar is collapsed or when prop is true */}
-        {(showSidebarToggle || !sidebarOpen) && (
+        {/* Desktop toggle - only visible when prop is true */}
+        {showSidebarToggle && (
           <button
             type="button"
             onClick={toggleSidebar}
