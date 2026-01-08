@@ -172,6 +172,19 @@ function AppShell({
     setMobileDrawerOpen(!mobileDrawerOpen);
   }, [mobileDrawerOpen]);
 
+  // Listen for Cmd+\ to toggle sidebar
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === '\\' && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        setSidebarOpen(!sidebarOpen);
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [sidebarOpen, setSidebarOpen]);
+
   const contextValue = React.useMemo<AppShellContextProps>(
     () => ({
       sidebarOpen,
