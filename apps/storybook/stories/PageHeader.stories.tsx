@@ -3,7 +3,7 @@ import { Badge, Button, Heading, PageHeader, Stack } from '@trycompai/design-sys
 import { Download, Plus, Settings } from 'lucide-react';
 
 const meta = {
-  title: 'Molecules/PageHeader',
+  title: 'Pages/PageHeader',
   component: PageHeader,
   parameters: {
     layout: 'padded',

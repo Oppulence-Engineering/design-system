@@ -11,7 +11,7 @@ import {
 } from '@trycompai/design-system';
 
 const meta = {
-  title: 'Organisms/PageLayout',
+  title: 'Pages/PageLayout',
   component: PageLayout,
   parameters: {
     layout: 'fullscreen',
