@@ -213,7 +213,7 @@ function AppShell({
       <div
         data-slot="app-shell"
         data-sidebar-open={sidebarOpen}
-        className="flex h-svh w-full flex-col bg-background overflow-hidden"
+        className="flex h-svh w-full flex-col bg-muted overflow-hidden"
         {...props}
       >
         {children}
