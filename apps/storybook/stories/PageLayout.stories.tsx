@@ -38,14 +38,25 @@ const meta = {
       options: ['sm', 'md', 'lg', 'xl', '2xl'],
     },
   },
+  args: {
+    variant: 'default',
+    padding: 'default',
+    container: true,
+    maxWidth: 'lg',
+  },
 } satisfies Meta<typeof PageLayout>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
-  render: () => (
-    <PageLayout>
+  args: {
+    variant: 'default',
+    padding: 'default',
+    container: true,
+  },
+  render: (args) => (
+    <PageLayout {...args}>
       <Stack gap="6">
         <Heading level="1">Page Title</Heading>
         <Text variant="muted">
@@ -63,8 +74,13 @@ export const Default: Story = {
 };
 
 export const FullWidth: Story = {
-  render: () => (
-    <PageLayout container={false}>
+  args: {
+    variant: 'default',
+    padding: 'default',
+    container: false,
+  },
+  render: (args) => (
+    <PageLayout {...args}>
       <Stack gap="6">
         <Heading level="1">Full Width Page</Heading>
         <Text variant="muted">
@@ -88,8 +104,14 @@ export const FullWidth: Story = {
 };
 
 export const Centered: Story = {
-  render: () => (
-    <PageLayout variant="center">
+  args: {
+    variant: 'center',
+    padding: 'default',
+    container: true,
+    maxWidth: 'sm',
+  },
+  render: (args) => (
+    <PageLayout {...args}>
       <Card width="full">
         <CardHeader>
           <Stack align="center" gap="xs">
@@ -111,8 +133,14 @@ export const Centered: Story = {
 };
 
 export const AuthPage: Story = {
-  render: () => (
-    <PageLayout variant="center" padding="lg" maxWidth="lg">
+  args: {
+    variant: 'center',
+    padding: 'lg',
+    container: true,
+    maxWidth: 'md',
+  },
+  render: (args) => (
+    <PageLayout {...args}>
       <Card width="full">
         <CardHeader>
           <Stack align="center" gap="md">
@@ -151,8 +179,14 @@ export const AuthPage: Story = {
 };
 
 export const CustomMaxWidth: Story = {
-  render: () => (
-    <PageLayout maxWidth="2xl">
+  args: {
+    variant: 'default',
+    padding: 'default',
+    container: true,
+    maxWidth: '2xl',
+  },
+  render: (args) => (
+    <PageLayout {...args}>
       <Stack gap="6">
         <Heading level="1">Wide Container</Heading>
         <Text variant="muted">
