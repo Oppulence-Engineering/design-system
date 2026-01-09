@@ -1,14 +1,14 @@
-'use client';
+"use client";
 
-import * as React from 'react';
+import * as React from "react";
 
-interface LogoProps extends Omit<React.SVGProps<SVGSVGElement>, 'className'> {
+interface LogoProps extends Omit<React.SVGProps<SVGSVGElement>, "className"> {
   /** Logo variant - 'dark' shows dark logo (for light backgrounds), 'light' shows white logo (for dark backgrounds) */
-  variant?: 'dark' | 'light';
+  variant?: "dark" | "light";
 }
 
-function Logo({ variant = 'dark', ...props }: LogoProps) {
-  const fill = variant === 'light' ? '#FFFFFF' : '#16171B';
+function Logo({ variant = "dark", ...props }: LogoProps) {
+  const fill = variant === "light" ? "#FFFFFF" : "#16171B";
 
   return (
     <svg
@@ -30,8 +30,8 @@ function Logo({ variant = 'dark', ...props }: LogoProps) {
 }
 
 /** Icon-only version of the logo (just the shield/chevron mark) */
-function LogoIcon({ variant = 'dark', ...props }: LogoProps) {
-  const fill = variant === 'light' ? '#FFFFFF' : '#16171B';
+function LogoIcon({ variant = "dark", ...props }: LogoProps) {
+  const fill = variant === "light" ? "#FFFFFF" : "#16171B";
 
   return (
     <svg

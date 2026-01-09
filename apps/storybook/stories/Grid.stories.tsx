@@ -1,21 +1,21 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Card, CardContent, Grid, Stack, Text } from '@oppulence/design-system';
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import { Card, CardContent, Grid, Stack, Text } from "@oppulence/design-system";
 
 const meta = {
-  title: 'Molecules/Grid',
+  title: "Molecules/Grid",
   component: Grid,
   parameters: {
-    layout: 'padded',
+    layout: "padded",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
   argTypes: {
     cols: {
-      control: 'select',
-      options: ['1', '2', '3', '4', '5', '6'],
+      control: "select",
+      options: ["1", "2", "3", "4", "5", "6"],
     },
     gap: {
-      control: 'select',
-      options: ['0', '1', '2', '3', '4', '6', '8'],
+      control: "select",
+      options: ["0", "1", "2", "3", "4", "6", "8"],
     },
   },
 } satisfies Meta<typeof Grid>;
@@ -74,7 +74,7 @@ export const FourColumns: Story = {
 
 export const Responsive: Story = {
   render: () => (
-    <Grid cols={{ sm: '2', lg: '4' }} gap="4">
+    <Grid cols={{ sm: "2", lg: "4" }} gap="4">
       <GridItem>1</GridItem>
       <GridItem>2</GridItem>
       <GridItem>3</GridItem>
@@ -86,7 +86,7 @@ export const Responsive: Story = {
 export const DashboardLayout: Story = {
   render: () => (
     <Stack gap="4">
-      <Grid cols={{ sm: '2', lg: '4' }} gap="4">
+      <Grid cols={{ sm: "2", lg: "4" }} gap="4">
         <Card>
           <CardContent>
             <div className="py-4">
@@ -136,7 +136,7 @@ export const DashboardLayout: Story = {
           </CardContent>
         </Card>
       </Grid>
-      <Grid cols={{ lg: '2' }} gap="4">
+      <Grid cols={{ lg: "2" }} gap="4">
         <Card>
           <CardContent>
             <div className="py-8">

@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import {
   Button,
@@ -9,7 +9,7 @@ import {
   PageLayout,
   SettingsCard,
   Stack,
-} from '@oppulence/design-system';
+} from "@oppulence/design-system";
 
 export default function SettingsGeneralPage() {
   return (
@@ -50,7 +50,11 @@ export default function SettingsGeneralPage() {
           <Stack gap="4">
             <Stack gap="2">
               <Label htmlFor="supportEmail">Email Address</Label>
-              <Input id="supportEmail" type="email" defaultValue="support@acme.com" />
+              <Input
+                id="supportEmail"
+                type="email"
+                defaultValue="support@acme.com"
+              />
             </Stack>
           </Stack>
         </SettingsCard>

@@ -14,8 +14,8 @@ import {
   SettingsIcon,
   ShieldCheckIcon,
   UsersIcon,
-} from 'lucide-react';
-import type { ReactNode } from 'react';
+} from "lucide-react";
+import type { ReactNode } from "react";
 
 export interface NavItem {
   id: string;
@@ -49,125 +49,212 @@ export interface SidebarConfig {
 // Rail items - top-level app modules (compliance product)
 export const railItems: RailItem[] = [
   {
-    id: 'compliance',
-    label: 'Compliance',
-    href: '/',
+    id: "compliance",
+    label: "Compliance",
+    href: "/",
     icon: <ShieldCheckIcon />,
-    activePaths: ['/', '/policies', '/controls', '/risks', '/vendors', '/integrations'],
+    activePaths: [
+      "/",
+      "/policies",
+      "/controls",
+      "/risks",
+      "/vendors",
+      "/integrations",
+    ],
   },
   {
-    id: 'cybersecurity',
-    label: 'Cybersecurity',
-    href: '/cybersecurity',
+    id: "cybersecurity",
+    label: "Cybersecurity",
+    href: "/cybersecurity",
     icon: <KeyIcon />,
-    activePaths: ['/cybersecurity'],
+    activePaths: ["/cybersecurity"],
   },
   {
-    id: 'analytics',
-    label: 'Analytics',
-    href: '/analytics',
+    id: "analytics",
+    label: "Analytics",
+    href: "/analytics",
     icon: <PieChartIcon />,
-    activePaths: ['/analytics'],
+    activePaths: ["/analytics"],
   },
   {
-    id: 'settings',
-    label: 'Settings',
-    href: '/settings',
+    id: "settings",
+    label: "Settings",
+    href: "/settings",
     icon: <SettingsIcon />,
-    activePaths: ['/settings'],
+    activePaths: ["/settings"],
   },
 ];
 
 // Sidebar configurations per section
 export const sidebarConfigs: Record<string, SidebarConfig> = {
   compliance: {
-    title: 'Compliance',
+    title: "Compliance",
     icon: <ShieldCheckIcon />,
     groups: [
       {
-        id: 'getting-started',
-        label: 'Getting started',
+        id: "getting-started",
+        label: "Getting started",
         items: [
-          { id: 'overview', label: 'Overview', href: '/', icon: <HomeIcon /> },
-          { id: 'quickstart', label: 'Quickstart', href: '#', icon: <BookOpenIcon /> },
+          { id: "overview", label: "Overview", href: "/", icon: <HomeIcon /> },
+          {
+            id: "quickstart",
+            label: "Quickstart",
+            href: "#",
+            icon: <BookOpenIcon />,
+          },
         ],
       },
       {
-        id: 'compliance',
-        label: 'Compliance',
+        id: "compliance",
+        label: "Compliance",
         items: [
-          { id: 'policies', label: 'Policies', href: '/policies', icon: <FileTextIcon /> },
-          { id: 'controls', label: 'Controls', href: '/controls', icon: <ClipboardCheckIcon /> },
-          { id: 'risks', label: 'Risks', href: '#', icon: <AlertTriangleIcon /> },
-          { id: 'vendors', label: 'Vendors', href: '/vendors', icon: <BuildingIcon /> },
-          { id: 'integrations', label: 'Integrations', href: '#', icon: <PlugIcon /> },
+          {
+            id: "policies",
+            label: "Policies",
+            href: "/policies",
+            icon: <FileTextIcon />,
+          },
+          {
+            id: "controls",
+            label: "Controls",
+            href: "/controls",
+            icon: <ClipboardCheckIcon />,
+          },
+          {
+            id: "risks",
+            label: "Risks",
+            href: "#",
+            icon: <AlertTriangleIcon />,
+          },
+          {
+            id: "vendors",
+            label: "Vendors",
+            href: "/vendors",
+            icon: <BuildingIcon />,
+          },
+          {
+            id: "integrations",
+            label: "Integrations",
+            href: "#",
+            icon: <PlugIcon />,
+          },
         ],
       },
     ],
     footer: [
-      { id: 'settings', label: 'Settings', href: '/settings', icon: <SettingsIcon /> },
+      {
+        id: "settings",
+        label: "Settings",
+        href: "/settings",
+        icon: <SettingsIcon />,
+      },
     ],
   },
   cybersecurity: {
-    title: 'Cybersecurity',
+    title: "Cybersecurity",
     icon: <KeyIcon />,
     groups: [
       {
-        id: 'security',
-        label: 'Security',
+        id: "security",
+        label: "Security",
         items: [
-          { id: 'dashboard', label: 'Dashboard', href: '/cybersecurity', icon: <LayoutDashboardIcon /> },
-          { id: 'vulnerabilities', label: 'Vulnerabilities', href: '#', icon: <AlertTriangleIcon /> },
-          { id: 'assets', label: 'Assets', href: '#', icon: <BuildingIcon /> },
+          {
+            id: "dashboard",
+            label: "Dashboard",
+            href: "/cybersecurity",
+            icon: <LayoutDashboardIcon />,
+          },
+          {
+            id: "vulnerabilities",
+            label: "Vulnerabilities",
+            href: "#",
+            icon: <AlertTriangleIcon />,
+          },
+          { id: "assets", label: "Assets", href: "#", icon: <BuildingIcon /> },
         ],
       },
     ],
     footer: [
-      { id: 'help', label: 'Help', href: '#', icon: <HelpCircleIcon /> },
+      { id: "help", label: "Help", href: "#", icon: <HelpCircleIcon /> },
     ],
   },
   analytics: {
-    title: 'Analytics',
+    title: "Analytics",
     icon: <PieChartIcon />,
     groups: [
       {
-        id: 'reports',
-        label: 'Reports',
+        id: "reports",
+        label: "Reports",
         items: [
-          { id: 'dashboard', label: 'Dashboard', href: '/analytics', icon: <LayoutDashboardIcon /> },
-          { id: 'compliance-reports', label: 'Compliance Reports', href: '#', icon: <FileTextIcon /> },
-          { id: 'audit-logs', label: 'Audit Logs', href: '#', icon: <ClipboardCheckIcon /> },
+          {
+            id: "dashboard",
+            label: "Dashboard",
+            href: "/analytics",
+            icon: <LayoutDashboardIcon />,
+          },
+          {
+            id: "compliance-reports",
+            label: "Compliance Reports",
+            href: "#",
+            icon: <FileTextIcon />,
+          },
+          {
+            id: "audit-logs",
+            label: "Audit Logs",
+            href: "#",
+            icon: <ClipboardCheckIcon />,
+          },
         ],
       },
     ],
     footer: [
-      { id: 'help', label: 'Help', href: '#', icon: <HelpCircleIcon /> },
+      { id: "help", label: "Help", href: "#", icon: <HelpCircleIcon /> },
     ],
   },
   settings: {
-    title: 'Settings',
+    title: "Settings",
     icon: <SettingsIcon />,
     groups: [
       {
-        id: 'organization',
-        label: 'Organization',
+        id: "organization",
+        label: "Organization",
         items: [
-          { id: 'general', label: 'General', href: '/settings', icon: <SettingsIcon /> },
-          { id: 'team', label: 'Team', href: '#', icon: <UsersIcon /> },
-          { id: 'billing', label: 'Billing', href: '#', icon: <CreditCardIcon /> },
+          {
+            id: "general",
+            label: "General",
+            href: "/settings",
+            icon: <SettingsIcon />,
+          },
+          { id: "team", label: "Team", href: "#", icon: <UsersIcon /> },
+          {
+            id: "billing",
+            label: "Billing",
+            href: "#",
+            icon: <CreditCardIcon />,
+          },
         ],
       },
       {
-        id: 'account',
-        label: 'Account',
+        id: "account",
+        label: "Account",
         items: [
-          { id: 'profile', label: 'Profile', href: '#', icon: <UsersIcon /> },
-          { id: 'security', label: 'Security', href: '/settings/security', icon: <KeyIcon /> },
+          { id: "profile", label: "Profile", href: "#", icon: <UsersIcon /> },
+          {
+            id: "security",
+            label: "Security",
+            href: "/settings/security",
+            icon: <KeyIcon />,
+          },
         ],
       },
     ],
     footer: [
-      { id: 'help', label: 'Help & Support', href: '#', icon: <HelpCircleIcon /> },
+      {
+        id: "help",
+        label: "Help & Support",
+        href: "#",
+        icon: <HelpCircleIcon />,
+      },
     ],
   },
 };
@@ -175,13 +262,15 @@ export const sidebarConfigs: Record<string, SidebarConfig> = {
 // Helper to get active rail item from pathname
 export function getActiveRailItem(pathname: string): string {
   for (const item of railItems) {
-    if (item.activePaths.some(path =>
-      path === '/' ? pathname === '/' : pathname.startsWith(path)
-    )) {
+    if (
+      item.activePaths.some((path) =>
+        path === "/" ? pathname === "/" : pathname.startsWith(path),
+      )
+    ) {
       return item.id;
     }
   }
-  return 'compliance';
+  return "compliance";
 }
 
 // Helper to get sidebar config from pathname

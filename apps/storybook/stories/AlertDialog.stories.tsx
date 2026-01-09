@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -10,15 +10,15 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
   Button,
-} from '@oppulence/design-system';
+} from "@oppulence/design-system";
 
 const meta = {
-  title: 'Organisms/AlertDialog',
+  title: "Organisms/AlertDialog",
   component: AlertDialog,
   parameters: {
-    layout: 'centered',
+    layout: "centered",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
 } satisfies Meta<typeof AlertDialog>;
 
 export default meta;
@@ -27,13 +27,15 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   render: () => (
     <AlertDialog>
-      <AlertDialogTrigger render={<Button variant="outline" />}>Show Dialog</AlertDialogTrigger>
+      <AlertDialogTrigger render={<Button variant="outline" />}>
+        Show Dialog
+      </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
           <AlertDialogDescription>
-            This action cannot be undone. This will permanently delete your account and remove your
-            data from our servers.
+            This action cannot be undone. This will permanently delete your
+            account and remove your data from our servers.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
@@ -48,13 +50,15 @@ export const Default: Story = {
 export const Destructive: Story = {
   render: () => (
     <AlertDialog>
-      <AlertDialogTrigger render={<Button variant="destructive" />}>Delete</AlertDialogTrigger>
+      <AlertDialogTrigger render={<Button variant="destructive" />}>
+        Delete
+      </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Delete this item?</AlertDialogTitle>
           <AlertDialogDescription>
-            This will permanently delete this item and all associated data. This action cannot be
-            reversed.
+            This will permanently delete this item and all associated data. This
+            action cannot be reversed.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
@@ -74,8 +78,8 @@ export const SaveChanges: Story = {
         <AlertDialogHeader>
           <AlertDialogTitle>Unsaved changes</AlertDialogTitle>
           <AlertDialogDescription>
-            You have unsaved changes. Are you sure you want to leave this page? Your changes will be
-            lost.
+            You have unsaved changes. Are you sure you want to leave this page?
+            Your changes will be lost.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

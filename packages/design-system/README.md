@@ -18,13 +18,13 @@ Add the design system to your `tailwind.config.ts` content paths:
 
 ```ts
 // tailwind.config.ts
-import type { Config } from 'tailwindcss';
+import type { Config } from "tailwindcss";
 
 const config: Config = {
   content: [
-    './src/**/*.{js,ts,jsx,tsx,mdx}',
+    "./src/**/*.{js,ts,jsx,tsx,mdx}",
     // Include the design system components
-    './node_modules/@oppulence/design-system/src/**/*.{js,ts,jsx,tsx}',
+    "./node_modules/@oppulence/design-system/src/**/*.{js,ts,jsx,tsx}",
   ],
   // ... rest of your config
 };
@@ -38,9 +38,9 @@ Import the design system's CSS in your root layout:
 
 ```tsx
 // app/layout.tsx
-import '@oppulence/design-system/globals.css';
+import "@oppulence/design-system/globals.css";
 // or import alongside your own globals
-import './globals.css';
+import "./globals.css";
 ```
 
 ### 3. Configure Next.js to Transpile
@@ -49,10 +49,10 @@ Add the package to `transpilePackages` in your `next.config.ts`:
 
 ```ts
 // next.config.ts
-import type { NextConfig } from 'next';
+import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  transpilePackages: ['@oppulence/design-system'],
+  transpilePackages: ["@oppulence/design-system"],
 };
 
 export default nextConfig;
@@ -63,7 +63,12 @@ export default nextConfig;
 Import components directly:
 
 ```tsx
-import { Button, Card, CardHeader, CardContent } from '@oppulence/design-system';
+import {
+  Button,
+  Card,
+  CardHeader,
+  CardContent,
+} from "@oppulence/design-system";
 
 export function MyComponent() {
   return (

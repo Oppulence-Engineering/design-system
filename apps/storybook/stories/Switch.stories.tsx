@@ -1,13 +1,13 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Label, Stack, Switch } from '@oppulence/design-system';
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import { Label, Stack, Switch } from "@oppulence/design-system";
 
 const meta = {
-  title: 'Atoms/Switch',
+  title: "Atoms/Switch",
   component: Switch,
   parameters: {
-    layout: 'centered',
+    layout: "centered",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
 } satisfies Meta<typeof Switch>;
 
 export default meta;
@@ -70,7 +70,9 @@ export const SettingsExample: Story = {
         <div className="flex items-center justify-between">
           <Stack gap="xs">
             <Label htmlFor="newsletter">Newsletter</Label>
-            <span className="text-xs text-muted-foreground">Weekly digest of what's new.</span>
+            <span className="text-xs text-muted-foreground">
+              Weekly digest of what's new.
+            </span>
           </Stack>
           <Switch id="newsletter" />
         </div>

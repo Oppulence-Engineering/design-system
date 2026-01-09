@@ -1,9 +1,9 @@
-import { Separator as SeparatorPrimitive } from '@base-ui/react/separator';
+import { Separator as SeparatorPrimitive } from "@base-ui/react/separator";
 
 function Separator({
-  orientation = 'horizontal',
+  orientation = "horizontal",
   ...props
-}: Omit<SeparatorPrimitive.Props, 'className'>) {
+}: Omit<SeparatorPrimitive.Props, "className">) {
   return (
     <SeparatorPrimitive
       data-slot="separator"

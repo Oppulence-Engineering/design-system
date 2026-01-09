@@ -1,24 +1,36 @@
-'use client';
+"use client";
 
-import { Accordion as AccordionPrimitive } from '@base-ui/react/accordion';
-import { ChevronDownIcon, ChevronUpIcon } from 'lucide-react';
+import { Accordion as AccordionPrimitive } from "@base-ui/react/accordion";
+import { ChevronDownIcon, ChevronUpIcon } from "lucide-react";
 
-function Accordion({ ...props }: Omit<AccordionPrimitive.Root.Props, 'className'>) {
+function Accordion({
+  ...props
+}: Omit<AccordionPrimitive.Root.Props, "className">) {
   return (
-    <AccordionPrimitive.Root data-slot="accordion" className="flex w-full flex-col" {...props} />
+    <AccordionPrimitive.Root
+      data-slot="accordion"
+      className="flex w-full flex-col"
+      {...props}
+    />
   );
 }
 
-function AccordionItem({ ...props }: Omit<AccordionPrimitive.Item.Props, 'className'>) {
+function AccordionItem({
+  ...props
+}: Omit<AccordionPrimitive.Item.Props, "className">) {
   return (
-    <AccordionPrimitive.Item data-slot="accordion-item" className="not-last:border-b" {...props} />
+    <AccordionPrimitive.Item
+      data-slot="accordion-item"
+      className="not-last:border-b"
+      {...props}
+    />
   );
 }
 
 function AccordionTrigger({
   children,
   ...props
-}: Omit<AccordionPrimitive.Trigger.Props, 'className'>) {
+}: Omit<AccordionPrimitive.Trigger.Props, "className">) {
   return (
     <AccordionPrimitive.Header className="flex">
       <AccordionPrimitive.Trigger
@@ -43,7 +55,7 @@ function AccordionTrigger({
 function AccordionContent({
   children,
   ...props
-}: Omit<AccordionPrimitive.Panel.Props, 'className'>) {
+}: Omit<AccordionPrimitive.Panel.Props, "className">) {
   return (
     <AccordionPrimitive.Panel
       data-slot="accordion-content"

@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import { Switch as SwitchPrimitive } from '@base-ui/react/switch';
+import { Switch as SwitchPrimitive } from "@base-ui/react/switch";
 
 function Switch({
-  size = 'default',
+  size = "default",
   ...props
-}: Omit<SwitchPrimitive.Root.Props, 'className'> & {
-  size?: 'sm' | 'default';
+}: Omit<SwitchPrimitive.Root.Props, "className"> & {
+  size?: "sm" | "default";
 }) {
   return (
     <SwitchPrimitive.Root

@@ -1,44 +1,50 @@
-'use client';
+"use client";
 
-import { Command as CommandPrimitive } from 'cmdk';
-import * as React from 'react';
+import { Command as CommandPrimitive } from "cmdk";
+import * as React from "react";
 
-import { Dialog as DialogPrimitive } from '@base-ui/react/dialog';
-import { cva, type VariantProps } from 'class-variance-authority';
-import { CheckIcon, SearchIcon } from 'lucide-react';
+import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
+import { cva, type VariantProps } from "class-variance-authority";
+import { CheckIcon, SearchIcon } from "lucide-react";
 
 const commandVariants = cva(
-  'bg-popover text-popover-foreground rounded-xl p-1 flex size-full flex-col overflow-hidden',
+  "bg-popover text-popover-foreground rounded-xl p-1 flex size-full flex-col overflow-hidden",
   {
     variants: {
       width: {
-        auto: '',
-        sm: 'w-sm',
-        md: 'w-md',
-        lg: 'w-lg',
+        auto: "",
+        sm: "w-sm",
+        md: "w-md",
+        lg: "w-lg",
       },
     },
     defaultVariants: {
-      width: 'auto',
+      width: "auto",
     },
   },
 );
 
 interface CommandProps
   extends
-    Omit<React.ComponentProps<typeof CommandPrimitive>, 'className'>,
+    Omit<React.ComponentProps<typeof CommandPrimitive>, "className">,
     VariantProps<typeof commandVariants> {}
 
 function Command({ width, ...props }: CommandProps) {
-  return <CommandPrimitive data-slot="command" className={commandVariants({ width })} {...props} />;
+  return (
+    <CommandPrimitive
+      data-slot="command"
+      className={commandVariants({ width })}
+      {...props}
+    />
+  );
 }
 
 function CommandDialog({
-  title = 'Command Palette',
-  description = 'Search for a command to run...',
+  title = "Command Palette",
+  description = "Search for a command to run...",
   children,
   ...props
-}: Omit<DialogPrimitive.Root.Props, 'children'> & {
+}: Omit<DialogPrimitive.Root.Props, "children"> & {
   title?: string;
   description?: string;
   children: React.ReactNode;
@@ -58,7 +64,10 @@ function CommandDialog({
             data-slot="dialog-header"
             className="sr-only flex flex-col gap-1.5 text-center sm:text-left"
           >
-            <DialogPrimitive.Title data-slot="dialog-title" className="text-lg font-medium">
+            <DialogPrimitive.Title
+              data-slot="dialog-title"
+              className="text-lg font-medium"
+            >
               {title}
             </DialogPrimitive.Title>
             <DialogPrimitive.Description
@@ -77,7 +86,7 @@ function CommandDialog({
 
 function CommandInput({
   ...props
-}: Omit<React.ComponentProps<typeof CommandPrimitive.Input>, 'className'>) {
+}: Omit<React.ComponentProps<typeof CommandPrimitive.Input>, "className">) {
   return (
     <div data-slot="command-input-wrapper" className="p-1 pb-0">
       <div
@@ -104,7 +113,7 @@ function CommandInput({
 
 function CommandList({
   ...props
-}: Omit<React.ComponentProps<typeof CommandPrimitive.List>, 'className'>) {
+}: Omit<React.ComponentProps<typeof CommandPrimitive.List>, "className">) {
   return (
     <CommandPrimitive.List
       data-slot="command-list"
@@ -116,7 +125,7 @@ function CommandList({
 
 function CommandEmpty({
   ...props
-}: Omit<React.ComponentProps<typeof CommandPrimitive.Empty>, 'className'>) {
+}: Omit<React.ComponentProps<typeof CommandPrimitive.Empty>, "className">) {
   return (
     <CommandPrimitive.Empty
       data-slot="command-empty"
@@ -128,7 +137,7 @@ function CommandEmpty({
 
 function CommandGroup({
   ...props
-}: Omit<React.ComponentProps<typeof CommandPrimitive.Group>, 'className'>) {
+}: Omit<React.ComponentProps<typeof CommandPrimitive.Group>, "className">) {
   return (
     <CommandPrimitive.Group
       data-slot="command-group"
@@ -140,7 +149,7 @@ function CommandGroup({
 
 function CommandSeparator({
   ...props
-}: Omit<React.ComponentProps<typeof CommandPrimitive.Separator>, 'className'>) {
+}: Omit<React.ComponentProps<typeof CommandPrimitive.Separator>, "className">) {
   return (
     <CommandPrimitive.Separator
       data-slot="command-separator"
@@ -153,7 +162,7 @@ function CommandSeparator({
 function CommandItem({
   children,
   ...props
-}: Omit<React.ComponentProps<typeof CommandPrimitive.Item>, 'className'>) {
+}: Omit<React.ComponentProps<typeof CommandPrimitive.Item>, "className">) {
   return (
     <CommandPrimitive.Item
       data-slot="command-item"
@@ -166,7 +175,9 @@ function CommandItem({
   );
 }
 
-function CommandShortcut({ ...props }: Omit<React.ComponentProps<'span'>, 'className'>) {
+function CommandShortcut({
+  ...props
+}: Omit<React.ComponentProps<"span">, "className">) {
   return (
     <span
       data-slot="command-shortcut"

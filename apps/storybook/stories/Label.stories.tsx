@@ -1,13 +1,13 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Checkbox, Input, Label, Stack } from '@oppulence/design-system';
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import { Checkbox, Input, Label, Stack } from "@oppulence/design-system";
 
 const meta = {
-  title: 'Atoms/Label',
+  title: "Atoms/Label",
   component: Label,
   parameters: {
-    layout: 'centered',
+    layout: "centered",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
 } satisfies Meta<typeof Label>;
 
 export default meta;
@@ -15,7 +15,7 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
-    children: 'Label text',
+    children: "Label text",
   },
 };
 

@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import {
   Alert,
   AlertAction,
@@ -6,29 +6,29 @@ import {
   AlertTitle,
   Button,
   Stack,
-} from '@oppulence/design-system';
-import { Rocket, X } from 'lucide-react';
+} from "@oppulence/design-system";
+import { Rocket, X } from "lucide-react";
 
 const meta = {
-  title: 'Molecules/Alert',
+  title: "Molecules/Alert",
   component: Alert,
   parameters: {
-    layout: 'centered',
+    layout: "centered",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
   argTypes: {
     variant: {
-      control: 'select',
-      options: ['default', 'info', 'success', 'warning', 'destructive'],
+      control: "select",
+      options: ["default", "info", "success", "warning", "destructive"],
     },
     title: {
-      control: 'text',
+      control: "text",
     },
     description: {
-      control: 'text',
+      control: "text",
     },
     hideIcon: {
-      control: 'boolean',
+      control: "boolean",
     },
   },
 } satisfies Meta<typeof Alert>;
@@ -39,9 +39,9 @@ type Story = StoryObj<typeof meta>;
 // Simple API with title and description props
 export const Default: Story = {
   args: {
-    variant: 'default',
-    title: 'Heads up!',
-    description: 'You can add components to your app using the CLI.',
+    variant: "default",
+    title: "Heads up!",
+    description: "You can add components to your app using the CLI.",
   },
   render: (args) => (
     <div className="w-[450px]">
@@ -52,9 +52,9 @@ export const Default: Story = {
 
 export const Info: Story = {
   args: {
-    variant: 'info',
-    title: 'Did you know?',
-    description: 'You can use keyboard shortcuts to navigate faster.',
+    variant: "info",
+    title: "Did you know?",
+    description: "You can use keyboard shortcuts to navigate faster.",
   },
   render: (args) => (
     <div className="w-[450px]">
@@ -65,9 +65,9 @@ export const Info: Story = {
 
 export const Success: Story = {
   args: {
-    variant: 'success',
-    title: 'Success!',
-    description: 'Your changes have been saved successfully.',
+    variant: "success",
+    title: "Success!",
+    description: "Your changes have been saved successfully.",
   },
   render: (args) => (
     <div className="w-[450px]">
@@ -78,9 +78,9 @@ export const Success: Story = {
 
 export const Warning: Story = {
   args: {
-    variant: 'warning',
-    title: 'Warning',
-    description: 'This action cannot be undone. Please proceed with caution.',
+    variant: "warning",
+    title: "Warning",
+    description: "This action cannot be undone. Please proceed with caution.",
   },
   render: (args) => (
     <div className="w-[450px]">
@@ -91,9 +91,9 @@ export const Warning: Story = {
 
 export const Destructive: Story = {
   args: {
-    variant: 'destructive',
-    title: 'Error',
-    description: 'Your session has expired. Please log in again.',
+    variant: "destructive",
+    title: "Error",
+    description: "Your session has expired. Please log in again.",
   },
   render: (args) => (
     <div className="w-[450px]">
@@ -107,11 +107,31 @@ export const AllVariants: Story = {
   render: () => (
     <div className="w-[450px]">
       <Stack gap="4">
-        <Alert variant="default" title="Default" description="This is a default alert." />
-        <Alert variant="info" title="Info" description="This is an informational alert." />
-        <Alert variant="success" title="Success" description="This is a success alert." />
-        <Alert variant="warning" title="Warning" description="This is a warning alert." />
-        <Alert variant="destructive" title="Error" description="This is an error alert." />
+        <Alert
+          variant="default"
+          title="Default"
+          description="This is a default alert."
+        />
+        <Alert
+          variant="info"
+          title="Info"
+          description="This is an informational alert."
+        />
+        <Alert
+          variant="success"
+          title="Success"
+          description="This is a success alert."
+        />
+        <Alert
+          variant="warning"
+          title="Warning"
+          description="This is a warning alert."
+        />
+        <Alert
+          variant="destructive"
+          title="Error"
+          description="This is an error alert."
+        />
       </Stack>
     </div>
   ),
@@ -120,9 +140,9 @@ export const AllVariants: Story = {
 // Custom icon
 export const CustomIcon: Story = {
   args: {
-    variant: 'info',
-    title: 'New Feature!',
-    description: 'Check out our latest update with exciting new features.',
+    variant: "info",
+    title: "New Feature!",
+    description: "Check out our latest update with exciting new features.",
     icon: <Rocket />,
   },
   render: (args) => (
@@ -135,9 +155,9 @@ export const CustomIcon: Story = {
 // Without icon
 export const WithoutIcon: Story = {
   args: {
-    variant: 'info',
-    title: 'Note',
-    description: 'This alert has no icon.',
+    variant: "info",
+    title: "Note",
+    description: "This alert has no icon.",
     hideIcon: true,
   },
   render: (args) => (
@@ -186,8 +206,8 @@ export const CompoundPattern: Story = {
 // Description only (no title)
 export const DescriptionOnly: Story = {
   args: {
-    variant: 'info',
-    description: 'This is a simple informational message without a title.',
+    variant: "info",
+    description: "This is a simple informational message without a title.",
   },
   render: (args) => (
     <div className="w-[450px]">

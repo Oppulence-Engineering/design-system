@@ -1,24 +1,24 @@
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { describe, expect, it } from 'vitest';
-import { Checkbox } from '@oppulence/design-system';
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { describe, expect, it } from "vitest";
+import { Checkbox } from "@oppulence/design-system";
 
-describe('Checkbox', () => {
-  it('renders unchecked by default', () => {
+describe("Checkbox", () => {
+  it("renders unchecked by default", () => {
     render(<Checkbox />);
-    expect(screen.getByRole('checkbox')).not.toBeChecked();
+    expect(screen.getByRole("checkbox")).not.toBeChecked();
   });
 
-  it('renders checked when defaultChecked is true', () => {
+  it("renders checked when defaultChecked is true", () => {
     render(<Checkbox defaultChecked />);
-    expect(screen.getByRole('checkbox')).toBeChecked();
+    expect(screen.getByRole("checkbox")).toBeChecked();
   });
 
-  it('toggles when clicked', async () => {
+  it("toggles when clicked", async () => {
     const user = userEvent.setup();
     render(<Checkbox />);
 
-    const checkbox = screen.getByRole('checkbox');
+    const checkbox = screen.getByRole("checkbox");
     expect(checkbox).not.toBeChecked();
 
     await user.click(checkbox);
@@ -28,37 +28,40 @@ describe('Checkbox', () => {
     expect(checkbox).not.toBeChecked();
   });
 
-  it('has data-slot attribute', () => {
+  it("has data-slot attribute", () => {
     render(<Checkbox data-testid="checkbox" />);
-    expect(screen.getByTestId('checkbox')).toHaveAttribute('data-slot', 'checkbox');
+    expect(screen.getByTestId("checkbox")).toHaveAttribute(
+      "data-slot",
+      "checkbox",
+    );
   });
 
-  it('applies disabled styling when disabled', () => {
+  it("applies disabled styling when disabled", () => {
     render(<Checkbox disabled data-testid="checkbox" />);
-    expect(screen.getByTestId('checkbox')).toHaveAttribute('data-disabled');
+    expect(screen.getByTestId("checkbox")).toHaveAttribute("data-disabled");
   });
 
-  it('does not toggle when disabled', async () => {
+  it("does not toggle when disabled", async () => {
     const user = userEvent.setup();
     render(<Checkbox disabled />);
 
-    const checkbox = screen.getByRole('checkbox');
+    const checkbox = screen.getByRole("checkbox");
     expect(checkbox).not.toBeChecked();
 
     await user.click(checkbox);
     expect(checkbox).not.toBeChecked();
   });
 
-  it('supports required attribute', () => {
+  it("supports required attribute", () => {
     render(<Checkbox required data-testid="checkbox" />);
-    expect(screen.getByTestId('checkbox')).toHaveAttribute('data-required');
+    expect(screen.getByTestId("checkbox")).toHaveAttribute("data-required");
   });
 
-  it('shows check icon when checked', async () => {
+  it("shows check icon when checked", async () => {
     const user = userEvent.setup();
     render(<Checkbox />);
 
-    await user.click(screen.getByRole('checkbox'));
-    expect(screen.getByRole('checkbox')).toHaveAttribute('data-checked');
+    await user.click(screen.getByRole("checkbox"));
+    expect(screen.getByRole("checkbox")).toHaveAttribute("data-checked");
   });
 });

@@ -1,13 +1,17 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@oppulence/design-system';
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@oppulence/design-system";
 
 const meta = {
-  title: 'Molecules/Resizable',
+  title: "Molecules/Resizable",
   component: ResizablePanelGroup,
   parameters: {
-    layout: 'centered',
+    layout: "centered",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
 } satisfies Meta<typeof ResizablePanelGroup>;
 
 export default meta;

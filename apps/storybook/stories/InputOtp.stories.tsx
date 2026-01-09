@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import {
   InputOTP,
   InputOTPGroup,
@@ -6,7 +6,7 @@ import {
   InputOTPSlot,
   Stack,
   Text,
-} from '@oppulence/design-system';
+} from "@oppulence/design-system";
 
 // Using a wrapper component to avoid complex args type requirements from input-otp
 const InputOTPDemo = () => (
@@ -23,12 +23,12 @@ const InputOTPDemo = () => (
 );
 
 const meta = {
-  title: 'Molecules/InputOTP',
+  title: "Molecules/InputOTP",
   component: InputOTPDemo,
   parameters: {
-    layout: 'centered',
+    layout: "centered",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
 } satisfies Meta<typeof InputOTPDemo>;
 
 export default meta;
@@ -90,7 +90,8 @@ export const WithDescription: Story = {
         </InputOTPGroup>
       </InputOTP>
       <Text size="sm" variant="muted">
-        Didn't receive a code? <span className="text-primary cursor-pointer">Resend</span>
+        Didn't receive a code?{" "}
+        <span className="text-primary cursor-pointer">Resend</span>
       </Text>
     </Stack>
   ),

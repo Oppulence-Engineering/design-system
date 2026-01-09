@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import {
   AppShell,
   AppShellBody,
@@ -42,8 +42,8 @@ import {
   Stack,
   Text,
   ThemeToggle,
-} from '@oppulence/design-system';
-import * as React from 'react';
+} from "@oppulence/design-system";
+import * as React from "react";
 import {
   AlertTriangleIcon,
   BellIcon,
@@ -65,15 +65,15 @@ import {
   ShieldCheckIcon,
   UserIcon,
   UsersIcon,
-} from 'lucide-react';
+} from "lucide-react";
 
 const meta = {
-  title: 'Layout/AppShell',
+  title: "Layout/AppShell",
   component: AppShell,
   parameters: {
-    layout: 'fullscreen',
+    layout: "fullscreen",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
 } satisfies Meta<typeof AppShell>;
 
 export default meta;
@@ -85,7 +85,9 @@ const OrgSelector = () => (
       <Button variant="ghost" size="sm">
         <HStack gap="xs" align="center">
           <div className="size-5 rounded bg-emerald-500" />
-          <Text size="sm" weight="medium">Personal</Text>
+          <Text size="sm" weight="medium">
+            Personal
+          </Text>
           <ChevronDownIcon className="size-3" />
         </HStack>
       </Button>
@@ -117,7 +119,7 @@ const ProjectSelector = () => (
         <ChevronDownIcon className="size-3 text-muted-foreground" />
       </button>
     </DropdownMenuTrigger>
-    <DropdownMenuContent align="start" style={{ minWidth: '220px' }}>
+    <DropdownMenuContent align="start" style={{ minWidth: "220px" }}>
       <DropdownMenuGroup>
         <DropdownMenuLabel>Projects</DropdownMenuLabel>
         <DropdownMenuItem>
@@ -150,20 +152,28 @@ const Logo = () => {
 
   React.useEffect(() => {
     // Check initial state
-    setIsDark(document.documentElement.classList.contains('dark'));
+    setIsDark(document.documentElement.classList.contains("dark"));
 
     // Watch for changes
     const observer = new MutationObserver(() => {
-      setIsDark(document.documentElement.classList.contains('dark'));
+      setIsDark(document.documentElement.classList.contains("dark"));
     });
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
     return () => observer.disconnect();
   }, []);
 
   return (
     <HStack gap="xs" align="center">
-      <CompLogo style={{ height: 22, width: 'auto' }} variant={isDark ? 'light' : 'dark'} />
-      <Text variant="muted" className="pl-3 pr-1">/</Text>
+      <CompLogo
+        style={{ height: 22, width: "auto" }}
+        variant={isDark ? "light" : "dark"}
+      />
+      <Text variant="muted" className="pl-3 pr-1">
+        /
+      </Text>
       <ProjectSelector />
     </HStack>
   );
@@ -171,46 +181,78 @@ const Logo = () => {
 
 const searchGroups = [
   {
-    id: 'pages',
-    label: 'Pages',
+    id: "pages",
+    label: "Pages",
     items: [
-      { id: 'overview', label: 'Overview', icon: <HomeIcon className="size-4" />, shortcut: '⌘1' },
-      { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboardIcon className="size-4" />, shortcut: '⌘2' },
-      { id: 'settings', label: 'Settings', icon: <SettingsIcon className="size-4" />, shortcut: '⌘,' },
+      {
+        id: "overview",
+        label: "Overview",
+        icon: <HomeIcon className="size-4" />,
+        shortcut: "⌘1",
+      },
+      {
+        id: "dashboard",
+        label: "Dashboard",
+        icon: <LayoutDashboardIcon className="size-4" />,
+        shortcut: "⌘2",
+      },
+      {
+        id: "settings",
+        label: "Settings",
+        icon: <SettingsIcon className="size-4" />,
+        shortcut: "⌘,",
+      },
     ],
   },
   {
-    id: 'actions',
-    label: 'Actions',
+    id: "actions",
+    label: "Actions",
     items: [
-      { id: 'new-project', label: 'Create new project', icon: <KeyIcon className="size-4" /> },
-      { id: 'invite-team', label: 'Invite team member', icon: <UsersIcon className="size-4" /> },
+      {
+        id: "new-project",
+        label: "Create new project",
+        icon: <KeyIcon className="size-4" />,
+      },
+      {
+        id: "invite-team",
+        label: "Invite team member",
+        icon: <UsersIcon className="size-4" />,
+      },
     ],
   },
   {
-    id: 'help',
-    label: 'Help',
+    id: "help",
+    label: "Help",
     items: [
-      { id: 'docs', label: 'Documentation', icon: <BookOpenIcon className="size-4" /> },
-      { id: 'api', label: 'API Reference', icon: <CodeIcon className="size-4" /> },
+      {
+        id: "docs",
+        label: "Documentation",
+        icon: <BookOpenIcon className="size-4" />,
+      },
+      {
+        id: "api",
+        label: "API Reference",
+        icon: <CodeIcon className="size-4" />,
+      },
     ],
   },
 ];
 
 const SidebarNav = () => (
   <>
-    <AppShellSidebarHeader
-      icon={<ShieldCheckIcon />}
-      title="Compliance"
-    />
+    <AppShellSidebarHeader icon={<ShieldCheckIcon />} title="Compliance" />
     <AppShellNav>
       <AppShellNavGroup label="Getting started">
-        <AppShellNavItem icon={<HomeIcon />} isActive>Overview</AppShellNavItem>
+        <AppShellNavItem icon={<HomeIcon />} isActive>
+          Overview
+        </AppShellNavItem>
         <AppShellNavItem icon={<BookOpenIcon />}>Quickstart</AppShellNavItem>
       </AppShellNavGroup>
       <AppShellNavGroup label="Compliance">
         <AppShellNavItem icon={<FileTextIcon />}>Policies</AppShellNavItem>
-        <AppShellNavItem icon={<ClipboardCheckIcon />}>Controls</AppShellNavItem>
+        <AppShellNavItem icon={<ClipboardCheckIcon />}>
+          Controls
+        </AppShellNavItem>
         <AppShellNavItem icon={<AlertTriangleIcon />}>Risks</AppShellNavItem>
         <AppShellNavItem icon={<BuildingIcon />}>Vendors</AppShellNavItem>
         <AppShellNavItem icon={<PlugIcon />}>Integrations</AppShellNavItem>
@@ -224,13 +266,12 @@ const SidebarNav = () => (
 
 const RailSidebarNav = () => (
   <>
-    <AppShellSidebarHeader
-      icon={<UsersIcon />}
-      title="HR"
-    />
+    <AppShellSidebarHeader icon={<UsersIcon />} title="HR" />
     <AppShellNav>
       <AppShellNavGroup label="HR">
-        <AppShellNavItem icon={<UsersIcon />} isActive>Employees</AppShellNavItem>
+        <AppShellNavItem icon={<UsersIcon />} isActive>
+          Employees
+        </AppShellNavItem>
         <AppShellNavItem icon={<BriefcaseIcon />}>Recruiting</AppShellNavItem>
         <AppShellNavItem icon={<BookOpenIcon />}>Learning</AppShellNavItem>
       </AppShellNavGroup>
@@ -246,19 +287,19 @@ const RailSidebarNav = () => (
 
 const UserMenuDemo = () => {
   const [isDark, setIsDark] = React.useState(() => {
-    if (typeof document !== 'undefined') {
-      return document.documentElement.classList.contains('dark');
+    if (typeof document !== "undefined") {
+      return document.documentElement.classList.contains("dark");
     }
     return false;
   });
 
   const handleThemeChange = (dark: boolean) => {
     setIsDark(dark);
-    if (typeof document !== 'undefined') {
+    if (typeof document !== "undefined") {
       if (dark) {
-        document.documentElement.classList.add('dark');
+        document.documentElement.classList.add("dark");
       } else {
-        document.documentElement.classList.remove('dark');
+        document.documentElement.classList.remove("dark");
       }
     }
   };
@@ -289,7 +330,11 @@ const UserMenuDemo = () => {
         <DropdownMenuGroup>
           <div className="flex items-center justify-between px-2 py-1.5">
             <Text size="sm">Theme</Text>
-            <ThemeToggle size="sm" isDark={isDark} onChange={handleThemeChange} />
+            <ThemeToggle
+              size="sm"
+              isDark={isDark}
+              onChange={handleThemeChange}
+            />
           </div>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
@@ -308,7 +353,9 @@ export const Default: Story = {
       <AppShellNavbar
         showSidebarToggle={false}
         startContent={<Logo />}
-        centerContent={<CommandSearch groups={searchGroups} placeholder="Search..." />}
+        centerContent={
+          <CommandSearch groups={searchGroups} placeholder="Search..." />
+        }
         endContent={
           <AppShellUserMenu>
             <Button variant="ghost" size="icon-sm">
@@ -320,9 +367,16 @@ export const Default: Story = {
       />
       <AppShellBody>
         <AppShellRail>
-          <AppShellRailItem icon={<ShieldCheckIcon />} label="Compliance" isActive />
+          <AppShellRailItem
+            icon={<ShieldCheckIcon />}
+            label="Compliance"
+            isActive
+          />
           <AppShellRailItem icon={<KeyIcon />} label="Cybersecurity" />
-          <AppShellRailItem icon={<LayoutDashboardIcon />} label="App Browser" />
+          <AppShellRailItem
+            icon={<LayoutDashboardIcon />}
+            label="App Browser"
+          />
         </AppShellRail>
         <AppShellMain>
           <AppShellSidebar collapsible>
@@ -331,7 +385,9 @@ export const Default: Story = {
           <AppShellContent padding="none">
             <PageLayout padding="default" container={false}>
               <PageHeader title="Overview">
-                <PageHeaderDescription>Track your progress towards SOC 2 compliance.</PageHeaderDescription>
+                <PageHeaderDescription>
+                  Track your progress towards SOC 2 compliance.
+                </PageHeaderDescription>
               </PageHeader>
 
               {/* SOC 2 Progress Section */}
@@ -343,10 +399,16 @@ export const Default: Story = {
                 <Stack gap="sm">
                   <HStack justify="between" align="baseline">
                     <HStack align="baseline" gap="xs">
-                      <Text size="lg" weight="semibold">67%</Text>
-                      <Text variant="muted" size="sm">complete</Text>
+                      <Text size="lg" weight="semibold">
+                        67%
+                      </Text>
+                      <Text variant="muted" size="sm">
+                        complete
+                      </Text>
                     </HStack>
-                    <Text variant="muted" size="sm">98 of 146 controls</Text>
+                    <Text variant="muted" size="sm">
+                      98 of 146 controls
+                    </Text>
                   </HStack>
                   <Progress value={67} />
                 </Stack>
@@ -359,22 +421,34 @@ export const Default: Story = {
                   <div className="flex items-start gap-3 py-3 border-b border-border/40">
                     <Checkbox />
                     <Stack gap="none">
-                      <Text size="sm" weight="medium">Complete security awareness training</Text>
-                      <Text variant="muted" size="xs">3 team members haven't completed annual training</Text>
+                      <Text size="sm" weight="medium">
+                        Complete security awareness training
+                      </Text>
+                      <Text variant="muted" size="xs">
+                        3 team members haven't completed annual training
+                      </Text>
                     </Stack>
                   </div>
                   <div className="flex items-start gap-3 py-3 border-b border-border/40">
                     <Checkbox />
                     <Stack gap="none">
-                      <Text size="sm" weight="medium">Review and approve access policies</Text>
-                      <Text variant="muted" size="xs">2 policies pending approval from admin</Text>
+                      <Text size="sm" weight="medium">
+                        Review and approve access policies
+                      </Text>
+                      <Text variant="muted" size="xs">
+                        2 policies pending approval from admin
+                      </Text>
                     </Stack>
                   </div>
                   <div className="flex items-start gap-3 py-3">
                     <Checkbox />
                     <Stack gap="none">
-                      <Text size="sm" weight="medium">Connect your cloud infrastructure</Text>
-                      <Text variant="muted" size="xs">AWS and GCP integrations available</Text>
+                      <Text size="sm" weight="medium">
+                        Connect your cloud infrastructure
+                      </Text>
+                      <Text variant="muted" size="xs">
+                        AWS and GCP integrations available
+                      </Text>
                     </Stack>
                   </div>
                 </Stack>
@@ -424,9 +498,13 @@ export const WithBreadcrumbs: Story = {
         startContent={
           <HStack gap="xs" align="center">
             <OrgSelector />
-            <Text variant="muted" size="sm">/</Text>
+            <Text variant="muted" size="sm">
+              /
+            </Text>
             <Text size="sm">Dashboard</Text>
-            <Text variant="muted" size="sm">/</Text>
+            <Text variant="muted" size="sm">
+              /
+            </Text>
             <Text size="sm">Settings</Text>
           </HStack>
         }
@@ -443,7 +521,9 @@ export const WithBreadcrumbs: Story = {
         </AppShellSidebar>
         <AppShellContent>
           <Heading level="1">With Breadcrumbs</Heading>
-          <Text variant="muted">Using startContent to add breadcrumbs navigation.</Text>
+          <Text variant="muted">
+            Using startContent to add breadcrumbs navigation.
+          </Text>
         </AppShellContent>
       </AppShellBody>
     </AppShell>
@@ -482,7 +562,9 @@ export const NoPadding: Story = {
         <AppShellContent padding="none">
           <div className="bg-muted h-full p-6">
             <Heading level="1">No Content Padding</Heading>
-            <Text variant="muted">Content area has no padding for full-width layouts.</Text>
+            <Text variant="muted">
+              Content area has no padding for full-width layouts.
+            </Text>
           </div>
         </AppShellContent>
       </AppShellBody>
@@ -517,7 +599,9 @@ export const WithRail: Story = {
       <AppShellNavbar
         showSidebarToggle={false}
         startContent={<Logo />}
-        centerContent={<CommandSearch groups={searchGroups} placeholder="Search..." />}
+        centerContent={
+          <CommandSearch groups={searchGroups} placeholder="Search..." />
+        }
         endContent={
           <AppShellUserMenu>
             <Button variant="ghost" size="icon-sm">
@@ -541,12 +625,17 @@ export const WithRail: Story = {
           </AppShellSidebar>
           <AppShellContent>
             <PageHeader title="Employees">
-              <PageHeaderDescription>Manage your team members and their information.</PageHeaderDescription>
+              <PageHeaderDescription>
+                Manage your team members and their information.
+              </PageHeaderDescription>
               <PageHeaderActions>
                 <Button>Add Employee</Button>
               </PageHeaderActions>
             </PageHeader>
-            <Text>Rippling-style layout with app rail on the left. Use <strong>⌘\</strong> to toggle the sidebar.</Text>
+            <Text>
+              Rippling-style layout with app rail on the left. Use{" "}
+              <strong>⌘\</strong> to toggle the sidebar.
+            </Text>
           </AppShellContent>
         </AppShellMain>
       </AppShellBody>
@@ -581,7 +670,9 @@ export const WithPageLayoutContainer: Story = {
                 <CardContent>
                   <Stack gap="xs">
                     <Heading level="3">General Settings</Heading>
-                    <Text variant="muted">Configure your account preferences.</Text>
+                    <Text variant="muted">
+                      Configure your account preferences.
+                    </Text>
                   </Stack>
                 </CardContent>
               </Card>
@@ -589,7 +680,9 @@ export const WithPageLayoutContainer: Story = {
                 <CardContent>
                   <Stack gap="xs">
                     <Heading level="3">Notifications</Heading>
-                    <Text variant="muted">Manage how you receive notifications.</Text>
+                    <Text variant="muted">
+                      Manage how you receive notifications.
+                    </Text>
                   </Stack>
                 </CardContent>
               </Card>
@@ -654,10 +747,14 @@ export const MutedSidebar: Story = {
         <AppShellContent>
           <PageHeader title="Muted Sidebar">
             <PageHeaderDescription>
-              Sidebar with muted background - active items use white background for contrast.
+              Sidebar with muted background - active items use white background
+              for contrast.
             </PageHeaderDescription>
           </PageHeader>
-          <Text>The muted variant provides subtle contrast between sidebar and content.</Text>
+          <Text>
+            The muted variant provides subtle contrast between sidebar and
+            content.
+          </Text>
         </AppShellContent>
       </AppShellBody>
     </AppShell>
@@ -679,7 +776,8 @@ export const PrimarySidebar: Story = {
         <AppShellContent>
           <PageHeader title="Primary Sidebar">
             <PageHeaderDescription>
-              Sidebar with primary (emerald) background - nav items use inverted colors.
+              Sidebar with primary (emerald) background - nav items use inverted
+              colors.
             </PageHeaderDescription>
           </PageHeader>
           <Text>The primary variant creates a bold, branded look.</Text>
@@ -695,7 +793,9 @@ export const WithAIChat: Story = {
       <AppShellNavbar
         showSidebarToggle={false}
         startContent={<Logo />}
-        centerContent={<CommandSearch groups={searchGroups} placeholder="Search..." />}
+        centerContent={
+          <CommandSearch groups={searchGroups} placeholder="Search..." />
+        }
         endContent={
           <AppShellUserMenu>
             <Button variant="ghost" size="icon-sm">
@@ -707,9 +807,16 @@ export const WithAIChat: Story = {
       />
       <AppShellBody>
         <AppShellRail>
-          <AppShellRailItem icon={<ShieldCheckIcon />} label="Compliance" isActive />
+          <AppShellRailItem
+            icon={<ShieldCheckIcon />}
+            label="Compliance"
+            isActive
+          />
           <AppShellRailItem icon={<KeyIcon />} label="Cybersecurity" />
-          <AppShellRailItem icon={<LayoutDashboardIcon />} label="App Browser" />
+          <AppShellRailItem
+            icon={<LayoutDashboardIcon />}
+            label="App Browser"
+          />
         </AppShellRail>
         <AppShellMain>
           <AppShellSidebar collapsible>
@@ -718,17 +825,22 @@ export const WithAIChat: Story = {
           <AppShellContent padding="none">
             <PageLayout padding="default" container={false}>
               <PageHeader title="AI Assistant">
-                <PageHeaderDescription>Click the floating button in the bottom-right to open the AI chat.</PageHeaderDescription>
+                <PageHeaderDescription>
+                  Click the floating button in the bottom-right to open the AI
+                  chat.
+                </PageHeaderDescription>
               </PageHeader>
 
               <Stack gap="md">
                 <Text>
-                  This example shows the optional AI chat feature. A floating sparkles button appears in the
-                  bottom-right corner. Click it to open a chat panel for AI-powered assistance.
+                  This example shows the optional AI chat feature. A floating
+                  sparkles button appears in the bottom-right corner. Click it
+                  to open a chat panel for AI-powered assistance.
                 </Text>
                 <Text variant="muted">
-                  The AI chat can be customized by passing content to the <code>aiChatContent</code> prop, or
-                  it will use a default chat interface.
+                  The AI chat can be customized by passing content to the{" "}
+                  <code>aiChatContent</code> prop, or it will use a default chat
+                  interface.
                 </Text>
               </Stack>
             </PageLayout>

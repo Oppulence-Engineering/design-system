@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import {
   Avatar,
   AvatarFallback,
@@ -7,19 +7,19 @@ import {
   AvatarImage,
   Stack,
   Text,
-} from '@oppulence/design-system';
+} from "@oppulence/design-system";
 
 const meta = {
-  title: 'Atoms/Avatar',
+  title: "Atoms/Avatar",
   component: Avatar,
   parameters: {
-    layout: 'centered',
+    layout: "centered",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
   argTypes: {
     size: {
-      control: 'select',
-      options: ['xs', 'sm', 'default', 'lg', 'xl'],
+      control: "select",
+      options: ["xs", "sm", "default", "lg", "xl"],
     },
   },
 } satisfies Meta<typeof Avatar>;
@@ -29,7 +29,7 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
-    size: 'lg',
+    size: "lg",
   },
   render: (args) => (
     <Avatar {...args}>

@@ -1,13 +1,13 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Spinner, Stack, Text } from '@oppulence/design-system';
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import { Spinner, Stack, Text } from "@oppulence/design-system";
 
 const meta = {
-  title: 'Atoms/Spinner',
+  title: "Atoms/Spinner",
   component: Spinner,
   parameters: {
-    layout: 'centered',
+    layout: "centered",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
 } satisfies Meta<typeof Spinner>;
 
 export default meta;

@@ -1,10 +1,10 @@
-import * as React from 'react';
+import * as React from "react";
 
 function Table({
-  variant = 'default',
+  variant = "default",
   ...props
-}: Omit<React.ComponentProps<'table'>, 'className'> & {
-  variant?: 'default' | 'bordered';
+}: Omit<React.ComponentProps<"table">, "className"> & {
+  variant?: "default" | "bordered";
 }) {
   return (
     <div
@@ -12,20 +12,38 @@ function Table({
       data-variant={variant}
       className="relative w-full overflow-x-auto data-[variant=bordered]:border data-[variant=bordered]:rounded-lg"
     >
-      <table data-slot="table" className="w-full caption-bottom text-sm" {...props} />
+      <table
+        data-slot="table"
+        className="w-full caption-bottom text-sm"
+        {...props}
+      />
     </div>
   );
 }
 
-function TableHeader({ ...props }: Omit<React.ComponentProps<'thead'>, 'className'>) {
-  return <thead data-slot="table-header" className="[&_tr]:border-b" {...props} />;
+function TableHeader({
+  ...props
+}: Omit<React.ComponentProps<"thead">, "className">) {
+  return (
+    <thead data-slot="table-header" className="[&_tr]:border-b" {...props} />
+  );
 }
 
-function TableBody({ ...props }: Omit<React.ComponentProps<'tbody'>, 'className'>) {
-  return <tbody data-slot="table-body" className="[&_tr:last-child]:border-0" {...props} />;
+function TableBody({
+  ...props
+}: Omit<React.ComponentProps<"tbody">, "className">) {
+  return (
+    <tbody
+      data-slot="table-body"
+      className="[&_tr:last-child]:border-0"
+      {...props}
+    />
+  );
 }
 
-function TableFooter({ ...props }: Omit<React.ComponentProps<'tfoot'>, 'className'>) {
+function TableFooter({
+  ...props
+}: Omit<React.ComponentProps<"tfoot">, "className">) {
   return (
     <tfoot
       data-slot="table-footer"
@@ -35,7 +53,7 @@ function TableFooter({ ...props }: Omit<React.ComponentProps<'tfoot'>, 'classNam
   );
 }
 
-function TableRow({ ...props }: Omit<React.ComponentProps<'tr'>, 'className'>) {
+function TableRow({ ...props }: Omit<React.ComponentProps<"tr">, "className">) {
   return (
     <tr
       data-slot="table-row"
@@ -45,7 +63,9 @@ function TableRow({ ...props }: Omit<React.ComponentProps<'tr'>, 'className'>) {
   );
 }
 
-function TableHead({ ...props }: Omit<React.ComponentProps<'th'>, 'className'>) {
+function TableHead({
+  ...props
+}: Omit<React.ComponentProps<"th">, "className">) {
   return (
     <th
       data-slot="table-head"
@@ -55,7 +75,9 @@ function TableHead({ ...props }: Omit<React.ComponentProps<'th'>, 'className'>) 
   );
 }
 
-function TableCell({ ...props }: Omit<React.ComponentProps<'td'>, 'className'>) {
+function TableCell({
+  ...props
+}: Omit<React.ComponentProps<"td">, "className">) {
   return (
     <td
       data-slot="table-cell"
@@ -65,10 +87,25 @@ function TableCell({ ...props }: Omit<React.ComponentProps<'td'>, 'className'>) 
   );
 }
 
-function TableCaption({ ...props }: Omit<React.ComponentProps<'caption'>, 'className'>) {
+function TableCaption({
+  ...props
+}: Omit<React.ComponentProps<"caption">, "className">) {
   return (
-    <caption data-slot="table-caption" className="text-muted-foreground mt-4 text-sm" {...props} />
+    <caption
+      data-slot="table-caption"
+      className="text-muted-foreground mt-4 text-sm"
+      {...props}
+    />
   );
 }
 
-export { Table, TableBody, TableCaption, TableCell, TableFooter, TableHead, TableHeader, TableRow };
+export {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
+};

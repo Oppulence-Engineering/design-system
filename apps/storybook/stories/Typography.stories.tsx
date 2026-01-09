@@ -1,25 +1,25 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Heading, Stack, Text } from '@oppulence/design-system';
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import { Heading, Stack, Text } from "@oppulence/design-system";
 
 const meta = {
-  title: 'Atoms/Typography',
+  title: "Atoms/Typography",
   component: Heading,
   parameters: {
-    layout: 'padded',
+    layout: "padded",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
   argTypes: {
     level: {
-      control: 'select',
+      control: "select",
       options: [1, 2, 3, 4, 5, 6],
     },
     variant: {
-      control: 'select',
-      options: ['default', 'muted'],
+      control: "select",
+      options: ["default", "muted"],
     },
     tracking: {
-      control: 'select',
-      options: ['default', 'tight'],
+      control: "select",
+      options: ["default", "tight"],
     },
   },
 } satisfies Meta<typeof Heading>;
@@ -57,7 +57,7 @@ export const Muted: Story = {
 };
 
 export const TextSizes: Story = {
-  name: 'Text - All Sizes',
+  name: "Text - All Sizes",
   render: () => (
     <Stack gap="3">
       <Text size="xs">Extra small text (xs)</Text>
@@ -69,7 +69,7 @@ export const TextSizes: Story = {
 };
 
 export const TextVariants: Story = {
-  name: 'Text - Variants',
+  name: "Text - Variants",
   render: () => (
     <Stack gap="3">
       <Text variant="default">Default text color</Text>
@@ -81,7 +81,7 @@ export const TextVariants: Story = {
 };
 
 export const TextWeights: Story = {
-  name: 'Text - Weights',
+  name: "Text - Weights",
   render: () => (
     <Stack gap="3">
       <Text weight="normal">Normal weight</Text>
@@ -92,7 +92,7 @@ export const TextWeights: Story = {
 };
 
 export const Composition: Story = {
-  name: 'Composition Example',
+  name: "Composition Example",
   render: () => (
     <div className="max-w-lg">
       <Stack gap="6">
@@ -105,11 +105,13 @@ export const Composition: Story = {
         <Stack gap="4">
           <Stack gap="1">
             <Heading level="3">Features</Heading>
-            <Text variant="muted">Everything you need to build beautiful interfaces.</Text>
+            <Text variant="muted">
+              Everything you need to build beautiful interfaces.
+            </Text>
           </Stack>
           <Text>
-            Our design system provides a complete set of components, utilities, and patterns to help
-            you build consistent user interfaces quickly.
+            Our design system provides a complete set of components, utilities,
+            and patterns to help you build consistent user interfaces quickly.
           </Text>
         </Stack>
       </Stack>

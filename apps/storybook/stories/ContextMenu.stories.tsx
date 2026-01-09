@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import {
   ContextMenu,
   ContextMenuCheckboxItem,
@@ -14,15 +14,15 @@ import {
   ContextMenuSubContent,
   ContextMenuSubTrigger,
   ContextMenuTrigger,
-} from '@oppulence/design-system';
+} from "@oppulence/design-system";
 
 const meta = {
-  title: 'Organisms/ContextMenu',
+  title: "Organisms/ContextMenu",
   component: ContextMenu,
   parameters: {
-    layout: 'centered',
+    layout: "centered",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
 } satisfies Meta<typeof ContextMenu>;
 
 export default meta;
@@ -74,8 +74,12 @@ export const Default: Story = {
         <ContextMenuGroup>
           <ContextMenuLabel>People</ContextMenuLabel>
           <ContextMenuRadioGroup value="person1">
-            <ContextMenuRadioItem value="person1">John Doe</ContextMenuRadioItem>
-            <ContextMenuRadioItem value="person2">Jane Smith</ContextMenuRadioItem>
+            <ContextMenuRadioItem value="person1">
+              John Doe
+            </ContextMenuRadioItem>
+            <ContextMenuRadioItem value="person2">
+              Jane Smith
+            </ContextMenuRadioItem>
           </ContextMenuRadioGroup>
         </ContextMenuGroup>
       </ContextMenuContent>

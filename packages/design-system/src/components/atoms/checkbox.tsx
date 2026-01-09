@@ -1,8 +1,10 @@
-import { Checkbox as CheckboxPrimitive } from '@base-ui/react/checkbox';
+import { Checkbox as CheckboxPrimitive } from "@base-ui/react/checkbox";
 
-import { CheckIcon } from 'lucide-react';
+import { CheckIcon } from "lucide-react";
 
-function Checkbox({ ...props }: Omit<CheckboxPrimitive.Root.Props, 'className'>) {
+function Checkbox({
+  ...props
+}: Omit<CheckboxPrimitive.Root.Props, "className">) {
   return (
     <CheckboxPrimitive.Root
       data-slot="checkbox"

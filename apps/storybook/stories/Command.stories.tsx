@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import {
   Card,
   Command,
@@ -9,20 +9,27 @@ import {
   CommandList,
   CommandSeparator,
   CommandShortcut,
-} from '@oppulence/design-system';
-import { Calculator, Calendar, CreditCard, Settings, Smile, User } from 'lucide-react';
+} from "@oppulence/design-system";
+import {
+  Calculator,
+  Calendar,
+  CreditCard,
+  Settings,
+  Smile,
+  User,
+} from "lucide-react";
 
 const meta = {
-  title: 'Organisms/Command',
+  title: "Organisms/Command",
   component: Command,
   parameters: {
-    layout: 'centered',
+    layout: "centered",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
   argTypes: {
     width: {
-      control: 'select',
-      options: ['auto', 'sm', 'md', 'lg'],
+      control: "select",
+      options: ["auto", "sm", "md", "lg"],
     },
   },
 } satisfies Meta<typeof Command>;

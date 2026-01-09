@@ -1,2 +1,2 @@
-export { AppShellClient } from './app-shell-client';
-export * from './nav-config';
+export { AppShellClient } from "./app-shell-client";
+export * from "./nav-config";

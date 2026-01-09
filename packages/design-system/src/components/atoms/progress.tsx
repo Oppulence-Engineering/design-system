@@ -1,8 +1,12 @@
-'use client';
+"use client";
 
-import { Progress as ProgressPrimitive } from '@base-ui/react/progress';
+import { Progress as ProgressPrimitive } from "@base-ui/react/progress";
 
-function Progress({ children, value, ...props }: Omit<ProgressPrimitive.Root.Props, 'className'>) {
+function Progress({
+  children,
+  value,
+  ...props
+}: Omit<ProgressPrimitive.Root.Props, "className">) {
   return (
     <ProgressPrimitive.Root
       value={value}
@@ -18,7 +22,9 @@ function Progress({ children, value, ...props }: Omit<ProgressPrimitive.Root.Pro
   );
 }
 
-function ProgressTrack({ ...props }: Omit<ProgressPrimitive.Track.Props, 'className'>) {
+function ProgressTrack({
+  ...props
+}: Omit<ProgressPrimitive.Track.Props, "className">) {
   return (
     <ProgressPrimitive.Track
       className="bg-muted h-1.5 rounded-full relative flex w-full items-center overflow-x-hidden"
@@ -28,7 +34,9 @@ function ProgressTrack({ ...props }: Omit<ProgressPrimitive.Track.Props, 'classN
   );
 }
 
-function ProgressIndicator({ ...props }: Omit<ProgressPrimitive.Indicator.Props, 'className'>) {
+function ProgressIndicator({
+  ...props
+}: Omit<ProgressPrimitive.Indicator.Props, "className">) {
   return (
     <ProgressPrimitive.Indicator
       data-slot="progress-indicator"
@@ -38,7 +46,9 @@ function ProgressIndicator({ ...props }: Omit<ProgressPrimitive.Indicator.Props,
   );
 }
 
-function ProgressLabel({ ...props }: Omit<ProgressPrimitive.Label.Props, 'className'>) {
+function ProgressLabel({
+  ...props
+}: Omit<ProgressPrimitive.Label.Props, "className">) {
   return (
     <ProgressPrimitive.Label
       className="text-sm font-medium"
@@ -48,7 +58,9 @@ function ProgressLabel({ ...props }: Omit<ProgressPrimitive.Label.Props, 'classN
   );
 }
 
-function ProgressValue({ ...props }: Omit<ProgressPrimitive.Value.Props, 'className'>) {
+function ProgressValue({
+  ...props
+}: Omit<ProgressPrimitive.Value.Props, "className">) {
   return (
     <ProgressPrimitive.Value
       className="text-muted-foreground ml-auto text-sm tabular-nums"
@@ -58,4 +70,10 @@ function ProgressValue({ ...props }: Omit<ProgressPrimitive.Value.Props, 'classN
   );
 }
 
-export { Progress, ProgressIndicator, ProgressLabel, ProgressTrack, ProgressValue };
+export {
+  Progress,
+  ProgressIndicator,
+  ProgressLabel,
+  ProgressTrack,
+  ProgressValue,
+};

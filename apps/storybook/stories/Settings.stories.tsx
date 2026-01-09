@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import {
   Avatar,
   AvatarFallback,
@@ -11,18 +11,18 @@ import {
   SettingsCard,
   Stack,
   Text,
-} from '@oppulence/design-system';
-import { useState } from 'react';
+} from "@oppulence/design-system";
+import { useState } from "react";
 
 const meta = {
-  title: 'Molecules/Settings',
+  title: "Molecules/Settings",
   component: SettingsCard,
   parameters: {
-    layout: 'fullscreen',
+    layout: "fullscreen",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
   args: {
-    title: 'Settings Card',
+    title: "Settings Card",
   },
 } satisfies Meta<typeof SettingsCard>;
 
@@ -30,11 +30,11 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 function FullSettingsDemo() {
-  const [name, setName] = useState('Mariano Fuentes');
-  const [email, setEmail] = useState('mariano@trycomp.ai');
+  const [name, setName] = useState("Mariano Fuentes");
+  const [email, setEmail] = useState("mariano@trycomp.ai");
 
-  const nameChanged = name !== 'Mariano Fuentes';
-  const emailChanged = email !== 'mariano@trycomp.ai';
+  const nameChanged = name !== "Mariano Fuentes";
+  const emailChanged = email !== "mariano@trycomp.ai";
 
   return (
     <PageLayout>
@@ -53,10 +53,18 @@ function FullSettingsDemo() {
         <SettingsCard
           title="Your Email"
           description="This will be the email you use to log in and receive notifications. A confirmation is required for changes."
-          hint={<a href="#" className="underline">Manage email preferences</a>}
+          hint={
+            <a href="#" className="underline">
+              Manage email preferences
+            </a>
+          }
           action={<Button disabled={!emailChanged}>Save Changes</Button>}
         >
-          <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+          <Input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
         </SettingsCard>
 
         <SettingsCard
@@ -80,7 +88,7 @@ export const FullSettingsPage: Story = {
 };
 
 function NameSettingDemo() {
-  const defaultValue = 'Mariano Fuentes';
+  const defaultValue = "Mariano Fuentes";
   const [value, setValue] = useState(defaultValue);
   const hasChanges = value !== defaultValue;
 
@@ -98,13 +106,13 @@ function NameSettingDemo() {
 
 export const SingleCard: Story = {
   parameters: {
-    layout: 'padded',
+    layout: "padded",
   },
   render: () => <NameSettingDemo />,
 };
 
 function EmailSettingDemo() {
-  const defaultValue = 'mariano@trycomp.ai';
+  const defaultValue = "mariano@trycomp.ai";
   const [value, setValue] = useState(defaultValue);
   const hasChanges = value !== defaultValue;
 
@@ -112,24 +120,32 @@ function EmailSettingDemo() {
     <SettingsCard
       title="Your Email"
       description="This will be the email you use to log in and receive notifications. A confirmation is required for changes."
-      hint={<a href="#" className="underline">Manage email preferences</a>}
+      hint={
+        <a href="#" className="underline">
+          Manage email preferences
+        </a>
+      }
       action={<Button disabled={!hasChanges}>Save Changes</Button>}
     >
-      <Input type="email" value={value} onChange={(e) => setValue(e.target.value)} />
+      <Input
+        type="email"
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+      />
     </SettingsCard>
   );
 }
 
 export const WithEmail: Story = {
   parameters: {
-    layout: 'padded',
+    layout: "padded",
   },
   render: () => <EmailSettingDemo />,
 };
 
 export const WithAvatar: Story = {
   parameters: {
-    layout: 'padded',
+    layout: "padded",
   },
   render: () => (
     <SettingsCard
@@ -148,7 +164,7 @@ export const WithAvatar: Story = {
 
 export const DangerZone: Story = {
   parameters: {
-    layout: 'padded',
+    layout: "padded",
   },
   render: () => (
     <SettingsCard
@@ -165,7 +181,7 @@ export const DangerZone: Story = {
 
 export const NoFooter: Story = {
   parameters: {
-    layout: 'padded',
+    layout: "padded",
   },
   render: () => (
     <SettingsCard
@@ -175,11 +191,15 @@ export const NoFooter: Story = {
       <Stack gap="2">
         <HStack justify="between">
           <Text size="sm">API Calls</Text>
-          <Text size="sm" weight="medium">12,847 / 50,000</Text>
+          <Text size="sm" weight="medium">
+            12,847 / 50,000
+          </Text>
         </HStack>
         <HStack justify="between">
           <Text size="sm">Storage</Text>
-          <Text size="sm" weight="medium">2.4 GB / 10 GB</Text>
+          <Text size="sm" weight="medium">
+            2.4 GB / 10 GB
+          </Text>
         </HStack>
       </Stack>
     </SettingsCard>

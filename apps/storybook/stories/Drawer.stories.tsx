@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import {
   Button,
   Drawer,
@@ -12,15 +12,15 @@ import {
   Input,
   Label,
   Stack,
-} from '@oppulence/design-system';
+} from "@oppulence/design-system";
 
 const meta = {
-  title: 'Organisms/Drawer',
+  title: "Organisms/Drawer",
   component: Drawer,
   parameters: {
-    layout: 'centered',
+    layout: "centered",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
 } satisfies Meta<typeof Drawer>;
 
 export default meta;
@@ -47,7 +47,11 @@ export const Default: Story = {
             </Stack>
             <Stack gap="2">
               <Label htmlFor="drawer-email">Email</Label>
-              <Input id="drawer-email" type="email" defaultValue="john@example.com" />
+              <Input
+                id="drawer-email"
+                type="email"
+                defaultValue="john@example.com"
+              />
             </Stack>
           </Stack>
         </div>
@@ -110,8 +114,8 @@ export const Confirmation: Story = {
         <DrawerHeader>
           <DrawerTitle>Are you sure?</DrawerTitle>
           <DrawerDescription>
-            This action cannot be undone. This will permanently delete your account and remove your
-            data from our servers.
+            This action cannot be undone. This will permanently delete your
+            account and remove your data from our servers.
           </DrawerDescription>
         </DrawerHeader>
         <DrawerFooter>

@@ -27,14 +27,14 @@ This starts Storybook at http://localhost:6006
 
 ## Commands
 
-| Command | Description |
-|---------|-------------|
-| `bun storybook` | Start Storybook dev server |
-| `bun run build` | Build all packages |
-| `bun run typecheck` | Type check all packages |
-| `bun run lint` | Lint all packages |
-| `bun test` | Run tests |
-| `bun run format` | Format code with Prettier |
+| Command             | Description                |
+| ------------------- | -------------------------- |
+| `bun storybook`     | Start Storybook dev server |
+| `bun run build`     | Build all packages         |
+| `bun run typecheck` | Type check all packages    |
+| `bun run lint`      | Lint all packages          |
+| `bun test`          | Run tests                  |
+| `bun run format`    | Format code with Prettier  |
 
 ## Building
 

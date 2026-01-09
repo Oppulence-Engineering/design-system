@@ -1,24 +1,36 @@
-import { Popover as PopoverPrimitive } from '@base-ui/react/popover';
-import * as React from 'react';
+import { Popover as PopoverPrimitive } from "@base-ui/react/popover";
+import * as React from "react";
 
-import { cn } from '../../../lib/utils';
+import { cn } from "../../../lib/utils";
 
 function Popover({ ...props }: PopoverPrimitive.Root.Props) {
   return <PopoverPrimitive.Root data-slot="popover" {...props} />;
 }
 
-function PopoverTrigger({ className, ...props }: PopoverPrimitive.Trigger.Props) {
-  return <PopoverPrimitive.Trigger data-slot="popover-trigger" className={cn(className)} {...props} />;
+function PopoverTrigger({
+  className,
+  ...props
+}: PopoverPrimitive.Trigger.Props) {
+  return (
+    <PopoverPrimitive.Trigger
+      data-slot="popover-trigger"
+      className={cn(className)}
+      {...props}
+    />
+  );
 }
 
 function PopoverContent({
-  align = 'center',
+  align = "center",
   alignOffset = 0,
-  side = 'bottom',
+  side = "bottom",
   sideOffset = 4,
   ...props
-}: Omit<PopoverPrimitive.Popup.Props, 'className'> &
-  Pick<PopoverPrimitive.Positioner.Props, 'align' | 'alignOffset' | 'side' | 'sideOffset'>) {
+}: Omit<PopoverPrimitive.Popup.Props, "className"> &
+  Pick<
+    PopoverPrimitive.Positioner.Props,
+    "align" | "alignOffset" | "side" | "sideOffset"
+  >) {
   return (
     <PopoverPrimitive.Portal>
       <PopoverPrimitive.Positioner
@@ -38,15 +50,33 @@ function PopoverContent({
   );
 }
 
-function PopoverHeader({ ...props }: Omit<React.ComponentProps<'div'>, 'className'>) {
-  return <div data-slot="popover-header" className="flex flex-col gap-0.5 text-sm" {...props} />;
+function PopoverHeader({
+  ...props
+}: Omit<React.ComponentProps<"div">, "className">) {
+  return (
+    <div
+      data-slot="popover-header"
+      className="flex flex-col gap-0.5 text-sm"
+      {...props}
+    />
+  );
 }
 
-function PopoverTitle({ ...props }: Omit<PopoverPrimitive.Title.Props, 'className'>) {
-  return <PopoverPrimitive.Title data-slot="popover-title" className="font-medium" {...props} />;
+function PopoverTitle({
+  ...props
+}: Omit<PopoverPrimitive.Title.Props, "className">) {
+  return (
+    <PopoverPrimitive.Title
+      data-slot="popover-title"
+      className="font-medium"
+      {...props}
+    />
+  );
 }
 
-function PopoverDescription({ ...props }: Omit<PopoverPrimitive.Description.Props, 'className'>) {
+function PopoverDescription({
+  ...props
+}: Omit<PopoverPrimitive.Description.Props, "className">) {
   return (
     <PopoverPrimitive.Description
       data-slot="popover-description"
@@ -56,4 +86,11 @@ function PopoverDescription({ ...props }: Omit<PopoverPrimitive.Description.Prop
   );
 }
 
-export { Popover, PopoverContent, PopoverDescription, PopoverHeader, PopoverTitle, PopoverTrigger };
+export {
+  Popover,
+  PopoverContent,
+  PopoverDescription,
+  PopoverHeader,
+  PopoverTitle,
+  PopoverTrigger,
+};

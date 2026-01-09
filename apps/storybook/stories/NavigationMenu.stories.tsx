@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -6,15 +6,15 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
-} from '@oppulence/design-system';
+} from "@oppulence/design-system";
 
 const meta = {
-  title: 'Organisms/NavigationMenu',
+  title: "Organisms/NavigationMenu",
   component: NavigationMenu,
   parameters: {
-    layout: 'centered',
+    layout: "centered",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
 } satisfies Meta<typeof NavigationMenu>;
 
 export default meta;
@@ -23,7 +23,7 @@ type Story = StoryObj<typeof meta>;
 const ListItem = ({
   title,
   children,
-  href = '#',
+  href = "#",
 }: {
   title: string;
   children: React.ReactNode;
@@ -35,7 +35,9 @@ const ListItem = ({
       href={href}
     >
       <div className="text-sm font-medium leading-none">{title}</div>
-      <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">{children}</p>
+      <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+        {children}
+      </p>
     </a>
   </li>
 );
@@ -55,7 +57,8 @@ export const Default: Story = {
                 >
                   <div className="mb-2 mt-4 text-lg font-medium">shadcn/ui</div>
                   <p className="text-sm leading-tight text-muted-foreground">
-                    Beautifully designed components built with Radix UI and Tailwind CSS.
+                    Beautifully designed components built with Radix UI and
+                    Tailwind CSS.
                   </p>
                 </a>
               </li>
@@ -65,7 +68,9 @@ export const Default: Story = {
               <ListItem title="Installation">
                 How to install dependencies and structure your app.
               </ListItem>
-              <ListItem title="Typography">Styles for headings, paragraphs, lists...etc</ListItem>
+              <ListItem title="Typography">
+                Styles for headings, paragraphs, lists...etc
+              </ListItem>
             </ul>
           </NavigationMenuContent>
         </NavigationMenuItem>
@@ -82,8 +87,12 @@ export const Default: Story = {
               <ListItem title="Progress">
                 Displays an indicator showing the completion progress.
               </ListItem>
-              <ListItem title="Scroll-area">Visually or semantically separates content.</ListItem>
-              <ListItem title="Tabs">A set of layered sections of content.</ListItem>
+              <ListItem title="Scroll-area">
+                Visually or semantically separates content.
+              </ListItem>
+              <ListItem title="Tabs">
+                A set of layered sections of content.
+              </ListItem>
               <ListItem title="Tooltip">
                 A popup that displays information related to an element.
               </ListItem>

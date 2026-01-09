@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import {
   Badge,
@@ -11,7 +11,7 @@ import {
   Progress,
   Stack,
   Text,
-} from '@oppulence/design-system';
+} from "@oppulence/design-system";
 
 export default function OverviewPage() {
   return (
@@ -31,10 +31,16 @@ export default function OverviewPage() {
         <Stack gap="sm">
           <HStack justify="between" align="baseline">
             <HStack align="baseline" gap="xs">
-              <Text size="lg" weight="semibold">67%</Text>
-              <Text variant="muted" size="sm">complete</Text>
+              <Text size="lg" weight="semibold">
+                67%
+              </Text>
+              <Text variant="muted" size="sm">
+                complete
+              </Text>
             </HStack>
-            <Text variant="muted" size="sm">98 of 146 controls</Text>
+            <Text variant="muted" size="sm">
+              98 of 146 controls
+            </Text>
           </HStack>
           <Progress value={67} />
         </Stack>
@@ -47,29 +53,45 @@ export default function OverviewPage() {
           <div className="flex items-start gap-3 py-3 border-b border-border/40">
             <Checkbox />
             <Stack gap="none">
-              <Text size="sm" weight="medium">Complete security awareness training</Text>
-              <Text variant="muted" size="xs">3 team members haven&apos;t completed annual training</Text>
+              <Text size="sm" weight="medium">
+                Complete security awareness training
+              </Text>
+              <Text variant="muted" size="xs">
+                3 team members haven&apos;t completed annual training
+              </Text>
             </Stack>
           </div>
           <div className="flex items-start gap-3 py-3 border-b border-border/40">
             <Checkbox />
             <Stack gap="none">
-              <Text size="sm" weight="medium">Review and approve access policies</Text>
-              <Text variant="muted" size="xs">2 policies pending approval from admin</Text>
+              <Text size="sm" weight="medium">
+                Review and approve access policies
+              </Text>
+              <Text variant="muted" size="xs">
+                2 policies pending approval from admin
+              </Text>
             </Stack>
           </div>
           <div className="flex items-start gap-3 py-3 border-b border-border/40">
             <Checkbox />
             <Stack gap="none">
-              <Text size="sm" weight="medium">Connect your cloud infrastructure</Text>
-              <Text variant="muted" size="xs">AWS and GCP integrations available</Text>
+              <Text size="sm" weight="medium">
+                Connect your cloud infrastructure
+              </Text>
+              <Text variant="muted" size="xs">
+                AWS and GCP integrations available
+              </Text>
             </Stack>
           </div>
           <div className="flex items-start gap-3 py-3">
             <Checkbox />
             <Stack gap="none">
-              <Text size="sm" weight="medium">Schedule your first audit</Text>
-              <Text variant="muted" size="xs">Contact our team to begin the audit process</Text>
+              <Text size="sm" weight="medium">
+                Schedule your first audit
+              </Text>
+              <Text variant="muted" size="xs">
+                Contact our team to begin the audit process
+              </Text>
             </Stack>
           </div>
         </Stack>

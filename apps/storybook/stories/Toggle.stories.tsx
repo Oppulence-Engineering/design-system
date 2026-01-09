@@ -1,22 +1,22 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Toggle, Stack } from '@oppulence/design-system';
-import { Bold, Italic, Underline } from 'lucide-react';
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import { Toggle, Stack } from "@oppulence/design-system";
+import { Bold, Italic, Underline } from "lucide-react";
 
 const meta = {
-  title: 'Atoms/Toggle',
+  title: "Atoms/Toggle",
   component: Toggle,
   parameters: {
-    layout: 'centered',
+    layout: "centered",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
   argTypes: {
     variant: {
-      control: 'select',
-      options: ['default', 'outline'],
+      control: "select",
+      options: ["default", "outline"],
     },
     size: {
-      control: 'select',
-      options: ['default', 'sm', 'lg'],
+      control: "select",
+      options: ["default", "sm", "lg"],
     },
   },
 } satisfies Meta<typeof Toggle>;
@@ -80,4 +80,3 @@ export const FormattingToolbar: Story = {
     </Stack>
   ),
 };
-

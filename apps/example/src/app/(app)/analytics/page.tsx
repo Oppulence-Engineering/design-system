@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import {
   Card,
@@ -9,22 +9,22 @@ import {
   Heading,
   Stack,
   Text,
-} from '@oppulence/design-system';
-import { TrendingDownIcon, TrendingUpIcon } from 'lucide-react';
+} from "@oppulence/design-system";
+import { TrendingDownIcon, TrendingUpIcon } from "lucide-react";
 
 const metrics = [
-  { label: 'Page Views', value: '124,892', change: '+12.5%', trend: 'up' },
-  { label: 'Unique Visitors', value: '45,234', change: '+8.2%', trend: 'up' },
-  { label: 'Bounce Rate', value: '32.1%', change: '-2.3%', trend: 'down' },
-  { label: 'Avg. Session', value: '4m 32s', change: '+0.8%', trend: 'up' },
+  { label: "Page Views", value: "124,892", change: "+12.5%", trend: "up" },
+  { label: "Unique Visitors", value: "45,234", change: "+8.2%", trend: "up" },
+  { label: "Bounce Rate", value: "32.1%", change: "-2.3%", trend: "down" },
+  { label: "Avg. Session", value: "4m 32s", change: "+0.8%", trend: "up" },
 ];
 
 const topPages = [
-  { page: '/dashboard', views: '23,456', percentage: 18.8 },
-  { page: '/projects', views: '18,234', percentage: 14.6 },
-  { page: '/settings', views: '12,567', percentage: 10.1 },
-  { page: '/team', views: '9,876', percentage: 7.9 },
-  { page: '/analytics', views: '8,432', percentage: 6.8 },
+  { page: "/dashboard", views: "23,456", percentage: 18.8 },
+  { page: "/projects", views: "18,234", percentage: 14.6 },
+  { page: "/settings", views: "12,567", percentage: 10.1 },
+  { page: "/team", views: "9,876", percentage: 7.9 },
+  { page: "/analytics", views: "8,432", percentage: 6.8 },
 ];
 
 export default function AnalyticsPage() {
@@ -32,7 +32,9 @@ export default function AnalyticsPage() {
     <Stack gap="6">
       <Stack gap="1">
         <Heading level="1">Analytics</Heading>
-        <Text variant="muted">Track your application performance and user engagement.</Text>
+        <Text variant="muted">
+          Track your application performance and user engagement.
+        </Text>
       </Stack>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -46,7 +48,7 @@ export default function AnalyticsPage() {
             </CardHeader>
             <CardContent>
               <div className="flex items-center gap-1 text-sm">
-                {metric.trend === 'up' ? (
+                {metric.trend === "up" ? (
                   <TrendingUpIcon className="size-4 text-green-600" />
                 ) : (
                   <TrendingDownIcon className="size-4 text-green-600" />
@@ -63,7 +65,9 @@ export default function AnalyticsPage() {
         <Card>
           <CardHeader>
             <CardTitle>Traffic Overview</CardTitle>
-            <CardDescription>Daily visitors over the past 30 days</CardDescription>
+            <CardDescription>
+              Daily visitors over the past 30 days
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="h-64 flex items-center justify-center bg-muted/30 rounded-lg">

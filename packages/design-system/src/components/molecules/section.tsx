@@ -1,18 +1,28 @@
-import * as React from 'react';
+import * as React from "react";
 
-import { Heading } from '../atoms/heading';
-import { Text } from '../atoms/text';
-import { Stack } from '../atoms/stack';
+import { Heading } from "../atoms/heading";
+import { Text } from "../atoms/text";
+import { Stack } from "../atoms/stack";
 
-interface SectionProps extends Omit<React.ComponentProps<'section'>, 'className'> {
+interface SectionProps extends Omit<
+  React.ComponentProps<"section">,
+  "className"
+> {
   title?: string;
   description?: string;
   actions?: React.ReactNode;
   /** Gap between header and content. Default is "4" */
-  gap?: '2' | '3' | '4' | '6' | '8';
+  gap?: "2" | "3" | "4" | "6" | "8";
 }
 
-function Section({ title, description, actions, gap = '4', children, ...props }: SectionProps) {
+function Section({
+  title,
+  description,
+  actions,
+  gap = "4",
+  children,
+  ...props
+}: SectionProps) {
   const hasHeader = title || description || actions;
 
   return (
@@ -28,7 +38,9 @@ function Section({ title, description, actions, gap = '4', children, ...props }:
                 </Text>
               )}
             </Stack>
-            {actions && <div className="flex shrink-0 items-center gap-2">{actions}</div>}
+            {actions && (
+              <div className="flex shrink-0 items-center gap-2">{actions}</div>
+            )}
           </div>
         )}
         {children}
@@ -37,28 +49,60 @@ function Section({ title, description, actions, gap = '4', children, ...props }:
   );
 }
 
-function SectionHeader({ ...props }: Omit<React.ComponentProps<'div'>, 'className'>) {
+function SectionHeader({
+  ...props
+}: Omit<React.ComponentProps<"div">, "className">) {
   return (
-    <div data-slot="section-header" className="flex items-start justify-between gap-4" {...props} />
+    <div
+      data-slot="section-header"
+      className="flex items-start justify-between gap-4"
+      {...props}
+    />
   );
 }
 
-function SectionTitle({ ...props }: Omit<React.ComponentProps<typeof Heading>, 'className'>) {
+function SectionTitle({
+  ...props
+}: Omit<React.ComponentProps<typeof Heading>, "className">) {
   return <Heading data-slot="section-title" level="3" {...props} />;
 }
 
-function SectionDescription({ ...props }: Omit<React.ComponentProps<typeof Text>, 'className'>) {
-  return <Text data-slot="section-description" size="sm" variant="muted" {...props} />;
-}
-
-function SectionActions({ ...props }: Omit<React.ComponentProps<'div'>, 'className'>) {
+function SectionDescription({
+  ...props
+}: Omit<React.ComponentProps<typeof Text>, "className">) {
   return (
-    <div data-slot="section-actions" className="flex shrink-0 items-center gap-2" {...props} />
+    <Text
+      data-slot="section-description"
+      size="sm"
+      variant="muted"
+      {...props}
+    />
   );
 }
 
-function SectionContent({ ...props }: Omit<React.ComponentProps<'div'>, 'className'>) {
+function SectionActions({
+  ...props
+}: Omit<React.ComponentProps<"div">, "className">) {
+  return (
+    <div
+      data-slot="section-actions"
+      className="flex shrink-0 items-center gap-2"
+      {...props}
+    />
+  );
+}
+
+function SectionContent({
+  ...props
+}: Omit<React.ComponentProps<"div">, "className">) {
   return <div data-slot="section-content" className="w-full" {...props} />;
 }
 
-export { Section, SectionActions, SectionContent, SectionDescription, SectionHeader, SectionTitle };
+export {
+  Section,
+  SectionActions,
+  SectionContent,
+  SectionDescription,
+  SectionHeader,
+  SectionTitle,
+};

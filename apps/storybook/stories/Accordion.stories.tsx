@@ -1,13 +1,18 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@oppulence/design-system';
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@oppulence/design-system";
 
 const meta = {
-  title: 'Molecules/Accordion',
+  title: "Molecules/Accordion",
   component: Accordion,
   parameters: {
-    layout: 'centered',
+    layout: "centered",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
 } satisfies Meta<typeof Accordion>;
 
 export default meta;
@@ -19,12 +24,15 @@ export const Default: Story = {
       <Accordion>
         <AccordionItem value="item-1">
           <AccordionTrigger>Is it accessible?</AccordionTrigger>
-          <AccordionContent>Yes. It adheres to the WAI-ARIA design pattern.</AccordionContent>
+          <AccordionContent>
+            Yes. It adheres to the WAI-ARIA design pattern.
+          </AccordionContent>
         </AccordionItem>
         <AccordionItem value="item-2">
           <AccordionTrigger>Is it styled?</AccordionTrigger>
           <AccordionContent>
-            Yes. It comes with default styles that matches the other components' aesthetic.
+            Yes. It comes with default styles that matches the other components'
+            aesthetic.
           </AccordionContent>
         </AccordionItem>
         <AccordionItem value="item-3">
@@ -51,7 +59,8 @@ export const Multiple: Story = {
         <AccordionItem value="item-2">
           <AccordionTrigger>How does it work?</AccordionTrigger>
           <AccordionContent>
-            Set the type prop to "multiple" to allow multiple items to be expanded.
+            Set the type prop to "multiple" to allow multiple items to be
+            expanded.
           </AccordionContent>
         </AccordionItem>
         <AccordionItem value="item-3">
@@ -70,31 +79,35 @@ export const FAQ: Story = {
     <div className="w-[500px]">
       <Accordion>
         <AccordionItem value="faq-1">
-          <AccordionTrigger>What payment methods do you accept?</AccordionTrigger>
+          <AccordionTrigger>
+            What payment methods do you accept?
+          </AccordionTrigger>
           <AccordionContent>
-            We accept all major credit cards (Visa, MasterCard, American Express) as well as PayPal
-            and bank transfers for enterprise customers.
+            We accept all major credit cards (Visa, MasterCard, American
+            Express) as well as PayPal and bank transfers for enterprise
+            customers.
           </AccordionContent>
         </AccordionItem>
         <AccordionItem value="faq-2">
           <AccordionTrigger>How do I cancel my subscription?</AccordionTrigger>
           <AccordionContent>
-            You can cancel your subscription at any time from your account settings. Your access
-            will continue until the end of your current billing period.
+            You can cancel your subscription at any time from your account
+            settings. Your access will continue until the end of your current
+            billing period.
           </AccordionContent>
         </AccordionItem>
         <AccordionItem value="faq-3">
           <AccordionTrigger>Do you offer refunds?</AccordionTrigger>
           <AccordionContent>
-            Yes, we offer a 30-day money-back guarantee. If you're not satisfied, contact our
-            support team for a full refund.
+            Yes, we offer a 30-day money-back guarantee. If you're not
+            satisfied, contact our support team for a full refund.
           </AccordionContent>
         </AccordionItem>
         <AccordionItem value="faq-4">
           <AccordionTrigger>Is there a free trial?</AccordionTrigger>
           <AccordionContent>
-            Yes! We offer a 14-day free trial with full access to all features. No credit card
-            required to start.
+            Yes! We offer a 14-day free trial with full access to all features.
+            No credit card required to start.
           </AccordionContent>
         </AccordionItem>
       </Accordion>

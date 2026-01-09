@@ -1,28 +1,29 @@
-import { cva, type VariantProps } from 'class-variance-authority';
-import * as React from 'react';
+import { cva, type VariantProps } from "class-variance-authority";
+import * as React from "react";
 
-import { Heading } from '../atoms/heading';
-import { Stack } from '../atoms/stack';
-import { Text } from '../atoms/text';
+import { Heading } from "../atoms/heading";
+import { Stack } from "../atoms/stack";
+import { Text } from "../atoms/text";
 
 const settingRowVariants = cva(
-  'flex w-full items-start justify-between gap-4 py-4 first:pt-0 last:pb-0',
+  "flex w-full items-start justify-between gap-4 py-4 first:pt-0 last:pb-0",
   {
     variants: {
       size: {
-        default: 'py-4',
-        sm: 'py-3',
-        lg: 'py-5',
+        default: "py-4",
+        sm: "py-3",
+        lg: "py-5",
       },
     },
     defaultVariants: {
-      size: 'default',
+      size: "default",
     },
-  }
+  },
 );
 
 interface SettingRowProps
-  extends Omit<React.ComponentProps<'div'>, 'className'>,
+  extends
+    Omit<React.ComponentProps<"div">, "className">,
     VariantProps<typeof settingRowVariants> {
   /** The setting label */
   label: string;
@@ -53,7 +54,7 @@ function SettingRow({
     >
       <div className="min-w-0 flex-1">
         <Stack gap="1">
-          <Text weight="medium" variant={disabled ? 'muted' : undefined}>
+          <Text weight="medium" variant={disabled ? "muted" : undefined}>
             {label}
           </Text>
           {description && (
@@ -68,7 +69,10 @@ function SettingRow({
   );
 }
 
-interface SettingGroupProps extends Omit<React.ComponentProps<'div'>, 'className'> {
+interface SettingGroupProps extends Omit<
+  React.ComponentProps<"div">,
+  "className"
+> {
   /** Whether to show dividers between rows */
   divided?: boolean;
 }
@@ -76,15 +80,19 @@ interface SettingGroupProps extends Omit<React.ComponentProps<'div'>, 'className
 /**
  * Groups multiple SettingRow components together, optionally with dividers.
  */
-function SettingGroup({ divided = true, children, ...props }: SettingGroupProps) {
+function SettingGroup({
+  divided = true,
+  children,
+  ...props
+}: SettingGroupProps) {
   return (
     <div
       data-slot="setting-group"
       data-divided={divided || undefined}
       className={
         divided
-          ? '[&>[data-slot=setting-row]:not(:last-child)]:border-border [&>[data-slot=setting-row]:not(:last-child)]:border-b'
-          : ''
+          ? "[&>[data-slot=setting-row]:not(:last-child)]:border-border [&>[data-slot=setting-row]:not(:last-child)]:border-b"
+          : ""
       }
       {...props}
     >
@@ -93,7 +101,10 @@ function SettingGroup({ divided = true, children, ...props }: SettingGroupProps)
   );
 }
 
-interface SettingLabelProps extends Omit<React.ComponentProps<'div'>, 'className'> {}
+interface SettingLabelProps extends Omit<
+  React.ComponentProps<"div">,
+  "className"
+> {}
 
 /**
  * Custom label area for complex setting rows. Use when you need more than just text.
@@ -106,20 +117,30 @@ function SettingLabel({ children, ...props }: SettingLabelProps) {
   );
 }
 
-interface SettingControlProps extends Omit<React.ComponentProps<'div'>, 'className'> {}
+interface SettingControlProps extends Omit<
+  React.ComponentProps<"div">,
+  "className"
+> {}
 
 /**
  * Control area for setting rows. Use when you need multiple controls or custom layout.
  */
 function SettingControl({ children, ...props }: SettingControlProps) {
   return (
-    <div data-slot="setting-control" className="flex shrink-0 items-center gap-2" {...props}>
+    <div
+      data-slot="setting-control"
+      className="flex shrink-0 items-center gap-2"
+      {...props}
+    >
       {children}
     </div>
   );
 }
 
-interface SettingsCardProps extends Omit<React.ComponentProps<'div'>, 'className'> {
+interface SettingsCardProps extends Omit<
+  React.ComponentProps<"div">,
+  "className"
+> {
   /** Card title */
   title: string;
   /** Optional description */
@@ -134,7 +155,14 @@ interface SettingsCardProps extends Omit<React.ComponentProps<'div'>, 'className
  * A self-contained settings card with title, description, content area, and footer.
  * Footer shows hint text on left and action button on right.
  */
-function SettingsCard({ title, description, hint, action, children, ...props }: SettingsCardProps) {
+function SettingsCard({
+  title,
+  description,
+  hint,
+  action,
+  children,
+  ...props
+}: SettingsCardProps) {
   const hasFooter = hint || action;
 
   return (

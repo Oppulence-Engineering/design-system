@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import {
   Avatar,
   AvatarFallback,
@@ -21,37 +21,37 @@ import {
   TabsList,
   TabsTrigger,
   Text,
-} from '@oppulence/design-system';
+} from "@oppulence/design-system";
 
 const meta = {
-  title: 'Pages/PageLayout',
+  title: "Pages/PageLayout",
   component: PageLayout,
   parameters: {
-    layout: 'fullscreen',
+    layout: "fullscreen",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
   argTypes: {
     variant: {
-      control: 'select',
-      options: ['default', 'center'],
+      control: "select",
+      options: ["default", "center"],
     },
     padding: {
-      control: 'select',
-      options: ['none', 'sm', 'default', 'lg'],
+      control: "select",
+      options: ["none", "sm", "default", "lg"],
     },
     container: {
-      control: 'boolean',
+      control: "boolean",
     },
     maxWidth: {
-      control: 'select',
-      options: ['sm', 'md', 'lg', 'xl', '2xl'],
+      control: "select",
+      options: ["sm", "md", "lg", "xl", "2xl"],
     },
   },
   args: {
-    variant: 'default',
-    padding: 'default',
+    variant: "default",
+    padding: "default",
     container: true,
-    maxWidth: 'lg',
+    maxWidth: "lg",
   },
 } satisfies Meta<typeof PageLayout>;
 
@@ -60,8 +60,8 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
-    variant: 'default',
-    padding: 'default',
+    variant: "default",
+    padding: "default",
     container: true,
   },
   render: (args) => (
@@ -69,8 +69,8 @@ export const Default: Story = {
       <Stack gap="6">
         <Heading level="1">Page Title</Heading>
         <Text variant="muted">
-          Content is centered with a max-width container by default. Resize the window to see the
-          effect.
+          Content is centered with a max-width container by default. Resize the
+          window to see the effect.
         </Text>
         <Card>
           <CardContent>
@@ -84,8 +84,8 @@ export const Default: Story = {
 
 export const FullWidth: Story = {
   args: {
-    variant: 'default',
-    padding: 'default',
+    variant: "default",
+    padding: "default",
     container: false,
   },
   render: (args) => (
@@ -93,8 +93,8 @@ export const FullWidth: Story = {
       <Stack gap="6">
         <Heading level="1">Full Width Page</Heading>
         <Text variant="muted">
-          This page has no container - content stretches to full width. Useful for dashboards, maps,
-          or custom layouts.
+          This page has no container - content stretches to full width. Useful
+          for dashboards, maps, or custom layouts.
         </Text>
         <Grid cols="4" gap="4">
           {[1, 2, 3, 4].map((i) => (
@@ -114,10 +114,10 @@ export const FullWidth: Story = {
 
 export const Centered: Story = {
   args: {
-    variant: 'center',
-    padding: 'default',
+    variant: "center",
+    padding: "default",
     container: true,
-    maxWidth: 'sm',
+    maxWidth: "sm",
   },
   render: (args) => (
     <PageLayout {...args}>
@@ -125,7 +125,9 @@ export const Centered: Story = {
         <CardHeader>
           <Stack align="center" gap="xs">
             <Heading level="2">Sign In</Heading>
-            <Text variant="muted">Welcome back! Please sign in to continue.</Text>
+            <Text variant="muted">
+              Welcome back! Please sign in to continue.
+            </Text>
           </Stack>
         </CardHeader>
         <CardContent>
@@ -143,10 +145,10 @@ export const Centered: Story = {
 
 export const AuthPage: Story = {
   args: {
-    variant: 'center',
-    padding: 'lg',
+    variant: "center",
+    padding: "lg",
     container: true,
-    maxWidth: 'md',
+    maxWidth: "md",
   },
   render: (args) => (
     <PageLayout {...args}>
@@ -158,7 +160,9 @@ export const AuthPage: Story = {
             </Avatar>
             <Stack align="center" gap="xs">
               <Heading level="1">Create an account</Heading>
-              <Text variant="muted">Get started with your free account today</Text>
+              <Text variant="muted">
+                Get started with your free account today
+              </Text>
             </Stack>
           </Stack>
         </CardHeader>
@@ -189,17 +193,18 @@ export const AuthPage: Story = {
 
 export const CustomMaxWidth: Story = {
   args: {
-    variant: 'default',
-    padding: 'default',
+    variant: "default",
+    padding: "default",
     container: true,
-    maxWidth: '2xl',
+    maxWidth: "2xl",
   },
   render: (args) => (
     <PageLayout {...args}>
       <Stack gap="6">
         <Heading level="1">Wide Container</Heading>
         <Text variant="muted">
-          This page uses a wider max-width (1400px) for more content-heavy pages.
+          This page uses a wider max-width (1400px) for more content-heavy
+          pages.
         </Text>
         <Grid cols="3" gap="4">
           {[1, 2, 3].map((i) => (
@@ -219,8 +224,8 @@ export const CustomMaxWidth: Story = {
 
 export const WithTabs: Story = {
   args: {
-    variant: 'default',
-    padding: 'default',
+    variant: "default",
+    padding: "default",
     container: true,
   },
   render: (args) => (

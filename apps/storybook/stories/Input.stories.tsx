@@ -1,17 +1,17 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Input, Label, Stack } from '@oppulence/design-system';
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import { Input, Label, Stack } from "@oppulence/design-system";
 
 const meta = {
-  title: 'Atoms/Input',
+  title: "Atoms/Input",
   component: Input,
   parameters: {
-    layout: 'centered',
+    layout: "centered",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
   argTypes: {
     type: {
-      control: 'select',
-      options: ['text', 'email', 'password', 'number', 'search', 'tel', 'url'],
+      control: "select",
+      options: ["text", "email", "password", "number", "search", "tel", "url"],
     },
   },
 } satisfies Meta<typeof Input>;
@@ -21,34 +21,34 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
-    placeholder: 'Enter text...',
+    placeholder: "Enter text...",
   },
 };
 
 export const WithValue: Story = {
   args: {
-    defaultValue: 'Hello World',
+    defaultValue: "Hello World",
   },
 };
 
 export const Disabled: Story = {
   args: {
     disabled: true,
-    placeholder: 'Disabled input',
+    placeholder: "Disabled input",
   },
 };
 
 export const Password: Story = {
   args: {
-    type: 'password',
-    placeholder: 'Enter password...',
+    type: "password",
+    placeholder: "Enter password...",
   },
 };
 
 export const Email: Story = {
   args: {
-    type: 'email',
-    placeholder: 'email@example.com',
+    type: "email",
+    placeholder: "email@example.com",
   },
 };
 

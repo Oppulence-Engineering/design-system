@@ -1,7 +1,7 @@
-import { mergeProps } from '@base-ui/react/merge-props';
-import { Separator as SeparatorPrimitive } from '@base-ui/react/separator';
-import { useRender } from '@base-ui/react/use-render';
-import { cva, type VariantProps } from 'class-variance-authority';
+import { mergeProps } from "@base-ui/react/merge-props";
+import { Separator as SeparatorPrimitive } from "@base-ui/react/separator";
+import { useRender } from "@base-ui/react/use-render";
+import { cva, type VariantProps } from "class-variance-authority";
 
 const buttonGroupVariants = cva(
   "has-[>[data-slot=button-group]]:gap-2 has-[select[aria-hidden=true]:last-child]:[&>[data-slot=select-trigger]:last-of-type]:rounded-r-md flex w-fit items-stretch [&>*]:focus-visible:z-10 [&>*]:focus-visible:relative [&>[data-slot=select-trigger]:not([class*='w-'])]:w-fit [&>input]:flex-1",
@@ -9,13 +9,13 @@ const buttonGroupVariants = cva(
     variants: {
       orientation: {
         horizontal:
-          '[&>[data-slot]:not(:has(~[data-slot]))]:rounded-r-md! [&>[data-slot]~[data-slot]]:rounded-l-none [&>[data-slot]~[data-slot]]:border-l-0 [&>[data-slot]]:rounded-r-none',
+          "[&>[data-slot]:not(:has(~[data-slot]))]:rounded-r-md! [&>[data-slot]~[data-slot]]:rounded-l-none [&>[data-slot]~[data-slot]]:border-l-0 [&>[data-slot]]:rounded-r-none",
         vertical:
-          '[&>[data-slot]:not(:has(~[data-slot]))]:rounded-b-md! flex-col [&>[data-slot]~[data-slot]]:rounded-t-none [&>[data-slot]~[data-slot]]:border-t-0 [&>[data-slot]]:rounded-b-none',
+          "[&>[data-slot]:not(:has(~[data-slot]))]:rounded-b-md! flex-col [&>[data-slot]~[data-slot]]:rounded-t-none [&>[data-slot]~[data-slot]]:border-t-0 [&>[data-slot]]:rounded-b-none",
       },
     },
     defaultVariants: {
-      orientation: 'horizontal',
+      orientation: "horizontal",
     },
   },
 );
@@ -25,12 +25,13 @@ const buttonGroupTextVariants = cva(
   {
     variants: {
       variant: {
-        default: 'bg-muted',
-        display: 'bg-background border-y border-x-0 min-w-[60px] justify-center tabular-nums',
+        default: "bg-muted",
+        display:
+          "bg-background border-y border-x-0 min-w-[60px] justify-center tabular-nums",
       },
     },
     defaultVariants: {
-      variant: 'default',
+      variant: "default",
     },
   },
 );
@@ -38,7 +39,8 @@ const buttonGroupTextVariants = cva(
 function ButtonGroup({
   orientation,
   ...props
-}: Omit<React.ComponentProps<'div'>, 'className'> & VariantProps<typeof buttonGroupVariants>) {
+}: Omit<React.ComponentProps<"div">, "className"> &
+  VariantProps<typeof buttonGroupVariants>) {
   return (
     <div
       role="group"
@@ -54,11 +56,11 @@ function ButtonGroupText({
   variant,
   render,
   ...props
-}: Omit<useRender.ComponentProps<'div'>, 'className'> &
+}: Omit<useRender.ComponentProps<"div">, "className"> &
   VariantProps<typeof buttonGroupTextVariants>) {
   return useRender({
-    defaultTagName: 'div',
-    props: mergeProps<'div'>(
+    defaultTagName: "div",
+    props: mergeProps<"div">(
       {
         className: buttonGroupTextVariants({ variant }),
       },
@@ -66,16 +68,16 @@ function ButtonGroupText({
     ),
     render,
     state: {
-      slot: 'button-group-text',
+      slot: "button-group-text",
       variant,
     },
   });
 }
 
 function ButtonGroupSeparator({
-  orientation = 'vertical',
+  orientation = "vertical",
   ...props
-}: Omit<SeparatorPrimitive.Props, 'className'>) {
+}: Omit<SeparatorPrimitive.Props, "className">) {
   return (
     <SeparatorPrimitive
       data-slot="button-group-separator"
@@ -86,4 +88,9 @@ function ButtonGroupSeparator({
   );
 }
 
-export { ButtonGroup, ButtonGroupSeparator, ButtonGroupText, buttonGroupVariants };
+export {
+  ButtonGroup,
+  ButtonGroupSeparator,
+  ButtonGroupText,
+  buttonGroupVariants,
+};

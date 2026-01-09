@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import {
   Badge,
@@ -13,15 +13,17 @@ import {
   Label,
   Stack,
   Text,
-} from '@oppulence/design-system';
-import { KeyIcon, ShieldCheckIcon, SmartphoneIcon } from 'lucide-react';
+} from "@oppulence/design-system";
+import { KeyIcon, ShieldCheckIcon, SmartphoneIcon } from "lucide-react";
 
 export default function SettingsSecurityPage() {
   return (
     <Stack gap="6">
       <Stack gap="1">
         <Heading level="1">Security</Heading>
-        <Text variant="muted">Manage your security settings and preferences.</Text>
+        <Text variant="muted">
+          Manage your security settings and preferences.
+        </Text>
       </Stack>
 
       <Card>
@@ -36,7 +38,10 @@ export default function SettingsSecurityPage() {
           <div className="flex items-center gap-4">
             <div className="flex-1">
               <div className="h-3 bg-muted rounded-full overflow-hidden">
-                <div className="h-full bg-green-500 rounded-full" style={{ width: '85%' }} />
+                <div
+                  className="h-full bg-green-500 rounded-full"
+                  style={{ width: "85%" }}
+                />
               </div>
             </div>
             <Badge variant="default">85%</Badge>
@@ -47,7 +52,9 @@ export default function SettingsSecurityPage() {
       <Card>
         <CardHeader>
           <CardTitle>Change Password</CardTitle>
-          <CardDescription>Update your password to keep your account secure.</CardDescription>
+          <CardDescription>
+            Update your password to keep your account secure.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <Stack gap="4">
@@ -73,7 +80,9 @@ export default function SettingsSecurityPage() {
       <Card>
         <CardHeader>
           <CardTitle>Two-Factor Authentication</CardTitle>
-          <CardDescription>Add an extra layer of security to your account.</CardDescription>
+          <CardDescription>
+            Add an extra layer of security to your account.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <Stack gap="4">

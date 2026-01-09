@@ -1,47 +1,47 @@
-import { cva, type VariantProps } from 'class-variance-authority';
-import * as React from 'react';
+import { cva, type VariantProps } from "class-variance-authority";
+import * as React from "react";
 
 const cardVariants = cva(
-  'bg-card text-card-foreground border border-border/40 shadow-[0_1px_3px_0_rgb(0_0_0/0.06)] gap-4 overflow-hidden rounded-xl py-4 text-sm has-data-[slot=card-footer]:pb-0 has-[>img:first-child]:pt-0 data-[size=sm]:gap-3 data-[size=sm]:py-3 data-[size=sm]:has-data-[slot=card-footer]:pb-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl group/card flex flex-col',
+  "bg-card text-card-foreground border border-border/40 shadow-[0_1px_3px_0_rgb(0_0_0/0.06)] gap-4 overflow-hidden rounded-xl py-4 text-sm has-data-[slot=card-footer]:pb-0 has-[>img:first-child]:pt-0 data-[size=sm]:gap-3 data-[size=sm]:py-3 data-[size=sm]:has-data-[slot=card-footer]:pb-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl group/card flex flex-col",
   {
     variants: {
       width: {
-        auto: '', // shrink to content (default behavior)
-        full: 'w-full', // fill parent container
-        sm: 'w-sm', // 24rem (384px)
-        md: 'w-md', // 28rem (448px)
-        lg: 'w-lg', // 32rem (512px)
-        xl: 'w-xl', // 36rem (576px)
-        '2xl': 'w-2xl', // 42rem (672px)
-        '3xl': 'w-3xl', // 48rem (768px)
+        auto: "", // shrink to content (default behavior)
+        full: "w-full", // fill parent container
+        sm: "w-sm", // 24rem (384px)
+        md: "w-md", // 28rem (448px)
+        lg: "w-lg", // 32rem (512px)
+        xl: "w-xl", // 36rem (576px)
+        "2xl": "w-2xl", // 42rem (672px)
+        "3xl": "w-3xl", // 48rem (768px)
       },
       maxWidth: {
-        sm: 'max-w-sm',
-        md: 'max-w-md',
-        lg: 'max-w-lg',
-        xl: 'max-w-xl',
-        '2xl': 'max-w-2xl',
-        '3xl': 'max-w-3xl',
-        full: 'max-w-full',
+        sm: "max-w-sm",
+        md: "max-w-md",
+        lg: "max-w-lg",
+        xl: "max-w-xl",
+        "2xl": "max-w-2xl",
+        "3xl": "max-w-3xl",
+        full: "max-w-full",
       },
       spacing: {
-        default: '',
-        tight: 'gap-3',
-        relaxed: 'gap-6',
+        default: "",
+        tight: "gap-3",
+        relaxed: "gap-6",
       },
     },
     defaultVariants: {
-      width: 'auto',
-      spacing: 'default',
+      width: "auto",
+      spacing: "default",
     },
   },
 );
 
 interface CardProps
   extends
-    Omit<React.ComponentProps<'div'>, 'className' | 'title'>,
+    Omit<React.ComponentProps<"div">, "className" | "title">,
     VariantProps<typeof cardVariants> {
-  size?: 'default' | 'sm';
+  size?: "default" | "sm";
   /** Card title - renders in CardHeader */
   title?: React.ReactNode;
   /** Card description - renders below title in CardHeader */
@@ -53,7 +53,7 @@ interface CardProps
 }
 
 function Card({
-  size = 'default',
+  size = "default",
   width,
   maxWidth,
   title,
@@ -70,16 +70,21 @@ function Card({
     if (React.isValidElement(child)) {
       const props = child.props as Record<string, unknown>;
       return (
-        props['data-slot'] === 'card-header' ||
-        props['data-slot'] === 'card-content' ||
-        props['data-slot'] === 'card-footer'
+        props["data-slot"] === "card-header" ||
+        props["data-slot"] === "card-content" ||
+        props["data-slot"] === "card-footer"
       );
     }
     return false;
   });
 
   return (
-    <div data-slot="card" data-size={size} className={cardVariants({ width, maxWidth })} {...props}>
+    <div
+      data-slot="card"
+      data-size={size}
+      className={cardVariants({ width, maxWidth })}
+      {...props}
+    >
       {hasHeader && (
         <CardHeader>
           {title && <CardTitle>{title}</CardTitle>}
@@ -87,13 +92,17 @@ function Card({
           {headerAction && <CardAction>{headerAction}</CardAction>}
         </CardHeader>
       )}
-      {hasCompoundChildren ? children : children && <CardContent>{children}</CardContent>}
+      {hasCompoundChildren
+        ? children
+        : children && <CardContent>{children}</CardContent>}
       {footer && <CardFooter>{footer}</CardFooter>}
     </div>
   );
 }
 
-function CardHeader({ ...props }: Omit<React.ComponentProps<'div'>, 'className'>) {
+function CardHeader({
+  ...props
+}: Omit<React.ComponentProps<"div">, "className">) {
   return (
     <div
       data-slot="card-header"
@@ -103,7 +112,9 @@ function CardHeader({ ...props }: Omit<React.ComponentProps<'div'>, 'className'>
   );
 }
 
-function CardTitle({ ...props }: Omit<React.ComponentProps<'div'>, 'className'>) {
+function CardTitle({
+  ...props
+}: Omit<React.ComponentProps<"div">, "className">) {
   return (
     <div
       data-slot="card-title"
@@ -113,11 +124,21 @@ function CardTitle({ ...props }: Omit<React.ComponentProps<'div'>, 'className'>)
   );
 }
 
-function CardDescription({ ...props }: Omit<React.ComponentProps<'div'>, 'className'>) {
-  return <div data-slot="card-description" className="text-muted-foreground text-sm" {...props} />;
+function CardDescription({
+  ...props
+}: Omit<React.ComponentProps<"div">, "className">) {
+  return (
+    <div
+      data-slot="card-description"
+      className="text-muted-foreground text-sm"
+      {...props}
+    />
+  );
 }
 
-function CardAction({ ...props }: Omit<React.ComponentProps<'div'>, 'className'>) {
+function CardAction({
+  ...props
+}: Omit<React.ComponentProps<"div">, "className">) {
   return (
     <div
       data-slot="card-action"
@@ -127,13 +148,21 @@ function CardAction({ ...props }: Omit<React.ComponentProps<'div'>, 'className'>
   );
 }
 
-function CardContent({ ...props }: Omit<React.ComponentProps<'div'>, 'className'>) {
+function CardContent({
+  ...props
+}: Omit<React.ComponentProps<"div">, "className">) {
   return (
-    <div data-slot="card-content" className="px-4 group-data-[size=sm]/card:px-3" {...props} />
+    <div
+      data-slot="card-content"
+      className="px-4 group-data-[size=sm]/card:px-3"
+      {...props}
+    />
   );
 }
 
-function CardFooter({ ...props }: Omit<React.ComponentProps<'div'>, 'className'>) {
+function CardFooter({
+  ...props
+}: Omit<React.ComponentProps<"div">, "className">) {
   return (
     <div
       data-slot="card-footer"

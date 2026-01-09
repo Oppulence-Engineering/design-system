@@ -1,14 +1,20 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Badge, Button, Heading, PageHeader, Stack } from '@oppulence/design-system';
-import { Download, Plus, Settings } from 'lucide-react';
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import {
+  Badge,
+  Button,
+  Heading,
+  PageHeader,
+  Stack,
+} from "@oppulence/design-system";
+import { Download, Plus, Settings } from "lucide-react";
 
 const meta = {
-  title: 'Pages/PageHeader',
+  title: "Pages/PageHeader",
   component: PageHeader,
   parameters: {
-    layout: 'padded',
+    layout: "padded",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
 } satisfies Meta<typeof PageHeader>;
 
 export default meta;
@@ -16,23 +22,23 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
-    title: 'Dashboard',
-    description: 'Overview of your account and recent activity.',
+    title: "Dashboard",
+    description: "Overview of your account and recent activity.",
   },
 };
 
 export const WithActions: Story = {
   args: {
-    title: 'Projects',
-    description: 'Manage your projects and team collaborations.',
+    title: "Projects",
+    description: "Manage your projects and team collaborations.",
     actions: <Button iconLeft={<Plus />}>New Project</Button>,
   },
 };
 
 export const WithMultipleActions: Story = {
   args: {
-    title: 'Reports',
-    description: 'Generate and download reports for your data.',
+    title: "Reports",
+    description: "Generate and download reports for your data.",
     actions: (
       <Stack direction="row" gap="2">
         <Button variant="outline" iconLeft={<Download />}>
@@ -46,9 +52,9 @@ export const WithMultipleActions: Story = {
 
 export const WithMeta: Story = {
   args: {
-    title: 'User Management',
-    description: 'View and manage all users in your organization.',
-    meta: 'Last updated 5 minutes ago',
+    title: "User Management",
+    description: "View and manage all users in your organization.",
+    meta: "Last updated 5 minutes ago",
     actions: (
       <Stack direction="row" gap="2">
         <Button variant="outline" size="icon">
@@ -62,9 +68,9 @@ export const WithMeta: Story = {
 
 export const ProjectPage: Story = {
   args: {
-    title: 'Project Alpha',
-    description: 'A comprehensive design system for modern web applications.',
-    meta: 'Created on Jan 15, 2024 • 12 team members',
+    title: "Project Alpha",
+    description: "A comprehensive design system for modern web applications.",
+    meta: "Created on Jan 15, 2024 • 12 team members",
     actions: (
       <Stack direction="row" gap="2">
         <Button variant="outline">Share</Button>
@@ -77,8 +83,8 @@ export const ProjectPage: Story = {
 
 export const WithBadge: Story = {
   args: {
-    title: 'Project Settings',
-    description: 'Manage project configuration and team access.',
+    title: "Project Settings",
+    description: "Manage project configuration and team access.",
   },
   render: (args) => (
     <div>

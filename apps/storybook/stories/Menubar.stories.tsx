@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import {
   Menubar,
   MenubarContent,
@@ -13,15 +13,15 @@ import {
   MenubarSub,
   MenubarSubContent,
   MenubarSubTrigger,
-} from '@oppulence/design-system';
+} from "@oppulence/design-system";
 
 const meta = {
-  title: 'Organisms/Menubar',
+  title: "Organisms/Menubar",
   component: Menubar,
   parameters: {
-    layout: 'centered',
+    layout: "centered",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
 } satisfies Meta<typeof Menubar>;
 
 export default meta;
@@ -118,4 +118,3 @@ export const Default: Story = {
     </Menubar>
   ),
 };
-

@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import {
   Card,
@@ -10,7 +10,7 @@ import {
   Stack,
   Switch,
   Text,
-} from '@oppulence/design-system';
+} from "@oppulence/design-system";
 
 export default function SettingsNotificationsPage() {
   return (
@@ -23,7 +23,9 @@ export default function SettingsNotificationsPage() {
       <Card>
         <CardHeader>
           <CardTitle>Email Notifications</CardTitle>
-          <CardDescription>Choose which emails you want to receive.</CardDescription>
+          <CardDescription>
+            Choose which emails you want to receive.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <Stack gap="6">
@@ -70,7 +72,9 @@ export default function SettingsNotificationsPage() {
       <Card>
         <CardHeader>
           <CardTitle>Push Notifications</CardTitle>
-          <CardDescription>Configure push notification settings.</CardDescription>
+          <CardDescription>
+            Configure push notification settings.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <Stack gap="6">

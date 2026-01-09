@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import {
   Button,
   Card,
@@ -7,16 +7,16 @@ import {
   CollapsibleTrigger,
   Stack,
   Text,
-} from '@oppulence/design-system';
-import { ChevronsUpDown } from 'lucide-react';
+} from "@oppulence/design-system";
+import { ChevronsUpDown } from "lucide-react";
 
 const meta = {
-  title: 'Molecules/Collapsible',
+  title: "Molecules/Collapsible",
   component: Collapsible,
   parameters: {
-    layout: 'centered',
+    layout: "centered",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
 } satisfies Meta<typeof Collapsible>;
 
 export default meta;
@@ -28,7 +28,9 @@ export const Default: Story = {
       <Collapsible>
         <Stack direction="row" align="center" justify="between" gap="4">
           <Text weight="semibold">@peduarte starred 3 repositories</Text>
-          <CollapsibleTrigger render={<Button variant="ghost" size="icon-sm" />}>
+          <CollapsibleTrigger
+            render={<Button variant="ghost" size="icon-sm" />}
+          >
             <ChevronsUpDown className="h-4 w-4" />
             <span className="sr-only">Toggle</span>
           </CollapsibleTrigger>
@@ -65,7 +67,9 @@ export const DefaultOpen: Story = {
       <Collapsible defaultOpen>
         <Stack direction="row" align="center" justify="between" gap="4">
           <Text weight="semibold">Files</Text>
-          <CollapsibleTrigger render={<Button variant="ghost" size="icon-sm" />}>
+          <CollapsibleTrigger
+            render={<Button variant="ghost" size="icon-sm" />}
+          >
             <ChevronsUpDown className="h-4 w-4" />
           </CollapsibleTrigger>
         </Stack>

@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import {
   Button,
   Empty,
@@ -7,16 +7,16 @@ import {
   EmptyMedia,
   EmptyTitle,
   Stack,
-} from '@oppulence/design-system';
-import { FileX, Inbox, Search, Users } from 'lucide-react';
+} from "@oppulence/design-system";
+import { FileX, Inbox, Search, Users } from "lucide-react";
 
 const meta = {
-  title: 'Molecules/Empty',
+  title: "Molecules/Empty",
   component: Empty,
   parameters: {
-    layout: 'centered',
+    layout: "centered",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
 } satisfies Meta<typeof Empty>;
 
 export default meta;
@@ -44,7 +44,9 @@ export const WithAction: Story = {
           <FileX />
         </EmptyMedia>
         <EmptyTitle>No documents</EmptyTitle>
-        <EmptyDescription>Get started by creating a new document.</EmptyDescription>
+        <EmptyDescription>
+          Get started by creating a new document.
+        </EmptyDescription>
       </EmptyHeader>
       <Button>Create Document</Button>
     </Empty>
@@ -76,7 +78,9 @@ export const NoTeamMembers: Story = {
           <Users />
         </EmptyMedia>
         <EmptyTitle>No team members</EmptyTitle>
-        <EmptyDescription>Invite people to collaborate on this project.</EmptyDescription>
+        <EmptyDescription>
+          Invite people to collaborate on this project.
+        </EmptyDescription>
       </EmptyHeader>
       <Stack direction="row" gap="2">
         <Button>Invite Members</Button>

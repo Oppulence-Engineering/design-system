@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import * as React from 'react';
+import * as React from "react";
 
 interface TemplateProps {
   children: React.ReactNode;
@@ -21,7 +21,7 @@ export default function Template({ children }: TemplateProps) {
     <div
       style={{
         opacity,
-        transition: 'opacity 400ms ease-in-out',
+        transition: "opacity 400ms ease-in-out",
       }}
     >
       {children}

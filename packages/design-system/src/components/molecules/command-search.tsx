@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import * as React from 'react';
-import { SearchIcon } from 'lucide-react';
+import * as React from "react";
+import { SearchIcon } from "lucide-react";
 import {
   Command,
   CommandDialog,
@@ -11,8 +11,8 @@ import {
   CommandItem,
   CommandList,
   CommandShortcut,
-} from '../organisms/command';
-import { Kbd } from '../atoms/kbd';
+} from "../organisms/command";
+import { Kbd } from "../atoms/kbd";
 
 // ============ TYPES ============
 
@@ -49,21 +49,21 @@ export interface CommandSearchProps {
   /** Whether to show the trigger input */
   showTrigger?: boolean;
   /** Width of the trigger input */
-  triggerWidth?: 'sm' | 'md' | 'lg' | 'full';
+  triggerWidth?: "sm" | "md" | "lg" | "full";
 }
 
 // ============ COMPONENT ============
 
 function CommandSearch({
-  placeholder = 'Search...',
-  emptyText = 'No results found.',
+  placeholder = "Search...",
+  emptyText = "No results found.",
   groups = [],
   items = [],
   onSelect,
   open: openProp,
   onOpenChange,
   showTrigger = true,
-  triggerWidth = 'md',
+  triggerWidth = "md",
 }: CommandSearchProps) {
   const [_open, _setOpen] = React.useState(false);
   const open = openProp ?? _open;
@@ -72,14 +72,14 @@ function CommandSearch({
   // Listen for Cmd+K / Ctrl+K
   React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
+      if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
         setOpen(!open);
       }
     };
 
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
   }, [open, setOpen]);
 
   const handleSelect = (item: CommandSearchItem) => {
@@ -89,16 +89,17 @@ function CommandSearch({
   };
 
   const widthClasses = {
-    sm: 'w-48 md:w-56',
-    md: 'w-56 md:w-72',
-    lg: 'w-72 md:w-96',
-    full: 'w-full max-w-md',
+    sm: "w-48 md:w-56",
+    md: "w-56 md:w-72",
+    lg: "w-72 md:w-96",
+    full: "w-full max-w-md",
   };
 
   // Combine flat items into a default group if provided
-  const allGroups = items.length > 0
-    ? [{ id: 'default', label: '', items }, ...groups]
-    : groups;
+  const allGroups =
+    items.length > 0
+      ? [{ id: "default", label: "", items }, ...groups]
+      : groups;
 
   return (
     <>

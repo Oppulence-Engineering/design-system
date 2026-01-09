@@ -1,11 +1,13 @@
-'use client';
+"use client";
 
-import { cva, type VariantProps } from 'class-variance-authority';
-import { useMemo } from 'react';
+import { cva, type VariantProps } from "class-variance-authority";
+import { useMemo } from "react";
 
-import { Separator as SeparatorPrimitive } from '@base-ui/react/separator';
+import { Separator as SeparatorPrimitive } from "@base-ui/react/separator";
 
-function FieldSet({ ...props }: Omit<React.ComponentProps<'fieldset'>, 'className'>) {
+function FieldSet({
+  ...props
+}: Omit<React.ComponentProps<"fieldset">, "className">) {
   return (
     <fieldset
       data-slot="field-set"
@@ -16,9 +18,11 @@ function FieldSet({ ...props }: Omit<React.ComponentProps<'fieldset'>, 'classNam
 }
 
 function FieldLegend({
-  variant = 'legend',
+  variant = "legend",
   ...props
-}: Omit<React.ComponentProps<'legend'>, 'className'> & { variant?: 'legend' | 'label' }) {
+}: Omit<React.ComponentProps<"legend">, "className"> & {
+  variant?: "legend" | "label";
+}) {
   return (
     <legend
       data-slot="field-legend"
@@ -29,7 +33,9 @@ function FieldLegend({
   );
 }
 
-function FieldGroup({ ...props }: Omit<React.ComponentProps<'div'>, 'className'>) {
+function FieldGroup({
+  ...props
+}: Omit<React.ComponentProps<"div">, "className">) {
   return (
     <div
       data-slot="field-group"
@@ -39,25 +45,29 @@ function FieldGroup({ ...props }: Omit<React.ComponentProps<'div'>, 'className'>
   );
 }
 
-const fieldVariants = cva('data-[invalid=true]:text-destructive gap-2 group/field flex w-full', {
-  variants: {
-    orientation: {
-      vertical: 'flex-col [&>*]:w-full [&>.sr-only]:w-auto',
-      horizontal:
-        'flex-row items-center [&>[data-slot=field-label]]:flex-auto has-[>[data-slot=field-content]]:items-start has-[>[data-slot=field-content]]:[&>[role=checkbox],[role=radio]]:mt-px',
-      responsive:
-        'flex-col [&>*]:w-full [&>.sr-only]:w-auto @md/field-group:flex-row @md/field-group:items-center @md/field-group:[&>*]:w-auto @md/field-group:[&>[data-slot=field-label]]:flex-auto @md/field-group:has-[>[data-slot=field-content]]:items-start @md/field-group:has-[>[data-slot=field-content]]:[&>[role=checkbox],[role=radio]]:mt-px',
+const fieldVariants = cva(
+  "data-[invalid=true]:text-destructive gap-2 group/field flex w-full",
+  {
+    variants: {
+      orientation: {
+        vertical: "flex-col [&>*]:w-full [&>.sr-only]:w-auto",
+        horizontal:
+          "flex-row items-center [&>[data-slot=field-label]]:flex-auto has-[>[data-slot=field-content]]:items-start has-[>[data-slot=field-content]]:[&>[role=checkbox],[role=radio]]:mt-px",
+        responsive:
+          "flex-col [&>*]:w-full [&>.sr-only]:w-auto @md/field-group:flex-row @md/field-group:items-center @md/field-group:[&>*]:w-auto @md/field-group:[&>[data-slot=field-label]]:flex-auto @md/field-group:has-[>[data-slot=field-content]]:items-start @md/field-group:has-[>[data-slot=field-content]]:[&>[role=checkbox],[role=radio]]:mt-px",
+      },
+    },
+    defaultVariants: {
+      orientation: "vertical",
     },
   },
-  defaultVariants: {
-    orientation: 'vertical',
-  },
-});
+);
 
 function Field({
-  orientation = 'vertical',
+  orientation = "vertical",
   ...props
-}: Omit<React.ComponentProps<'div'>, 'className'> & VariantProps<typeof fieldVariants>) {
+}: Omit<React.ComponentProps<"div">, "className"> &
+  VariantProps<typeof fieldVariants>) {
   return (
     <div
       role="group"
@@ -69,7 +79,9 @@ function Field({
   );
 }
 
-function FieldContent({ ...props }: Omit<React.ComponentProps<'div'>, 'className'>) {
+function FieldContent({
+  ...props
+}: Omit<React.ComponentProps<"div">, "className">) {
   return (
     <div
       data-slot="field-content"
@@ -79,7 +91,9 @@ function FieldContent({ ...props }: Omit<React.ComponentProps<'div'>, 'className
   );
 }
 
-function FieldLabel({ ...props }: Omit<React.ComponentProps<'label'>, 'className'>) {
+function FieldLabel({
+  ...props
+}: Omit<React.ComponentProps<"label">, "className">) {
   return (
     <label
       data-slot="field-label"
@@ -89,7 +103,9 @@ function FieldLabel({ ...props }: Omit<React.ComponentProps<'label'>, 'className
   );
 }
 
-function FieldTitle({ ...props }: Omit<React.ComponentProps<'div'>, 'className'>) {
+function FieldTitle({
+  ...props
+}: Omit<React.ComponentProps<"div">, "className">) {
   return (
     <div
       data-slot="field-label"
@@ -99,7 +115,9 @@ function FieldTitle({ ...props }: Omit<React.ComponentProps<'div'>, 'className'>
   );
 }
 
-function FieldDescription({ ...props }: Omit<React.ComponentProps<'p'>, 'className'>) {
+function FieldDescription({
+  ...props
+}: Omit<React.ComponentProps<"p">, "className">) {
   return (
     <p
       data-slot="field-description"
@@ -112,7 +130,7 @@ function FieldDescription({ ...props }: Omit<React.ComponentProps<'p'>, 'classNa
 function FieldSeparator({
   children,
   ...props
-}: Omit<React.ComponentProps<'div'>, 'className'> & {
+}: Omit<React.ComponentProps<"div">, "className"> & {
   children?: React.ReactNode;
 }) {
   return (
@@ -139,7 +157,7 @@ function FieldError({
   children,
   errors,
   ...props
-}: Omit<React.ComponentProps<'div'>, 'className'> & {
+}: Omit<React.ComponentProps<"div">, "className"> & {
   errors?: Array<{ message?: string } | undefined>;
 }) {
   const content = useMemo(() => {
@@ -151,7 +169,9 @@ function FieldError({
       return null;
     }
 
-    const uniqueErrors = [...new Map(errors.map((error) => [error?.message, error])).values()];
+    const uniqueErrors = [
+      ...new Map(errors.map((error) => [error?.message, error])).values(),
+    ];
 
     if (uniqueErrors?.length == 1) {
       return uniqueErrors[0]?.message;
@@ -159,7 +179,10 @@ function FieldError({
 
     return (
       <ul className="ml-4 flex list-disc flex-col gap-1">
-        {uniqueErrors.map((error, index) => error?.message && <li key={index}>{error.message}</li>)}
+        {uniqueErrors.map(
+          (error, index) =>
+            error?.message && <li key={index}>{error.message}</li>,
+        )}
       </ul>
     );
   }, [children, errors]);

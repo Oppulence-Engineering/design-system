@@ -1,9 +1,11 @@
-import { Radio as RadioPrimitive } from '@base-ui/react/radio';
-import { RadioGroup as RadioGroupPrimitive } from '@base-ui/react/radio-group';
+import { Radio as RadioPrimitive } from "@base-ui/react/radio";
+import { RadioGroup as RadioGroupPrimitive } from "@base-ui/react/radio-group";
 
-import { CircleIcon } from 'lucide-react';
+import { CircleIcon } from "lucide-react";
 
-function RadioGroup({ ...props }: Omit<RadioGroupPrimitive.Props, 'className'>) {
+function RadioGroup({
+  ...props
+}: Omit<RadioGroupPrimitive.Props, "className">) {
   return (
     <RadioGroupPrimitive
       data-slot="radio-group"
@@ -13,7 +15,9 @@ function RadioGroup({ ...props }: Omit<RadioGroupPrimitive.Props, 'className'>) 
   );
 }
 
-function RadioGroupItem({ ...props }: Omit<RadioPrimitive.Root.Props, 'className'>) {
+function RadioGroupItem({
+  ...props
+}: Omit<RadioPrimitive.Root.Props, "className">) {
   return (
     <RadioPrimitive.Root
       data-slot="radio-group-item"

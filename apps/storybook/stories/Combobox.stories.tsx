@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import {
   Combobox,
   ComboboxContent,
@@ -11,27 +11,27 @@ import {
   ComboboxSeparator,
   Label,
   Stack,
-} from '@oppulence/design-system';
+} from "@oppulence/design-system";
 
 const meta = {
-  title: 'Organisms/Combobox',
+  title: "Organisms/Combobox",
   component: Combobox,
   parameters: {
-    layout: 'centered',
+    layout: "centered",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
 } satisfies Meta<typeof Combobox>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
 const fruits = [
-  { value: 'apple', label: 'Apple' },
-  { value: 'banana', label: 'Banana' },
-  { value: 'orange', label: 'Orange' },
-  { value: 'grape', label: 'Grape' },
-  { value: 'mango', label: 'Mango' },
-  { value: 'strawberry', label: 'Strawberry' },
+  { value: "apple", label: "Apple" },
+  { value: "banana", label: "Banana" },
+  { value: "orange", label: "Orange" },
+  { value: "grape", label: "Grape" },
+  { value: "mango", label: "Mango" },
+  { value: "strawberry", label: "Strawberry" },
 ];
 
 export const Default: Story = {

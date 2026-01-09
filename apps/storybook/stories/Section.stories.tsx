@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import {
   Section,
   SectionHeader,
@@ -13,15 +13,15 @@ import {
   Stack,
   Input,
   Label,
-} from '@oppulence/design-system';
+} from "@oppulence/design-system";
 
 const meta = {
-  title: 'Molecules/Section',
+  title: "Molecules/Section",
   component: Section,
   parameters: {
-    layout: 'padded',
+    layout: "padded",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
 } satisfies Meta<typeof Section>;
 
 export default meta;
@@ -29,7 +29,10 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   render: () => (
-    <Section title="Settings" description="Manage your account settings and preferences.">
+    <Section
+      title="Settings"
+      description="Manage your account settings and preferences."
+    >
       <Card>
         <CardContent>
           <div className="py-4">
@@ -65,10 +68,14 @@ export const Composable: Story = {
       <SectionHeader>
         <div>
           <SectionTitle>Notifications</SectionTitle>
-          <SectionDescription>Configure how you receive notifications.</SectionDescription>
+          <SectionDescription>
+            Configure how you receive notifications.
+          </SectionDescription>
         </div>
         <SectionActions>
-          <Button variant="outline" size="sm">Reset</Button>
+          <Button variant="outline" size="sm">
+            Reset
+          </Button>
           <Button size="sm">Save</Button>
         </SectionActions>
       </SectionHeader>
@@ -103,18 +110,27 @@ export const MultipleSections: Story = {
       <Section
         title="Security"
         description="Manage your security settings."
-        actions={<Button variant="outline" size="sm">Change Password</Button>}
+        actions={
+          <Button variant="outline" size="sm">
+            Change Password
+          </Button>
+        }
       >
         <Card>
           <CardContent>
             <div className="py-4">
-              <Text size="sm" variant="muted">Last password change: 30 days ago</Text>
+              <Text size="sm" variant="muted">
+                Last password change: 30 days ago
+              </Text>
             </div>
           </CardContent>
         </Card>
       </Section>
 
-      <Section title="Danger Zone" description="Irreversible and destructive actions.">
+      <Section
+        title="Danger Zone"
+        description="Irreversible and destructive actions."
+      >
         <div className="border-destructive/50 border rounded-lg">
           <Card>
             <CardContent>

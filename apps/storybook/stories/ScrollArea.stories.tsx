@@ -1,42 +1,42 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
-import { ScrollArea, Separator, Stack } from '@oppulence/design-system';
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import { ScrollArea, Separator, Stack } from "@oppulence/design-system";
 
 const meta = {
-  title: 'Molecules/ScrollArea',
+  title: "Molecules/ScrollArea",
   component: ScrollArea,
   parameters: {
-    layout: 'centered',
+    layout: "centered",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
 } satisfies Meta<typeof ScrollArea>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
 const tags = [
-  'React',
-  'TypeScript',
-  'Tailwind CSS',
-  'Next.js',
-  'Vite',
-  'Node.js',
-  'GraphQL',
-  'Prisma',
-  'PostgreSQL',
-  'MongoDB',
-  'Redis',
-  'Docker',
-  'Kubernetes',
-  'AWS',
-  'Vercel',
-  'GitHub Actions',
-  'Jest',
-  'Cypress',
-  'Storybook',
-  'Figma',
-  'Framer Motion',
-  'Radix UI',
-  'shadcn/ui',
+  "React",
+  "TypeScript",
+  "Tailwind CSS",
+  "Next.js",
+  "Vite",
+  "Node.js",
+  "GraphQL",
+  "Prisma",
+  "PostgreSQL",
+  "MongoDB",
+  "Redis",
+  "Docker",
+  "Kubernetes",
+  "AWS",
+  "Vercel",
+  "GitHub Actions",
+  "Jest",
+  "Cypress",
+  "Storybook",
+  "Figma",
+  "Framer Motion",
+  "Radix UI",
+  "shadcn/ui",
 ];
 
 export const Default: Story = {
@@ -86,22 +86,25 @@ export const LongContent: Story = {
         <div className="p-4 pr-6">
           <h4 className="mb-4 text-lg font-semibold">Terms of Service</h4>
           <p className="text-sm text-muted-foreground mb-4">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam pulvinar risus non risus
-            hendrerit venenatis. Pellentesque sit amet hendrerit risus, sed porttitor quam.
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam
+            pulvinar risus non risus hendrerit venenatis. Pellentesque sit amet
+            hendrerit risus, sed porttitor quam.
           </p>
           <p className="text-sm text-muted-foreground mb-4">
-            Magna exercitation reprehenderit magna aute tempor cupidatat consequat elit dolor
-            adipisicing. Mollit dolor eiusmod sunt ex incididunt cillum quis. Velit duis sit officia
-            eiusmod Lorem aliqua enim laboris do dolor eiusmod.
+            Magna exercitation reprehenderit magna aute tempor cupidatat
+            consequat elit dolor adipisicing. Mollit dolor eiusmod sunt ex
+            incididunt cillum quis. Velit duis sit officia eiusmod Lorem aliqua
+            enim laboris do dolor eiusmod.
           </p>
           <p className="text-sm text-muted-foreground mb-4">
-            Et fugiat ipsum nisi ullamco. Tempor exercitation excepteur cillum et elit exercitation
-            consequat do. Ullamco proident non amet magna elit nisi exercitation enim occaecat do
-            labore culpa quis sit.
+            Et fugiat ipsum nisi ullamco. Tempor exercitation excepteur cillum
+            et elit exercitation consequat do. Ullamco proident non amet magna
+            elit nisi exercitation enim occaecat do labore culpa quis sit.
           </p>
           <p className="text-sm text-muted-foreground">
-            Qui magna veniam cupidatat veniam amet do adipisicing exercitation fugiat labore nostrud
-            mollit. Est ad laboris et quis. Nisi Lorem nulla voluptate aute veniam tempor.
+            Qui magna veniam cupidatat veniam amet do adipisicing exercitation
+            fugiat labore nostrud mollit. Est ad laboris et quis. Nisi Lorem
+            nulla voluptate aute veniam tempor.
           </p>
         </div>
       </ScrollArea>

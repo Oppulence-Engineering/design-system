@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import {
   Field,
   FieldDescription,
@@ -6,15 +6,15 @@ import {
   FieldLabel,
   Input,
   Stack,
-} from '@oppulence/design-system';
+} from "@oppulence/design-system";
 
 const meta = {
-  title: 'Molecules/Field',
+  title: "Molecules/Field",
   component: Field,
   parameters: {
-    layout: 'centered',
+    layout: "centered",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
 } satisfies Meta<typeof Field>;
 
 export default meta;
@@ -37,7 +37,9 @@ export const WithDescription: Story = {
       <Field>
         <FieldLabel htmlFor="username">Username</FieldLabel>
         <Input id="username" placeholder="johndoe" />
-        <FieldDescription>This will be your public display name.</FieldDescription>
+        <FieldDescription>
+          This will be your public display name.
+        </FieldDescription>
       </Field>
     </div>
   ),
@@ -63,7 +65,9 @@ export const Required: Story = {
           Full Name <span className="text-destructive">*</span>
         </FieldLabel>
         <Input id="name" required />
-        <FieldDescription>Enter your legal name as it appears on your ID.</FieldDescription>
+        <FieldDescription>
+          Enter your legal name as it appears on your ID.
+        </FieldDescription>
       </Field>
     </div>
   ),

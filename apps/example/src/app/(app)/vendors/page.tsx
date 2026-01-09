@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import {
   Avatar,
@@ -15,73 +15,78 @@ import {
   PageLayout,
   Stack,
   Text,
-} from '@oppulence/design-system';
-import { ExternalLinkIcon, MoreHorizontalIcon, PlusIcon, ShieldCheckIcon } from 'lucide-react';
+} from "@oppulence/design-system";
+import {
+  ExternalLinkIcon,
+  MoreHorizontalIcon,
+  PlusIcon,
+  ShieldCheckIcon,
+} from "lucide-react";
 
 const vendors = [
   {
     id: 1,
-    name: 'Amazon Web Services',
-    category: 'Cloud Infrastructure',
-    riskLevel: 'low',
-    status: 'approved',
-    lastAssessment: 'Dec 15, 2023',
-    logo: 'https://logo.clearbit.com/aws.amazon.com',
+    name: "Amazon Web Services",
+    category: "Cloud Infrastructure",
+    riskLevel: "low",
+    status: "approved",
+    lastAssessment: "Dec 15, 2023",
+    logo: "https://logo.clearbit.com/aws.amazon.com",
   },
   {
     id: 2,
-    name: 'Google Cloud Platform',
-    category: 'Cloud Infrastructure',
-    riskLevel: 'low',
-    status: 'approved',
-    lastAssessment: 'Dec 10, 2023',
-    logo: 'https://logo.clearbit.com/cloud.google.com',
+    name: "Google Cloud Platform",
+    category: "Cloud Infrastructure",
+    riskLevel: "low",
+    status: "approved",
+    lastAssessment: "Dec 10, 2023",
+    logo: "https://logo.clearbit.com/cloud.google.com",
   },
   {
     id: 3,
-    name: 'Slack',
-    category: 'Communication',
-    riskLevel: 'medium',
-    status: 'approved',
-    lastAssessment: 'Nov 28, 2023',
-    logo: 'https://logo.clearbit.com/slack.com',
+    name: "Slack",
+    category: "Communication",
+    riskLevel: "medium",
+    status: "approved",
+    lastAssessment: "Nov 28, 2023",
+    logo: "https://logo.clearbit.com/slack.com",
   },
   {
     id: 4,
-    name: 'Salesforce',
-    category: 'CRM',
-    riskLevel: 'medium',
-    status: 'pending',
-    lastAssessment: 'Nov 15, 2023',
-    logo: 'https://logo.clearbit.com/salesforce.com',
+    name: "Salesforce",
+    category: "CRM",
+    riskLevel: "medium",
+    status: "pending",
+    lastAssessment: "Nov 15, 2023",
+    logo: "https://logo.clearbit.com/salesforce.com",
   },
   {
     id: 5,
-    name: 'Datadog',
-    category: 'Monitoring',
-    riskLevel: 'low',
-    status: 'approved',
-    lastAssessment: 'Oct 30, 2023',
-    logo: 'https://logo.clearbit.com/datadoghq.com',
+    name: "Datadog",
+    category: "Monitoring",
+    riskLevel: "low",
+    status: "approved",
+    lastAssessment: "Oct 30, 2023",
+    logo: "https://logo.clearbit.com/datadoghq.com",
   },
   {
     id: 6,
-    name: 'Stripe',
-    category: 'Payments',
-    riskLevel: 'high',
-    status: 'review',
-    lastAssessment: 'Oct 15, 2023',
-    logo: 'https://logo.clearbit.com/stripe.com',
+    name: "Stripe",
+    category: "Payments",
+    riskLevel: "high",
+    status: "review",
+    lastAssessment: "Oct 15, 2023",
+    logo: "https://logo.clearbit.com/stripe.com",
   },
 ];
 
 function getRiskBadge(risk: string) {
   switch (risk) {
-    case 'low':
+    case "low":
       return <Badge>Low Risk</Badge>;
-    case 'medium':
+    case "medium":
       return <Badge variant="secondary">Medium Risk</Badge>;
-    case 'high':
+    case "high":
       return <Badge variant="destructive">High Risk</Badge>;
     default:
       return <Badge variant="outline">{risk}</Badge>;
@@ -90,23 +95,35 @@ function getRiskBadge(risk: string) {
 
 function getStatusBadge(status: string) {
   switch (status) {
-    case 'approved':
+    case "approved":
       return (
         <HStack gap="1" align="center">
           <ShieldCheckIcon className="size-4 text-green-600" />
           <Text size="sm">Approved</Text>
         </HStack>
       );
-    case 'pending':
-      return <Text size="sm" variant="muted">Pending Review</Text>;
-    case 'review':
-      return <Text size="sm" variant="muted">Under Review</Text>;
+    case "pending":
+      return (
+        <Text size="sm" variant="muted">
+          Pending Review
+        </Text>
+      );
+    case "review":
+      return (
+        <Text size="sm" variant="muted">
+          Under Review
+        </Text>
+      );
     default:
-      return <Text size="sm" variant="muted">{status}</Text>;
+      return (
+        <Text size="sm" variant="muted">
+          {status}
+        </Text>
+      );
   }
 }
 
-function VendorCard({ vendor }: { vendor: typeof vendors[0] }) {
+function VendorCard({ vendor }: { vendor: (typeof vendors)[0] }) {
   return (
     <Card>
       <CardContent>
@@ -115,11 +132,15 @@ function VendorCard({ vendor }: { vendor: typeof vendors[0] }) {
             <HStack gap="3" align="center">
               <Avatar size="lg">
                 <AvatarImage src={vendor.logo} />
-                <AvatarFallback>{vendor.name.slice(0, 2).toUpperCase()}</AvatarFallback>
+                <AvatarFallback>
+                  {vendor.name.slice(0, 2).toUpperCase()}
+                </AvatarFallback>
               </Avatar>
               <Stack gap="none">
                 <Text weight="semibold">{vendor.name}</Text>
-                <Text size="sm" variant="muted">{vendor.category}</Text>
+                <Text size="sm" variant="muted">
+                  {vendor.category}
+                </Text>
               </Stack>
             </HStack>
             <Button variant="ghost" size="icon-sm">
@@ -133,7 +154,9 @@ function VendorCard({ vendor }: { vendor: typeof vendors[0] }) {
           </HStack>
 
           <HStack justify="between" align="center">
-            <Text size="xs" variant="muted">Last assessment: {vendor.lastAssessment}</Text>
+            <Text size="xs" variant="muted">
+              Last assessment: {vendor.lastAssessment}
+            </Text>
             <Button variant="ghost" size="xs">
               <ExternalLinkIcon className="size-3" />
               View Details

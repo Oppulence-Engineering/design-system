@@ -1,5 +1,5 @@
-import { render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { render, screen } from "@testing-library/react";
+import { describe, expect, it } from "vitest";
 import {
   Card,
   CardHeader,
@@ -7,19 +7,19 @@ import {
   CardDescription,
   CardContent,
   CardFooter,
-} from '@oppulence/design-system';
+} from "@oppulence/design-system";
 
-describe('Card', () => {
-  it('renders card with content', () => {
+describe("Card", () => {
+  it("renders card with content", () => {
     render(
       <Card>
         <CardContent>Card content</CardContent>
-      </Card>
+      </Card>,
     );
-    expect(screen.getByText('Card content')).toBeInTheDocument();
+    expect(screen.getByText("Card content")).toBeInTheDocument();
   });
 
-  it('renders card with all slots', () => {
+  it("renders card with all slots", () => {
     render(
       <Card>
         <CardHeader>
@@ -28,49 +28,49 @@ describe('Card', () => {
         </CardHeader>
         <CardContent>Content</CardContent>
         <CardFooter>Footer</CardFooter>
-      </Card>
+      </Card>,
     );
 
-    expect(screen.getByText('Title')).toBeInTheDocument();
-    expect(screen.getByText('Description')).toBeInTheDocument();
-    expect(screen.getByText('Content')).toBeInTheDocument();
-    expect(screen.getByText('Footer')).toBeInTheDocument();
+    expect(screen.getByText("Title")).toBeInTheDocument();
+    expect(screen.getByText("Description")).toBeInTheDocument();
+    expect(screen.getByText("Content")).toBeInTheDocument();
+    expect(screen.getByText("Footer")).toBeInTheDocument();
   });
 
-  it('renders simple content without explicit CardContent wrapper', () => {
+  it("renders simple content without explicit CardContent wrapper", () => {
     render(<Card>Simple content</Card>);
-    expect(screen.getByText('Simple content')).toBeInTheDocument();
+    expect(screen.getByText("Simple content")).toBeInTheDocument();
   });
 
-  it('applies maxWidth prop', () => {
+  it("applies maxWidth prop", () => {
     const { container } = render(<Card maxWidth="sm">Content</Card>);
     const card = container.firstChild as HTMLElement;
-    expect(card).toHaveClass('max-w-sm');
+    expect(card).toHaveClass("max-w-sm");
   });
 });
 
-describe('CardTitle', () => {
-  it('renders title text', () => {
+describe("CardTitle", () => {
+  it("renders title text", () => {
     render(
       <Card>
         <CardHeader>
           <CardTitle>My Title</CardTitle>
         </CardHeader>
-      </Card>
+      </Card>,
     );
-    expect(screen.getByText('My Title')).toBeInTheDocument();
+    expect(screen.getByText("My Title")).toBeInTheDocument();
   });
 });
 
-describe('CardDescription', () => {
-  it('renders description text', () => {
+describe("CardDescription", () => {
+  it("renders description text", () => {
     render(
       <Card>
         <CardHeader>
           <CardDescription>My description</CardDescription>
         </CardHeader>
-      </Card>
+      </Card>,
     );
-    expect(screen.getByText('My description')).toBeInTheDocument();
+    expect(screen.getByText("My description")).toBeInTheDocument();
   });
 });

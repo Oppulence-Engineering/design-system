@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import {
   InputGroup,
   InputGroupAddon,
@@ -6,16 +6,16 @@ import {
   InputGroupInput,
   Label,
   Stack,
-} from '@oppulence/design-system';
-import { Copy, DollarSign, Mail, Search } from 'lucide-react';
+} from "@oppulence/design-system";
+import { Copy, DollarSign, Mail, Search } from "lucide-react";
 
 const meta = {
-  title: 'Molecules/InputGroup',
+  title: "Molecules/InputGroup",
   component: InputGroup,
   parameters: {
-    layout: 'centered',
+    layout: "centered",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
 } satisfies Meta<typeof InputGroup>;
 
 export default meta;
@@ -87,7 +87,10 @@ export const WithButton: Story = {
   render: () => (
     <div className="w-[350px]">
       <InputGroup>
-        <InputGroupInput defaultValue="https://example.com/share/abc123" readOnly />
+        <InputGroupInput
+          defaultValue="https://example.com/share/abc123"
+          readOnly
+        />
         <InputGroupButton>
           <Copy />
           Copy

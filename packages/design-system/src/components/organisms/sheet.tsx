@@ -1,8 +1,8 @@
-import { Dialog as SheetPrimitive } from '@base-ui/react/dialog';
-import * as React from 'react';
+import { Dialog as SheetPrimitive } from "@base-ui/react/dialog";
+import * as React from "react";
 
-import { XIcon } from 'lucide-react';
-import { Button } from '../atoms/button';
+import { XIcon } from "lucide-react";
+import { Button } from "../atoms/button";
 
 function Sheet({ ...props }: SheetPrimitive.Root.Props) {
   return <SheetPrimitive.Root data-slot="sheet" {...props} />;
@@ -20,7 +20,9 @@ function SheetPortal({ ...props }: SheetPrimitive.Portal.Props) {
   return <SheetPrimitive.Portal data-slot="sheet-portal" {...props} />;
 }
 
-function SheetOverlay({ ...props }: Omit<SheetPrimitive.Backdrop.Props, 'className'>) {
+function SheetOverlay({
+  ...props
+}: Omit<SheetPrimitive.Backdrop.Props, "className">) {
   return (
     <SheetPrimitive.Backdrop
       data-slot="sheet-overlay"
@@ -32,11 +34,11 @@ function SheetOverlay({ ...props }: Omit<SheetPrimitive.Backdrop.Props, 'classNa
 
 function SheetContent({
   children,
-  side = 'right',
+  side = "right",
   showCloseButton = true,
   ...props
-}: Omit<SheetPrimitive.Popup.Props, 'className'> & {
-  side?: 'top' | 'right' | 'bottom' | 'left';
+}: Omit<SheetPrimitive.Popup.Props, "className"> & {
+  side?: "top" | "right" | "bottom" | "left";
   showCloseButton?: boolean;
 }) {
   return (
@@ -64,15 +66,33 @@ function SheetContent({
   );
 }
 
-function SheetHeader({ ...props }: Omit<React.ComponentProps<'div'>, 'className'>) {
-  return <div data-slot="sheet-header" className="gap-0.5 pt-4 flex flex-col" {...props} />;
+function SheetHeader({
+  ...props
+}: Omit<React.ComponentProps<"div">, "className">) {
+  return (
+    <div
+      data-slot="sheet-header"
+      className="gap-0.5 pt-4 flex flex-col"
+      {...props}
+    />
+  );
 }
 
-function SheetFooter({ ...props }: Omit<React.ComponentProps<'div'>, 'className'>) {
-  return <div data-slot="sheet-footer" className="gap-2 pb-4 mt-auto flex flex-col" {...props} />;
+function SheetFooter({
+  ...props
+}: Omit<React.ComponentProps<"div">, "className">) {
+  return (
+    <div
+      data-slot="sheet-footer"
+      className="gap-2 pb-4 mt-auto flex flex-col"
+      {...props}
+    />
+  );
 }
 
-function SheetTitle({ ...props }: Omit<SheetPrimitive.Title.Props, 'className'>) {
+function SheetTitle({
+  ...props
+}: Omit<SheetPrimitive.Title.Props, "className">) {
   return (
     <SheetPrimitive.Title
       data-slot="sheet-title"
@@ -82,7 +102,9 @@ function SheetTitle({ ...props }: Omit<SheetPrimitive.Title.Props, 'className'>)
   );
 }
 
-function SheetDescription({ ...props }: Omit<SheetPrimitive.Description.Props, 'className'>) {
+function SheetDescription({
+  ...props
+}: Omit<SheetPrimitive.Description.Props, "className">) {
   return (
     <SheetPrimitive.Description
       data-slot="sheet-description"

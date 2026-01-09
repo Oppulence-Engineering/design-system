@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import {
   AIChat,
   AIChatBody,
@@ -6,36 +6,36 @@ import {
   AIChatHeader,
   Stack,
   Text,
-} from '@oppulence/design-system';
-import { MessageCircleIcon, SparklesIcon, XIcon } from 'lucide-react';
-import * as React from 'react';
+} from "@oppulence/design-system";
+import { MessageCircleIcon, SparklesIcon, XIcon } from "lucide-react";
+import * as React from "react";
 
 const meta = {
-  title: 'Components/AIChat',
+  title: "Components/AIChat",
   component: AIChat,
   parameters: {
-    layout: 'fullscreen',
+    layout: "fullscreen",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
   argTypes: {
     size: {
-      control: 'select',
-      options: ['sm', 'default', 'lg'],
-      description: 'Size of the trigger button',
+      control: "select",
+      options: ["sm", "default", "lg"],
+      description: "Size of the trigger button",
     },
     variant: {
-      control: 'select',
-      options: ['default', 'secondary'],
-      description: 'Visual variant of the trigger button',
+      control: "select",
+      options: ["default", "secondary"],
+      description: "Visual variant of the trigger button",
     },
     panelSize: {
-      control: 'select',
-      options: ['sm', 'default', 'lg'],
-      description: 'Size of the chat panel',
+      control: "select",
+      options: ["sm", "default", "lg"],
+      description: "Size of the chat panel",
     },
     defaultOpen: {
-      control: 'boolean',
-      description: 'Whether the panel is open by default',
+      control: "boolean",
+      description: "Whether the panel is open by default",
     },
   },
 } satisfies Meta<typeof AIChat>;
@@ -46,7 +46,10 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   render: (args) => (
     <div className="h-[600px] bg-muted p-8 relative">
-      <Text>Click the floating button in the bottom-right corner to open the AI chat.</Text>
+      <Text>
+        Click the floating button in the bottom-right corner to open the AI
+        chat.
+      </Text>
       <AIChat {...args} />
     </div>
   ),
@@ -100,7 +103,9 @@ export const CustomContent: Story = {
             </span>
             <div>
               <div className="font-semibold text-sm">Compliance AI</div>
-              <div className="text-xs text-muted-foreground">Your SOC 2 expert</div>
+              <div className="text-xs text-muted-foreground">
+                Your SOC 2 expert
+              </div>
             </div>
           </div>
         </AIChatHeader>
@@ -179,7 +184,7 @@ export const Controlled: Story = {
             onClick={() => setOpen(!open)}
             className="px-4 py-2 bg-primary text-primary-foreground rounded-md w-fit"
           >
-            {open ? 'Close Chat' : 'Open Chat'}
+            {open ? "Close Chat" : "Open Chat"}
           </button>
         </Stack>
         <AIChat open={open} onOpenChange={setOpen} />

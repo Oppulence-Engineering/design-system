@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import {
   Avatar,
@@ -11,81 +11,81 @@ import {
   Heading,
   Stack,
   Text,
-} from '@oppulence/design-system';
-import { MailIcon, PlusIcon } from 'lucide-react';
+} from "@oppulence/design-system";
+import { MailIcon, PlusIcon } from "lucide-react";
 
 const teamMembers = [
   {
     id: 1,
-    name: 'Sarah Wilson',
-    email: 'sarah@example.com',
-    role: 'Admin',
-    avatar: 'https://i.pravatar.cc/150?img=1',
-    status: 'online',
+    name: "Sarah Wilson",
+    email: "sarah@example.com",
+    role: "Admin",
+    avatar: "https://i.pravatar.cc/150?img=1",
+    status: "online",
   },
   {
     id: 2,
-    name: 'Michael Chen',
-    email: 'michael@example.com',
-    role: 'Developer',
-    avatar: 'https://i.pravatar.cc/150?img=2',
-    status: 'online',
+    name: "Michael Chen",
+    email: "michael@example.com",
+    role: "Developer",
+    avatar: "https://i.pravatar.cc/150?img=2",
+    status: "online",
   },
   {
     id: 3,
-    name: 'Emma Thompson',
-    email: 'emma@example.com',
-    role: 'Designer',
-    avatar: 'https://i.pravatar.cc/150?img=3',
-    status: 'away',
+    name: "Emma Thompson",
+    email: "emma@example.com",
+    role: "Designer",
+    avatar: "https://i.pravatar.cc/150?img=3",
+    status: "away",
   },
   {
     id: 4,
-    name: 'James Rodriguez',
-    email: 'james@example.com',
-    role: 'Developer',
-    avatar: 'https://i.pravatar.cc/150?img=4',
-    status: 'offline',
+    name: "James Rodriguez",
+    email: "james@example.com",
+    role: "Developer",
+    avatar: "https://i.pravatar.cc/150?img=4",
+    status: "offline",
   },
   {
     id: 5,
-    name: 'Lisa Park',
-    email: 'lisa@example.com',
-    role: 'Product Manager',
-    avatar: 'https://i.pravatar.cc/150?img=5',
-    status: 'online',
+    name: "Lisa Park",
+    email: "lisa@example.com",
+    role: "Product Manager",
+    avatar: "https://i.pravatar.cc/150?img=5",
+    status: "online",
   },
   {
     id: 6,
-    name: 'David Kim',
-    email: 'david@example.com',
-    role: 'Developer',
-    avatar: 'https://i.pravatar.cc/150?img=6',
-    status: 'offline',
+    name: "David Kim",
+    email: "david@example.com",
+    role: "Developer",
+    avatar: "https://i.pravatar.cc/150?img=6",
+    status: "offline",
   },
 ];
 
 function getStatusColor(status: string) {
   switch (status) {
-    case 'online':
-      return 'bg-green-500';
-    case 'away':
-      return 'bg-yellow-500';
+    case "online":
+      return "bg-green-500";
+    case "away":
+      return "bg-yellow-500";
     default:
-      return 'bg-gray-400';
+      return "bg-gray-400";
   }
 }
 
 function getRoleBadgeVariant(role: string) {
   switch (role) {
-    case 'Admin':
-      return 'default' as const;
-    case 'Developer':
-      return 'secondary' as const;
-    case 'Designer':
-      return 'outline' as const;
+    case "Admin":
+      return "default" as const;
+    case "Developer":
+      return "secondary" as const;
+    case "Designer":
+      return "outline" as const;
     default:
-      return 'secondary' as const;
+      return "secondary" as const;
   }
 }
 
@@ -113,9 +113,9 @@ export default function TeamPage() {
                     <AvatarImage src={member.avatar} />
                     <AvatarFallback>
                       {member.name
-                        .split(' ')
+                        .split(" ")
                         .map((n) => n[0])
-                        .join('')}
+                        .join("")}
                     </AvatarFallback>
                   </Avatar>
                   <span

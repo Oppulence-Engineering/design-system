@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import {
   Badge,
@@ -11,64 +11,64 @@ import {
   Heading,
   Stack,
   Text,
-} from '@oppulence/design-system';
-import { CalendarIcon, FolderIcon, PlusIcon, UsersIcon } from 'lucide-react';
-import Link from 'next/link';
+} from "@oppulence/design-system";
+import { CalendarIcon, FolderIcon, PlusIcon, UsersIcon } from "lucide-react";
+import Link from "next/link";
 
 const projects = [
   {
-    id: '1',
-    name: 'Website Redesign',
-    description: 'Complete overhaul of the company website with new branding',
-    status: 'In Progress',
-    statusVariant: 'default' as const,
+    id: "1",
+    name: "Website Redesign",
+    description: "Complete overhaul of the company website with new branding",
+    status: "In Progress",
+    statusVariant: "default" as const,
     members: 5,
-    dueDate: 'Feb 15, 2024',
+    dueDate: "Feb 15, 2024",
   },
   {
-    id: '2',
-    name: 'Mobile App v2.0',
-    description: 'Major update to the mobile application with new features',
-    status: 'On Track',
-    statusVariant: 'secondary' as const,
+    id: "2",
+    name: "Mobile App v2.0",
+    description: "Major update to the mobile application with new features",
+    status: "On Track",
+    statusVariant: "secondary" as const,
     members: 8,
-    dueDate: 'Mar 1, 2024',
+    dueDate: "Mar 1, 2024",
   },
   {
-    id: '3',
-    name: 'API Integration',
-    description: 'Integration with third-party payment providers',
-    status: 'At Risk',
-    statusVariant: 'outline' as const,
+    id: "3",
+    name: "API Integration",
+    description: "Integration with third-party payment providers",
+    status: "At Risk",
+    statusVariant: "outline" as const,
     members: 3,
-    dueDate: 'Jan 30, 2024',
+    dueDate: "Jan 30, 2024",
   },
   {
-    id: '4',
-    name: 'Security Audit',
-    description: 'Comprehensive security review and penetration testing',
-    status: 'Completed',
-    statusVariant: 'secondary' as const,
+    id: "4",
+    name: "Security Audit",
+    description: "Comprehensive security review and penetration testing",
+    status: "Completed",
+    statusVariant: "secondary" as const,
     members: 2,
-    dueDate: 'Jan 10, 2024',
+    dueDate: "Jan 10, 2024",
   },
   {
-    id: '5',
-    name: 'Data Migration',
-    description: 'Migrate legacy data to new cloud infrastructure',
-    status: 'Overdue',
-    statusVariant: 'destructive' as const,
+    id: "5",
+    name: "Data Migration",
+    description: "Migrate legacy data to new cloud infrastructure",
+    status: "Overdue",
+    statusVariant: "destructive" as const,
     members: 4,
-    dueDate: 'Jan 5, 2024',
+    dueDate: "Jan 5, 2024",
   },
   {
-    id: '6',
-    name: 'Design System',
-    description: 'Build a comprehensive component library for the team',
-    status: 'In Progress',
-    statusVariant: 'default' as const,
+    id: "6",
+    name: "Design System",
+    description: "Build a comprehensive component library for the team",
+    status: "In Progress",
+    statusVariant: "default" as const,
     members: 3,
-    dueDate: 'Apr 1, 2024',
+    dueDate: "Apr 1, 2024",
   },
 ];
 
@@ -78,7 +78,9 @@ export default function ProjectsPage() {
       <div className="flex items-center justify-between">
         <Stack gap="1">
           <Heading level="1">Projects</Heading>
-          <Text variant="muted">Manage and track all your projects in one place.</Text>
+          <Text variant="muted">
+            Manage and track all your projects in one place.
+          </Text>
         </Stack>
         <Button>
           <PlusIcon />
@@ -100,7 +102,9 @@ export default function ProjectsPage() {
                       <CardTitle>{project.name}</CardTitle>
                     </Stack>
                   </div>
-                  <Badge variant={project.statusVariant}>{project.status}</Badge>
+                  <Badge variant={project.statusVariant}>
+                    {project.status}
+                  </Badge>
                 </div>
                 <CardDescription>{project.description}</CardDescription>
               </CardHeader>

@@ -1,9 +1,15 @@
-import { Button as ButtonPrimitive } from '@base-ui/react/button';
+import { Button as ButtonPrimitive } from "@base-ui/react/button";
 
-import { ChevronLeftIcon, ChevronRightIcon, MoreHorizontalIcon } from 'lucide-react';
-import { buttonVariants } from '../atoms/button';
+import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  MoreHorizontalIcon,
+} from "lucide-react";
+import { buttonVariants } from "../atoms/button";
 
-function Pagination({ ...props }: Omit<React.ComponentProps<'nav'>, 'className'>) {
+function Pagination({
+  ...props
+}: Omit<React.ComponentProps<"nav">, "className">) {
   return (
     <nav
       role="navigation"
@@ -15,28 +21,43 @@ function Pagination({ ...props }: Omit<React.ComponentProps<'nav'>, 'className'>
   );
 }
 
-function PaginationContent({ ...props }: Omit<React.ComponentProps<'ul'>, 'className'>) {
+function PaginationContent({
+  ...props
+}: Omit<React.ComponentProps<"ul">, "className">) {
   return (
-    <ul data-slot="pagination-content" className="gap-1 flex items-center" {...props} />
+    <ul
+      data-slot="pagination-content"
+      className="gap-1 flex items-center"
+      {...props}
+    />
   );
 }
 
-function PaginationItem({ ...props }: Omit<React.ComponentProps<'li'>, 'className'>) {
+function PaginationItem({
+  ...props
+}: Omit<React.ComponentProps<"li">, "className">) {
   return <li data-slot="pagination-item" {...props} />;
 }
 
 type PaginationLinkProps = {
   isActive?: boolean;
-  size?: 'default' | 'icon';
-} & Omit<React.ComponentProps<'a'>, 'className'>;
+  size?: "default" | "icon";
+} & Omit<React.ComponentProps<"a">, "className">;
 
-function PaginationLink({ isActive, size = 'icon', ...props }: PaginationLinkProps) {
+function PaginationLink({
+  isActive,
+  size = "icon",
+  ...props
+}: PaginationLinkProps) {
   return (
     <ButtonPrimitive
-      className={buttonVariants({ variant: isActive ? 'outline' : 'ghost', size })}
+      className={buttonVariants({
+        variant: isActive ? "outline" : "ghost",
+        size,
+      })}
       render={
         <a
-          aria-current={isActive ? 'page' : undefined}
+          aria-current={isActive ? "page" : undefined}
           data-slot="pagination-link"
           data-active={isActive}
           {...props}
@@ -46,11 +67,17 @@ function PaginationLink({ isActive, size = 'icon', ...props }: PaginationLinkPro
   );
 }
 
-function PaginationPrevious({ ...props }: Omit<PaginationLinkProps, 'size'>) {
+function PaginationPrevious({ ...props }: Omit<PaginationLinkProps, "size">) {
   return (
     <ButtonPrimitive
-      className={`${buttonVariants({ variant: 'ghost', size: 'default' })} pl-2`}
-      render={<a aria-label="Go to previous page" data-slot="pagination-link" {...props} />}
+      className={`${buttonVariants({ variant: "ghost", size: "default" })} pl-2`}
+      render={
+        <a
+          aria-label="Go to previous page"
+          data-slot="pagination-link"
+          {...props}
+        />
+      }
     >
       <ChevronLeftIcon data-icon="inline-start" />
       <span className="hidden sm:block">Previous</span>
@@ -58,11 +85,17 @@ function PaginationPrevious({ ...props }: Omit<PaginationLinkProps, 'size'>) {
   );
 }
 
-function PaginationNext({ ...props }: Omit<PaginationLinkProps, 'size'>) {
+function PaginationNext({ ...props }: Omit<PaginationLinkProps, "size">) {
   return (
     <ButtonPrimitive
-      className={`${buttonVariants({ variant: 'ghost', size: 'default' })} pr-2`}
-      render={<a aria-label="Go to next page" data-slot="pagination-link" {...props} />}
+      className={`${buttonVariants({ variant: "ghost", size: "default" })} pr-2`}
+      render={
+        <a
+          aria-label="Go to next page"
+          data-slot="pagination-link"
+          {...props}
+        />
+      }
     >
       <span className="hidden sm:block">Next</span>
       <ChevronRightIcon data-icon="inline-end" />
@@ -70,7 +103,9 @@ function PaginationNext({ ...props }: Omit<PaginationLinkProps, 'size'>) {
   );
 }
 
-function PaginationEllipsis({ ...props }: Omit<React.ComponentProps<'span'>, 'className'>) {
+function PaginationEllipsis({
+  ...props
+}: Omit<React.ComponentProps<"span">, "className">) {
   return (
     <span
       aria-hidden

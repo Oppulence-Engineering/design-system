@@ -1,5 +1,5 @@
-import type { Preview } from '@storybook/react-vite';
-import '../styles/globals.css';
+import type { Preview } from "@storybook/react-vite";
+import "../styles/globals.css";
 
 const preview: Preview = {
   parameters: {
@@ -10,25 +10,27 @@ const preview: Preview = {
       },
     },
     backgrounds: {
-      default: 'light',
+      default: "light",
       values: [
-        { name: 'light', value: '#ffffff' },
-        { name: 'dark', value: '#09090b' },
+        { name: "light", value: "#ffffff" },
+        { name: "dark", value: "#09090b" },
       ],
     },
     options: {
       storySort: {
-        order: ['Atoms', 'Molecules', 'Organisms', 'Layout', 'Pages'],
+        order: ["Atoms", "Molecules", "Organisms", "Layout", "Pages"],
       },
     },
   },
   decorators: [
     (Story, context) => {
-      const isDark = context.globals?.backgrounds?.value === '#09090b';
-      const isFullscreen = context.parameters?.layout === 'fullscreen';
+      const isDark = context.globals?.backgrounds?.value === "#09090b";
+      const isFullscreen = context.parameters?.layout === "fullscreen";
       return (
-        <div className={isDark ? 'dark' : ''}>
-          <div className={`bg-background text-foreground min-h-screen ${isFullscreen ? '' : 'p-6'}`}>
+        <div className={isDark ? "dark" : ""}>
+          <div
+            className={`bg-background text-foreground min-h-screen ${isFullscreen ? "" : "p-6"}`}
+          >
             <Story />
           </div>
         </div>

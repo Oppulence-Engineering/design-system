@@ -1,10 +1,10 @@
-import * as React from 'react';
+import * as React from "react";
 
 function Textarea({
-  size = 'default',
+  size = "default",
   ...props
-}: Omit<React.ComponentProps<'textarea'>, 'className'> & {
-  size?: 'sm' | 'default' | 'lg' | 'full';
+}: Omit<React.ComponentProps<"textarea">, "className"> & {
+  size?: "sm" | "default" | "lg" | "full";
 }) {
   return (
     <textarea

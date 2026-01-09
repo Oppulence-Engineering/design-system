@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import {
   Button,
   DropdownMenu,
@@ -15,7 +15,7 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-} from '@oppulence/design-system';
+} from "@oppulence/design-system";
 import {
   Cloud,
   CreditCard,
@@ -26,15 +26,15 @@ import {
   Plus,
   Settings,
   User,
-} from 'lucide-react';
+} from "lucide-react";
 
 const meta = {
-  title: 'Organisms/DropdownMenu',
+  title: "Organisms/DropdownMenu",
   component: DropdownMenu,
   parameters: {
-    layout: 'centered',
+    layout: "centered",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
 } satisfies Meta<typeof DropdownMenu>;
 
 export default meta;
@@ -43,7 +43,9 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   render: () => (
     <DropdownMenu>
-      <DropdownMenuTrigger render={<Button variant="outline" />}>Open Menu</DropdownMenuTrigger>
+      <DropdownMenuTrigger render={<Button variant="outline" />}>
+        Open Menu
+      </DropdownMenuTrigger>
       <DropdownMenuContent>
         <DropdownMenuGroup>
           <DropdownMenuLabel>My Account</DropdownMenuLabel>
@@ -77,13 +79,19 @@ export const Default: Story = {
 export const WithCheckboxes: Story = {
   render: () => (
     <DropdownMenu>
-      <DropdownMenuTrigger render={<Button variant="outline" />}>View Options</DropdownMenuTrigger>
+      <DropdownMenuTrigger render={<Button variant="outline" />}>
+        View Options
+      </DropdownMenuTrigger>
       <DropdownMenuContent>
         <DropdownMenuGroup>
           <DropdownMenuLabel>Appearance</DropdownMenuLabel>
-          <DropdownMenuCheckboxItem defaultChecked>Show Statusbar</DropdownMenuCheckboxItem>
+          <DropdownMenuCheckboxItem defaultChecked>
+            Show Statusbar
+          </DropdownMenuCheckboxItem>
           <DropdownMenuCheckboxItem>Show Toolbar</DropdownMenuCheckboxItem>
-          <DropdownMenuCheckboxItem defaultChecked>Show Sidebar</DropdownMenuCheckboxItem>
+          <DropdownMenuCheckboxItem defaultChecked>
+            Show Sidebar
+          </DropdownMenuCheckboxItem>
         </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -93,7 +101,9 @@ export const WithCheckboxes: Story = {
 export const WithRadioGroup: Story = {
   render: () => (
     <DropdownMenu>
-      <DropdownMenuTrigger render={<Button variant="outline" />}>Select Theme</DropdownMenuTrigger>
+      <DropdownMenuTrigger render={<Button variant="outline" />}>
+        Select Theme
+      </DropdownMenuTrigger>
       <DropdownMenuContent>
         <DropdownMenuGroup>
           <DropdownMenuLabel>Theme</DropdownMenuLabel>
@@ -111,7 +121,9 @@ export const WithRadioGroup: Story = {
 export const WithSubmenu: Story = {
   render: () => (
     <DropdownMenu>
-      <DropdownMenuTrigger render={<Button variant="outline" />}>Open</DropdownMenuTrigger>
+      <DropdownMenuTrigger render={<Button variant="outline" />}>
+        Open
+      </DropdownMenuTrigger>
       <DropdownMenuContent>
         <DropdownMenuItem>
           <Plus />

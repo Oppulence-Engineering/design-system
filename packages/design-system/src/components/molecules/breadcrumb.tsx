@@ -1,14 +1,19 @@
-import { mergeProps } from '@base-ui/react/merge-props';
-import { useRender } from '@base-ui/react/use-render';
-import * as React from 'react';
+import { mergeProps } from "@base-ui/react/merge-props";
+import { useRender } from "@base-ui/react/use-render";
+import * as React from "react";
 
-import { ArrowRightIcon, ChevronRightIcon, MoreHorizontalIcon, SlashIcon } from 'lucide-react';
+import {
+  ArrowRightIcon,
+  ChevronRightIcon,
+  MoreHorizontalIcon,
+  SlashIcon,
+} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '../organisms/dropdown-menu';
+} from "../organisms/dropdown-menu";
 
 interface BreadcrumbItemData {
   /** The text label for the breadcrumb item */
@@ -23,7 +28,7 @@ interface BreadcrumbItemData {
   props?: Record<string, unknown>;
 }
 
-type BreadcrumbSeparatorType = 'chevron' | 'slash' | 'arrow';
+type BreadcrumbSeparatorType = "chevron" | "slash" | "arrow";
 
 const separatorIcons: Record<BreadcrumbSeparatorType, React.ReactNode> = {
   chevron: <ChevronRightIcon />,
@@ -31,7 +36,10 @@ const separatorIcons: Record<BreadcrumbSeparatorType, React.ReactNode> = {
   arrow: <ArrowRightIcon />,
 };
 
-interface BreadcrumbProps extends Omit<React.ComponentProps<'nav'>, 'children' | 'className'> {
+interface BreadcrumbProps extends Omit<
+  React.ComponentProps<"nav">,
+  "children" | "className"
+> {
   /** Simple API: Array of breadcrumb items */
   items?: BreadcrumbItemData[];
   /** Separator style: 'chevron' (default), 'slash', or 'arrow' */
@@ -45,7 +53,9 @@ interface BreadcrumbProps extends Omit<React.ComponentProps<'nav'>, 'children' |
 }
 
 interface CollapseResult {
-  displayItems: Array<BreadcrumbItemData & { collapsedItems?: BreadcrumbItemData[] }>;
+  displayItems: Array<
+    BreadcrumbItemData & { collapsedItems?: BreadcrumbItemData[] }
+  >;
   hasCollapsed: boolean;
 }
 
@@ -84,14 +94,18 @@ function collapseItems({
   const endItems = items.slice(items.length - after);
 
   return {
-    displayItems: [...startItems, { isEllipsis: true, collapsedItems }, ...endItems],
+    displayItems: [
+      ...startItems,
+      { isEllipsis: true, collapsedItems },
+      ...endItems,
+    ],
     hasCollapsed: true,
   };
 }
 
 function Breadcrumb({
   items,
-  separator = 'chevron',
+  separator = "chevron",
   maxItems = 4,
   itemsBeforeCollapse = 1,
   children,
@@ -113,8 +127,10 @@ function Breadcrumb({
         <BreadcrumbList>
           {displayItems.map((item, index) => {
             const isLast = index === displayItems.length - 1;
-            const isCurrent = item.isCurrent ?? (isLast && !item.href && !item.isEllipsis);
-            const collapsedItems = 'collapsedItems' in item ? item.collapsedItems : undefined;
+            const isCurrent =
+              item.isCurrent ?? (isLast && !item.href && !item.isEllipsis);
+            const collapsedItems =
+              "collapsedItems" in item ? item.collapsedItems : undefined;
 
             return (
               <React.Fragment key={index}>
@@ -122,14 +138,18 @@ function Breadcrumb({
                   {item.isEllipsis ? (
                     <BreadcrumbEllipsisMenu collapsedItems={collapsedItems} />
                   ) : isCurrent ? (
-                    <BreadcrumbPage {...item.props}>{item.label}</BreadcrumbPage>
+                    <BreadcrumbPage {...item.props}>
+                      {item.label}
+                    </BreadcrumbPage>
                   ) : (
                     <BreadcrumbLink href={item.href} {...item.props}>
                       {item.label}
                     </BreadcrumbLink>
                   )}
                 </BreadcrumbItem>
-                {!isLast && <BreadcrumbSeparator>{separatorIcon}</BreadcrumbSeparator>}
+                {!isLast && (
+                  <BreadcrumbSeparator>{separatorIcon}</BreadcrumbSeparator>
+                )}
               </React.Fragment>
             );
           })}
@@ -146,7 +166,9 @@ function Breadcrumb({
   );
 }
 
-function BreadcrumbList({ ...props }: Omit<React.ComponentProps<'ol'>, 'className'>) {
+function BreadcrumbList({
+  ...props
+}: Omit<React.ComponentProps<"ol">, "className">) {
   return (
     <ol
       data-slot="breadcrumb-list"
@@ -156,27 +178,40 @@ function BreadcrumbList({ ...props }: Omit<React.ComponentProps<'ol'>, 'classNam
   );
 }
 
-function BreadcrumbItem({ ...props }: Omit<React.ComponentProps<'li'>, 'className'>) {
-  return <li data-slot="breadcrumb-item" className="gap-1.5 inline-flex items-center" {...props} />;
+function BreadcrumbItem({
+  ...props
+}: Omit<React.ComponentProps<"li">, "className">) {
+  return (
+    <li
+      data-slot="breadcrumb-item"
+      className="gap-1.5 inline-flex items-center"
+      {...props}
+    />
+  );
 }
 
-function BreadcrumbLink({ render, ...props }: Omit<useRender.ComponentProps<'a'>, 'className'>) {
+function BreadcrumbLink({
+  render,
+  ...props
+}: Omit<useRender.ComponentProps<"a">, "className">) {
   return useRender({
-    defaultTagName: 'a',
-    props: mergeProps<'a'>(
+    defaultTagName: "a",
+    props: mergeProps<"a">(
       {
-        className: 'hover:text-foreground transition-colors',
+        className: "hover:text-foreground transition-colors",
       },
       props,
     ),
     render,
     state: {
-      slot: 'breadcrumb-link',
+      slot: "breadcrumb-link",
     },
   });
 }
 
-function BreadcrumbPage({ ...props }: Omit<React.ComponentProps<'span'>, 'className'>) {
+function BreadcrumbPage({
+  ...props
+}: Omit<React.ComponentProps<"span">, "className">) {
   return (
     <span
       data-slot="breadcrumb-page"
@@ -192,7 +227,7 @@ function BreadcrumbPage({ ...props }: Omit<React.ComponentProps<'span'>, 'classN
 function BreadcrumbSeparator({
   children,
   ...props
-}: Omit<React.ComponentProps<'li'>, 'className'>) {
+}: Omit<React.ComponentProps<"li">, "className">) {
   return (
     <li
       data-slot="breadcrumb-separator"
@@ -206,7 +241,9 @@ function BreadcrumbSeparator({
   );
 }
 
-function BreadcrumbEllipsis({ ...props }: Omit<React.ComponentProps<'span'>, 'className'>) {
+function BreadcrumbEllipsis({
+  ...props
+}: Omit<React.ComponentProps<"span">, "className">) {
   return (
     <span
       data-slot="breadcrumb-ellipsis"
@@ -221,19 +258,29 @@ function BreadcrumbEllipsis({ ...props }: Omit<React.ComponentProps<'span'>, 'cl
   );
 }
 
-function BreadcrumbEllipsisMenu({ collapsedItems }: { collapsedItems?: BreadcrumbItemData[] }) {
+function BreadcrumbEllipsisMenu({
+  collapsedItems,
+}: {
+  collapsedItems?: BreadcrumbItemData[];
+}) {
   if (!collapsedItems || collapsedItems.length === 0) {
     return <BreadcrumbEllipsis />;
   }
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger variant="ellipsis" aria-label="Show hidden breadcrumb items">
+      <DropdownMenuTrigger
+        variant="ellipsis"
+        aria-label="Show hidden breadcrumb items"
+      >
         <MoreHorizontalIcon />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start">
         {collapsedItems.map((item, index) => (
-          <DropdownMenuItem key={index} render={item.href ? <a href={item.href} /> : undefined}>
+          <DropdownMenuItem
+            key={index}
+            render={item.href ? <a href={item.href} /> : undefined}
+          >
             {item.label}
           </DropdownMenuItem>
         ))}

@@ -1,21 +1,27 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Card, CardContent, Container, Stack, Text } from '@oppulence/design-system';
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import {
+  Card,
+  CardContent,
+  Container,
+  Stack,
+  Text,
+} from "@oppulence/design-system";
 
 const meta = {
-  title: 'Atoms/Container',
+  title: "Atoms/Container",
   component: Container,
   parameters: {
-    layout: 'fullscreen',
+    layout: "fullscreen",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
   argTypes: {
     size: {
-      control: 'select',
-      options: ['sm', 'md', 'lg', 'xl', '2xl', 'full'],
+      control: "select",
+      options: ["sm", "md", "lg", "xl", "2xl", "full"],
     },
     padding: {
-      control: 'select',
-      options: ['none', 'sm', 'default', 'lg'],
+      control: "select",
+      options: ["none", "sm", "default", "lg"],
     },
   },
 } satisfies Meta<typeof Container>;
@@ -30,7 +36,9 @@ export const Default: Story = {
         <Card>
           <CardContent>
             <div className="py-4">
-              <Text>This content is centered within a Container (default: xl size)</Text>
+              <Text>
+                This content is centered within a Container (default: xl size)
+              </Text>
             </div>
           </CardContent>
         </Card>

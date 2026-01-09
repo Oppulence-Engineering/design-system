@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import { Tabs as TabsPrimitive } from '@base-ui/react/tabs';
-import { cva, type VariantProps } from 'class-variance-authority';
+import { Tabs as TabsPrimitive } from "@base-ui/react/tabs";
+import { cva, type VariantProps } from "class-variance-authority";
 
 function Tabs({
-  orientation = 'horizontal',
+  orientation = "horizontal",
   ...props
-}: Omit<TabsPrimitive.Root.Props, 'className'>) {
+}: Omit<TabsPrimitive.Root.Props, "className">) {
   return (
     <TabsPrimitive.Root
       data-slot="tabs"
@@ -18,25 +18,27 @@ function Tabs({
 }
 
 const tabsListVariants = cva(
-  'rounded-lg p-[3px] group-data-horizontal/tabs:h-8 data-[variant=line]:rounded-none data-[variant=underline]:rounded-none group/tabs-list text-muted-foreground inline-flex w-fit items-center justify-center group-data-[orientation=vertical]/tabs:h-fit group-data-[orientation=vertical]/tabs:flex-col',
+  "rounded-lg p-[3px] group-data-horizontal/tabs:h-8 data-[variant=line]:rounded-none data-[variant=underline]:rounded-none group/tabs-list text-muted-foreground inline-flex w-fit items-center justify-center group-data-[orientation=vertical]/tabs:h-fit group-data-[orientation=vertical]/tabs:flex-col",
   {
     variants: {
       variant: {
-        default: 'bg-muted',
-        line: 'gap-1 bg-transparent',
-        underline: 'p-0 pb-px bg-transparent w-full justify-start items-stretch shadow-[inset_0_-1px_0_0_var(--color-border)]',
+        default: "bg-muted",
+        line: "gap-1 bg-transparent",
+        underline:
+          "p-0 pb-px bg-transparent w-full justify-start items-stretch shadow-[inset_0_-1px_0_0_var(--color-border)]",
       },
     },
     defaultVariants: {
-      variant: 'default',
+      variant: "default",
     },
   },
 );
 
 function TabsList({
-  variant = 'default',
+  variant = "default",
   ...props
-}: Omit<TabsPrimitive.List.Props, 'className'> & VariantProps<typeof tabsListVariants>) {
+}: Omit<TabsPrimitive.List.Props, "className"> &
+  VariantProps<typeof tabsListVariants>) {
   return (
     <TabsPrimitive.List
       data-slot="tabs-list"
@@ -47,7 +49,7 @@ function TabsList({
   );
 }
 
-function TabsTrigger({ ...props }: Omit<TabsPrimitive.Tab.Props, 'className'>) {
+function TabsTrigger({ ...props }: Omit<TabsPrimitive.Tab.Props, "className">) {
   return (
     <TabsPrimitive.Tab
       data-slot="tabs-trigger"
@@ -57,7 +59,9 @@ function TabsTrigger({ ...props }: Omit<TabsPrimitive.Tab.Props, 'className'>) {
   );
 }
 
-function TabsContent({ ...props }: Omit<TabsPrimitive.Panel.Props, 'className'>) {
+function TabsContent({
+  ...props
+}: Omit<TabsPrimitive.Panel.Props, "className">) {
   return (
     <TabsPrimitive.Panel
       data-slot="tabs-content"

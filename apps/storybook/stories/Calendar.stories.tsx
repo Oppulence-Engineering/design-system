@@ -1,15 +1,15 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Calendar } from '@oppulence/design-system';
-import { useState } from 'react';
-import type { DateRange } from 'react-day-picker';
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import { Calendar } from "@oppulence/design-system";
+import { useState } from "react";
+import type { DateRange } from "react-day-picker";
 
 const meta = {
-  title: 'Organisms/Calendar',
+  title: "Organisms/Calendar",
   component: Calendar,
   parameters: {
-    layout: 'centered',
+    layout: "centered",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
 } satisfies Meta<typeof Calendar>;
 
 export default meta;
@@ -34,7 +34,12 @@ export const Range: Story = {
     });
     return (
       <div className="rounded-md border">
-        <Calendar mode="range" selected={range} onSelect={setRange} numberOfMonths={2} />
+        <Calendar
+          mode="range"
+          selected={range}
+          onSelect={setRange}
+          numberOfMonths={2}
+        />
       </div>
     );
   },

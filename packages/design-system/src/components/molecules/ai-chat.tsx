@@ -1,42 +1,44 @@
-'use client';
+"use client";
 
-import { cva, type VariantProps } from 'class-variance-authority';
-import { MessageCircleIcon, SparklesIcon, XIcon } from 'lucide-react';
-import * as React from 'react';
+import { cva, type VariantProps } from "class-variance-authority";
+import { MessageCircleIcon, SparklesIcon, XIcon } from "lucide-react";
+import * as React from "react";
 
 const aiChatTriggerVariants = cva(
-  'fixed bottom-6 right-6 z-50 flex items-center justify-center rounded-full transition-all duration-200 cursor-pointer',
+  "fixed bottom-6 right-6 z-50 flex items-center justify-center rounded-full transition-all duration-200 cursor-pointer",
   {
     variants: {
       size: {
-        default: 'size-14',
-        sm: 'size-12',
-        lg: 'size-16',
+        default: "size-14",
+        sm: "size-12",
+        lg: "size-16",
       },
       variant: {
-        default: 'bg-primary text-primary-foreground hover:bg-primary/90 active:scale-95',
-        secondary: 'bg-foreground text-background hover:bg-foreground/90 active:scale-95',
+        default:
+          "bg-primary text-primary-foreground hover:bg-primary/90 active:scale-95",
+        secondary:
+          "bg-foreground text-background hover:bg-foreground/90 active:scale-95",
       },
     },
     defaultVariants: {
-      size: 'default',
-      variant: 'default',
+      size: "default",
+      variant: "default",
     },
   },
 );
 
 const aiChatPanelVariants = cva(
-  'fixed bottom-24 right-6 z-50 flex flex-col bg-background border border-border/40 rounded-2xl overflow-hidden transition-all duration-200 origin-bottom-right',
+  "fixed bottom-24 right-6 z-50 flex flex-col bg-background border border-border/40 rounded-2xl overflow-hidden transition-all duration-200 origin-bottom-right",
   {
     variants: {
       size: {
-        default: 'w-96 h-[500px]',
-        sm: 'w-80 h-[400px]',
-        lg: 'w-[450px] h-[600px]',
+        default: "w-96 h-[500px]",
+        sm: "w-80 h-[400px]",
+        lg: "w-[450px] h-[600px]",
       },
     },
     defaultVariants: {
-      size: 'default',
+      size: "default",
     },
   },
 );
@@ -51,7 +53,7 @@ interface AIChatProps extends VariantProps<typeof aiChatTriggerVariants> {
   /** Custom trigger icon */
   triggerIcon?: React.ReactNode;
   /** Panel size */
-  panelSize?: 'sm' | 'default' | 'lg';
+  panelSize?: "sm" | "default" | "lg";
   /** Content to render inside the chat panel */
   children?: React.ReactNode;
 }
@@ -61,9 +63,9 @@ function AIChat({
   defaultOpen = false,
   onOpenChange,
   triggerIcon,
-  size = 'default',
-  variant = 'default',
-  panelSize = 'default',
+  size = "default",
+  variant = "default",
+  panelSize = "default",
   children,
 }: AIChatProps) {
   const [internalOpen, setInternalOpen] = React.useState(defaultOpen);
@@ -83,10 +85,13 @@ function AIChat({
       <div
         data-slot="ai-chat-panel"
         className={`${aiChatPanelVariants({ size: panelSize })} ${
-          isOpen ? 'scale-100 opacity-100' : 'scale-95 opacity-0 pointer-events-none'
+          isOpen
+            ? "scale-100 opacity-100"
+            : "scale-95 opacity-0 pointer-events-none"
         }`}
         style={{
-          boxShadow: '0 8px 32px -4px rgb(0 0 0 / 0.12), 0 4px 16px -2px rgb(0 0 0 / 0.08)',
+          boxShadow:
+            "0 8px 32px -4px rgb(0 0 0 / 0.12), 0 4px 16px -2px rgb(0 0 0 / 0.08)",
         }}
       >
         {children || <AIChatDefaultContent onClose={handleToggle} />}
@@ -99,20 +104,25 @@ function AIChat({
         onClick={handleToggle}
         className={aiChatTriggerVariants({ size, variant })}
         style={{
-          boxShadow: '0 4px 16px -2px rgb(0 0 0 / 0.15), 0 2px 8px -2px rgb(0 0 0 / 0.1)',
+          boxShadow:
+            "0 4px 16px -2px rgb(0 0 0 / 0.15), 0 2px 8px -2px rgb(0 0 0 / 0.1)",
         }}
-        aria-label={isOpen ? 'Close chat' : 'Open chat'}
+        aria-label={isOpen ? "Close chat" : "Open chat"}
       >
         <span
           className={`absolute transition-all duration-200 ${
-            isOpen ? 'scale-0 opacity-0 rotate-90' : 'scale-100 opacity-100 rotate-0'
+            isOpen
+              ? "scale-0 opacity-0 rotate-90"
+              : "scale-100 opacity-100 rotate-0"
           }`}
         >
           {triggerIcon || <SparklesIcon className="size-6" />}
         </span>
         <span
           className={`absolute transition-all duration-200 ${
-            isOpen ? 'scale-100 opacity-100 rotate-0' : 'scale-0 opacity-0 -rotate-90'
+            isOpen
+              ? "scale-100 opacity-100 rotate-0"
+              : "scale-0 opacity-0 -rotate-90"
           }`}
         >
           <XIcon className="size-6" />
@@ -185,7 +195,10 @@ function AIChatDefaultContent({ onClose }: { onClose: () => void }) {
 }
 
 // Compound components for custom content
-function AIChatHeader({ children, ...props }: Omit<React.ComponentProps<'div'>, 'className'>) {
+function AIChatHeader({
+  children,
+  ...props
+}: Omit<React.ComponentProps<"div">, "className">) {
   return (
     <div
       data-slot="ai-chat-header"
@@ -197,21 +210,42 @@ function AIChatHeader({ children, ...props }: Omit<React.ComponentProps<'div'>, 
   );
 }
 
-function AIChatBody({ children, ...props }: Omit<React.ComponentProps<'div'>, 'className'>) {
+function AIChatBody({
+  children,
+  ...props
+}: Omit<React.ComponentProps<"div">, "className">) {
   return (
-    <div data-slot="ai-chat-body" className="flex-1 overflow-auto p-4" {...props}>
+    <div
+      data-slot="ai-chat-body"
+      className="flex-1 overflow-auto p-4"
+      {...props}
+    >
       {children}
     </div>
   );
 }
 
-function AIChatFooter({ children, ...props }: Omit<React.ComponentProps<'div'>, 'className'>) {
+function AIChatFooter({
+  children,
+  ...props
+}: Omit<React.ComponentProps<"div">, "className">) {
   return (
-    <div data-slot="ai-chat-footer" className="p-3 border-t border-border/40" {...props}>
+    <div
+      data-slot="ai-chat-footer"
+      className="p-3 border-t border-border/40"
+      {...props}
+    >
       {children}
     </div>
   );
 }
 
-export { AIChat, AIChatHeader, AIChatBody, AIChatFooter, aiChatTriggerVariants, aiChatPanelVariants };
+export {
+  AIChat,
+  AIChatHeader,
+  AIChatBody,
+  AIChatFooter,
+  aiChatTriggerVariants,
+  aiChatPanelVariants,
+};
 export type { AIChatProps };

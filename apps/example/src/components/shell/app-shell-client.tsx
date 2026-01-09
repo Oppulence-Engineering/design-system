@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import {
   AppShell,
@@ -36,7 +36,7 @@ import {
   Stack,
   Text,
   ThemeToggle,
-} from '@oppulence/design-system';
+} from "@oppulence/design-system";
 import {
   BellIcon,
   CheckIcon,
@@ -45,26 +45,26 @@ import {
   PlusIcon,
   SettingsIcon,
   UserIcon,
-} from 'lucide-react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import * as React from 'react';
+} from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import * as React from "react";
 
 import {
   getActiveRailItem,
   getSidebarConfig,
   railItems,
   type NavItem,
-} from './nav-config';
+} from "./nav-config";
 
 // =============================================================================
 // Project Selector
 // =============================================================================
 
 const projects = [
-  { id: 'example', name: 'Example App', color: 'bg-primary', plan: 'Pro' },
-  { id: 'side', name: 'Side Project', color: 'bg-blue-500', plan: 'Free' },
-  { id: 'personal', name: 'Personal', color: 'bg-purple-500', plan: 'Free' },
+  { id: "example", name: "Example App", color: "bg-primary", plan: "Pro" },
+  { id: "side", name: "Side Project", color: "bg-blue-500", plan: "Free" },
+  { id: "personal", name: "Personal", color: "bg-purple-500", plan: "Free" },
 ];
 
 function ProjectSelector() {
@@ -76,7 +76,7 @@ function ProjectSelector() {
         {currentProject.name}
         <ChevronDownIcon className="size-3 text-muted-foreground" />
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" style={{ minWidth: '220px' }}>
+      <DropdownMenuContent align="start" style={{ minWidth: "220px" }}>
         <DropdownMenuGroup>
           <DropdownMenuLabel>Projects</DropdownMenuLabel>
           {projects.map((project) => (
@@ -89,7 +89,9 @@ function ProjectSelector() {
               {currentProject.id === project.id && (
                 <CheckIcon className="size-4 text-primary" />
               )}
-              <span className="text-xs text-muted-foreground">{project.plan}</span>
+              <span className="text-xs text-muted-foreground">
+                {project.plan}
+              </span>
             </DropdownMenuItem>
           ))}
         </DropdownMenuGroup>
@@ -111,18 +113,24 @@ function NavbarLogo() {
   const [isDark, setIsDark] = React.useState(false);
 
   React.useEffect(() => {
-    setIsDark(document.documentElement.classList.contains('dark'));
+    setIsDark(document.documentElement.classList.contains("dark"));
     const observer = new MutationObserver(() => {
-      setIsDark(document.documentElement.classList.contains('dark'));
+      setIsDark(document.documentElement.classList.contains("dark"));
     });
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
     return () => observer.disconnect();
   }, []);
 
   return (
     <HStack gap="xs" align="center">
       <Link href="/">
-        <Logo style={{ height: 22, width: 'auto' }} variant={isDark ? 'light' : 'dark'} />
+        <Logo
+          style={{ height: 22, width: "auto" }}
+          variant={isDark ? "light" : "dark"}
+        />
       </Link>
       <span className="pl-3 pr-1 text-muted-foreground">/</span>
       <ProjectSelector />
@@ -137,23 +145,23 @@ function NavbarLogo() {
 const notifications = [
   {
     id: 1,
-    title: 'New team member',
-    description: 'Sarah joined the team',
-    time: '5 minutes ago',
+    title: "New team member",
+    description: "Sarah joined the team",
+    time: "5 minutes ago",
     unread: true,
   },
   {
     id: 2,
-    title: 'Project update',
-    description: 'Website Redesign moved to Review',
-    time: '1 hour ago',
+    title: "Project update",
+    description: "Website Redesign moved to Review",
+    time: "1 hour ago",
     unread: true,
   },
   {
     id: 3,
-    title: 'Comment mention',
-    description: 'Mike mentioned you in a comment',
-    time: '2 hours ago',
+    title: "Comment mention",
+    description: "Mike mentioned you in a comment",
+    time: "2 hours ago",
     unread: false,
   },
 ];
@@ -173,7 +181,7 @@ function NotificationsPopover() {
           )}
         </div>
       </PopoverTrigger>
-      <PopoverContent align="end" style={{ width: '320px', padding: 0 }}>
+      <PopoverContent align="end" style={{ width: "320px", padding: 0 }}>
         <div className="px-3 py-2 border-b border-border">
           <HStack justify="between" align="center">
             <Text weight="semibold">Notifications</Text>
@@ -187,7 +195,7 @@ function NotificationsPopover() {
             <div
               key={notification.id}
               className={`px-3 py-2.5 border-b border-border last:border-0 hover:bg-muted/50 cursor-pointer ${
-                notification.unread ? 'bg-primary/5' : ''
+                notification.unread ? "bg-primary/5" : ""
               }`}
             >
               <HStack justify="between" align="start">
@@ -227,20 +235,23 @@ function UserMenu() {
   const [isDark, setIsDark] = React.useState(false);
 
   React.useEffect(() => {
-    setIsDark(document.documentElement.classList.contains('dark'));
+    setIsDark(document.documentElement.classList.contains("dark"));
     const observer = new MutationObserver(() => {
-      setIsDark(document.documentElement.classList.contains('dark'));
+      setIsDark(document.documentElement.classList.contains("dark"));
     });
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
     return () => observer.disconnect();
   }, []);
 
   const handleThemeChange = (dark: boolean) => {
     setIsDark(dark);
     if (dark) {
-      document.documentElement.classList.add('dark');
+      document.documentElement.classList.add("dark");
     } else {
-      document.documentElement.classList.remove('dark');
+      document.documentElement.classList.remove("dark");
     }
   };
 
@@ -252,10 +263,14 @@ function UserMenu() {
           <AvatarFallback>JD</AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" style={{ minWidth: '200px' }}>
+      <DropdownMenuContent align="end" style={{ minWidth: "200px" }}>
         <div className="px-2 py-1.5">
-          <Text size="sm" weight="medium">John Doe</Text>
-          <Text size="xs" variant="muted">john@example.com</Text>
+          <Text size="sm" weight="medium">
+            John Doe
+          </Text>
+          <Text size="xs" variant="muted">
+            john@example.com
+          </Text>
         </div>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
@@ -293,8 +308,8 @@ function UserMenu() {
 
 const searchGroups = [
   {
-    id: 'pages',
-    label: 'Pages',
+    id: "pages",
+    label: "Pages",
     items: railItems.map((item) => ({
       id: item.id,
       label: item.label,
@@ -302,11 +317,19 @@ const searchGroups = [
     })),
   },
   {
-    id: 'actions',
-    label: 'Actions',
+    id: "actions",
+    label: "Actions",
     items: [
-      { id: 'new-project', label: 'Create new project', icon: <PlusIcon className="size-4" /> },
-      { id: 'invite', label: 'Invite team member', icon: <UserIcon className="size-4" /> },
+      {
+        id: "new-project",
+        label: "Create new project",
+        icon: <PlusIcon className="size-4" />,
+      },
+      {
+        id: "invite",
+        label: "Invite team member",
+        icon: <UserIcon className="size-4" />,
+      },
     ],
   },
 ];
@@ -345,15 +368,17 @@ export function AppShellClient({ children }: AppShellClientProps) {
 
   // Check if a nav item is active
   const isNavItemActive = (href: string) => {
-    if (href === '/') return pathname === '/';
-    return pathname === href || pathname.startsWith(href + '/');
+    if (href === "/") return pathname === "/";
+    return pathname === href || pathname.startsWith(href + "/");
   };
 
   return (
     <AppShell showAIChat>
       <AppShellNavbar
         startContent={<NavbarLogo />}
-        centerContent={<CommandSearch groups={searchGroups} placeholder="Search..." />}
+        centerContent={
+          <CommandSearch groups={searchGroups} placeholder="Search..." />
+        }
         endContent={
           <AppShellUserMenu>
             <NotificationsPopover />

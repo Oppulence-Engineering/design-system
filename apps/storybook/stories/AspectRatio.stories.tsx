@@ -1,13 +1,13 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
-import { AspectRatio, Stack, Text } from '@oppulence/design-system';
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import { AspectRatio, Stack, Text } from "@oppulence/design-system";
 
 const meta = {
-  title: 'Atoms/AspectRatio',
+  title: "Atoms/AspectRatio",
   component: AspectRatio,
   parameters: {
-    layout: 'centered',
+    layout: "centered",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
 } satisfies Meta<typeof AspectRatio>;
 
 export default meta;

@@ -1,27 +1,35 @@
-'use client';
+"use client";
 
-import * as React from 'react';
-import { Drawer as DrawerPrimitive } from 'vaul';
+import * as React from "react";
+import { Drawer as DrawerPrimitive } from "vaul";
 
-function Drawer({ ...props }: React.ComponentProps<typeof DrawerPrimitive.Root>) {
+function Drawer({
+  ...props
+}: React.ComponentProps<typeof DrawerPrimitive.Root>) {
   return <DrawerPrimitive.Root data-slot="drawer" {...props} />;
 }
 
-function DrawerTrigger({ ...props }: React.ComponentProps<typeof DrawerPrimitive.Trigger>) {
+function DrawerTrigger({
+  ...props
+}: React.ComponentProps<typeof DrawerPrimitive.Trigger>) {
   return <DrawerPrimitive.Trigger data-slot="drawer-trigger" {...props} />;
 }
 
-function DrawerPortal({ ...props }: React.ComponentProps<typeof DrawerPrimitive.Portal>) {
+function DrawerPortal({
+  ...props
+}: React.ComponentProps<typeof DrawerPrimitive.Portal>) {
   return <DrawerPrimitive.Portal data-slot="drawer-portal" {...props} />;
 }
 
-function DrawerClose({ ...props }: React.ComponentProps<typeof DrawerPrimitive.Close>) {
+function DrawerClose({
+  ...props
+}: React.ComponentProps<typeof DrawerPrimitive.Close>) {
   return <DrawerPrimitive.Close data-slot="drawer-close" {...props} />;
 }
 
 function DrawerOverlay({
   ...props
-}: Omit<React.ComponentProps<typeof DrawerPrimitive.Overlay>, 'className'>) {
+}: Omit<React.ComponentProps<typeof DrawerPrimitive.Overlay>, "className">) {
   return (
     <DrawerPrimitive.Overlay
       data-slot="drawer-overlay"
@@ -34,7 +42,7 @@ function DrawerOverlay({
 function DrawerContent({
   children,
   ...props
-}: Omit<React.ComponentProps<typeof DrawerPrimitive.Content>, 'className'>) {
+}: Omit<React.ComponentProps<typeof DrawerPrimitive.Content>, "className">) {
   return (
     <DrawerPortal data-slot="drawer-portal">
       <DrawerOverlay />
@@ -50,7 +58,9 @@ function DrawerContent({
   );
 }
 
-function DrawerHeader({ ...props }: Omit<React.ComponentProps<'div'>, 'className'>) {
+function DrawerHeader({
+  ...props
+}: Omit<React.ComponentProps<"div">, "className">) {
   return (
     <div
       data-slot="drawer-header"
@@ -60,13 +70,21 @@ function DrawerHeader({ ...props }: Omit<React.ComponentProps<'div'>, 'className
   );
 }
 
-function DrawerFooter({ ...props }: Omit<React.ComponentProps<'div'>, 'className'>) {
-  return <div data-slot="drawer-footer" className="gap-2 p-4 mt-auto flex flex-col" {...props} />;
+function DrawerFooter({
+  ...props
+}: Omit<React.ComponentProps<"div">, "className">) {
+  return (
+    <div
+      data-slot="drawer-footer"
+      className="gap-2 p-4 mt-auto flex flex-col"
+      {...props}
+    />
+  );
 }
 
 function DrawerTitle({
   ...props
-}: Omit<React.ComponentProps<typeof DrawerPrimitive.Title>, 'className'>) {
+}: Omit<React.ComponentProps<typeof DrawerPrimitive.Title>, "className">) {
   return (
     <DrawerPrimitive.Title
       data-slot="drawer-title"
@@ -78,7 +96,10 @@ function DrawerTitle({
 
 function DrawerDescription({
   ...props
-}: Omit<React.ComponentProps<typeof DrawerPrimitive.Description>, 'className'>) {
+}: Omit<
+  React.ComponentProps<typeof DrawerPrimitive.Description>,
+  "className"
+>) {
   return (
     <DrawerPrimitive.Description
       data-slot="drawer-description"

@@ -1,9 +1,9 @@
-import type { Metadata } from 'next';
-import './globals.css';
+import type { Metadata } from "next";
+import "./globals.css";
 
 export const metadata: Metadata = {
-  title: 'Comp Example App',
-  description: 'Example application using @oppulence/design-system',
+  title: "Comp Example App",
+  description: "Example application using @oppulence/design-system",
 };
 
 export default function RootLayout({

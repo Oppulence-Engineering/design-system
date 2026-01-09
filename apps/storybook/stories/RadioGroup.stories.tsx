@@ -1,13 +1,18 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
-import { RadioGroup, RadioGroupItem, Label, Stack } from '@oppulence/design-system';
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import {
+  RadioGroup,
+  RadioGroupItem,
+  Label,
+  Stack,
+} from "@oppulence/design-system";
 
 const meta = {
-  title: 'Molecules/RadioGroup',
+  title: "Molecules/RadioGroup",
   component: RadioGroup,
   parameters: {
-    layout: 'centered',
+    layout: "centered",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
 } satisfies Meta<typeof RadioGroup>;
 
 export default meta;

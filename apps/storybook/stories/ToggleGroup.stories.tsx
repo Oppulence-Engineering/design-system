@@ -1,5 +1,10 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Stack, Text, ToggleGroup, ToggleGroupItem } from '@oppulence/design-system';
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import {
+  Stack,
+  Text,
+  ToggleGroup,
+  ToggleGroupItem,
+} from "@oppulence/design-system";
 import {
   AlignCenter,
   AlignJustify,
@@ -8,15 +13,15 @@ import {
   Bold,
   Italic,
   Underline,
-} from 'lucide-react';
+} from "lucide-react";
 
 const meta = {
-  title: 'Molecules/ToggleGroup',
+  title: "Molecules/ToggleGroup",
   component: ToggleGroup,
   parameters: {
-    layout: 'centered',
+    layout: "centered",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
 } satisfies Meta<typeof ToggleGroup>;
 
 export default meta;
@@ -24,7 +29,7 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   render: () => (
-    <ToggleGroup defaultValue={['center']}>
+    <ToggleGroup defaultValue={["center"]}>
       <ToggleGroupItem value="left" aria-label="Align left">
         <AlignLeft className="h-4 w-4" />
       </ToggleGroupItem>
@@ -43,7 +48,7 @@ export const Default: Story = {
 
 export const Multiple: Story = {
   render: () => (
-    <ToggleGroup defaultValue={['bold', 'italic']}>
+    <ToggleGroup defaultValue={["bold", "italic"]}>
       <ToggleGroupItem value="bold" aria-label="Toggle bold">
         <Bold className="h-4 w-4" />
       </ToggleGroupItem>
@@ -59,7 +64,7 @@ export const Multiple: Story = {
 
 export const Outline: Story = {
   render: () => (
-    <ToggleGroup variant="outline" defaultValue={['center']}>
+    <ToggleGroup variant="outline" defaultValue={["center"]}>
       <ToggleGroupItem value="left" aria-label="Align left">
         <AlignLeft className="h-4 w-4" />
       </ToggleGroupItem>
@@ -79,7 +84,7 @@ export const WithLabels: Story = {
       <Text size="sm" variant="muted">
         Text alignment
       </Text>
-      <ToggleGroup defaultValue={['left']}>
+      <ToggleGroup defaultValue={["left"]}>
         <ToggleGroupItem value="left">Left</ToggleGroupItem>
         <ToggleGroupItem value="center">Center</ToggleGroupItem>
         <ToggleGroupItem value="right">Right</ToggleGroupItem>
@@ -95,7 +100,7 @@ export const Sizes: Story = {
         <Text size="sm" variant="muted">
           Small
         </Text>
-        <ToggleGroup size="sm" defaultValue={['a']}>
+        <ToggleGroup size="sm" defaultValue={["a"]}>
           <ToggleGroupItem value="a">A</ToggleGroupItem>
           <ToggleGroupItem value="b">B</ToggleGroupItem>
           <ToggleGroupItem value="c">C</ToggleGroupItem>
@@ -105,7 +110,7 @@ export const Sizes: Story = {
         <Text size="sm" variant="muted">
           Default
         </Text>
-        <ToggleGroup defaultValue={['a']}>
+        <ToggleGroup defaultValue={["a"]}>
           <ToggleGroupItem value="a">A</ToggleGroupItem>
           <ToggleGroupItem value="b">B</ToggleGroupItem>
           <ToggleGroupItem value="c">C</ToggleGroupItem>
@@ -115,7 +120,7 @@ export const Sizes: Story = {
         <Text size="sm" variant="muted">
           Large
         </Text>
-        <ToggleGroup size="lg" defaultValue={['a']}>
+        <ToggleGroup size="lg" defaultValue={["a"]}>
           <ToggleGroupItem value="a">A</ToggleGroupItem>
           <ToggleGroupItem value="b">B</ToggleGroupItem>
           <ToggleGroupItem value="c">C</ToggleGroupItem>
@@ -127,7 +132,7 @@ export const Sizes: Story = {
 
 export const Disabled: Story = {
   render: () => (
-    <ToggleGroup disabled defaultValue={['a']}>
+    <ToggleGroup disabled defaultValue={["a"]}>
       <ToggleGroupItem value="a">A</ToggleGroupItem>
       <ToggleGroupItem value="b">B</ToggleGroupItem>
       <ToggleGroupItem value="c">C</ToggleGroupItem>

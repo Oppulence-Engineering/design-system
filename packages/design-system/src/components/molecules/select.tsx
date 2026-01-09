@@ -1,19 +1,27 @@
-'use client';
+"use client";
 
-import { Select as SelectPrimitive } from '@base-ui/react/select';
-import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from 'lucide-react';
-import * as React from 'react';
+import { Select as SelectPrimitive } from "@base-ui/react/select";
+import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react";
+import * as React from "react";
 
 const Select = SelectPrimitive.Root;
 
-function SelectGroup({ ...props }: Omit<SelectPrimitive.Group.Props, 'className'>) {
-  return <SelectPrimitive.Group data-slot="select-group" className="scroll-my-1 p-1" {...props} />;
+function SelectGroup({
+  ...props
+}: Omit<SelectPrimitive.Group.Props, "className">) {
+  return (
+    <SelectPrimitive.Group
+      data-slot="select-group"
+      className="scroll-my-1 p-1"
+      {...props}
+    />
+  );
 }
 
 function SelectValue({
   placeholder,
   ...props
-}: Omit<SelectPrimitive.Value.Props, 'className'> & {
+}: Omit<SelectPrimitive.Value.Props, "className"> & {
   /** Text to show when no value is selected */
   placeholder?: string;
 }) {
@@ -37,11 +45,11 @@ function SelectValue({
 }
 
 function SelectTrigger({
-  size = 'default',
+  size = "default",
   children,
   ...props
-}: Omit<SelectPrimitive.Trigger.Props, 'className'> & {
-  size?: 'sm' | 'default';
+}: Omit<SelectPrimitive.Trigger.Props, "className"> & {
+  size?: "sm" | "default";
 }) {
   return (
     <SelectPrimitive.Trigger
@@ -52,7 +60,9 @@ function SelectTrigger({
     >
       {children}
       <SelectPrimitive.Icon
-        render={<ChevronDownIcon className="text-muted-foreground size-4 pointer-events-none" />}
+        render={
+          <ChevronDownIcon className="text-muted-foreground size-4 pointer-events-none" />
+        }
       />
     </SelectPrimitive.Trigger>
   );
@@ -60,16 +70,16 @@ function SelectTrigger({
 
 function SelectContent({
   children,
-  side = 'bottom',
+  side = "bottom",
   sideOffset = 4,
-  align = 'center',
+  align = "center",
   alignOffset = 0,
   alignItemWithTrigger = true,
   ...props
-}: Omit<SelectPrimitive.Popup.Props, 'className'> &
+}: Omit<SelectPrimitive.Popup.Props, "className"> &
   Pick<
     SelectPrimitive.Positioner.Props,
-    'align' | 'alignOffset' | 'side' | 'sideOffset' | 'alignItemWithTrigger'
+    "align" | "alignOffset" | "side" | "sideOffset" | "alignItemWithTrigger"
   >) {
   return (
     <SelectPrimitive.Portal>
@@ -95,7 +105,9 @@ function SelectContent({
   );
 }
 
-function SelectLabel({ ...props }: Omit<SelectPrimitive.GroupLabel.Props, 'className'>) {
+function SelectLabel({
+  ...props
+}: Omit<SelectPrimitive.GroupLabel.Props, "className">) {
   return (
     <SelectPrimitive.GroupLabel
       data-slot="select-label"
@@ -105,7 +117,10 @@ function SelectLabel({ ...props }: Omit<SelectPrimitive.GroupLabel.Props, 'class
   );
 }
 
-function SelectItem({ children, ...props }: Omit<SelectPrimitive.Item.Props, 'className'>) {
+function SelectItem({
+  children,
+  ...props
+}: Omit<SelectPrimitive.Item.Props, "className">) {
   return (
     <SelectPrimitive.Item
       data-slot="select-item"
@@ -126,7 +141,9 @@ function SelectItem({ children, ...props }: Omit<SelectPrimitive.Item.Props, 'cl
   );
 }
 
-function SelectSeparator({ ...props }: Omit<SelectPrimitive.Separator.Props, 'className'>) {
+function SelectSeparator({
+  ...props
+}: Omit<SelectPrimitive.Separator.Props, "className">) {
   return (
     <SelectPrimitive.Separator
       data-slot="select-separator"
@@ -138,7 +155,10 @@ function SelectSeparator({ ...props }: Omit<SelectPrimitive.Separator.Props, 'cl
 
 function SelectScrollUpButton({
   ...props
-}: Omit<React.ComponentProps<typeof SelectPrimitive.ScrollUpArrow>, 'className'>) {
+}: Omit<
+  React.ComponentProps<typeof SelectPrimitive.ScrollUpArrow>,
+  "className"
+>) {
   return (
     <SelectPrimitive.ScrollUpArrow
       data-slot="select-scroll-up-button"
@@ -152,7 +172,10 @@ function SelectScrollUpButton({
 
 function SelectScrollDownButton({
   ...props
-}: Omit<React.ComponentProps<typeof SelectPrimitive.ScrollDownArrow>, 'className'>) {
+}: Omit<
+  React.ComponentProps<typeof SelectPrimitive.ScrollDownArrow>,
+  "className"
+>) {
   return (
     <SelectPrimitive.ScrollDownArrow
       data-slot="select-scroll-down-button"

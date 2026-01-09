@@ -1,14 +1,14 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Button, Stack, Toaster } from '@oppulence/design-system';
-import { toast } from 'sonner';
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import { Button, Stack, Toaster } from "@oppulence/design-system";
+import { toast } from "sonner";
 
 const meta = {
-  title: 'Organisms/Sonner',
+  title: "Organisms/Sonner",
   component: Toaster,
   parameters: {
-    layout: 'fullscreen',
+    layout: "fullscreen",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
   decorators: [
     (Story) => (
       <div className="flex items-center justify-center min-h-screen">
@@ -23,33 +23,47 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
-  render: () => <Button onClick={() => toast('This is a toast message')}>Show Toast</Button>,
+  render: () => (
+    <Button onClick={() => toast("This is a toast message")}>Show Toast</Button>
+  ),
 };
 
 export const Success: Story = {
-  render: () => <Button onClick={() => toast.success('Successfully saved!')}>Show Success</Button>,
+  render: () => (
+    <Button onClick={() => toast.success("Successfully saved!")}>
+      Show Success
+    </Button>
+  ),
 };
 
 export const Error: Story = {
-  render: () => <Button onClick={() => toast.error('Something went wrong')}>Show Error</Button>,
+  render: () => (
+    <Button onClick={() => toast.error("Something went wrong")}>
+      Show Error
+    </Button>
+  ),
 };
 
 export const Warning: Story = {
   render: () => (
-    <Button onClick={() => toast.warning('Please review your changes')}>Show Warning</Button>
+    <Button onClick={() => toast.warning("Please review your changes")}>
+      Show Warning
+    </Button>
   ),
 };
 
 export const Info: Story = {
-  render: () => <Button onClick={() => toast.info('Did you know?')}>Show Info</Button>,
+  render: () => (
+    <Button onClick={() => toast.info("Did you know?")}>Show Info</Button>
+  ),
 };
 
 export const WithDescription: Story = {
   render: () => (
     <Button
       onClick={() =>
-        toast.success('Profile updated', {
-          description: 'Your changes have been saved successfully.',
+        toast.success("Profile updated", {
+          description: "Your changes have been saved successfully.",
         })
       }
     >
@@ -62,10 +76,10 @@ export const WithAction: Story = {
   render: () => (
     <Button
       onClick={() =>
-        toast('File deleted', {
+        toast("File deleted", {
           action: {
-            label: 'Undo',
-            onClick: () => toast.success('File restored'),
+            label: "Undo",
+            onClick: () => toast.success("File restored"),
           },
         })
       }
@@ -79,11 +93,13 @@ export const PromiseToast: Story = {
   render: () => (
     <Button
       onClick={() => {
-        const promise = new Promise<void>((resolve) => setTimeout(resolve, 2000));
+        const promise = new Promise<void>((resolve) =>
+          setTimeout(resolve, 2000),
+        );
         toast.promise(promise, {
-          loading: 'Saving...',
-          success: 'Saved!',
-          error: 'Failed to save',
+          loading: "Saving...",
+          success: "Saved!",
+          error: "Failed to save",
         });
       }}
     >
@@ -95,19 +111,19 @@ export const PromiseToast: Story = {
 export const AllTypes: Story = {
   render: () => (
     <Stack direction="row" gap="sm" wrap="wrap">
-      <Button variant="outline" onClick={() => toast('Default toast')}>
+      <Button variant="outline" onClick={() => toast("Default toast")}>
         Default
       </Button>
-      <Button variant="outline" onClick={() => toast.success('Success!')}>
+      <Button variant="outline" onClick={() => toast.success("Success!")}>
         Success
       </Button>
-      <Button variant="outline" onClick={() => toast.error('Error!')}>
+      <Button variant="outline" onClick={() => toast.error("Error!")}>
         Error
       </Button>
-      <Button variant="outline" onClick={() => toast.warning('Warning!')}>
+      <Button variant="outline" onClick={() => toast.warning("Warning!")}>
         Warning
       </Button>
-      <Button variant="outline" onClick={() => toast.info('Info!')}>
+      <Button variant="outline" onClick={() => toast.info("Info!")}>
         Info
       </Button>
     </Stack>

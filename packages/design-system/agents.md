@@ -130,11 +130,11 @@ For layout concerns (width, grid positioning, margins), use wrapper elements:
 
 ```tsx
 // Example: Adding a variant to button.tsx
-const buttonVariants = cva('...base classes...', {
+const buttonVariants = cva("...base classes...", {
   variants: {
     variant: {
       // existing variants...
-      newVariant: 'bg-teal-500 text-white hover:bg-teal-600', // ADD HERE
+      newVariant: "bg-teal-500 text-white hover:bg-teal-600", // ADD HERE
     },
   },
 });
@@ -155,5 +155,5 @@ import {
   Text,
   Badge,
   // ... etc
-} from '@oppulence/design-system';
+} from "@oppulence/design-system";
 ```

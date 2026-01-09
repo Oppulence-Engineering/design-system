@@ -1,10 +1,12 @@
-import { mergeProps } from '@base-ui/react/merge-props';
-import { useRender } from '@base-ui/react/use-render';
-import { cva, type VariantProps } from 'class-variance-authority';
+import { mergeProps } from "@base-ui/react/merge-props";
+import { useRender } from "@base-ui/react/use-render";
+import { cva, type VariantProps } from "class-variance-authority";
 
-import { Separator as SeparatorPrimitive } from '@base-ui/react/separator';
+import { Separator as SeparatorPrimitive } from "@base-ui/react/separator";
 
-function ItemGroup({ ...props }: Omit<React.ComponentProps<'div'>, 'className'>) {
+function ItemGroup({
+  ...props
+}: Omit<React.ComponentProps<"div">, "className">) {
   return (
     <div
       role="list"
@@ -15,7 +17,9 @@ function ItemGroup({ ...props }: Omit<React.ComponentProps<'div'>, 'className'>)
   );
 }
 
-function ItemSeparator({ ...props }: Omit<SeparatorPrimitive.Props, 'className'>) {
+function ItemSeparator({
+  ...props
+}: Omit<SeparatorPrimitive.Props, "className">) {
   return (
     <SeparatorPrimitive
       data-slot="item-separator"
@@ -27,36 +31,37 @@ function ItemSeparator({ ...props }: Omit<SeparatorPrimitive.Props, 'className'>
 }
 
 const itemVariants = cva(
-  '[a]:hover:bg-muted rounded-md border text-sm w-full group/item focus-visible:border-ring focus-visible:ring-ring/50 flex items-center flex-wrap outline-none transition-colors duration-100 focus-visible:ring-[3px] [a]:transition-colors',
+  "[a]:hover:bg-muted rounded-md border text-sm w-full group/item focus-visible:border-ring focus-visible:ring-ring/50 flex items-center flex-wrap outline-none transition-colors duration-100 focus-visible:ring-[3px] [a]:transition-colors",
   {
     variants: {
       variant: {
-        default: 'border-transparent',
-        outline: 'border-border',
-        muted: 'bg-muted/50 border-transparent',
+        default: "border-transparent",
+        outline: "border-border",
+        muted: "bg-muted/50 border-transparent",
       },
       size: {
-        default: 'gap-3.5 px-4 py-3.5',
-        sm: 'gap-2.5 px-3 py-2.5',
-        xs: 'gap-2 px-2.5 py-2 [[data-slot=dropdown-menu-content]_&]:p-0',
+        default: "gap-3.5 px-4 py-3.5",
+        sm: "gap-2.5 px-3 py-2.5",
+        xs: "gap-2 px-2.5 py-2 [[data-slot=dropdown-menu-content]_&]:p-0",
       },
     },
     defaultVariants: {
-      variant: 'default',
-      size: 'default',
+      variant: "default",
+      size: "default",
     },
   },
 );
 
 function Item({
-  variant = 'default',
-  size = 'default',
+  variant = "default",
+  size = "default",
   render,
   ...props
-}: Omit<useRender.ComponentProps<'div'>, 'className'> & VariantProps<typeof itemVariants>) {
+}: Omit<useRender.ComponentProps<"div">, "className"> &
+  VariantProps<typeof itemVariants>) {
   return useRender({
-    defaultTagName: 'div',
-    props: mergeProps<'div'>(
+    defaultTagName: "div",
+    props: mergeProps<"div">(
       {
         className: itemVariants({ variant, size }),
       },
@@ -64,7 +69,7 @@ function Item({
     ),
     render,
     state: {
-      slot: 'item',
+      slot: "item",
       variant,
       size,
     },
@@ -72,26 +77,27 @@ function Item({
 }
 
 const itemMediaVariants = cva(
-  'gap-2 group-has-[[data-slot=item-description]]/item:translate-y-0.5 group-has-[[data-slot=item-description]]/item:self-start flex shrink-0 items-center justify-center [&_svg]:pointer-events-none',
+  "gap-2 group-has-[[data-slot=item-description]]/item:translate-y-0.5 group-has-[[data-slot=item-description]]/item:self-start flex shrink-0 items-center justify-center [&_svg]:pointer-events-none",
   {
     variants: {
       variant: {
-        default: 'bg-transparent',
+        default: "bg-transparent",
         icon: "[&_svg:not([class*='size-'])]:size-4",
         image:
-          'size-10 overflow-hidden rounded-sm group-data-[size=sm]/item:size-8 group-data-[size=xs]/item:size-6 [&_img]:size-full [&_img]:object-cover',
+          "size-10 overflow-hidden rounded-sm group-data-[size=sm]/item:size-8 group-data-[size=xs]/item:size-6 [&_img]:size-full [&_img]:object-cover",
       },
     },
     defaultVariants: {
-      variant: 'default',
+      variant: "default",
     },
   },
 );
 
 function ItemMedia({
-  variant = 'default',
+  variant = "default",
   ...props
-}: Omit<React.ComponentProps<'div'>, 'className'> & VariantProps<typeof itemMediaVariants>) {
+}: Omit<React.ComponentProps<"div">, "className"> &
+  VariantProps<typeof itemMediaVariants>) {
   return (
     <div
       data-slot="item-media"
@@ -102,7 +108,9 @@ function ItemMedia({
   );
 }
 
-function ItemContent({ ...props }: Omit<React.ComponentProps<'div'>, 'className'>) {
+function ItemContent({
+  ...props
+}: Omit<React.ComponentProps<"div">, "className">) {
   return (
     <div
       data-slot="item-content"
@@ -112,7 +120,9 @@ function ItemContent({ ...props }: Omit<React.ComponentProps<'div'>, 'className'
   );
 }
 
-function ItemTitle({ ...props }: Omit<React.ComponentProps<'div'>, 'className'>) {
+function ItemTitle({
+  ...props
+}: Omit<React.ComponentProps<"div">, "className">) {
   return (
     <div
       data-slot="item-title"
@@ -122,7 +132,9 @@ function ItemTitle({ ...props }: Omit<React.ComponentProps<'div'>, 'className'>)
   );
 }
 
-function ItemDescription({ ...props }: Omit<React.ComponentProps<'p'>, 'className'>) {
+function ItemDescription({
+  ...props
+}: Omit<React.ComponentProps<"p">, "className">) {
   return (
     <p
       data-slot="item-description"
@@ -132,11 +144,21 @@ function ItemDescription({ ...props }: Omit<React.ComponentProps<'p'>, 'classNam
   );
 }
 
-function ItemActions({ ...props }: Omit<React.ComponentProps<'div'>, 'className'>) {
-  return <div data-slot="item-actions" className="gap-2 flex items-center" {...props} />;
+function ItemActions({
+  ...props
+}: Omit<React.ComponentProps<"div">, "className">) {
+  return (
+    <div
+      data-slot="item-actions"
+      className="gap-2 flex items-center"
+      {...props}
+    />
+  );
 }
 
-function ItemHeader({ ...props }: Omit<React.ComponentProps<'div'>, 'className'>) {
+function ItemHeader({
+  ...props
+}: Omit<React.ComponentProps<"div">, "className">) {
   return (
     <div
       data-slot="item-header"
@@ -146,7 +168,9 @@ function ItemHeader({ ...props }: Omit<React.ComponentProps<'div'>, 'className'>
   );
 }
 
-function ItemFooter({ ...props }: Omit<React.ComponentProps<'div'>, 'className'>) {
+function ItemFooter({
+  ...props
+}: Omit<React.ComponentProps<"div">, "className">) {
   return (
     <div
       data-slot="item-footer"

@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import {
   Button,
   Card,
@@ -13,15 +13,15 @@ import {
   TabsContent,
   TabsList,
   TabsTrigger,
-} from '@oppulence/design-system';
+} from "@oppulence/design-system";
 
 const meta = {
-  title: 'Molecules/Tabs',
+  title: "Molecules/Tabs",
   component: Tabs,
   parameters: {
-    layout: 'centered',
+    layout: "centered",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
 } satisfies Meta<typeof Tabs>;
 
 export default meta;
@@ -112,22 +112,30 @@ export const FullWidth: Story = {
         </div>
         <TabsContent value="overview">
           <div className="p-4">
-            <p className="text-sm text-muted-foreground">Overview content goes here.</p>
+            <p className="text-sm text-muted-foreground">
+              Overview content goes here.
+            </p>
           </div>
         </TabsContent>
         <TabsContent value="analytics">
           <div className="p-4">
-            <p className="text-sm text-muted-foreground">Analytics content goes here.</p>
+            <p className="text-sm text-muted-foreground">
+              Analytics content goes here.
+            </p>
           </div>
         </TabsContent>
         <TabsContent value="reports">
           <div className="p-4">
-            <p className="text-sm text-muted-foreground">Reports content goes here.</p>
+            <p className="text-sm text-muted-foreground">
+              Reports content goes here.
+            </p>
           </div>
         </TabsContent>
         <TabsContent value="notifications">
           <div className="p-4">
-            <p className="text-sm text-muted-foreground">Notifications content goes here.</p>
+            <p className="text-sm text-muted-foreground">
+              Notifications content goes here.
+            </p>
           </div>
         </TabsContent>
       </Tabs>

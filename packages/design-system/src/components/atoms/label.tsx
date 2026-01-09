@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import * as React from 'react';
+import * as React from "react";
 
-function Label({ ...props }: Omit<React.ComponentProps<'label'>, 'className'>) {
+function Label({ ...props }: Omit<React.ComponentProps<"label">, "className">) {
   return (
     <label
       data-slot="label"

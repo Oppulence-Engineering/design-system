@@ -1,15 +1,15 @@
-import * as React from 'react';
+import * as React from "react";
 
 function AspectRatio({
   ratio,
   ...props
-}: Omit<React.ComponentProps<'div'>, 'className'> & { ratio: number }) {
+}: Omit<React.ComponentProps<"div">, "className"> & { ratio: number }) {
   return (
     <div
       data-slot="aspect-ratio"
       style={
         {
-          '--ratio': ratio,
+          "--ratio": ratio,
         } as React.CSSProperties
       }
       className="relative aspect-(--ratio)"

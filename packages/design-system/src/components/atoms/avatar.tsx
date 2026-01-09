@@ -1,14 +1,14 @@
-'use client';
+"use client";
 
-import { Avatar as AvatarPrimitive } from '@base-ui/react/avatar';
-import * as React from 'react';
+import { Avatar as AvatarPrimitive } from "@base-ui/react/avatar";
+import * as React from "react";
 
-type AvatarSize = 'xs' | 'sm' | 'default' | 'lg' | 'xl';
+type AvatarSize = "xs" | "sm" | "default" | "lg" | "xl";
 
 function Avatar({
-  size = 'default',
+  size = "default",
   ...props
-}: Omit<AvatarPrimitive.Root.Props, 'className'> & {
+}: Omit<AvatarPrimitive.Root.Props, "className"> & {
   size?: AvatarSize;
 }) {
   return (
@@ -21,7 +21,9 @@ function Avatar({
   );
 }
 
-function AvatarImage({ ...props }: Omit<AvatarPrimitive.Image.Props, 'className'>) {
+function AvatarImage({
+  ...props
+}: Omit<AvatarPrimitive.Image.Props, "className">) {
   return (
     <AvatarPrimitive.Image
       data-slot="avatar-image"
@@ -31,7 +33,9 @@ function AvatarImage({ ...props }: Omit<AvatarPrimitive.Image.Props, 'className'
   );
 }
 
-function AvatarFallback({ ...props }: Omit<AvatarPrimitive.Fallback.Props, 'className'>) {
+function AvatarFallback({
+  ...props
+}: Omit<AvatarPrimitive.Fallback.Props, "className">) {
   return (
     <AvatarPrimitive.Fallback
       data-slot="avatar-fallback"
@@ -41,7 +45,9 @@ function AvatarFallback({ ...props }: Omit<AvatarPrimitive.Fallback.Props, 'clas
   );
 }
 
-function AvatarBadge({ ...props }: Omit<React.ComponentProps<'span'>, 'className'>) {
+function AvatarBadge({
+  ...props
+}: Omit<React.ComponentProps<"span">, "className">) {
   return (
     <span
       data-slot="avatar-badge"
@@ -51,7 +57,9 @@ function AvatarBadge({ ...props }: Omit<React.ComponentProps<'span'>, 'className
   );
 }
 
-function AvatarGroup({ ...props }: Omit<React.ComponentProps<'div'>, 'className'>) {
+function AvatarGroup({
+  ...props
+}: Omit<React.ComponentProps<"div">, "className">) {
   return (
     <div
       data-slot="avatar-group"
@@ -61,7 +69,9 @@ function AvatarGroup({ ...props }: Omit<React.ComponentProps<'div'>, 'className'
   );
 }
 
-function AvatarGroupCount({ ...props }: Omit<React.ComponentProps<'div'>, 'className'>) {
+function AvatarGroupCount({
+  ...props
+}: Omit<React.ComponentProps<"div">, "className">) {
   return (
     <div
       data-slot="avatar-group-count"
@@ -71,4 +81,11 @@ function AvatarGroupCount({ ...props }: Omit<React.ComponentProps<'div'>, 'class
   );
 }
 
-export { Avatar, AvatarBadge, AvatarFallback, AvatarGroup, AvatarGroupCount, AvatarImage };
+export {
+  Avatar,
+  AvatarBadge,
+  AvatarFallback,
+  AvatarGroup,
+  AvatarGroupCount,
+  AvatarImage,
+};

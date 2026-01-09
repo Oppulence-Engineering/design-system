@@ -1,13 +1,13 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Stack, Textarea } from '@oppulence/design-system';
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import { Stack, Textarea } from "@oppulence/design-system";
 
 const meta = {
-  title: 'Atoms/Textarea',
+  title: "Atoms/Textarea",
   component: Textarea,
   parameters: {
-    layout: 'centered',
+    layout: "centered",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
 } satisfies Meta<typeof Textarea>;
 
 export default meta;
@@ -26,6 +26,6 @@ export const Sizes: Story = {
 export const Disabled: Story = {
   args: {
     disabled: true,
-    placeholder: 'Disabled textarea',
+    placeholder: "Disabled textarea",
   },
 };

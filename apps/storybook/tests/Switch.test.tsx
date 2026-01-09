@@ -1,24 +1,24 @@
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { describe, expect, it } from 'vitest';
-import { Switch } from '@oppulence/design-system';
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { describe, expect, it } from "vitest";
+import { Switch } from "@oppulence/design-system";
 
-describe('Switch', () => {
-  it('renders unchecked by default', () => {
+describe("Switch", () => {
+  it("renders unchecked by default", () => {
     render(<Switch />);
-    expect(screen.getByRole('switch')).not.toBeChecked();
+    expect(screen.getByRole("switch")).not.toBeChecked();
   });
 
-  it('renders checked when defaultChecked is true', () => {
+  it("renders checked when defaultChecked is true", () => {
     render(<Switch defaultChecked />);
-    expect(screen.getByRole('switch')).toBeChecked();
+    expect(screen.getByRole("switch")).toBeChecked();
   });
 
-  it('toggles when clicked', async () => {
+  it("toggles when clicked", async () => {
     const user = userEvent.setup();
     render(<Switch />);
 
-    const switchEl = screen.getByRole('switch');
+    const switchEl = screen.getByRole("switch");
     expect(switchEl).not.toBeChecked();
 
     await user.click(switchEl);
@@ -28,39 +28,42 @@ describe('Switch', () => {
     expect(switchEl).not.toBeChecked();
   });
 
-  it('has data-slot attribute', () => {
+  it("has data-slot attribute", () => {
     render(<Switch data-testid="switch" />);
-    expect(screen.getByTestId('switch')).toHaveAttribute('data-slot', 'switch');
+    expect(screen.getByTestId("switch")).toHaveAttribute("data-slot", "switch");
   });
 
-  it('applies disabled styling when disabled', () => {
+  it("applies disabled styling when disabled", () => {
     render(<Switch disabled data-testid="switch" />);
-    expect(screen.getByTestId('switch')).toHaveAttribute('data-disabled');
+    expect(screen.getByTestId("switch")).toHaveAttribute("data-disabled");
   });
 
-  it('does not toggle when disabled', async () => {
+  it("does not toggle when disabled", async () => {
     const user = userEvent.setup();
     render(<Switch disabled />);
 
-    const switchEl = screen.getByRole('switch');
+    const switchEl = screen.getByRole("switch");
     expect(switchEl).not.toBeChecked();
 
     await user.click(switchEl);
     expect(switchEl).not.toBeChecked();
   });
 
-  it('supports required attribute', () => {
+  it("supports required attribute", () => {
     render(<Switch required data-testid="switch" />);
-    expect(screen.getByTestId('switch')).toHaveAttribute('data-required');
+    expect(screen.getByTestId("switch")).toHaveAttribute("data-required");
   });
 
-  it('applies size variant', () => {
+  it("applies size variant", () => {
     render(<Switch size="sm" data-testid="switch" />);
-    expect(screen.getByTestId('switch')).toHaveAttribute('data-size', 'sm');
+    expect(screen.getByTestId("switch")).toHaveAttribute("data-size", "sm");
   });
 
-  it('defaults to default size', () => {
+  it("defaults to default size", () => {
     render(<Switch data-testid="switch" />);
-    expect(screen.getByTestId('switch')).toHaveAttribute('data-size', 'default');
+    expect(screen.getByTestId("switch")).toHaveAttribute(
+      "data-size",
+      "default",
+    );
   });
 });

@@ -1,34 +1,34 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, within } from 'storybook/test';
-import { Stack, VStack, HStack, Badge } from '@oppulence/design-system';
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import { expect, within } from "storybook/test";
+import { Stack, VStack, HStack, Badge } from "@oppulence/design-system";
 
 const meta = {
-  title: 'Atoms/Stack',
+  title: "Atoms/Stack",
   component: Stack,
   parameters: {
-    layout: 'centered',
+    layout: "centered",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
   argTypes: {
     direction: {
-      control: 'select',
-      options: ['row', 'column', 'row-reverse', 'column-reverse'],
+      control: "select",
+      options: ["row", "column", "row-reverse", "column-reverse"],
     },
     gap: {
-      control: 'select',
-      options: ['none', 'xs', 'sm', 'md', 'lg', 'xl'],
+      control: "select",
+      options: ["none", "xs", "sm", "md", "lg", "xl"],
     },
     align: {
-      control: 'select',
-      options: ['start', 'center', 'end', 'stretch', 'baseline'],
+      control: "select",
+      options: ["start", "center", "end", "stretch", "baseline"],
     },
     justify: {
-      control: 'select',
-      options: ['start', 'center', 'end', 'between', 'around', 'evenly'],
+      control: "select",
+      options: ["start", "center", "end", "between", "around", "evenly"],
     },
     wrap: {
-      control: 'select',
-      options: ['nowrap', 'wrap', 'wrap-reverse'],
+      control: "select",
+      options: ["nowrap", "wrap", "wrap-reverse"],
     },
   },
 } satisfies Meta<typeof Stack>;
@@ -59,7 +59,7 @@ export const Default: Story = {
 
 export const Horizontal: Story = {
   args: {
-    direction: 'row',
+    direction: "row",
   },
   render: (args) => (
     <Stack {...args}>
@@ -71,7 +71,7 @@ export const Horizontal: Story = {
 };
 
 export const VStackExample: Story = {
-  name: 'VStack',
+  name: "VStack",
   render: () => (
     <VStack gap="md">
       <Box>1</Box>
@@ -87,7 +87,7 @@ export const VStackExample: Story = {
 };
 
 export const HStackExample: Story = {
-  name: 'HStack',
+  name: "HStack",
   render: () => (
     <HStack gap="md">
       <Box>1</Box>

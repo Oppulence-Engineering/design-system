@@ -1,17 +1,17 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Breadcrumb, Stack, Text } from '@oppulence/design-system';
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import { Breadcrumb, Stack, Text } from "@oppulence/design-system";
 
 const meta = {
-  title: 'Molecules/Breadcrumb',
+  title: "Molecules/Breadcrumb",
   component: Breadcrumb,
   parameters: {
-    layout: 'centered',
+    layout: "centered",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
   argTypes: {
     separator: {
-      control: 'select',
-      options: ['chevron', 'slash', 'arrow'],
+      control: "select",
+      options: ["chevron", "slash", "arrow"],
     },
   },
 } satisfies Meta<typeof Breadcrumb>;
@@ -23,26 +23,26 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   args: {
     items: [
-      { label: 'Home', href: '/' },
-      { label: 'Documentation', href: '/docs' },
-      { label: 'Components' },
+      { label: "Home", href: "/" },
+      { label: "Documentation", href: "/docs" },
+      { label: "Components" },
     ],
   },
 };
 
 export const TwoLevels: Story = {
   args: {
-    items: [{ label: 'Dashboard', href: '/dashboard' }, { label: 'Settings' }],
+    items: [{ label: "Dashboard", href: "/dashboard" }, { label: "Settings" }],
   },
 };
 
 export const FourLevels: Story = {
   args: {
     items: [
-      { label: 'Home', href: '/' },
-      { label: 'Products', href: '/products' },
-      { label: 'Electronics', href: '/products/electronics' },
-      { label: 'Smartphones' },
+      { label: "Home", href: "/" },
+      { label: "Products", href: "/products" },
+      { label: "Electronics", href: "/products/electronics" },
+      { label: "Smartphones" },
     ],
   },
 };
@@ -50,33 +50,33 @@ export const FourLevels: Story = {
 // Separator variants
 export const ChevronSeparator: Story = {
   args: {
-    separator: 'chevron',
+    separator: "chevron",
     items: [
-      { label: 'Home', href: '/' },
-      { label: 'Settings', href: '/settings' },
-      { label: 'Profile' },
+      { label: "Home", href: "/" },
+      { label: "Settings", href: "/settings" },
+      { label: "Profile" },
     ],
   },
 };
 
 export const SlashSeparator: Story = {
   args: {
-    separator: 'slash',
+    separator: "slash",
     items: [
-      { label: 'Home', href: '/' },
-      { label: 'Settings', href: '/settings' },
-      { label: 'Profile' },
+      { label: "Home", href: "/" },
+      { label: "Settings", href: "/settings" },
+      { label: "Profile" },
     ],
   },
 };
 
 export const ArrowSeparator: Story = {
   args: {
-    separator: 'arrow',
+    separator: "arrow",
     items: [
-      { label: 'Home', href: '/' },
-      { label: 'Settings', href: '/settings' },
-      { label: 'Profile' },
+      { label: "Home", href: "/" },
+      { label: "Settings", href: "/settings" },
+      { label: "Profile" },
     ],
   },
 };
@@ -91,9 +91,9 @@ export const AllSeparators: Story = {
         <Breadcrumb
           separator="chevron"
           items={[
-            { label: 'Home', href: '/' },
-            { label: 'Docs', href: '/docs' },
-            { label: 'Page' },
+            { label: "Home", href: "/" },
+            { label: "Docs", href: "/docs" },
+            { label: "Page" },
           ]}
         />
       </Stack>
@@ -104,9 +104,9 @@ export const AllSeparators: Story = {
         <Breadcrumb
           separator="slash"
           items={[
-            { label: 'Home', href: '/' },
-            { label: 'Docs', href: '/docs' },
-            { label: 'Page' },
+            { label: "Home", href: "/" },
+            { label: "Docs", href: "/docs" },
+            { label: "Page" },
           ]}
         />
       </Stack>
@@ -117,9 +117,9 @@ export const AllSeparators: Story = {
         <Breadcrumb
           separator="arrow"
           items={[
-            { label: 'Home', href: '/' },
-            { label: 'Docs', href: '/docs' },
-            { label: 'Page' },
+            { label: "Home", href: "/" },
+            { label: "Docs", href: "/docs" },
+            { label: "Page" },
           ]}
         />
       </Stack>
@@ -132,12 +132,12 @@ export const AllSeparators: Story = {
 export const AutoCollapse: Story = {
   args: {
     items: [
-      { label: 'Home', href: '/' },
-      { label: 'Products', href: '/products' },
-      { label: 'Electronics', href: '/electronics' },
-      { label: 'Phones', href: '/phones' },
-      { label: 'Smartphones', href: '/smartphones' },
-      { label: 'iPhone 15' },
+      { label: "Home", href: "/" },
+      { label: "Products", href: "/products" },
+      { label: "Electronics", href: "/electronics" },
+      { label: "Phones", href: "/phones" },
+      { label: "Smartphones", href: "/smartphones" },
+      { label: "iPhone 15" },
     ],
     // maxItems defaults to 4, so this will auto-collapse
     // Click the ellipsis to see Products, Electronics, Phones in a dropdown!
@@ -154,12 +154,12 @@ export const AutoCollapseComparison: Story = {
         <Breadcrumb
           maxItems={0}
           items={[
-            { label: 'Home', href: '/' },
-            { label: 'Products', href: '/products' },
-            { label: 'Electronics', href: '/electronics' },
-            { label: 'Phones', href: '/phones' },
-            { label: 'Smartphones', href: '/smartphones' },
-            { label: 'iPhone 15' },
+            { label: "Home", href: "/" },
+            { label: "Products", href: "/products" },
+            { label: "Electronics", href: "/electronics" },
+            { label: "Phones", href: "/phones" },
+            { label: "Smartphones", href: "/smartphones" },
+            { label: "iPhone 15" },
           ]}
         />
       </Stack>
@@ -169,12 +169,12 @@ export const AutoCollapseComparison: Story = {
         </Text>
         <Breadcrumb
           items={[
-            { label: 'Home', href: '/' },
-            { label: 'Products', href: '/products' },
-            { label: 'Electronics', href: '/electronics' },
-            { label: 'Phones', href: '/phones' },
-            { label: 'Smartphones', href: '/smartphones' },
-            { label: 'iPhone 15' },
+            { label: "Home", href: "/" },
+            { label: "Products", href: "/products" },
+            { label: "Electronics", href: "/electronics" },
+            { label: "Phones", href: "/phones" },
+            { label: "Smartphones", href: "/smartphones" },
+            { label: "iPhone 15" },
           ]}
         />
       </Stack>
@@ -185,12 +185,12 @@ export const AutoCollapseComparison: Story = {
         <Breadcrumb
           maxItems={5}
           items={[
-            { label: 'Home', href: '/' },
-            { label: 'Products', href: '/products' },
-            { label: 'Electronics', href: '/electronics' },
-            { label: 'Phones', href: '/phones' },
-            { label: 'Smartphones', href: '/smartphones' },
-            { label: 'iPhone 15' },
+            { label: "Home", href: "/" },
+            { label: "Products", href: "/products" },
+            { label: "Electronics", href: "/electronics" },
+            { label: "Phones", href: "/phones" },
+            { label: "Smartphones", href: "/smartphones" },
+            { label: "iPhone 15" },
           ]}
         />
       </Stack>
@@ -209,12 +209,12 @@ export const CustomCollapseSettings: Story = {
           maxItems={4}
           itemsBeforeCollapse={2}
           items={[
-            { label: 'Home', href: '/' },
-            { label: 'Products', href: '/products' },
-            { label: 'Electronics', href: '/electronics' },
-            { label: 'Phones', href: '/phones' },
-            { label: 'Smartphones', href: '/smartphones' },
-            { label: 'iPhone 15' },
+            { label: "Home", href: "/" },
+            { label: "Products", href: "/products" },
+            { label: "Electronics", href: "/electronics" },
+            { label: "Phones", href: "/phones" },
+            { label: "Smartphones", href: "/smartphones" },
+            { label: "iPhone 15" },
           ]}
         />
       </Stack>
@@ -226,12 +226,12 @@ export const CustomCollapseSettings: Story = {
           maxItems={5}
           itemsBeforeCollapse={2}
           items={[
-            { label: 'Home', href: '/' },
-            { label: 'Products', href: '/products' },
-            { label: 'Electronics', href: '/electronics' },
-            { label: 'Phones', href: '/phones' },
-            { label: 'Smartphones', href: '/smartphones' },
-            { label: 'iPhone 15' },
+            { label: "Home", href: "/" },
+            { label: "Products", href: "/products" },
+            { label: "Electronics", href: "/electronics" },
+            { label: "Phones", href: "/phones" },
+            { label: "Smartphones", href: "/smartphones" },
+            { label: "iPhone 15" },
           ]}
         />
       </Stack>
@@ -244,10 +244,10 @@ export const ManualEllipsis: Story = {
   args: {
     maxItems: 0, // Disable auto-collapse
     items: [
-      { label: 'Home', href: '/' },
+      { label: "Home", href: "/" },
       { isEllipsis: true },
-      { label: 'Components', href: '/components' },
-      { label: 'Breadcrumb' },
+      { label: "Components", href: "/components" },
+      { label: "Breadcrumb" },
     ],
   },
 };

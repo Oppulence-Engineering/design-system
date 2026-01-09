@@ -1,13 +1,13 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Progress, Stack, Text } from '@oppulence/design-system';
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import { Progress, Stack, Text } from "@oppulence/design-system";
 
 const meta = {
-  title: 'Atoms/Progress',
+  title: "Atoms/Progress",
   component: Progress,
   parameters: {
-    layout: 'centered',
+    layout: "centered",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
 } satisfies Meta<typeof Progress>;
 
 export default meta;

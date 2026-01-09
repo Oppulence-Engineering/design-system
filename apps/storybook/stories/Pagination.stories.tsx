@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import {
   Pagination,
   PaginationContent,
@@ -7,15 +7,15 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from '@oppulence/design-system';
+} from "@oppulence/design-system";
 
 const meta = {
-  title: 'Molecules/Pagination',
+  title: "Molecules/Pagination",
   component: Pagination,
   parameters: {
-    layout: 'centered',
+    layout: "centered",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
 } satisfies Meta<typeof Pagination>;
 
 export default meta;
@@ -32,7 +32,9 @@ export const Default: Story = {
           <PaginationLink href="#">1</PaginationLink>
         </PaginationItem>
         <PaginationItem>
-          <PaginationLink href="#" isActive>2</PaginationLink>
+          <PaginationLink href="#" isActive>
+            2
+          </PaginationLink>
         </PaginationItem>
         <PaginationItem>
           <PaginationLink href="#">3</PaginationLink>
@@ -65,7 +67,9 @@ export const WithEllipsis: Story = {
           <PaginationLink href="#">4</PaginationLink>
         </PaginationItem>
         <PaginationItem>
-          <PaginationLink href="#" isActive>5</PaginationLink>
+          <PaginationLink href="#" isActive>
+            5
+          </PaginationLink>
         </PaginationItem>
         <PaginationItem>
           <PaginationLink href="#">6</PaginationLink>
@@ -98,4 +102,3 @@ export const Simple: Story = {
     </Pagination>
   ),
 };
-

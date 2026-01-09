@@ -1,13 +1,13 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Label, Slider, Stack, Text } from '@oppulence/design-system';
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import { Label, Slider, Stack, Text } from "@oppulence/design-system";
 
 const meta = {
-  title: 'Atoms/Slider',
+  title: "Atoms/Slider",
   component: Slider,
   parameters: {
-    layout: 'centered',
+    layout: "centered",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
 } satisfies Meta<typeof Slider>;
 
 export default meta;

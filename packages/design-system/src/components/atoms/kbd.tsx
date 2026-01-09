@@ -1,4 +1,4 @@
-function Kbd({ ...props }: Omit<React.ComponentProps<'kbd'>, 'className'>) {
+function Kbd({ ...props }: Omit<React.ComponentProps<"kbd">, "className">) {
   return (
     <kbd
       data-slot="kbd"
@@ -8,7 +8,9 @@ function Kbd({ ...props }: Omit<React.ComponentProps<'kbd'>, 'className'>) {
   );
 }
 
-function KbdGroup({ ...props }: Omit<React.ComponentProps<'div'>, 'className'>) {
+function KbdGroup({
+  ...props
+}: Omit<React.ComponentProps<"div">, "className">) {
   return (
     <kbd
       data-slot="kbd-group"

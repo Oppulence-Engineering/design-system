@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import {
   Avatar,
   AvatarFallback,
@@ -11,24 +11,31 @@ import {
   ItemSeparator,
   ItemTitle,
   Stack,
-} from '@oppulence/design-system';
-import { ChevronRight, FileText, Folder, Mail, Settings, User } from 'lucide-react';
+} from "@oppulence/design-system";
+import {
+  ChevronRight,
+  FileText,
+  Folder,
+  Mail,
+  Settings,
+  User,
+} from "lucide-react";
 
 const meta = {
-  title: 'Molecules/Item',
+  title: "Molecules/Item",
   component: Item,
   parameters: {
-    layout: 'centered',
+    layout: "centered",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
   argTypes: {
     variant: {
-      control: 'select',
-      options: ['default', 'outline'],
+      control: "select",
+      options: ["default", "outline"],
     },
     size: {
-      control: 'select',
-      options: ['default', 'sm', 'xs'],
+      control: "select",
+      options: ["default", "sm", "xs"],
     },
   },
 } satisfies Meta<typeof Item>;

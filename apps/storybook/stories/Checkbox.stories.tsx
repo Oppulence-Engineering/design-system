@@ -1,13 +1,13 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Checkbox, Label, Stack } from '@oppulence/design-system';
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import { Checkbox, Label, Stack } from "@oppulence/design-system";
 
 const meta = {
-  title: 'Atoms/Checkbox',
+  title: "Atoms/Checkbox",
   component: Checkbox,
   parameters: {
-    layout: 'centered',
+    layout: "centered",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
 } satisfies Meta<typeof Checkbox>;
 
 export default meta;
@@ -63,4 +63,3 @@ export const CheckboxGroup: Story = {
     </Stack>
   ),
 };
-

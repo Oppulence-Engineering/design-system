@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import {
   Button,
   Input,
@@ -11,15 +11,15 @@ import {
   SheetTitle,
   SheetTrigger,
   Stack,
-} from '@oppulence/design-system';
+} from "@oppulence/design-system";
 
 const meta = {
-  title: 'Organisms/Sheet',
+  title: "Organisms/Sheet",
   component: Sheet,
   parameters: {
-    layout: 'centered',
+    layout: "centered",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
 } satisfies Meta<typeof Sheet>;
 
 export default meta;
@@ -28,7 +28,9 @@ type Story = StoryObj<typeof meta>;
 export const Right: Story = {
   render: () => (
     <Sheet>
-      <SheetTrigger render={<Button variant="outline" />}>Open Sheet</SheetTrigger>
+      <SheetTrigger render={<Button variant="outline" />}>
+        Open Sheet
+      </SheetTrigger>
       <SheetContent>
         <SheetHeader>
           <SheetTitle>Edit profile</SheetTitle>
@@ -59,11 +61,15 @@ export const Right: Story = {
 export const Left: Story = {
   render: () => (
     <Sheet>
-      <SheetTrigger render={<Button variant="outline" />}>Open Left</SheetTrigger>
+      <SheetTrigger render={<Button variant="outline" />}>
+        Open Left
+      </SheetTrigger>
       <SheetContent side="left">
         <SheetHeader>
           <SheetTitle>Navigation</SheetTitle>
-          <SheetDescription>Browse through different sections.</SheetDescription>
+          <SheetDescription>
+            Browse through different sections.
+          </SheetDescription>
         </SheetHeader>
         <div className="py-4">
           <Stack gap="2">
@@ -89,11 +95,15 @@ export const Left: Story = {
 export const Top: Story = {
   render: () => (
     <Sheet>
-      <SheetTrigger render={<Button variant="outline" />}>Open Top</SheetTrigger>
+      <SheetTrigger render={<Button variant="outline" />}>
+        Open Top
+      </SheetTrigger>
       <SheetContent side="top">
         <SheetHeader>
           <SheetTitle>Notification</SheetTitle>
-          <SheetDescription>You have a new message from the system.</SheetDescription>
+          <SheetDescription>
+            You have a new message from the system.
+          </SheetDescription>
         </SheetHeader>
       </SheetContent>
     </Sheet>
@@ -103,7 +113,9 @@ export const Top: Story = {
 export const Bottom: Story = {
   render: () => (
     <Sheet>
-      <SheetTrigger render={<Button variant="outline" />}>Open Bottom</SheetTrigger>
+      <SheetTrigger render={<Button variant="outline" />}>
+        Open Bottom
+      </SheetTrigger>
       <SheetContent side="bottom">
         <SheetHeader>
           <SheetTitle>Actions</SheetTitle>

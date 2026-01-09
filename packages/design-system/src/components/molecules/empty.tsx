@@ -1,6 +1,6 @@
-import { cva, type VariantProps } from 'class-variance-authority';
+import { cva, type VariantProps } from "class-variance-authority";
 
-function Empty({ ...props }: Omit<React.ComponentProps<'div'>, 'className'>) {
+function Empty({ ...props }: Omit<React.ComponentProps<"div">, "className">) {
   return (
     <div
       data-slot="empty"
@@ -10,7 +10,9 @@ function Empty({ ...props }: Omit<React.ComponentProps<'div'>, 'className'>) {
   );
 }
 
-function EmptyHeader({ ...props }: Omit<React.ComponentProps<'div'>, 'className'>) {
+function EmptyHeader({
+  ...props
+}: Omit<React.ComponentProps<"div">, "className">) {
   return (
     <div
       data-slot="empty-header"
@@ -21,24 +23,25 @@ function EmptyHeader({ ...props }: Omit<React.ComponentProps<'div'>, 'className'
 }
 
 const emptyMediaVariants = cva(
-  'mb-2 flex shrink-0 items-center justify-center [&_svg]:pointer-events-none [&_svg]:shrink-0',
+  "mb-2 flex shrink-0 items-center justify-center [&_svg]:pointer-events-none [&_svg]:shrink-0",
   {
     variants: {
       variant: {
-        default: 'bg-transparent',
+        default: "bg-transparent",
         icon: "bg-muted text-foreground flex size-10 shrink-0 items-center justify-center rounded-lg [&_svg:not([class*='size-'])]:size-6",
       },
     },
     defaultVariants: {
-      variant: 'default',
+      variant: "default",
     },
   },
 );
 
 function EmptyMedia({
-  variant = 'default',
+  variant = "default",
   ...props
-}: Omit<React.ComponentProps<'div'>, 'className'> & VariantProps<typeof emptyMediaVariants>) {
+}: Omit<React.ComponentProps<"div">, "className"> &
+  VariantProps<typeof emptyMediaVariants>) {
   return (
     <div
       data-slot="empty-icon"
@@ -49,7 +52,9 @@ function EmptyMedia({
   );
 }
 
-function EmptyTitle({ ...props }: Omit<React.ComponentProps<'div'>, 'className'>) {
+function EmptyTitle({
+  ...props
+}: Omit<React.ComponentProps<"div">, "className">) {
   return (
     <div
       data-slot="empty-title"
@@ -59,7 +64,9 @@ function EmptyTitle({ ...props }: Omit<React.ComponentProps<'div'>, 'className'>
   );
 }
 
-function EmptyDescription({ ...props }: Omit<React.ComponentProps<'p'>, 'className'>) {
+function EmptyDescription({
+  ...props
+}: Omit<React.ComponentProps<"p">, "className">) {
   return (
     <div
       data-slot="empty-description"
@@ -69,7 +76,9 @@ function EmptyDescription({ ...props }: Omit<React.ComponentProps<'p'>, 'classNa
   );
 }
 
-function EmptyContent({ ...props }: Omit<React.ComponentProps<'div'>, 'className'>) {
+function EmptyContent({
+  ...props
+}: Omit<React.ComponentProps<"div">, "className">) {
   return (
     <div
       data-slot="empty-content"
@@ -79,4 +88,11 @@ function EmptyContent({ ...props }: Omit<React.ComponentProps<'div'>, 'className
   );
 }
 
-export { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle };
+export {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+};

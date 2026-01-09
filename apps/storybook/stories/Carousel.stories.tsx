@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import {
   Carousel,
   CarouselContent,
@@ -7,15 +7,15 @@ import {
   CarouselPrevious,
   Card,
   CardContent,
-} from '@oppulence/design-system';
+} from "@oppulence/design-system";
 
 const meta = {
-  title: 'Organisms/Carousel',
+  title: "Organisms/Carousel",
   component: Carousel,
   parameters: {
-    layout: 'centered',
+    layout: "centered",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
 } satisfies Meta<typeof Carousel>;
 
 export default meta;
@@ -32,7 +32,9 @@ export const Default: Story = {
                 <Card>
                   <CardContent>
                     <div className="flex aspect-square items-center justify-center p-6">
-                      <span className="text-4xl font-semibold">{index + 1}</span>
+                      <span className="text-4xl font-semibold">
+                        {index + 1}
+                      </span>
                     </div>
                   </CardContent>
                 </Card>
@@ -58,7 +60,9 @@ export const MultipleItems: Story = {
                 <Card>
                   <CardContent>
                     <div className="flex aspect-square items-center justify-center p-6">
-                      <span className="text-2xl font-semibold">{index + 1}</span>
+                      <span className="text-2xl font-semibold">
+                        {index + 1}
+                      </span>
                     </div>
                   </CardContent>
                 </Card>
@@ -76,7 +80,7 @@ export const MultipleItems: Story = {
 export const Orientation: Story = {
   render: () => (
     <div className="w-full max-w-xs">
-      <Carousel opts={{ align: 'start' }} orientation="vertical">
+      <Carousel opts={{ align: "start" }} orientation="vertical">
         <CarouselContent>
           {Array.from({ length: 5 }).map((_, index) => (
             <CarouselItem key={index}>
@@ -84,7 +88,9 @@ export const Orientation: Story = {
                 <Card>
                   <CardContent>
                     <div className="flex items-center justify-center p-6">
-                      <span className="text-3xl font-semibold">{index + 1}</span>
+                      <span className="text-3xl font-semibold">
+                        {index + 1}
+                      </span>
                     </div>
                   </CardContent>
                 </Card>

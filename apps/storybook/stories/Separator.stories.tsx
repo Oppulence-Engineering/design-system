@@ -1,17 +1,17 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Separator, Stack, Text } from '@oppulence/design-system';
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import { Separator, Stack, Text } from "@oppulence/design-system";
 
 const meta = {
-  title: 'Atoms/Separator',
+  title: "Atoms/Separator",
   component: Separator,
   parameters: {
-    layout: 'centered',
+    layout: "centered",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
   argTypes: {
     orientation: {
-      control: 'select',
-      options: ['horizontal', 'vertical'],
+      control: "select",
+      options: ["horizontal", "vertical"],
     },
   },
 } satisfies Meta<typeof Separator>;

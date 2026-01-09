@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import {
   Badge,
@@ -16,27 +16,63 @@ import {
   TabsList,
   TabsTrigger,
   Text,
-} from '@oppulence/design-system';
-import { ArrowLeftIcon, CalendarIcon, CheckCircleIcon, CircleIcon, UsersIcon } from 'lucide-react';
-import Link from 'next/link';
-import { use } from 'react';
+} from "@oppulence/design-system";
+import {
+  ArrowLeftIcon,
+  CalendarIcon,
+  CheckCircleIcon,
+  CircleIcon,
+  UsersIcon,
+} from "lucide-react";
+import Link from "next/link";
+import { use } from "react";
 
 const projectData = {
-  '1': { name: 'Website Redesign', status: 'In Progress', members: 5, dueDate: 'Feb 15, 2024' },
-  '2': { name: 'Mobile App v2.0', status: 'On Track', members: 8, dueDate: 'Mar 1, 2024' },
-  '3': { name: 'API Integration', status: 'At Risk', members: 3, dueDate: 'Jan 30, 2024' },
-  '4': { name: 'Security Audit', status: 'Completed', members: 2, dueDate: 'Jan 10, 2024' },
-  '5': { name: 'Data Migration', status: 'Overdue', members: 4, dueDate: 'Jan 5, 2024' },
-  '6': { name: 'Design System', status: 'In Progress', members: 3, dueDate: 'Apr 1, 2024' },
+  "1": {
+    name: "Website Redesign",
+    status: "In Progress",
+    members: 5,
+    dueDate: "Feb 15, 2024",
+  },
+  "2": {
+    name: "Mobile App v2.0",
+    status: "On Track",
+    members: 8,
+    dueDate: "Mar 1, 2024",
+  },
+  "3": {
+    name: "API Integration",
+    status: "At Risk",
+    members: 3,
+    dueDate: "Jan 30, 2024",
+  },
+  "4": {
+    name: "Security Audit",
+    status: "Completed",
+    members: 2,
+    dueDate: "Jan 10, 2024",
+  },
+  "5": {
+    name: "Data Migration",
+    status: "Overdue",
+    members: 4,
+    dueDate: "Jan 5, 2024",
+  },
+  "6": {
+    name: "Design System",
+    status: "In Progress",
+    members: 3,
+    dueDate: "Apr 1, 2024",
+  },
 };
 
 const tasks = [
-  { id: 1, title: 'Setup project repository', completed: true },
-  { id: 2, title: 'Create wireframes', completed: true },
-  { id: 3, title: 'Design homepage mockup', completed: true },
-  { id: 4, title: 'Implement responsive navigation', completed: false },
-  { id: 5, title: 'Build component library', completed: false },
-  { id: 6, title: 'User testing', completed: false },
+  { id: 1, title: "Setup project repository", completed: true },
+  { id: 2, title: "Create wireframes", completed: true },
+  { id: 3, title: "Design homepage mockup", completed: true },
+  { id: 4, title: "Implement responsive navigation", completed: false },
+  { id: 5, title: "Build component library", completed: false },
+  { id: 6, title: "User testing", completed: false },
 ];
 
 export default function ProjectDetailPage({
@@ -45,7 +81,8 @@ export default function ProjectDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
-  const project = projectData[id as keyof typeof projectData] || projectData['1'];
+  const project =
+    projectData[id as keyof typeof projectData] || projectData["1"];
 
   return (
     <Stack gap="6">
@@ -61,11 +98,15 @@ export default function ProjectDetailPage({
             <Badge>{project.status}</Badge>
             <HStack gap="1" align="center">
               <UsersIcon className="size-4 text-muted-foreground" />
-              <Text variant="muted" size="sm">{project.members} members</Text>
+              <Text variant="muted" size="sm">
+                {project.members} members
+              </Text>
             </HStack>
             <HStack gap="1" align="center">
               <CalendarIcon className="size-4 text-muted-foreground" />
-              <Text variant="muted" size="sm">Due {project.dueDate}</Text>
+              <Text variant="muted" size="sm">
+                Due {project.dueDate}
+              </Text>
             </HStack>
           </HStack>
         </Stack>
@@ -93,7 +134,10 @@ export default function ProjectDetailPage({
                     <Text weight="semibold">3 / 6</Text>
                   </div>
                   <div className="h-3 bg-muted rounded-full overflow-hidden">
-                    <div className="h-full bg-primary rounded-full" style={{ width: '50%' }} />
+                    <div
+                      className="h-full bg-primary rounded-full"
+                      style={{ width: "50%" }}
+                    />
                   </div>
                 </Stack>
               </CardContent>
@@ -109,17 +153,23 @@ export default function ProjectDetailPage({
                   <div className="flex items-center gap-2">
                     <div className="size-2 rounded-full bg-green-500" />
                     <Text size="sm">Design mockup approved</Text>
-                    <Text variant="muted" size="sm">2h ago</Text>
+                    <Text variant="muted" size="sm">
+                      2h ago
+                    </Text>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="size-2 rounded-full bg-blue-500" />
                     <Text size="sm">New file uploaded</Text>
-                    <Text variant="muted" size="sm">4h ago</Text>
+                    <Text variant="muted" size="sm">
+                      4h ago
+                    </Text>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="size-2 rounded-full bg-yellow-500" />
                     <Text size="sm">Comment added</Text>
-                    <Text variant="muted" size="sm">1d ago</Text>
+                    <Text variant="muted" size="sm">
+                      1d ago
+                    </Text>
                   </div>
                 </Stack>
               </CardContent>
@@ -131,7 +181,9 @@ export default function ProjectDetailPage({
           <Card>
             <CardHeader>
               <CardTitle>Tasks</CardTitle>
-              <CardDescription>Track project tasks and progress</CardDescription>
+              <CardDescription>
+                Track project tasks and progress
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <Stack gap="2">
@@ -145,7 +197,13 @@ export default function ProjectDetailPage({
                     ) : (
                       <CircleIcon className="size-5 text-muted-foreground" />
                     )}
-                    <span className={task.completed ? 'line-through text-muted-foreground' : ''}>
+                    <span
+                      className={
+                        task.completed
+                          ? "line-through text-muted-foreground"
+                          : ""
+                      }
+                    >
                       {task.title}
                     </span>
                   </div>

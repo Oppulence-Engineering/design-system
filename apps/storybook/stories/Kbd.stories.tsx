@@ -1,13 +1,13 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Kbd, Stack, Text } from '@oppulence/design-system';
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import { Kbd, Stack, Text } from "@oppulence/design-system";
 
 const meta = {
-  title: 'Atoms/Kbd',
+  title: "Atoms/Kbd",
   component: Kbd,
   parameters: {
-    layout: 'centered',
+    layout: "centered",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
 } satisfies Meta<typeof Kbd>;
 
 export default meta;
@@ -15,13 +15,13 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
-    children: '⌘',
+    children: "⌘",
   },
 };
 
 export const SingleKey: Story = {
   args: {
-    children: 'K',
+    children: "K",
   },
 };
 

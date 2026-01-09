@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import {
   Avatar,
   AvatarFallback,
@@ -9,16 +9,16 @@ import {
   HoverCardTrigger,
   Stack,
   Text,
-} from '@oppulence/design-system';
-import { CalendarDays } from 'lucide-react';
+} from "@oppulence/design-system";
+import { CalendarDays } from "lucide-react";
 
 const meta = {
-  title: 'Molecules/HoverCard',
+  title: "Molecules/HoverCard",
   component: HoverCard,
   parameters: {
-    layout: 'centered',
+    layout: "centered",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
 } satisfies Meta<typeof HoverCard>;
 
 export default meta;
@@ -27,7 +27,9 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   render: () => (
     <HoverCard>
-      <HoverCardTrigger render={<Button variant="link" />}>@nextjs</HoverCardTrigger>
+      <HoverCardTrigger render={<Button variant="link" />}>
+        @nextjs
+      </HoverCardTrigger>
       <HoverCardContent>
         <div className="flex justify-between space-x-4">
           <Avatar>
@@ -37,7 +39,9 @@ export const Default: Story = {
           <div className="flex-1">
             <Stack gap="1">
               <h4 className="text-sm font-semibold">@nextjs</h4>
-              <Text size="sm">The React Framework – created and maintained by @vercel.</Text>
+              <Text size="sm">
+                The React Framework – created and maintained by @vercel.
+              </Text>
               <div className="flex items-center pt-2">
                 <CalendarDays className="mr-2 h-4 w-4 opacity-70" />
                 <Text size="xs" variant="muted">
@@ -55,7 +59,11 @@ export const Default: Story = {
 export const UserProfile: Story = {
   render: () => (
     <HoverCard>
-      <HoverCardTrigger render={<span className="text-sm text-primary cursor-pointer underline" />}>
+      <HoverCardTrigger
+        render={
+          <span className="text-sm text-primary cursor-pointer underline" />
+        }
+      >
         John Doe
       </HoverCardTrigger>
       <HoverCardContent>
@@ -70,7 +78,8 @@ export const UserProfile: Story = {
                 john.doe@example.com
               </Text>
               <Text size="sm">
-                Software Engineer at Acme Inc. Working on design systems and developer tools.
+                Software Engineer at Acme Inc. Working on design systems and
+                developer tools.
               </Text>
             </Stack>
           </div>

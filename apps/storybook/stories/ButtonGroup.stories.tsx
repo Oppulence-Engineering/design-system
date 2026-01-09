@@ -1,14 +1,27 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Button, ButtonGroup, ButtonGroupText, Stack, Text } from '@oppulence/design-system';
-import { ChevronLeft, ChevronRight, Grid, List, Minus, Plus } from 'lucide-react';
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import {
+  Button,
+  ButtonGroup,
+  ButtonGroupText,
+  Stack,
+  Text,
+} from "@oppulence/design-system";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Grid,
+  List,
+  Minus,
+  Plus,
+} from "lucide-react";
 
 const meta = {
-  title: 'Molecules/ButtonGroup',
+  title: "Molecules/ButtonGroup",
   component: ButtonGroup,
   parameters: {
-    layout: 'centered',
+    layout: "centered",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
 } satisfies Meta<typeof ButtonGroup>;
 
 export default meta;
