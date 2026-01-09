@@ -56,7 +56,7 @@ const recentThreats = [
 
 export default function CybersecurityPage() {
   return (
-    <PageLayout padding="default" container={false}>
+    <PageLayout padding="none" container={false}>
       <PageHeader title="Cybersecurity Dashboard">
         <PageHeaderDescription>
           Monitor your organization&apos;s security posture and threats.

@@ -123,7 +123,7 @@ export default function ControlsPage() {
   const passedControls = controlCategories.reduce((sum, c) => sum + c.passed, 0);
 
   return (
-    <PageLayout padding="default" container={false}>
+    <PageLayout padding="none" container={false}>
       <PageHeader title="Controls">
         <PageHeaderDescription>
           Monitor and manage your security controls across {totalControls} requirements.

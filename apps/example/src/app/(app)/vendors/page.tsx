@@ -147,7 +147,7 @@ function VendorCard({ vendor }: { vendor: typeof vendors[0] }) {
 
 export default function VendorsPage() {
   return (
-    <PageLayout padding="default" container={false}>
+    <PageLayout padding="none" container={false}>
       <PageHeader title="Vendors">
         <PageHeaderDescription>
           Manage third-party vendors and track their security assessments.

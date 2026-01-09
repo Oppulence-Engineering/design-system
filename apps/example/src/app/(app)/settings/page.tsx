@@ -13,7 +13,7 @@ import {
 
 export default function SettingsGeneralPage() {
   return (
-    <PageLayout padding="default" container={false}>
+    <PageLayout padding="none" container={false}>
       <PageHeader title="General Settings">
         <PageHeaderDescription>
           Manage your organization settings and preferences.

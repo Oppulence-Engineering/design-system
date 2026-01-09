@@ -15,7 +15,7 @@ import {
 
 export default function OverviewPage() {
   return (
-    <PageLayout padding="default" container={false}>
+    <PageLayout padding="none" container={false}>
       <PageHeader title="Overview">
         <PageHeaderDescription>
           Track your progress towards SOC 2 compliance.

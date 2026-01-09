@@ -83,7 +83,7 @@ function getStatusBadge(status: string) {
 
 export default function PoliciesPage() {
   return (
-    <PageLayout padding="default" container={false}>
+    <PageLayout padding="none" container={false}>
       <PageHeader title="Policies">
         <PageHeaderDescription>
           Manage your organization&apos;s security and compliance policies.
