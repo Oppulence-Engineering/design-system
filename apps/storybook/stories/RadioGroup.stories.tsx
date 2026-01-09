@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { RadioGroup, RadioGroupItem, Label, Stack } from '@trycompai/design-system';
+import { RadioGroup, RadioGroupItem, Label, Stack } from '@oppulence/design-system';
 
 const meta = {
   title: 'Molecules/RadioGroup',

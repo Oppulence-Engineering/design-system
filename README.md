@@ -4,7 +4,7 @@ A Turborepo containing the design system component library and Storybook documen
 
 ## Packages
 
-- `@trycompai/design-system` - React component library with Tailwind CSS
+- `@oppulence/design-system` - React component library with Tailwind CSS
 - `@comp/storybook` - Storybook documentation and component playground
 
 ## Getting Started
@@ -47,5 +47,5 @@ bun run build
 Build a specific package:
 
 ```sh
-bun run build --filter=@trycompai/design-system
+bun run build --filter=@oppulence/design-system
 ```

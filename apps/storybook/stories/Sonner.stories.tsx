@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Button, Stack, Toaster } from '@trycompai/design-system';
+import { Button, Stack, Toaster } from '@oppulence/design-system';
 import { toast } from 'sonner';
 
 const meta = {

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Calendar } from '@trycompai/design-system';
+import { Calendar } from '@oppulence/design-system';
 import { useState } from 'react';
 import type { DateRange } from 'react-day-picker';
 

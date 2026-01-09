@@ -6,7 +6,7 @@ import {
   InputOTPSlot,
   Stack,
   Text,
-} from '@trycompai/design-system';
+} from '@oppulence/design-system';
 
 // Using a wrapper component to avoid complex args type requirements from input-otp
 const InputOTPDemo = () => (

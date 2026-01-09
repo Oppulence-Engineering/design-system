@@ -7,7 +7,7 @@ import {
   CarouselPrevious,
   Card,
   CardContent,
-} from '@trycompai/design-system';
+} from '@oppulence/design-system';
 
 const meta = {
   title: 'Organisms/Carousel',

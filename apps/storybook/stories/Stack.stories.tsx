@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, within } from 'storybook/test';
-import { Stack, VStack, HStack, Badge } from '@trycompai/design-system';
+import { Stack, VStack, HStack, Badge } from '@oppulence/design-system';
 
 const meta = {
   title: 'Atoms/Stack',

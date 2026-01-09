@@ -7,7 +7,7 @@ import {
   EmptyMedia,
   EmptyTitle,
   Stack,
-} from '@trycompai/design-system';
+} from '@oppulence/design-system';
 import { FileX, Inbox, Search, Users } from 'lucide-react';
 
 const meta = {

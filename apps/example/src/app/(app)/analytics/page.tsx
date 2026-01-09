@@ -9,7 +9,7 @@ import {
   Heading,
   Stack,
   Text,
-} from '@trycompai/design-system';
+} from '@oppulence/design-system';
 import { TrendingDownIcon, TrendingUpIcon } from 'lucide-react';
 
 const metrics = [

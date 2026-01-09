@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@trycompai/design-system": "workspace:*",
+    "@oppulence/design-system": "workspace:*",
     "lucide-react": "^0.469.0",
     "next": "^15.0.0",
     "react": "^19.0.0",

@@ -13,7 +13,7 @@ import {
   Progress,
   Stack,
   Text,
-} from '@trycompai/design-system';
+} from '@oppulence/design-system';
 import { AlertTriangleIcon, CheckCircleIcon, ShieldAlertIcon, ShieldCheckIcon } from 'lucide-react';
 
 const securityMetrics = [

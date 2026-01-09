@@ -6,7 +6,7 @@ import {
   AlertTitle,
   Button,
   Stack,
-} from '@trycompai/design-system';
+} from '@oppulence/design-system';
 import { Rocket, X } from 'lucide-react';
 
 const meta = {

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Checkbox, Label, Stack } from '@trycompai/design-system';
+import { Checkbox, Label, Stack } from '@oppulence/design-system';
 
 const meta = {
   title: 'Atoms/Checkbox',

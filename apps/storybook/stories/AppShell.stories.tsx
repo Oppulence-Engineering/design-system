@@ -42,7 +42,7 @@ import {
   Stack,
   Text,
   ThemeToggle,
-} from '@trycompai/design-system';
+} from '@oppulence/design-system';
 import * as React from 'react';
 import {
   AlertTriangleIcon,

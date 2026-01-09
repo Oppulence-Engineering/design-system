@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Button, ButtonGroup, ButtonGroupText, Stack, Text } from '@trycompai/design-system';
+import { Button, ButtonGroup, ButtonGroupText, Stack, Text } from '@oppulence/design-system';
 import { ChevronLeft, ChevronRight, Grid, List, Minus, Plus } from 'lucide-react';
 
 const meta = {

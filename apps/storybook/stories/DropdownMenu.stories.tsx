@@ -15,7 +15,7 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-} from '@trycompai/design-system';
+} from '@oppulence/design-system';
 import {
   Cloud,
   CreditCard,

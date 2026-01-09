@@ -13,7 +13,7 @@ import {
   Stack,
   Input,
   Label,
-} from '@trycompai/design-system';
+} from '@oppulence/design-system';
 
 const meta = {
   title: 'Molecules/Section',

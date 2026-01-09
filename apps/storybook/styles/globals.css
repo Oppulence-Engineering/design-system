@@ -1,7 +1,7 @@
 @import 'tailwindcss';
 
 /* Import the design system styles */
-@import '@trycompai/design-system/globals.css';
+@import '@oppulence/design-system/globals.css';
 
 /* Scan for Tailwind classes in stories and design-system components */
 @source "../stories";

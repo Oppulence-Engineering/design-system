@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Skeleton, Stack } from '@trycompai/design-system';
+import { Skeleton, Stack } from '@oppulence/design-system';
 
 const meta = {
   title: 'Atoms/Skeleton',

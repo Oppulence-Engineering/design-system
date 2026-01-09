@@ -9,7 +9,7 @@ import {
   PageLayout,
   SettingsCard,
   Stack,
-} from '@trycompai/design-system';
+} from '@oppulence/design-system';
 
 export default function SettingsGeneralPage() {
   return (

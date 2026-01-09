@@ -6,7 +6,7 @@ import {
   AIChatHeader,
   Stack,
   Text,
-} from '@trycompai/design-system';
+} from '@oppulence/design-system';
 import { MessageCircleIcon, SparklesIcon, XIcon } from 'lucide-react';
 import * as React from 'react';
 

@@ -6,7 +6,7 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '@trycompai/design-system';
+} from '@oppulence/design-system';
 import { HelpCircle, Plus, Settings } from 'lucide-react';
 
 const meta = {

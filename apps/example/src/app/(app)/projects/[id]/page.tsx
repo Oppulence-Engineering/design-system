@@ -16,7 +16,7 @@ import {
   TabsList,
   TabsTrigger,
   Text,
-} from '@trycompai/design-system';
+} from '@oppulence/design-system';
 import { ArrowLeftIcon, CalendarIcon, CheckCircleIcon, CircleIcon, UsersIcon } from 'lucide-react';
 import Link from 'next/link';
 import { use } from 'react';

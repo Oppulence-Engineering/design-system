@@ -14,7 +14,7 @@ import {
   Progress,
   Stack,
   Text,
-} from '@trycompai/design-system';
+} from '@oppulence/design-system';
 import { CheckCircleIcon, CircleIcon, FilterIcon } from 'lucide-react';
 
 const controlCategories = [

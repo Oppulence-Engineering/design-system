@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { AspectRatio, Stack, Text } from '@trycompai/design-system';
+import { AspectRatio, Stack, Text } from '@oppulence/design-system';
 
 const meta = {
   title: 'Atoms/AspectRatio',

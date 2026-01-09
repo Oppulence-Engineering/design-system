@@ -3,7 +3,7 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: 'Comp Example App',
-  description: 'Example application using @trycompai/design-system',
+  description: 'Example application using @oppulence/design-system',
 };
 
 export default function RootLayout({

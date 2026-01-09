@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Breadcrumb, Stack, Text } from '@trycompai/design-system';
+import { Breadcrumb, Stack, Text } from '@oppulence/design-system';
 
 const meta = {
   title: 'Molecules/Breadcrumb',

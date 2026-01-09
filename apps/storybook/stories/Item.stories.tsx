@@ -11,7 +11,7 @@ import {
   ItemSeparator,
   ItemTitle,
   Stack,
-} from '@trycompai/design-system';
+} from '@oppulence/design-system';
 import { ChevronRight, FileText, Folder, Mail, Settings, User } from 'lucide-react';
 
 const meta = {

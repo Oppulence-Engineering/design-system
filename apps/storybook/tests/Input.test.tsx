@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
-import { Input } from '@trycompai/design-system';
+import { Input } from '@oppulence/design-system';
 
 describe('Input', () => {
   it('renders with default type', () => {

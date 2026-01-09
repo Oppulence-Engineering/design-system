@@ -11,7 +11,7 @@ import {
   SettingsCard,
   Stack,
   Text,
-} from '@trycompai/design-system';
+} from '@oppulence/design-system';
 import { useState } from 'react';
 
 const meta = {

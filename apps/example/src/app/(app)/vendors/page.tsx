@@ -15,7 +15,7 @@ import {
   PageLayout,
   Stack,
   Text,
-} from '@trycompai/design-system';
+} from '@oppulence/design-system';
 import { ExternalLinkIcon, MoreHorizontalIcon, PlusIcon, ShieldCheckIcon } from 'lucide-react';
 
 const vendors = [

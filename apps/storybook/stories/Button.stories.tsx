@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, within } from 'storybook/test';
-import { Button } from '@trycompai/design-system';
+import { Button } from '@oppulence/design-system';
 import { ArrowRight, Mail, Plus } from 'lucide-react';
 
 const meta = {

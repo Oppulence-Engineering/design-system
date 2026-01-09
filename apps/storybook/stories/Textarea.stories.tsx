@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Stack, Textarea } from '@trycompai/design-system';
+import { Stack, Textarea } from '@oppulence/design-system';
 
 const meta = {
   title: 'Atoms/Textarea',

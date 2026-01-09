@@ -14,7 +14,7 @@ import {
   TableHeader,
   TableRow,
   Text,
-} from '@trycompai/design-system';
+} from '@oppulence/design-system';
 import { MoreHorizontalIcon, PlusIcon } from 'lucide-react';
 
 const policies = [

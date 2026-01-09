@@ -10,7 +10,7 @@ import {
   Stack,
   Switch,
   Text,
-} from '@trycompai/design-system';
+} from '@oppulence/design-system';
 
 export default function SettingsNotificationsPage() {
   return (

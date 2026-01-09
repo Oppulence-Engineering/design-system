@@ -7,7 +7,7 @@ import {
   CardDescription,
   CardContent,
   CardFooter,
-} from '@trycompai/design-system';
+} from '@oppulence/design-system';
 
 describe('Card', () => {
   it('renders card with content', () => {

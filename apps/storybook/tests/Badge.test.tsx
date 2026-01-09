@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import { Badge } from '@trycompai/design-system';
+import { Badge } from '@oppulence/design-system';
 
 describe('Badge', () => {
   it('renders children', () => {

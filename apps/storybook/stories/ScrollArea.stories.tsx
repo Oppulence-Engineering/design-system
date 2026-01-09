@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { ScrollArea, Separator, Stack } from '@trycompai/design-system';
+import { ScrollArea, Separator, Stack } from '@oppulence/design-system';
 
 const meta = {
   title: 'Molecules/ScrollArea',

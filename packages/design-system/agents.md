@@ -155,5 +155,5 @@ import {
   Text,
   Badge,
   // ... etc
-} from '@trycompai/design-system';
+} from '@oppulence/design-system';
 ```

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Stack, Text, ToggleGroup, ToggleGroupItem } from '@trycompai/design-system';
+import { Stack, Text, ToggleGroup, ToggleGroupItem } from '@oppulence/design-system';
 import {
   AlignCenter,
   AlignJustify,

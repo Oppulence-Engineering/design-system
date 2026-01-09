@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@trycompai/design-system';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@oppulence/design-system';
 
 const meta = {
   title: 'Molecules/Accordion',

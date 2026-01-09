@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@trycompai/design-system';
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@oppulence/design-system';
 
 const meta = {
   title: 'Molecules/Resizable',

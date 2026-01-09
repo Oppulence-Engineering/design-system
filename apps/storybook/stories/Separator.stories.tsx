@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Separator, Stack, Text } from '@trycompai/design-system';
+import { Separator, Stack, Text } from '@oppulence/design-system';
 
 const meta = {
   title: 'Atoms/Separator',

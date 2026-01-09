@@ -7,7 +7,7 @@ import {
   CollapsibleTrigger,
   Stack,
   Text,
-} from '@trycompai/design-system';
+} from '@oppulence/design-system';
 import { ChevronsUpDown } from 'lucide-react';
 
 const meta = {

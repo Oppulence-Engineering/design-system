@@ -13,7 +13,7 @@ import {
   Label,
   Stack,
   Text,
-} from '@trycompai/design-system';
+} from '@oppulence/design-system';
 import { KeyIcon, ShieldCheckIcon, SmartphoneIcon } from 'lucide-react';
 
 export default function SettingsSecurityPage() {

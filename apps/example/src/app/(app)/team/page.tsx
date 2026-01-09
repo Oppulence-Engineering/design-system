@@ -11,7 +11,7 @@ import {
   Heading,
   Stack,
   Text,
-} from '@trycompai/design-system';
+} from '@oppulence/design-system';
 import { MailIcon, PlusIcon } from 'lucide-react';
 
 const teamMembers = [

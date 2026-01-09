@@ -1,13 +1,13 @@
-# @trycompai/design-system
+# @oppulence/design-system
 
 A shadcn-style design system with Tailwind CSS v4. Ships raw TypeScript/TSX source files that your app compiles directly.
 
 ## Installation
 
 ```bash
-npm install @trycompai/design-system
+npm install @oppulence/design-system
 # or
-bun add @trycompai/design-system
+bun add @oppulence/design-system
 ```
 
 ## Setup in Next.js
@@ -24,7 +24,7 @@ const config: Config = {
   content: [
     './src/**/*.{js,ts,jsx,tsx,mdx}',
     // Include the design system components
-    './node_modules/@trycompai/design-system/src/**/*.{js,ts,jsx,tsx}',
+    './node_modules/@oppulence/design-system/src/**/*.{js,ts,jsx,tsx}',
   ],
   // ... rest of your config
 };
@@ -38,7 +38,7 @@ Import the design system's CSS in your root layout:
 
 ```tsx
 // app/layout.tsx
-import '@trycompai/design-system/globals.css';
+import '@oppulence/design-system/globals.css';
 // or import alongside your own globals
 import './globals.css';
 ```
@@ -52,7 +52,7 @@ Add the package to `transpilePackages` in your `next.config.ts`:
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  transpilePackages: ['@trycompai/design-system'],
+  transpilePackages: ['@oppulence/design-system'],
 };
 
 export default nextConfig;
@@ -63,7 +63,7 @@ export default nextConfig;
 Import components directly:
 
 ```tsx
-import { Button, Card, CardHeader, CardContent } from '@trycompai/design-system';
+import { Button, Card, CardHeader, CardContent } from '@oppulence/design-system';
 
 export function MyComponent() {
   return (
@@ -81,10 +81,10 @@ export function MyComponent() {
 
 | Export                                     | Description                        |
 | ------------------------------------------ | ---------------------------------- |
-| `@trycompai/design-system`                 | All components                     |
-| `@trycompai/design-system/cn`              | `cn()` utility for merging classes |
-| `@trycompai/design-system/globals.css`     | Global CSS with theme variables    |
-| `@trycompai/design-system/tailwind.config` | Tailwind configuration             |
+| `@oppulence/design-system`                 | All components                     |
+| `@oppulence/design-system/cn`              | `cn()` utility for merging classes |
+| `@oppulence/design-system/globals.css`     | Global CSS with theme variables    |
+| `@oppulence/design-system/tailwind.config` | Tailwind configuration             |
 
 ## Components
 

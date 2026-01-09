@@ -9,7 +9,7 @@ import {
   TableRow,
   TableFooter,
   Badge,
-} from '@trycompai/design-system';
+} from '@oppulence/design-system';
 
 const meta = {
   title: 'Molecules/Table',

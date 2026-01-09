@@ -36,7 +36,7 @@ import {
   Stack,
   Text,
   ThemeToggle,
-} from '@trycompai/design-system';
+} from '@oppulence/design-system';
 import {
   BellIcon,
   CheckIcon,

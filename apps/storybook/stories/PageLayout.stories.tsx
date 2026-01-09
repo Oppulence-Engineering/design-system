@@ -21,7 +21,7 @@ import {
   TabsList,
   TabsTrigger,
   Text,
-} from '@trycompai/design-system';
+} from '@oppulence/design-system';
 
 const meta = {
   title: 'Pages/PageLayout',

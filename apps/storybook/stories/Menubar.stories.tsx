@@ -13,7 +13,7 @@ import {
   MenubarSub,
   MenubarSubContent,
   MenubarSubTrigger,
-} from '@trycompai/design-system';
+} from '@oppulence/design-system';
 
 const meta = {
   title: 'Organisms/Menubar',

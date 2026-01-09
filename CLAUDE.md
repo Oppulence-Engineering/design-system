@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a Turborepo monorepo containing `@trycompai/design-system`, a shadcn-style React component library with Tailwind CSS v4. The design system ships raw TypeScript/TSX source files (no pre-built dist).
+This is a Turborepo monorepo containing `@oppulence/design-system`, a shadcn-style React component library with Tailwind CSS v4. The design system ships raw TypeScript/TSX source files (no pre-built dist).
 
 ## Commands
 
@@ -26,7 +26,7 @@ bun test:unit        # Unit tests (jsdom)
 bun test:coverage    # Coverage report
 
 # Filter to specific package
-bun run --filter @trycompai/design-system typecheck
+bun run --filter @oppulence/design-system typecheck
 bun run --filter @comp/storybook test
 ```
 
@@ -36,7 +36,7 @@ bun run --filter @comp/storybook test
 apps/
   storybook/          # Component documentation & testing (Storybook 10, Vitest, Playwright)
 packages/
-  design-system/      # Main component library (@trycompai/design-system)
+  design-system/      # Main component library (@oppulence/design-system)
   eslint-config/      # Shared ESLint configs (@repo/eslint-config)
   typescript-config/  # Shared TypeScript configs (@repo/typescript-config)
 ```

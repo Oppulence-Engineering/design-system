@@ -7,7 +7,7 @@ import {
   PopoverContent,
   PopoverTrigger,
   Stack,
-} from '@trycompai/design-system';
+} from '@oppulence/design-system';
 import { Settings } from 'lucide-react';
 
 const meta = {

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Label, Slider, Stack, Text } from '@trycompai/design-system';
+import { Label, Slider, Stack, Text } from '@oppulence/design-system';
 
 const meta = {
   title: 'Atoms/Slider',

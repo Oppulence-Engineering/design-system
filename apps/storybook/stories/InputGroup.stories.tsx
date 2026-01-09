@@ -6,7 +6,7 @@ import {
   InputGroupInput,
   Label,
   Stack,
-} from '@trycompai/design-system';
+} from '@oppulence/design-system';
 import { Copy, DollarSign, Mail, Search } from 'lucide-react';
 
 const meta = {

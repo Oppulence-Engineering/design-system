@@ -290,7 +290,7 @@ import {
   Text,
   Heading,
   // ... etc
-} from '@trycompai/design-system';
+} from '@oppulence/design-system';
 ```
 
 ---

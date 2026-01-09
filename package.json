@@ -1,5 +1,5 @@
 {
-  "name": "@trycompai/design-system-monorepo",
+  "name": "@oppulence/design-system-monorepo",
   "private": true,
   "workspaces": ["apps/*", "packages/*"],
   "scripts": {

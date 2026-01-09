@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Toggle, Stack } from '@trycompai/design-system';
+import { Toggle, Stack } from '@oppulence/design-system';
 import { Bold, Italic, Underline } from 'lucide-react';
 
 const meta = {

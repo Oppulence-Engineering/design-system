@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Label, Stack, Switch } from '@trycompai/design-system';
+import { Label, Stack, Switch } from '@oppulence/design-system';
 
 const meta = {
   title: 'Atoms/Switch',

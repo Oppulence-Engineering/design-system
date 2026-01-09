@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import { Stack, VStack, HStack } from '@trycompai/design-system';
+import { Stack, VStack, HStack } from '@oppulence/design-system';
 
 describe('Stack', () => {
   it('renders children', () => {
