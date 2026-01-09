@@ -2,62 +2,74 @@
 
 import {
   Button,
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  Heading,
   Input,
   Label,
+  PageHeader,
+  PageHeaderDescription,
+  PageLayout,
+  SettingsCard,
   Stack,
-  Text,
 } from '@trycompai/design-system';
 
-export default function SettingsProfilePage() {
+export default function SettingsGeneralPage() {
   return (
-    <Stack gap="6">
-      <Stack gap="1">
-        <Heading level="1">Profile</Heading>
-        <Text variant="muted">Manage your profile information.</Text>
-      </Stack>
+    <PageLayout padding="default" container={false}>
+      <PageHeader title="General Settings">
+        <PageHeaderDescription>
+          Manage your organization settings and preferences.
+        </PageHeaderDescription>
+      </PageHeader>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Personal Information</CardTitle>
-          <CardDescription>Update your personal details here.</CardDescription>
-        </CardHeader>
-        <CardContent>
+      <Stack gap="6">
+        <SettingsCard
+          title="Organization Name"
+          description="This is your organization's display name."
+          hint="Please use 32 characters at maximum."
+          action={<Button>Save</Button>}
+        >
+          <Input defaultValue="Acme Corp" />
+        </SettingsCard>
+
+        <SettingsCard
+          title="Organization URL"
+          description="Your organization's unique URL on the platform."
+          hint="Only lowercase letters, numbers, and hyphens allowed."
+          action={<Button>Save</Button>}
+        >
+          <div className="flex items-center gap-2">
+            <span className="text-muted-foreground text-sm">comp.ai/</span>
+            <Input defaultValue="acme-corp" />
+          </div>
+        </SettingsCard>
+
+        <SettingsCard
+          title="Support Email"
+          description="Where should we send important notifications?"
+          action={<Button>Save</Button>}
+        >
           <Stack gap="4">
-            <div className="grid gap-4 md:grid-cols-2">
-              <Stack gap="2">
-                <Label htmlFor="firstName">First Name</Label>
-                <Input id="firstName" placeholder="John" defaultValue="John" />
-              </Stack>
-              <Stack gap="2">
-                <Label htmlFor="lastName">Last Name</Label>
-                <Input id="lastName" placeholder="Doe" defaultValue="Doe" />
-              </Stack>
-            </div>
             <Stack gap="2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="john@example.com"
-                defaultValue="john@example.com"
-              />
+              <Label htmlFor="supportEmail">Email Address</Label>
+              <Input id="supportEmail" type="email" defaultValue="support@acme.com" />
             </Stack>
-            <Stack gap="2">
-              <Label htmlFor="bio">Bio</Label>
-              <Input id="bio" placeholder="Tell us about yourself" />
-            </Stack>
-            <div className="flex justify-end">
-              <Button>Save Changes</Button>
-            </div>
           </Stack>
-        </CardContent>
-      </Card>
-    </Stack>
+        </SettingsCard>
+
+        <SettingsCard
+          title="Danger Zone"
+          description="Irreversible and destructive actions."
+        >
+          <div className="flex items-center justify-between py-2">
+            <Stack gap="1">
+              <span className="text-sm font-medium">Delete Organization</span>
+              <span className="text-sm text-muted-foreground">
+                Permanently delete your organization and all its data.
+              </span>
+            </Stack>
+            <Button variant="destructive">Delete Organization</Button>
+          </div>
+        </SettingsCard>
+      </Stack>
+    </PageLayout>
   );
 }

@@ -89,7 +89,7 @@ export const sidebarConfigs: Record<string, SidebarConfig> = {
         label: 'Getting started',
         items: [
           { id: 'overview', label: 'Overview', href: '/', icon: <HomeIcon /> },
-          { id: 'quickstart', label: 'Quickstart', href: '/quickstart', icon: <BookOpenIcon /> },
+          { id: 'quickstart', label: 'Quickstart', href: '#', icon: <BookOpenIcon /> },
         ],
       },
       {
@@ -98,9 +98,9 @@ export const sidebarConfigs: Record<string, SidebarConfig> = {
         items: [
           { id: 'policies', label: 'Policies', href: '/policies', icon: <FileTextIcon /> },
           { id: 'controls', label: 'Controls', href: '/controls', icon: <ClipboardCheckIcon /> },
-          { id: 'risks', label: 'Risks', href: '/risks', icon: <AlertTriangleIcon /> },
+          { id: 'risks', label: 'Risks', href: '#', icon: <AlertTriangleIcon /> },
           { id: 'vendors', label: 'Vendors', href: '/vendors', icon: <BuildingIcon /> },
-          { id: 'integrations', label: 'Integrations', href: '/integrations', icon: <PlugIcon /> },
+          { id: 'integrations', label: 'Integrations', href: '#', icon: <PlugIcon /> },
         ],
       },
     ],
@@ -117,8 +117,8 @@ export const sidebarConfigs: Record<string, SidebarConfig> = {
         label: 'Security',
         items: [
           { id: 'dashboard', label: 'Dashboard', href: '/cybersecurity', icon: <LayoutDashboardIcon /> },
-          { id: 'vulnerabilities', label: 'Vulnerabilities', href: '/cybersecurity/vulnerabilities', icon: <AlertTriangleIcon /> },
-          { id: 'assets', label: 'Assets', href: '/cybersecurity/assets', icon: <BuildingIcon /> },
+          { id: 'vulnerabilities', label: 'Vulnerabilities', href: '#', icon: <AlertTriangleIcon /> },
+          { id: 'assets', label: 'Assets', href: '#', icon: <BuildingIcon /> },
         ],
       },
     ],
@@ -135,8 +135,8 @@ export const sidebarConfigs: Record<string, SidebarConfig> = {
         label: 'Reports',
         items: [
           { id: 'dashboard', label: 'Dashboard', href: '/analytics', icon: <LayoutDashboardIcon /> },
-          { id: 'compliance-reports', label: 'Compliance Reports', href: '/analytics/compliance', icon: <FileTextIcon /> },
-          { id: 'audit-logs', label: 'Audit Logs', href: '/analytics/audit', icon: <ClipboardCheckIcon /> },
+          { id: 'compliance-reports', label: 'Compliance Reports', href: '#', icon: <FileTextIcon /> },
+          { id: 'audit-logs', label: 'Audit Logs', href: '#', icon: <ClipboardCheckIcon /> },
         ],
       },
     ],
@@ -153,15 +153,15 @@ export const sidebarConfigs: Record<string, SidebarConfig> = {
         label: 'Organization',
         items: [
           { id: 'general', label: 'General', href: '/settings', icon: <SettingsIcon /> },
-          { id: 'team', label: 'Team', href: '/settings/team', icon: <UsersIcon /> },
-          { id: 'billing', label: 'Billing', href: '/settings/billing', icon: <CreditCardIcon /> },
+          { id: 'team', label: 'Team', href: '#', icon: <UsersIcon /> },
+          { id: 'billing', label: 'Billing', href: '#', icon: <CreditCardIcon /> },
         ],
       },
       {
         id: 'account',
         label: 'Account',
         items: [
-          { id: 'profile', label: 'Profile', href: '/settings/profile', icon: <UsersIcon /> },
+          { id: 'profile', label: 'Profile', href: '#', icon: <UsersIcon /> },
           { id: 'security', label: 'Security', href: '/settings/security', icon: <KeyIcon /> },
         ],
       },

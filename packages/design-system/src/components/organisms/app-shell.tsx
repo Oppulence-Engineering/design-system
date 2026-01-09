@@ -171,6 +171,15 @@ interface AppShellRailItemProps extends Omit<React.ComponentProps<'button'>, 'cl
   label?: string;
 }
 
+// Rail indicator context for tracking active item position
+type RailIndicatorContextProps = {
+  registerItem: (id: string, element: HTMLElement | null) => void;
+  activeId: string | null;
+  setActiveId: (id: string | null) => void;
+};
+
+const RailIndicatorContext = React.createContext<RailIndicatorContextProps | null>(null);
+
 // ============ COMPONENTS ============
 
 function AppShell({
@@ -377,6 +386,10 @@ function AppShellMain({ children, ...props }: Omit<React.ComponentProps<'div'>, 
 
 function AppShellRail({ showSidebarToggle = true, children, ...props }: AppShellRailProps) {
   const { sidebarOpen, toggleSidebar, setRailContent } = useAppShell();
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const itemsRef = React.useRef<Map<string, HTMLElement>>(new Map());
+  const [activeId, setActiveId] = React.useState<string | null>(null);
+  const [indicatorStyle, setIndicatorStyle] = React.useState<{ top: number; opacity: number }>({ top: 0, opacity: 0 });
 
   // Register rail content for mobile drawer
   React.useEffect(() => {
@@ -384,55 +397,111 @@ function AppShellRail({ showSidebarToggle = true, children, ...props }: AppShell
     return () => setRailContent(null);
   }, [children, setRailContent]);
 
+  const registerItem = React.useCallback((id: string, element: HTMLElement | null) => {
+    if (element) {
+      itemsRef.current.set(id, element);
+    } else {
+      itemsRef.current.delete(id);
+    }
+  }, []);
+
+  // Update indicator position when active item changes
+  React.useEffect(() => {
+    if (!activeId || !containerRef.current) {
+      setIndicatorStyle(prev => ({ ...prev, opacity: 0 }));
+      return;
+    }
+
+    const activeElement = itemsRef.current.get(activeId);
+    if (!activeElement) {
+      setIndicatorStyle(prev => ({ ...prev, opacity: 0 }));
+      return;
+    }
+
+    const containerRect = containerRef.current.getBoundingClientRect();
+    const itemRect = activeElement.getBoundingClientRect();
+
+    // Calculate center position of the item relative to container
+    const top = itemRect.top - containerRect.top + (itemRect.height / 2) - 12; // 12 = half of indicator height (24px / 2)
+
+    setIndicatorStyle({ top, opacity: 1 });
+  }, [activeId]);
+
+  const contextValue = React.useMemo<RailIndicatorContextProps>(
+    () => ({ registerItem, activeId, setActiveId }),
+    [registerItem, activeId]
+  );
+
   return (
-    <div
-      data-slot="app-shell-rail"
-      className="hidden md:flex flex-col items-center w-14 shrink-0 py-2 gap-1"
-      {...props}
-    >
-      {/* App/module items */}
-      <div className="flex flex-col items-center gap-1 flex-1">
-        {children}
+    <RailIndicatorContext.Provider value={contextValue}>
+      <div
+        ref={containerRef}
+        data-slot="app-shell-rail"
+        className="hidden md:flex flex-col items-center w-14 shrink-0 py-2 gap-1 relative"
+        {...props}
+      >
+        {/* Animated indicator pill */}
+        <span
+          className="absolute right-0.5 w-1 h-6 rounded-full bg-primary transition-all duration-300 ease-out pointer-events-none"
+          style={{
+            transform: `translateY(${indicatorStyle.top}px)`,
+            opacity: indicatorStyle.opacity,
+          }}
+        />
+        {/* App/module items */}
+        <div className="flex flex-col items-center gap-1 flex-1">
+          {children}
+        </div>
+        {/* Sidebar toggle at bottom */}
+        {showSidebarToggle && (
+          <button
+            type="button"
+            onClick={toggleSidebar}
+            className="flex size-10 items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-background/50 transition-colors"
+            aria-label={sidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
+          >
+            <PanelLeftIcon className={`size-5 transition-transform ${sidebarOpen ? '' : 'rotate-180'}`} />
+          </button>
+        )}
       </div>
-      {/* Sidebar toggle at bottom */}
-      {showSidebarToggle && (
-        <button
-          type="button"
-          onClick={toggleSidebar}
-          className="flex size-10 items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-background/50 transition-colors"
-          aria-label={sidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
-        >
-          <PanelLeftIcon className={`size-5 transition-transform ${sidebarOpen ? '' : 'rotate-180'}`} />
-        </button>
-      )}
-    </div>
+    </RailIndicatorContext.Provider>
   );
 }
 
 function AppShellRailItem({ isActive, icon, label, ...props }: AppShellRailItemProps) {
+  const buttonRef = React.useRef<HTMLButtonElement>(null);
+  const context = React.useContext(RailIndicatorContext);
+  const itemId = React.useId();
+
+  // Register this item with the rail
+  React.useEffect(() => {
+    context?.registerItem(itemId, buttonRef.current);
+    return () => context?.registerItem(itemId, null);
+  }, [context, itemId]);
+
+  // Update active state in context
+  React.useEffect(() => {
+    if (isActive) {
+      context?.setActiveId(itemId);
+    }
+  }, [isActive, context, itemId]);
+
   return (
-    <div className="relative flex items-center">
-      <button
-        data-slot="app-shell-rail-item"
-        data-active={isActive}
-        className={`flex size-10 items-center justify-center rounded-md transition-all duration-200 cursor-pointer ${
-          isActive
-            ? 'bg-primary/10 text-primary'
-            : 'text-muted-foreground hover:text-foreground hover:bg-background/50'
-        }`}
-        title={label}
-        aria-label={label}
-        {...props}
-      >
-        <span className="size-5 [&>svg]:size-5">{icon}</span>
-      </button>
-      {/* Active indicator pill - positioned outside on the right */}
-      <span
-        className={`absolute -right-2.5 w-1 rounded-full bg-primary transition-all duration-200 ease-out ${
-          isActive ? 'h-6 opacity-100' : 'h-0 opacity-0'
-        }`}
-      />
-    </div>
+    <button
+      ref={buttonRef}
+      data-slot="app-shell-rail-item"
+      data-active={isActive}
+      className={`flex size-10 items-center justify-center rounded-md transition-all duration-200 cursor-pointer ${
+        isActive
+          ? 'bg-primary/10 text-primary'
+          : 'text-muted-foreground hover:text-foreground hover:bg-background/50'
+      }`}
+      title={label}
+      aria-label={label}
+      {...props}
+    >
+      <span className="size-5 [&>svg]:size-5">{icon}</span>
+    </button>
   );
 }
 
