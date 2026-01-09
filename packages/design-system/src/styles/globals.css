@@ -1,6 +1,6 @@
-@import 'tailwindcss';
-@import 'tw-animate-css';
-@import '@fontsource-variable/plus-jakarta-sans';
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "@fontsource-variable/plus-jakarta-sans";
 
 /* Include design system components in Tailwind's content scan */
 @source "../components/**/*.tsx";
@@ -16,44 +16,44 @@
     --card-foreground: oklch(0.09 0 0);
     --popover: oklch(1 0 0);
     --popover-foreground: oklch(0.09 0 0);
-    
+
     /* Pure black primary for bold, modern look */
     --primary: oklch(0.09 0 0);
     --primary-foreground: oklch(0.99 0 0);
-    
+
     /* Subtle gray secondary */
     --secondary: oklch(0.96 0 0);
     --secondary-foreground: oklch(0.15 0 0);
-    
+
     /* Refined muted tones */
     --muted: oklch(0.965 0 0);
     --muted-foreground: oklch(0.45 0 0);
-    
+
     /* Subtle accent */
     --accent: oklch(0.955 0 0);
     --accent-foreground: oklch(0.12 0 0);
-    
+
     /* Semantic colors - muted for elegance */
     --destructive: oklch(0.55 0.2 25);
     --success: oklch(0.55 0.15 145);
     --warning: oklch(0.7 0.14 80);
     --info: oklch(0.55 0.14 250);
-    
+
     /* Refined borders and inputs */
     --border: oklch(0.91 0 0);
     --input: oklch(0.91 0 0);
     --ring: oklch(0.09 0 0);
-    
+
     /* Monochrome chart palette - grayscale gradient */
     --chart-1: oklch(0.15 0 0);
     --chart-2: oklch(0.35 0 0);
     --chart-3: oklch(0.5 0 0);
     --chart-4: oklch(0.65 0 0);
     --chart-5: oklch(0.8 0 0);
-    
+
     /* Modern radius - slightly larger for softer feel */
     --radius: 0.5rem;
-    
+
     /* Sidebar - clean separation */
     --sidebar: oklch(0.985 0 0);
     --sidebar-foreground: oklch(0.09 0 0);
@@ -64,7 +64,7 @@
     --sidebar-border: oklch(0.92 0 0);
     --sidebar-ring: oklch(0.09 0 0);
   }
-  
+
   .dark {
     /* Modern monochrome dark theme - deep blacks and refined grays */
     --background: oklch(0.09 0 0);
@@ -73,41 +73,41 @@
     --card-foreground: oklch(0.95 0 0);
     --popover: oklch(0.12 0 0);
     --popover-foreground: oklch(0.95 0 0);
-    
+
     /* Pure white primary for bold contrast */
     --primary: oklch(0.99 0 0);
     --primary-foreground: oklch(0.09 0 0);
-    
+
     /* Subtle gray secondary */
     --secondary: oklch(0.18 0 0);
     --secondary-foreground: oklch(0.92 0 0);
-    
+
     /* Refined muted tones */
     --muted: oklch(0.18 0 0);
     --muted-foreground: oklch(0.6 0 0);
-    
+
     /* Subtle accent */
     --accent: oklch(0.2 0 0);
     --accent-foreground: oklch(0.95 0 0);
-    
+
     /* Semantic colors - slightly brighter for dark mode */
     --destructive: oklch(0.65 0.2 25);
     --success: oklch(0.65 0.15 145);
     --warning: oklch(0.75 0.14 80);
     --info: oklch(0.65 0.14 250);
-    
+
     /* Refined borders and inputs - subtle white tint */
     --border: oklch(1 0 0 / 12%);
     --input: oklch(1 0 0 / 12%);
     --ring: oklch(0.99 0 0);
-    
+
     /* Monochrome chart palette - inverted grayscale */
     --chart-1: oklch(0.95 0 0);
     --chart-2: oklch(0.75 0 0);
     --chart-3: oklch(0.55 0 0);
     --chart-4: oklch(0.4 0 0);
     --chart-5: oklch(0.25 0 0);
-    
+
     /* Sidebar - subtle separation */
     --sidebar: oklch(0.11 0 0);
     --sidebar-foreground: oklch(0.95 0 0);
@@ -121,8 +121,10 @@
 }
 
 @theme inline {
-  --font-sans: 'Plus Jakarta Sans Variable', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
-  
+  --font-sans:
+    "Plus Jakarta Sans Variable", ui-sans-serif, system-ui, sans-serif,
+    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+
   /* Letter spacing tokens */
   --tracking-tighter: -0.05em;
   --tracking-tight: -0.025em;
@@ -173,58 +175,69 @@
   * {
     @apply border-border outline-ring/50;
   }
-  
+
   html {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
   }
-  
+
   body {
     @apply bg-background text-foreground;
-    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
     line-height: 1.6;
   }
-  
+
   /* Refined focus states for accessibility */
   :focus-visible {
     @apply outline-2 outline-offset-2 outline-ring;
   }
-  
+
   /* Smooth scrolling */
   @media (prefers-reduced-motion: no-preference) {
     html {
       scroll-behavior: smooth;
     }
   }
-  
+
   /* Selection styling */
   ::selection {
     @apply bg-foreground/10;
   }
-  
+
   /* Typography - refined headings */
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     @apply font-semibold;
     text-wrap: balance;
   }
-  
-  h1 { 
+
+  h1 {
     @apply text-4xl;
     letter-spacing: -0.05em;
   }
-  h2 { 
+  h2 {
     @apply text-3xl;
     letter-spacing: -0.025em;
   }
-  h3 { 
+  h3 {
     @apply text-2xl;
     letter-spacing: -0.025em;
   }
-  h4 { @apply text-xl; }
-  h5 { @apply text-lg; }
-  h6 { @apply text-base font-medium; }
-  
+  h4 {
+    @apply text-xl;
+  }
+  h5 {
+    @apply text-lg;
+  }
+  h6 {
+    @apply text-base font-medium;
+  }
+
   /* Paragraphs */
   p {
     text-wrap: pretty;
@@ -245,13 +258,25 @@
 }
 
 @keyframes fade-out {
-  from { opacity: 1; transform: translateY(0); }
-  to { opacity: 0; transform: translateY(-4px); }
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
 }
 
 @keyframes fade-in {
-  from { opacity: 0; transform: translateY(4px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Page content animation fallback for non-View Transitions browsers */
