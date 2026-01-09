@@ -1,7 +1,7 @@
 {
   "name": "@oppulence/design-system",
   "version": "1.0.1",
-  "description": "Design system for Comp AI - shadcn-style components with Tailwind CSS",
+  "description": "Design system for Oppulence - shadcn-style components with Tailwind CSS v4",
   "type": "module",
   "main": "./src/index.ts",
   "module": "./src/index.ts",
@@ -47,7 +47,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/trycompai/comp.git",
+    "url": "git+https://github.com/Oppulence-Engineering/design-system.git",
     "directory": "packages/design-system"
   },
   "license": "MIT",
@@ -91,7 +91,6 @@
     "tailwindcss": "^4.0.0"
   },
   "devDependencies": {
-    "@repo/typescript-config": "workspace:*",
     "@tailwindcss/postcss": "^4.1.10",
     "@types/node": "^22.18.0",
     "@types/react": "^19.2.7",
