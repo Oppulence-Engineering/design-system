@@ -232,7 +232,7 @@ function AppShell({
 
 function AppShellNavbar({
   position = 'sticky',
-  showSidebarToggle = true,
+  showSidebarToggle = false,
   startContent,
   centerContent,
   endContent,
