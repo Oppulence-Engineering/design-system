@@ -40,7 +40,7 @@ jobs:
       - name: Bump version (manual trigger only)
         if: github.event_name == 'workflow_dispatch'
         run: |
-          CURRENT=$(npm pkg get version | tr -d '"')
+          CURRENT=$(node -p "require('./package.json').version")
           NEW=$(npx --yes semver -i ${{ github.event.inputs.version }} $CURRENT)
           npm pkg set version=$NEW
           echo "Bumped $CURRENT → $NEW"
