@@ -352,7 +352,7 @@ function AppShellRailItem({ isActive, icon, label, ...props }: AppShellRailItemP
       </button>
       {/* Active indicator pill - positioned outside on the right */}
       <span
-        className={`absolute -right-1 w-1 rounded-full bg-primary transition-all duration-200 ease-out ${
+        className={`absolute -right-2.5 w-1 rounded-full bg-primary transition-all duration-200 ease-out ${
           isActive ? 'h-6 opacity-100' : 'h-0 opacity-0'
         }`}
       />
