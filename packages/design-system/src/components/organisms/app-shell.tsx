@@ -335,26 +335,28 @@ function AppShellRail({ showSidebarToggle = true, children, ...props }: AppShell
 
 function AppShellRailItem({ isActive, icon, label, ...props }: AppShellRailItemProps) {
   return (
-    <button
-      data-slot="app-shell-rail-item"
-      data-active={isActive}
-      className={`relative flex size-10 items-center justify-center rounded-md transition-all duration-200 cursor-pointer ${
-        isActive
-          ? 'bg-primary/10 text-primary'
-          : 'text-muted-foreground hover:text-foreground hover:bg-background/50'
-      }`}
-      title={label}
-      aria-label={label}
-      {...props}
-    >
-      {/* Active indicator pill */}
+    <div className="relative flex items-center">
+      <button
+        data-slot="app-shell-rail-item"
+        data-active={isActive}
+        className={`flex size-10 items-center justify-center rounded-md transition-all duration-200 cursor-pointer ${
+          isActive
+            ? 'bg-primary/10 text-primary'
+            : 'text-muted-foreground hover:text-foreground hover:bg-background/50'
+        }`}
+        title={label}
+        aria-label={label}
+        {...props}
+      >
+        <span className="size-5 [&>svg]:size-5">{icon}</span>
+      </button>
+      {/* Active indicator pill - positioned outside on the right */}
       <span
-        className={`absolute left-0 w-1 rounded-full bg-primary transition-all duration-200 ease-out ${
+        className={`absolute -right-1 w-1 rounded-full bg-primary transition-all duration-200 ease-out ${
           isActive ? 'h-6 opacity-100' : 'h-0 opacity-0'
         }`}
       />
-      <span className="size-5 [&>svg]:size-5">{icon}</span>
-    </button>
+    </div>
   );
 }
 
