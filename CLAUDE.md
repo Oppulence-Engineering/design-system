@@ -10,24 +10,24 @@ This is a Turborepo monorepo containing `@trycompai/design-system`, a shadcn-sty
 
 ```bash
 # Development
-pnpm dev              # Run all dev servers
-pnpm storybook        # Start Storybook at http://localhost:6006
+bun dev              # Run all dev servers
+bun storybook        # Start Storybook at http://localhost:6006
 
 # Build & Quality
-pnpm build            # Build all packages
-pnpm typecheck        # Type check entire monorepo
-pnpm lint             # Check formatting with Prettier
-pnpm format           # Fix formatting with Prettier
+bun run build        # Build all packages
+bun run typecheck    # Type check entire monorepo
+bun run lint         # Check formatting with Prettier
+bun run format       # Fix formatting with Prettier
 
 # Testing (from apps/storybook)
-pnpm test             # Run all tests
-pnpm test:storybook   # Browser tests via Playwright
-pnpm test:unit        # Unit tests (jsdom)
-pnpm test:coverage    # Coverage report
+bun test             # Run all tests
+bun test:storybook   # Browser tests via Playwright
+bun test:unit        # Unit tests (jsdom)
+bun test:coverage    # Coverage report
 
 # Filter to specific package
-pnpm --filter @trycompai/design-system typecheck
-pnpm --filter @comp/storybook test
+bun run --filter @trycompai/design-system typecheck
+bun run --filter @comp/storybook test
 ```
 
 ## Architecture

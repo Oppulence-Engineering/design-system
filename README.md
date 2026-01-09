@@ -12,7 +12,7 @@ A Turborepo containing the design system component library and Storybook documen
 Install dependencies:
 
 ```sh
-pnpm install
+bun install
 ```
 
 ## Development
@@ -20,7 +20,7 @@ pnpm install
 Run Storybook:
 
 ```sh
-pnpm storybook
+bun storybook
 ```
 
 This starts Storybook at http://localhost:6006
@@ -29,23 +29,23 @@ This starts Storybook at http://localhost:6006
 
 | Command | Description |
 |---------|-------------|
-| `pnpm storybook` | Start Storybook dev server |
-| `pnpm build` | Build all packages |
-| `pnpm typecheck` | Type check all packages |
-| `pnpm lint` | Lint all packages |
-| `pnpm test` | Run tests |
-| `pnpm format` | Format code with Prettier |
+| `bun storybook` | Start Storybook dev server |
+| `bun run build` | Build all packages |
+| `bun run typecheck` | Type check all packages |
+| `bun run lint` | Lint all packages |
+| `bun test` | Run tests |
+| `bun run format` | Format code with Prettier |
 
 ## Building
 
 Build all packages:
 
 ```sh
-pnpm build
+bun run build
 ```
 
 Build a specific package:
 
 ```sh
-pnpm build --filter=@trycompai/design-system
+bun run build --filter=@trycompai/design-system
 ```

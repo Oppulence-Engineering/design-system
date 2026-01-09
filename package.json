@@ -1,6 +1,7 @@
 {
   "name": "@trycompai/design-system-monorepo",
   "private": true,
+  "workspaces": ["apps/*", "packages/*"],
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
@@ -15,12 +16,10 @@
     "turbo": "^2.7.1",
     "typescript": "5.9.2"
   },
-  "pnpm": {
-    "overrides": {
-      "esbuild": "0.25.12"
-    }
+  "overrides": {
+    "esbuild": "0.25.12"
   },
-  "packageManager": "pnpm@9.0.0",
+  "packageManager": "bun@1.2.5",
   "engines": {
     "node": ">=18"
   }
