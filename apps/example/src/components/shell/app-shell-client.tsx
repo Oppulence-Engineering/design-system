@@ -198,7 +198,7 @@ function NotificationsPopover() {
                   <Text size="sm" variant="muted">
                     {notification.description}
                   </Text>
-                  <Text size="xs" variant="muted" className="mt-0.5">
+                  <Text size="xs" variant="muted">
                     {notification.time}
                   </Text>
                 </Stack>
