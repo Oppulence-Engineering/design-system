@@ -386,10 +386,11 @@ function AppShellMain({ children, ...props }: Omit<React.ComponentProps<'div'>, 
 
 function AppShellRail({ showSidebarToggle = true, children, ...props }: AppShellRailProps) {
   const { sidebarOpen, toggleSidebar, setRailContent } = useAppShell();
-  const containerRef = React.useRef<HTMLDivElement>(null);
+  const itemsContainerRef = React.useRef<HTMLDivElement>(null);
+  const indicatorRef = React.useRef<HTMLSpanElement>(null);
   const itemsRef = React.useRef<Map<string, HTMLElement>>(new Map());
   const [activeId, setActiveId] = React.useState<string | null>(null);
-  const [indicatorStyle, setIndicatorStyle] = React.useState<{ top: number; opacity: number }>({ top: 0, opacity: 0 });
+  const isFirstRender = React.useRef(true);
 
   // Register rail content for mobile drawer
   React.useEffect(() => {
@@ -407,24 +408,39 @@ function AppShellRail({ showSidebarToggle = true, children, ...props }: AppShell
 
   // Update indicator position when active item changes
   React.useEffect(() => {
-    if (!activeId || !containerRef.current) {
-      setIndicatorStyle(prev => ({ ...prev, opacity: 0 }));
+    if (!activeId || !itemsContainerRef.current || !indicatorRef.current) {
+      if (indicatorRef.current) {
+        indicatorRef.current.style.opacity = '0';
+      }
       return;
     }
 
     const activeElement = itemsRef.current.get(activeId);
     if (!activeElement) {
-      setIndicatorStyle(prev => ({ ...prev, opacity: 0 }));
+      indicatorRef.current.style.opacity = '0';
       return;
     }
 
-    const containerRect = containerRef.current.getBoundingClientRect();
+    const containerRect = itemsContainerRef.current.getBoundingClientRect();
     const itemRect = activeElement.getBoundingClientRect();
 
-    // Calculate center position of the item relative to container
-    const top = itemRect.top - containerRect.top + (itemRect.height / 2) - 12; // 12 = half of indicator height (24px / 2)
+    // Calculate center position of the item relative to items container
+    // Item center Y relative to container, minus half the indicator height (h-6 = 24px, so 12px)
+    const top = itemRect.top - containerRect.top + (itemRect.height / 2) - 12;
 
-    setIndicatorStyle({ top, opacity: 1 });
+    // On first render, position instantly without animation
+    if (isFirstRender.current) {
+      indicatorRef.current.style.transition = 'none';
+      indicatorRef.current.style.top = `${top}px`;
+      indicatorRef.current.style.opacity = '1';
+      // Force reflow, then re-enable transitions
+      indicatorRef.current.offsetHeight;
+      indicatorRef.current.style.transition = '';
+      isFirstRender.current = false;
+    } else {
+      indicatorRef.current.style.top = `${top}px`;
+      indicatorRef.current.style.opacity = '1';
+    }
   }, [activeId]);
 
   const contextValue = React.useMemo<RailIndicatorContextProps>(
@@ -435,21 +451,18 @@ function AppShellRail({ showSidebarToggle = true, children, ...props }: AppShell
   return (
     <RailIndicatorContext.Provider value={contextValue}>
       <div
-        ref={containerRef}
         data-slot="app-shell-rail"
-        className="hidden md:flex flex-col items-center w-14 shrink-0 py-2 gap-1 relative"
+        className="hidden md:flex flex-col items-center w-14 shrink-0 py-2 gap-1"
         {...props}
       >
-        {/* Animated indicator pill */}
-        <span
-          className="absolute right-0.5 w-1 h-6 rounded-full bg-primary transition-all duration-300 ease-out pointer-events-none"
-          style={{
-            transform: `translateY(${indicatorStyle.top}px)`,
-            opacity: indicatorStyle.opacity,
-          }}
-        />
-        {/* App/module items */}
-        <div className="flex flex-col items-center gap-1 flex-1">
+        {/* App/module items with indicator */}
+        <div ref={itemsContainerRef} className="flex flex-col items-center gap-1 flex-1 relative">
+          {/* Animated indicator pill */}
+          <span
+            ref={indicatorRef}
+            className="absolute right-0 w-1 h-6 rounded-full bg-primary transition-all duration-300 ease-out pointer-events-none -mr-2"
+            style={{ opacity: 0, top: 0 }}
+          />
           {children}
         </div>
         {/* Sidebar toggle at bottom */}
