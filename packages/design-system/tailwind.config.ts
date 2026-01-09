@@ -53,6 +53,22 @@ export default {
           ring: 'var(--sidebar-ring)',
         },
       },
+      boxShadow: {
+        // Modern, subtle shadows for depth
+        'subtle': '0 1px 2px 0 rgb(0 0 0 / 0.03)',
+        'soft': '0 2px 8px -2px rgb(0 0 0 / 0.05), 0 1px 2px -1px rgb(0 0 0 / 0.03)',
+        'elevated': '0 4px 16px -4px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.04)',
+        'float': '0 8px 32px -8px rgb(0 0 0 / 0.12), 0 4px 8px -4px rgb(0 0 0 / 0.06)',
+      },
+      transitionTimingFunction: {
+        // Modern easing curves
+        'smooth': 'cubic-bezier(0.4, 0, 0.2, 1)',
+        'bounce': 'cubic-bezier(0.34, 1.56, 0.64, 1)',
+      },
+      transitionDuration: {
+        '150': '150ms',
+        '200': '200ms',
+      },
     },
   },
   plugins: [],
