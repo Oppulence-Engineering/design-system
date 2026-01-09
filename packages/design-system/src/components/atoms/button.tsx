@@ -36,6 +36,11 @@ const buttonVariants = cva(
         'icon-sm':
           'size-7 rounded-[min(var(--radius-md),12px)] in-data-[slot=button-group]:rounded-lg',
         'icon-lg': 'size-9',
+        // Round icon buttons - for avatar triggers and circular icons
+        'icon-round': 'size-8 rounded-full',
+        'icon-round-xs': "size-6 rounded-full [&_svg:not([class*='size-'])]:size-3",
+        'icon-round-sm': 'size-7 rounded-full',
+        'icon-round-lg': 'size-9 rounded-full',
         // Calendar day button - special size for calendar day cells
         'calendar-day': [
           // Base sizing

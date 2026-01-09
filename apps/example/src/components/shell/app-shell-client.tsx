@@ -73,13 +73,10 @@ function ProjectSelector() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger>
-        <button
-          type="button"
-          className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-sm font-medium hover:bg-background/50 transition-colors"
-        >
+        <span className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-sm font-medium hover:bg-background/50 transition-colors">
           {currentProject.name}
           <ChevronDownIcon className="size-3 text-muted-foreground" />
-        </button>
+        </span>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" style={{ minWidth: '220px' }}>
         <DropdownMenuLabel>Projects</DropdownMenuLabel>
@@ -169,16 +166,16 @@ function NotificationsPopover() {
   return (
     <Popover>
       <PopoverTrigger>
-        <Button variant="ghost" size="icon-sm">
+        <span className="inline-flex size-7 items-center justify-center rounded-md hover:bg-muted transition-colors cursor-pointer">
           <div className="relative">
-            <BellIcon />
+            <BellIcon className="size-4" />
             {unreadCount > 0 && (
-              <span className="absolute -top-1 -right-1 size-4 rounded-full bg-destructive text-[10px] font-medium text-white flex items-center justify-center">
+              <span className="absolute -top-1.5 -right-1.5 size-3.5 rounded-full bg-destructive text-[9px] font-medium text-white flex items-center justify-center">
                 {unreadCount}
               </span>
             )}
           </div>
-        </Button>
+        </span>
       </PopoverTrigger>
       <PopoverContent align="end" style={{ width: '320px', padding: 0 }}>
         <div className="p-3 border-b border-border">
@@ -254,12 +251,12 @@ function UserMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger>
-        <Button variant="ghost" size="icon-sm">
+        <span className="inline-flex size-7 items-center justify-center rounded-full hover:bg-muted transition-colors cursor-pointer">
           <Avatar size="sm">
             <AvatarImage src="https://github.com/shadcn.png" />
             <AvatarFallback>JD</AvatarFallback>
           </Avatar>
-        </Button>
+        </span>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" style={{ minWidth: '200px' }}>
         <div className="px-2 py-1.5">

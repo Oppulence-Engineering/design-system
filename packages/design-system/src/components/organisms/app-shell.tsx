@@ -620,7 +620,7 @@ function AppShellNavGroup({ label, children, ...props }: AppShellNavGroupProps) 
           {label}
         </div>
       )}
-      <div className="space-y-1">{children}</div>
+      <div className="space-y-1.5">{children}</div>
     </div>
   );
 }
