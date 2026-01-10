@@ -76,6 +76,8 @@ type ButtonProps = Omit<ButtonPrimitive.Props, "className"> &
     iconLeft?: React.ReactNode;
     /** Icon to show on the right side of the button */
     iconRight?: React.ReactNode;
+    /** HTML button type attribute */
+    type?: "button" | "submit" | "reset";
   };
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
