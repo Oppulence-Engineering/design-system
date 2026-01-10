@@ -75,10 +75,9 @@ jobs:
           node-version: 20
           registry-url: 'https://registry.npmjs.org'
 
-      - name: Bump version (manual trigger only)
-        if: github.event_name == 'workflow_dispatch'
+      - name: Bump version
         env:
-          VERSION_BUMP: ${{ github.event.inputs.version }}
+          VERSION_BUMP: ${{ github.event.inputs.version || 'patch' }}
         run: |
           CURRENT=$(node -p "require('./package.json').version")
           NEW=$(npx --yes semver -i "$VERSION_BUMP" "$CURRENT")
@@ -95,16 +94,15 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Commit version bump (manual trigger only)
-        if: github.event_name == 'workflow_dispatch'
+      - name: Commit version bump
         working-directory: .
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git add packages/design-system/package.json
           VERSION=$(node -p "require('./packages/design-system/package.json').version")
-          git commit -m "chore: bump @oppulence/design-system to v${VERSION}"
-          git push
+          git commit -m "chore: bump @oppulence/design-system to v${VERSION}" || echo "No changes to commit"
+          git push || echo "Nothing to push"
 
   publish-auth:
     name: Publish @oppulence/auth
@@ -136,10 +134,9 @@ jobs:
           node-version: 20
           registry-url: 'https://registry.npmjs.org'
 
-      - name: Bump version (manual trigger only)
-        if: github.event_name == 'workflow_dispatch'
+      - name: Bump version
         env:
-          VERSION_BUMP: ${{ github.event.inputs.version }}
+          VERSION_BUMP: ${{ github.event.inputs.version || 'patch' }}
         run: |
           CURRENT=$(node -p "require('./package.json').version")
           NEW=$(npx --yes semver -i "$VERSION_BUMP" "$CURRENT")
@@ -163,13 +160,12 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Commit version bump (manual trigger only)
-        if: github.event_name == 'workflow_dispatch'
+      - name: Commit version bump
         working-directory: .
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git add packages/auth/package.json
           VERSION=$(node -p "require('./packages/auth/package.json').version")
-          git commit -m "chore: bump @oppulence/auth to v${VERSION}"
-          git push
+          git commit -m "chore: bump @oppulence/auth to v${VERSION}" || echo "No changes to commit"
+          git push || echo "Nothing to push"
