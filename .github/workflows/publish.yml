@@ -1,6 +1,12 @@
 name: Publish to NPM
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'packages/design-system/**'
+      - 'packages/auth/**'
   release:
     types: [published]
   workflow_dispatch:
@@ -25,13 +31,32 @@ on:
           - major
 
 jobs:
+  detect-changes:
+    name: Detect package changes
+    runs-on: ubuntu-latest
+    outputs:
+      design-system: ${{ steps.filter.outputs.design-system }}
+      auth: ${{ steps.filter.outputs.auth }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            design-system:
+              - 'packages/design-system/**'
+            auth:
+              - 'packages/auth/**'
+
   publish-design-system:
     name: Publish @oppulence/design-system
     runs-on: ubuntu-latest
+    needs: [detect-changes]
     if: |
       github.event_name == 'release' ||
       github.event.inputs.package == 'design-system' ||
-      github.event.inputs.package == 'both'
+      github.event.inputs.package == 'both' ||
+      (github.event_name == 'push' && needs.detect-changes.outputs.design-system == 'true')
     permissions:
       contents: write
     defaults:
@@ -84,11 +109,15 @@ jobs:
   publish-auth:
     name: Publish @oppulence/auth
     runs-on: ubuntu-latest
-    needs: [publish-design-system]
+    needs: [detect-changes, publish-design-system]
     if: |
       always() &&
-      (github.event.inputs.package == 'auth' || github.event.inputs.package == 'both') &&
-      (needs.publish-design-system.result == 'success' || needs.publish-design-system.result == 'skipped')
+      (needs.publish-design-system.result == 'success' || needs.publish-design-system.result == 'skipped') &&
+      (
+        github.event.inputs.package == 'auth' ||
+        github.event.inputs.package == 'both' ||
+        (github.event_name == 'push' && needs.detect-changes.outputs.auth == 'true')
+      )
     permissions:
       contents: write
     defaults:
