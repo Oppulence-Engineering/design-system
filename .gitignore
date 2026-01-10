@@ -39,3 +39,5 @@ yarn-error.log*
 *.pem
 
 .playwright-mcp
+# Firebase
+firebase-debug.log
