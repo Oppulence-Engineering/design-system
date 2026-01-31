@@ -1,6 +1,6 @@
 {
   "name": "@oppulence/design-system",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Design system for Oppulence - shadcn-style components with Tailwind CSS v4",
   "type": "module",
   "main": "./src/index.ts",
