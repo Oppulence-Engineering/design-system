@@ -344,9 +344,7 @@ export async function updateSessionOrganization(
  * Extracts session metadata without full resolution.
  * Useful for quick checks without API calls.
  */
-export async function getSessionMetadata(
-  encryptedToken: string,
-): Promise<{
+export async function getSessionMetadata(encryptedToken: string): Promise<{
   userId: string;
   organizationId: string | null;
   expiresAt: Date;
