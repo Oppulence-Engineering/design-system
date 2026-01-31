@@ -9,6 +9,11 @@ export default defineConfig({
     setupFiles: ["./src/test-setup.ts"],
     include: ["src/**/*.test.{ts,tsx}"],
     exclude: ["node_modules", "dist"],
+    server: {
+      deps: {
+        inline: ["@oppulence/design-system", "streamdown", "katex"],
+      },
+    },
     coverage: {
       provider: "v8",
       reporter: ["text", "json", "html"],
