@@ -20,9 +20,9 @@ function NavigationMenu({
   );
 }
 
-function NavigationMenuList({
-  ...props
-}: Omit<NavigationMenuPrimitive.List.Props, "className">) {
+function NavigationMenuList(
+  props: Omit<NavigationMenuPrimitive.List.Props, "className">,
+) {
   return (
     <NavigationMenuPrimitive.List
       data-slot="navigation-menu-list"
