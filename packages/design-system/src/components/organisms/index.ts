@@ -4,7 +4,10 @@ export * from "./calendar";
 export * from "./carousel";
 export * from "./chart";
 export * from "./combobox";
-export * from "./combobox-dropdown";
+export {
+  ComboboxDropdown,
+  type ComboboxItem as ComboboxDropdownItem,
+} from "./combobox-dropdown";
 export * from "./command";
 export * from "./conversation";
 export * from "./context-menu";

@@ -34,11 +34,10 @@ import {
   Stack,
   Badge,
   Input,
-  Button,
   Tabs,
-  TabList,
-  Tab,
-  TabPanel,
+  TabsList,
+  TabsTrigger,
+  TabsContent,
 } from "@oppulence/design-system";
 import * as React from "react";
 
@@ -86,7 +85,7 @@ function PasswordStrengthDemo() {
                   {strength.strength.toUpperCase()}
                 </Badge>
               </HStack>
-              <Text size="sm" className="text-muted-foreground">
+              <Text size="sm" variant="muted">
                 {getPasswordStrengthMessage(strength.strength)}
               </Text>
               <div className="flex gap-1">
@@ -143,7 +142,8 @@ function PasswordStrengthDemo() {
 
 function AuthStateDemo() {
   const { user, isAuthenticated, isLoading, organization } = useAuth();
-  const { hasPermission, hasRole, isAdmin, isMember } = usePermissions();
+  const { hasPermission, hasRole, isAdmin, role } = usePermissions();
+  const isMember = Boolean(role);
 
   return (
     <Card>
@@ -158,25 +158,25 @@ function AuthStateDemo() {
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
               <Text weight="medium">isLoading</Text>
-              <Text className="text-muted-foreground">
+              <Text variant="muted">
                 {isLoading ? "true" : "false"}
               </Text>
             </div>
             <div>
               <Text weight="medium">isAuthenticated</Text>
-              <Text className="text-muted-foreground">
+              <Text variant="muted">
                 {isAuthenticated ? "true" : "false"}
               </Text>
             </div>
             <div>
               <Text weight="medium">user</Text>
-              <Text className="text-muted-foreground font-mono text-xs">
+              <Text size="xs" variant="muted" font="mono">
                 {user ? user.email : "null"}
               </Text>
             </div>
             <div>
               <Text weight="medium">organization</Text>
-              <Text className="text-muted-foreground font-mono text-xs">
+              <Text size="xs" variant="muted" font="mono">
                 {organization ? organization.name : "null"}
               </Text>
             </div>
@@ -333,30 +333,28 @@ export default function AuthDemoPage() {
   return (
     <Stack gap="lg">
       <div>
-        <Text as="h1" size="2xl" weight="bold">
-          Auth Demo
-        </Text>
-        <Text className="text-muted-foreground">
+        <h1 className="text-2xl font-semibold">Auth Demo</h1>
+        <Text variant="muted">
           Showcasing @oppulence/auth components and utilities
         </Text>
       </div>
 
       <Tabs defaultValue="components">
-        <TabList>
-          <Tab value="components">Components</Tab>
-          <Tab value="forms">Forms</Tab>
-          <Tab value="utilities">Utilities</Tab>
-        </TabList>
+        <TabsList>
+          <TabsTrigger value="components">Components</TabsTrigger>
+          <TabsTrigger value="forms">Forms</TabsTrigger>
+          <TabsTrigger value="utilities">Utilities</TabsTrigger>
+        </TabsList>
 
-        <TabPanel value="components">
+        <TabsContent value="components">
           <div className="grid gap-6 pt-6 md:grid-cols-2">
             <AuthStateDemo />
             <ComponentsDemo />
             <AccessControlDemo />
           </div>
-        </TabPanel>
+        </TabsContent>
 
-        <TabPanel value="forms">
+        <TabsContent value="forms">
           <div className="grid gap-6 pt-6 lg:grid-cols-2">
             <Card>
               <CardHeader>
@@ -385,15 +383,15 @@ export default function AuthDemoPage() {
                 <SignUpForm
                   providers={["google"]}
                   showSignInLink
-                  requireTerms
+                  showTerms
                   showNameFields
                 />
               </CardContent>
             </Card>
           </div>
-        </TabPanel>
+        </TabsContent>
 
-        <TabPanel value="utilities">
+        <TabsContent value="utilities">
           <div className="grid gap-6 pt-6 md:grid-cols-2">
             <PasswordStrengthDemo />
             <Card>
@@ -405,29 +403,29 @@ export default function AuthDemoPage() {
               </CardHeader>
               <CardContent>
                 <Stack gap="sm">
-                  <Text size="sm" className="font-mono">
+                  <Text size="sm" font="mono">
                     signInSchema
                   </Text>
-                  <Text size="sm" className="font-mono">
+                  <Text size="sm" font="mono">
                     signUpSchema
                   </Text>
-                  <Text size="sm" className="font-mono">
+                  <Text size="sm" font="mono">
                     forgotPasswordSchema
                   </Text>
-                  <Text size="sm" className="font-mono">
+                  <Text size="sm" font="mono">
                     resetPasswordSchema
                   </Text>
-                  <Text size="sm" className="font-mono">
+                  <Text size="sm" font="mono">
                     verifyEmailSchema
                   </Text>
-                  <Text size="sm" className="font-mono">
+                  <Text size="sm" font="mono">
                     mfaChallengeSchema
                   </Text>
                 </Stack>
               </CardContent>
             </Card>
           </div>
-        </TabPanel>
+        </TabsContent>
       </Tabs>
     </Stack>
   );

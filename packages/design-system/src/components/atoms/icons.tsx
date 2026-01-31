@@ -1,7 +1,7 @@
 import { ArchiveIcon } from "@radix-ui/react-icons";
 import { FiGithub } from "react-icons/fi";
 import type { IconType as BaseIconType } from "react-icons/lib";
-import type { ComponentType, FC, ReactNode, SVGProps } from "react";
+import type { ComponentType, FC, ReactNode, SVGAttributes, SVGProps } from "react";
 import {
   MdArrowBack,
   MdArrowDownward,
@@ -124,6 +124,11 @@ type SvgProps = Omit<SVGProps<SVGSVGElement>, "className"> & {
   size?: number | string;
 };
 
+type RadixIconProps = Omit<SVGAttributes<SVGElement>, "children"> & {
+  children?: never;
+  color?: string;
+};
+
 const createReactIcon =
   (Icon: BaseIconType) =>
   ({ size = 20, color }: IconProps) => (
@@ -131,7 +136,7 @@ const createReactIcon =
   );
 
 const createRadixIcon =
-  (Icon: ComponentType<SVGProps<SVGSVGElement>>) =>
+  (Icon: ComponentType<RadixIconProps>) =>
   ({ size = 20, color }: IconProps) => (
     <Icon width={size} height={size} color={color} />
   );

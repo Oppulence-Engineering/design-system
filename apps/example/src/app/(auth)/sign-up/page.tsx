@@ -14,10 +14,10 @@ export default function SignUpPage() {
       signInUrl="/sign-in"
       termsUrl="/terms"
       privacyUrl="/privacy"
-      requireTerms
+      showTerms
       showNameFields
-      onSuccess={(user) => {
-        console.log("Account created:", user.email);
+      onSuccess={() => {
+        console.log("Account created");
       }}
       onError={(error) => {
         console.error("Sign-up failed:", error);

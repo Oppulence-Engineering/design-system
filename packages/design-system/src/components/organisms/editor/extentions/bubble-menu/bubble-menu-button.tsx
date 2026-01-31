@@ -3,7 +3,7 @@
 interface BubbleMenuButtonProps {
   action: () => void;
   isActive: boolean;
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }
 
 export function BubbleMenuButton({
