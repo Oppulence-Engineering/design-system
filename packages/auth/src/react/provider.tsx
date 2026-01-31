@@ -90,6 +90,7 @@ export function AuthProvider({
   onAuthStateChange,
   apiBaseUrl = "/api/auth",
 }: AuthProviderProps) {
+  const hasInitialSession = initialSession !== undefined;
   // State
   const [user, setUser] = React.useState<User | null>(initialSession?.user ?? null);
   const [session, setSession] = React.useState<Session | null>(initialSession?.session ?? null);
@@ -102,7 +103,7 @@ export function AuthProvider({
   const [organizations, setOrganizations] = React.useState<Organization[]>(
     initialSession?.organizations ?? []
   );
-  const [isLoading, setIsLoading] = React.useState(!initialSession);
+  const [isLoading, setIsLoading] = React.useState(!hasInitialSession);
   const [error, setError] = React.useState<AuthErrorType | null>(null);
 
   // Derived state
@@ -157,10 +158,10 @@ export function AuthProvider({
 
   // Initial session fetch
   React.useEffect(() => {
-    if (!initialSession) {
+    if (!hasInitialSession) {
       fetchSession();
     }
-  }, [initialSession, fetchSession]);
+  }, [hasInitialSession, fetchSession]);
 
   // Session refresh interval
   React.useEffect(() => {

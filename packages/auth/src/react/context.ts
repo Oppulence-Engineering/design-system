@@ -214,7 +214,7 @@ const defaultContextValue: AuthContextValue = {
   membership: null,
   organizations: [],
   isAuthenticated: false,
-  isLoading: true,
+  isLoading: false,
   error: null,
 
   // Methods (throw if used without provider)
