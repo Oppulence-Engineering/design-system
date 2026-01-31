@@ -70,7 +70,10 @@ export function getSessionFromNextCookies(cookies: NextCookies): string | null {
  * @param cookies - The cookies() object from next/headers
  * @param token - Encrypted session token
  */
-export function setSessionInNextCookies(cookies: NextCookies, token: string): void {
+export function setSessionInNextCookies(
+  cookies: NextCookies,
+  token: string,
+): void {
   const options = getCookieOptions();
   cookies.set(getCookieName(), token, options);
   debugLog("Session cookie set via Next.js cookies()");
@@ -160,7 +163,10 @@ export function createClearSessionCookieHeader(): string {
  * @param token - Encrypted session token
  * @returns Response with Set-Cookie header
  */
-export function addSessionToResponse(response: Response, token: string): Response {
+export function addSessionToResponse(
+  response: Response,
+  token: string,
+): Response {
   const newResponse = new Response(response.body, response);
   newResponse.headers.append("Set-Cookie", createSessionCookieHeader(token));
   debugLog("Session cookie added to response");
@@ -203,7 +209,7 @@ interface NextResponseCookies {
  * Gets session token from NextRequest (middleware context).
  */
 export function getSessionFromNextRequest(
-  requestCookies: NextRequestCookies
+  requestCookies: NextRequestCookies,
 ): string | null {
   const cookie = requestCookies.get(getCookieName());
   return cookie?.value ?? null;
@@ -214,7 +220,7 @@ export function getSessionFromNextRequest(
  */
 export function setSessionInNextResponse(
   responseCookies: NextResponseCookies,
-  token: string
+  token: string,
 ): void {
   const options = getCookieOptions();
   responseCookies.set(getCookieName(), token, options);
@@ -225,7 +231,7 @@ export function setSessionInNextResponse(
  * Clears session token from NextResponse (middleware context).
  */
 export function clearSessionFromNextResponse(
-  responseCookies: NextResponseCookies
+  responseCookies: NextResponseCookies,
 ): void {
   responseCookies.delete(getCookieName());
   debugLog("Session cookie cleared from NextResponse");
@@ -293,7 +299,7 @@ export function generateCSRFToken(): { token: string; cookie: string } {
  */
 export function validateCSRFToken(
   request: Request,
-  cookieHeader: string | null
+  cookieHeader: string | null,
 ): boolean {
   if (!cookieHeader) {
     return false;

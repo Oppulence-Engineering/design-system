@@ -8,7 +8,12 @@
 import type { NextApiRequest, NextApiResponse, NextApiHandler } from "next";
 import type { GetServerSidePropsContext, GetServerSidePropsResult } from "next";
 import { getSessionFromRequest, getUserFromSession } from "./server";
-import type { User, Session, Organization, OrganizationMembership } from "../core/types";
+import type {
+  User,
+  Session,
+  Organization,
+  OrganizationMembership,
+} from "../core/types";
 
 // ============================================================================
 // Types
@@ -50,7 +55,10 @@ export interface WithAuthOptions {
   /**
    * Custom unauthorized handler.
    */
-  onUnauthorized?: (req: NextApiRequest, res: NextApiResponse) => void | Promise<void>;
+  onUnauthorized?: (
+    req: NextApiRequest,
+    res: NextApiResponse,
+  ) => void | Promise<void>;
 }
 
 /**
@@ -110,8 +118,11 @@ export interface WithAuthSSROptions {
  * ```
  */
 export function withAuth(
-  handler: (req: AuthenticatedRequest, res: NextApiResponse) => void | Promise<void>,
-  options: WithAuthOptions = {}
+  handler: (
+    req: AuthenticatedRequest,
+    res: NextApiResponse,
+  ) => void | Promise<void>,
+  options: WithAuthOptions = {},
 ): NextApiHandler {
   const {
     required = true,
@@ -133,7 +144,8 @@ export function withAuth(
       }
 
       if (sessionResult) {
-        const { session, tokens, user, organization, membership } = sessionResult;
+        const { session, tokens, user, organization, membership } =
+          sessionResult;
 
         // Check organization requirement
         if (requireOrganization && !organization) {
@@ -146,7 +158,8 @@ export function withAuth(
         // Check role requirement
         if (requiredRole && membership) {
           const roleHierarchy = { owner: 3, admin: 2, member: 1 };
-          const userRoleLevel = roleHierarchy[membership.role as keyof typeof roleHierarchy] ?? 0;
+          const userRoleLevel =
+            roleHierarchy[membership.role as keyof typeof roleHierarchy] ?? 0;
           const requiredRoleLevel = roleHierarchy[requiredRole];
 
           if (userRoleLevel < requiredRoleLevel) {
@@ -186,8 +199,11 @@ export function withAuth(
  * Wraps an API route handler that requires admin role.
  */
 export function withAdmin(
-  handler: (req: AuthenticatedRequest, res: NextApiResponse) => void | Promise<void>,
-  options: Omit<WithAuthOptions, "requiredRole"> = {}
+  handler: (
+    req: AuthenticatedRequest,
+    res: NextApiResponse,
+  ) => void | Promise<void>,
+  options: Omit<WithAuthOptions, "requiredRole"> = {},
 ): NextApiHandler {
   return withAuth(handler, { ...options, requiredRole: "admin" });
 }
@@ -196,8 +212,11 @@ export function withAdmin(
  * Wraps an API route handler that requires owner role.
  */
 export function withOwner(
-  handler: (req: AuthenticatedRequest, res: NextApiResponse) => void | Promise<void>,
-  options: Omit<WithAuthOptions, "requiredRole"> = {}
+  handler: (
+    req: AuthenticatedRequest,
+    res: NextApiResponse,
+  ) => void | Promise<void>,
+  options: Omit<WithAuthOptions, "requiredRole"> = {},
 ): NextApiHandler {
   return withAuth(handler, { ...options, requiredRole: "owner" });
 }
@@ -206,8 +225,11 @@ export function withOwner(
  * Wraps an API route handler that requires organization membership.
  */
 export function withOrganization(
-  handler: (req: AuthenticatedRequest, res: NextApiResponse) => void | Promise<void>,
-  options: Omit<WithAuthOptions, "requireOrganization"> = {}
+  handler: (
+    req: AuthenticatedRequest,
+    res: NextApiResponse,
+  ) => void | Promise<void>,
+  options: Omit<WithAuthOptions, "requireOrganization"> = {},
 ): NextApiHandler {
   return withAuth(handler, { ...options, requireOrganization: true });
 }
@@ -245,13 +267,17 @@ export function withOrganization(
  * }
  * ```
  */
-export function withAuthSSR<P extends Record<string, unknown> = Record<string, unknown>>(
+export function withAuthSSR<
+  P extends Record<string, unknown> = Record<string, unknown>,
+>(
   getServerSidePropsFunc?: (
     context: GetServerSidePropsContext,
-    auth: AuthProps
+    auth: AuthProps,
   ) => Promise<GetServerSidePropsResult<P>>,
-  options: WithAuthSSROptions = {}
-): (context: GetServerSidePropsContext) => Promise<GetServerSidePropsResult<P & AuthProps>> {
+  options: WithAuthSSROptions = {},
+): (
+  context: GetServerSidePropsContext,
+) => Promise<GetServerSidePropsResult<P & AuthProps>> {
   const {
     redirectToSignIn = true,
     signInUrl = "/sign-in",
@@ -269,7 +295,9 @@ export function withAuthSSR<P extends Record<string, unknown> = Record<string, u
           ? {
               id: sessionResult.session.sessionId,
               userId: sessionResult.session.userId,
-              expiresAt: new Date(sessionResult.tokens.refreshTokenExpiresAt * 1000),
+              expiresAt: new Date(
+                sessionResult.tokens.refreshTokenExpiresAt * 1000,
+              ),
               createdAt: new Date(),
               ipAddress: null,
               userAgent: null,
@@ -360,8 +388,10 @@ export function requireAuth(options: WithAuthSSROptions = {}) {
  * Useful for sign-in/sign-up pages.
  */
 export function redirectIfAuthenticated(
-  redirectTo: string = "/"
-): (context: GetServerSidePropsContext) => Promise<GetServerSidePropsResult<AuthProps>> {
+  redirectTo: string = "/",
+): (
+  context: GetServerSidePropsContext,
+) => Promise<GetServerSidePropsResult<AuthProps>> {
   return async (context: GetServerSidePropsContext) => {
     try {
       const sessionResult = await getSessionFromRequest(context.req);

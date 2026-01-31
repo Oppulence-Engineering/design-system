@@ -12,7 +12,10 @@ import type { AuthConfig, ResolvedAuthConfig } from "./types";
  * Default configuration values.
  * These can be overridden when initializing the auth package.
  */
-export const DEFAULT_CONFIG: Omit<ResolvedAuthConfig, "clientId" | "redirectUri"> = {
+export const DEFAULT_CONFIG: Omit<
+  ResolvedAuthConfig,
+  "clientId" | "redirectUri"
+> = {
   publicRoutes: [],
   signInUrl: "/sign-in",
   afterSignInUrl: "/dashboard",

@@ -6,7 +6,12 @@
  */
 
 import { encrypt, decrypt, generateToken } from "./crypto";
-import { refreshAccessToken, getUser, getOrganization, getOrganizationMembership } from "./client";
+import {
+  refreshAccessToken,
+  getUser,
+  getOrganization,
+  getOrganizationMembership,
+} from "./client";
 import { debugLog, assertServer } from "./env";
 import {
   ACCESS_TOKEN_LIFETIME,
@@ -77,7 +82,7 @@ export async function createSession(
     ipAddress?: string;
     userAgent?: string;
     organizationId?: string;
-  }
+  },
 ): Promise<string> {
   assertServer("createSession()");
 
@@ -114,14 +119,21 @@ export async function createSession(
  * @param encryptedToken - Encrypted session token from cookie
  * @returns Session payload or null if invalid
  */
-export async function decodeSession(encryptedToken: string): Promise<SessionPayload | null> {
+export async function decodeSession(
+  encryptedToken: string,
+): Promise<SessionPayload | null> {
   assertServer("decodeSession()");
 
   try {
     const payload = await decrypt<SessionPayload>(encryptedToken);
 
     // Validate required fields
-    if (!payload.sessionId || !payload.userId || !payload.accessToken || !payload.refreshToken) {
+    if (
+      !payload.sessionId ||
+      !payload.userId ||
+      !payload.accessToken ||
+      !payload.refreshToken
+    ) {
       debugLog("Session missing required fields");
       return null;
     }
@@ -145,7 +157,7 @@ export async function decodeSession(encryptedToken: string): Promise<SessionPayl
  * @returns Valid session data with new token if refreshed, or null if invalid
  */
 export async function getValidSession(
-  encryptedToken: string
+  encryptedToken: string,
 ): Promise<{ session: SessionPayload; newToken: string | null } | null> {
   assertServer("getValidSession()");
 
@@ -164,10 +176,14 @@ export async function getValidSession(
 
   // Check if access token needs refresh (expires within buffer time)
   if (now >= payload.accessTokenExpiresAt - TOKEN_REFRESH_BUFFER) {
-    debugLog("Access token expiring soon, refreshing", { sessionId: payload.sessionId });
+    debugLog("Access token expiring soon, refreshing", {
+      sessionId: payload.sessionId,
+    });
 
     try {
-      const { accessToken, refreshToken } = await refreshAccessToken(payload.refreshToken);
+      const { accessToken, refreshToken } = await refreshAccessToken(
+        payload.refreshToken,
+      );
 
       // Update payload with new tokens
       const newPayload: SessionPayload = {
@@ -180,7 +196,9 @@ export async function getValidSession(
       };
 
       const newToken = await encrypt(newPayload, "30d");
-      debugLog("Session refreshed successfully", { sessionId: payload.sessionId });
+      debugLog("Session refreshed successfully", {
+        sessionId: payload.sessionId,
+      });
 
       return { session: newPayload, newToken };
     } catch (error) {
@@ -205,7 +223,7 @@ export async function getValidSession(
  * @returns Full resolved session or null if invalid
  */
 export async function resolveSession(
-  encryptedToken: string
+  encryptedToken: string,
 ): Promise<{ resolved: ResolvedSession; newToken: string | null } | null> {
   assertServer("resolveSession()");
 
@@ -227,10 +245,16 @@ export async function resolveSession(
     if (payload.organizationId) {
       try {
         organization = await getOrganization(payload.organizationId);
-        membership = await getOrganizationMembership(payload.userId, payload.organizationId);
+        membership = await getOrganizationMembership(
+          payload.userId,
+          payload.organizationId,
+        );
       } catch (error) {
         // Organization might have been deleted or user removed
-        debugLog("Failed to resolve organization", { organizationId: payload.organizationId, error });
+        debugLog("Failed to resolve organization", {
+          organizationId: payload.organizationId,
+          error,
+        });
       }
     }
 
@@ -263,7 +287,10 @@ export async function resolveSession(
       newToken,
     };
   } catch (error) {
-    debugLog("Failed to resolve session", { sessionId: payload.sessionId, error });
+    debugLog("Failed to resolve session", {
+      sessionId: payload.sessionId,
+      error,
+    });
     return null;
   }
 }
@@ -281,7 +308,7 @@ export async function resolveSession(
  */
 export async function updateSessionOrganization(
   encryptedToken: string,
-  organizationId: string | null
+  organizationId: string | null,
 ): Promise<string> {
   assertServer("updateSessionOrganization()");
 
@@ -318,8 +345,12 @@ export async function updateSessionOrganization(
  * Useful for quick checks without API calls.
  */
 export async function getSessionMetadata(
-  encryptedToken: string
-): Promise<{ userId: string; organizationId: string | null; expiresAt: Date } | null> {
+  encryptedToken: string,
+): Promise<{
+  userId: string;
+  organizationId: string | null;
+  expiresAt: Date;
+} | null> {
   const payload = await decodeSession(encryptedToken);
   if (!payload) {
     return null;
@@ -336,7 +367,9 @@ export async function getSessionMetadata(
  * Checks if a session token needs to be refreshed.
  * Returns true if access token expires within the buffer time.
  */
-export async function sessionNeedsRefresh(encryptedToken: string): Promise<boolean> {
+export async function sessionNeedsRefresh(
+  encryptedToken: string,
+): Promise<boolean> {
   const payload = await decodeSession(encryptedToken);
   if (!payload) {
     return false;

@@ -27,7 +27,10 @@ import {
 import { Alert, AlertDescription } from "@oppulence/design-system";
 
 import { useAuth } from "../hooks";
-import { evaluatePasswordStrength, getPasswordStrengthMessage } from "../schemas";
+import {
+  evaluatePasswordStrength,
+  getPasswordStrengthMessage,
+} from "../schemas";
 
 // ============================================================================
 // Types
@@ -43,7 +46,7 @@ const resetPasswordSchema = z
       .regex(/[0-9]/, "Password must contain at least one number")
       .regex(
         /[^A-Za-z0-9]/,
-        "Password must contain at least one special character"
+        "Password must contain at least one special character",
       ),
     confirmPassword: z.string(),
   })
@@ -250,7 +253,8 @@ export function ResetPasswordForm({
               Password reset successful
             </Text>
             <Text size="sm" variant="muted">
-              Your password has been updated. You can now sign in with your new password.
+              Your password has been updated. You can now sign in with your new
+              password.
             </Text>
           </div>
         </div>
@@ -270,7 +274,9 @@ export function ResetPasswordForm({
       return (
         <div className="w-full max-w-md mx-auto">
           <Card>
-            <CardContent><div className="pt-6">{successContent}</div></CardContent>
+            <CardContent>
+              <div className="pt-6">{successContent}</div>
+            </CardContent>
           </Card>
         </div>
       );
@@ -310,7 +316,9 @@ export function ResetPasswordForm({
           </Field>
 
           <Field>
-            <FieldLabel htmlFor="confirmPassword">Confirm new password</FieldLabel>
+            <FieldLabel htmlFor="confirmPassword">
+              Confirm new password
+            </FieldLabel>
             <FieldContent>
               <Input
                 id="confirmPassword"
@@ -323,15 +331,13 @@ export function ResetPasswordForm({
               />
             </FieldContent>
             {errors.confirmPassword && (
-              <FieldError errors={[{ message: errors.confirmPassword.message }]} />
+              <FieldError
+                errors={[{ message: errors.confirmPassword.message }]}
+              />
             )}
           </Field>
 
-          <Button
-            width="full"
-            loading={isSubmitting}
-            disabled={isDisabled}
-          >
+          <Button width="full" loading={isSubmitting} disabled={isDisabled}>
             Reset password
           </Button>
         </Stack>
@@ -339,7 +345,10 @@ export function ResetPasswordForm({
 
       <p className="text-center text-sm text-muted-foreground">
         Remember your password?{" "}
-        <a href={signInUrl} className="text-primary hover:underline font-medium">
+        <a
+          href={signInUrl}
+          className="text-primary hover:underline font-medium"
+        >
           Sign in
         </a>
       </p>

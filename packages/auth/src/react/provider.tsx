@@ -8,8 +8,17 @@
  */
 
 import * as React from "react";
-import { AuthContext, type AuthContextValue, type AuthContextState } from "./context";
-import { AUTH_ROUTES, SESSION_REFRESH_INTERVAL, ROLE_HIERARCHY, hasRoleLevel } from "../core/constants";
+import {
+  AuthContext,
+  type AuthContextValue,
+  type AuthContextState,
+} from "./context";
+import {
+  AUTH_ROUTES,
+  SESSION_REFRESH_INTERVAL,
+  ROLE_HIERARCHY,
+  hasRoleLevel,
+} from "../core/constants";
 import type {
   User,
   Session,
@@ -56,7 +65,7 @@ export interface AuthProviderProps {
 
 async function authFetch<T>(
   endpoint: string,
-  options?: RequestInit
+  options?: RequestInit,
 ): Promise<T> {
   const response = await fetch(endpoint, {
     ...options,
@@ -73,7 +82,7 @@ async function authFetch<T>(
     throw new AuthError(
       data.message || "Request failed",
       data.code || "UNKNOWN_ERROR",
-      response.status
+      response.status,
     );
   }
 
@@ -92,16 +101,21 @@ export function AuthProvider({
 }: AuthProviderProps) {
   const hasInitialSession = initialSession !== undefined;
   // State
-  const [user, setUser] = React.useState<User | null>(initialSession?.user ?? null);
-  const [session, setSession] = React.useState<Session | null>(initialSession?.session ?? null);
+  const [user, setUser] = React.useState<User | null>(
+    initialSession?.user ?? null,
+  );
+  const [session, setSession] = React.useState<Session | null>(
+    initialSession?.session ?? null,
+  );
   const [organization, setOrganization] = React.useState<Organization | null>(
-    initialSession?.organization ?? null
+    initialSession?.organization ?? null,
   );
-  const [membership, setMembership] = React.useState<OrganizationMembership | null>(
-    initialSession?.membership ?? null
-  );
+  const [membership, setMembership] =
+    React.useState<OrganizationMembership | null>(
+      initialSession?.membership ?? null,
+    );
   const [organizations, setOrganizations] = React.useState<Organization[]>(
-    initialSession?.organizations ?? []
+    initialSession?.organizations ?? [],
   );
   const [isLoading, setIsLoading] = React.useState(!hasInitialSession);
   const [error, setError] = React.useState<AuthErrorType | null>(null);
@@ -110,7 +124,9 @@ export function AuthProvider({
   const isAuthenticated = !!user && !!session;
 
   // Refs
-  const refreshIntervalRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
+  const refreshIntervalRef = React.useRef<ReturnType<
+    typeof setInterval
+  > | null>(null);
 
   // =========================================================================
   // Session Management
@@ -166,7 +182,10 @@ export function AuthProvider({
   // Session refresh interval
   React.useEffect(() => {
     if (isAuthenticated) {
-      refreshIntervalRef.current = setInterval(refreshSession, SESSION_REFRESH_INTERVAL);
+      refreshIntervalRef.current = setInterval(
+        refreshSession,
+        SESSION_REFRESH_INTERVAL,
+      );
     }
 
     return () => {
@@ -201,7 +220,17 @@ export function AuthProvider({
       isLoading,
       error,
     });
-  }, [user, session, organization, membership, organizations, isAuthenticated, isLoading, error, onAuthStateChange]);
+  }, [
+    user,
+    session,
+    organization,
+    membership,
+    organizations,
+    isAuthenticated,
+    isLoading,
+    error,
+    onAuthStateChange,
+  ]);
 
   // =========================================================================
   // Auth Methods
@@ -241,14 +270,14 @@ export function AuthProvider({
         setIsLoading(false);
       }
     },
-    [apiBaseUrl]
+    [apiBaseUrl],
   );
 
   const signUp = React.useCallback(
     async (
       email: string,
       password: string,
-      options?: { firstName?: string; lastName?: string }
+      options?: { firstName?: string; lastName?: string },
     ) => {
       setIsLoading(true);
       setError(null);
@@ -268,7 +297,7 @@ export function AuthProvider({
         setIsLoading(false);
       }
     },
-    [apiBaseUrl]
+    [apiBaseUrl],
   );
 
   const signOut = React.useCallback(async () => {
@@ -296,7 +325,7 @@ export function AuthProvider({
       // Redirect to OAuth authorization
       window.location.href = `${apiBaseUrl}/callback?provider=${provider}&state=${state}`;
     },
-    [apiBaseUrl]
+    [apiBaseUrl],
   );
 
   const forgotPassword = React.useCallback(
@@ -313,7 +342,7 @@ export function AuthProvider({
         // Always succeed from user perspective
       }
     },
-    [apiBaseUrl]
+    [apiBaseUrl],
   );
 
   const resetPassword = React.useCallback(
@@ -331,7 +360,7 @@ export function AuthProvider({
         throw authError;
       }
     },
-    [apiBaseUrl]
+    [apiBaseUrl],
   );
 
   const sendVerificationEmail = React.useCallback(async () => {
@@ -370,7 +399,7 @@ export function AuthProvider({
         throw authError;
       }
     },
-    [apiBaseUrl]
+    [apiBaseUrl],
   );
 
   const switchOrganization = React.useCallback(
@@ -392,7 +421,7 @@ export function AuthProvider({
         throw authError;
       }
     },
-    [apiBaseUrl]
+    [apiBaseUrl],
   );
 
   const clearOrganization = React.useCallback(async () => {
@@ -423,7 +452,7 @@ export function AuthProvider({
     try {
       const data = await authFetch<{ qrCodeUrl: string; secret: string }>(
         `${apiBaseUrl}/mfa/enroll`,
-        { method: "POST" }
+        { method: "POST" },
       );
       return data;
     } catch (err) {
@@ -441,7 +470,7 @@ export function AuthProvider({
           {
             method: "POST",
             body: JSON.stringify({ code, action: "enroll" }),
-          }
+          },
         );
         return data;
       } catch (err) {
@@ -450,7 +479,7 @@ export function AuthProvider({
         throw authError;
       }
     },
-    [apiBaseUrl]
+    [apiBaseUrl],
   );
 
   const verifyMFA = React.useCallback(
@@ -458,7 +487,7 @@ export function AuthProvider({
       challengeId: string,
       code: string,
       method: "totp" | "sms" | "backup",
-      rememberDevice?: boolean
+      rememberDevice?: boolean,
     ) => {
       setIsLoading(true);
       try {
@@ -488,7 +517,7 @@ export function AuthProvider({
         setIsLoading(false);
       }
     },
-    [apiBaseUrl]
+    [apiBaseUrl],
   );
 
   const sendMFASMS = React.useCallback(
@@ -504,7 +533,7 @@ export function AuthProvider({
         throw authError;
       }
     },
-    [apiBaseUrl]
+    [apiBaseUrl],
   );
 
   // Aliases for component compatibility
@@ -523,7 +552,7 @@ export function AuthProvider({
         throw authError;
       }
     },
-    [apiBaseUrl]
+    [apiBaseUrl],
   );
 
   // =========================================================================
@@ -535,7 +564,7 @@ export function AuthProvider({
       if (!membership) return false;
       return membership.permissions.includes(permission);
     },
-    [membership]
+    [membership],
   );
 
   const hasAllPermissions = React.useCallback(
@@ -543,7 +572,7 @@ export function AuthProvider({
       if (!membership) return false;
       return permissions.every((p) => membership.permissions.includes(p));
     },
-    [membership]
+    [membership],
   );
 
   const hasAnyPermission = React.useCallback(
@@ -551,7 +580,7 @@ export function AuthProvider({
       if (!membership) return false;
       return permissions.some((p) => membership.permissions.includes(p));
     },
-    [membership]
+    [membership],
   );
 
   const hasRole = React.useCallback(
@@ -559,7 +588,7 @@ export function AuthProvider({
       if (!membership) return false;
       return hasRoleLevel(membership.role, role);
     },
-    [membership]
+    [membership],
   );
 
   const isOwner = membership?.role === "owner";
@@ -644,8 +673,10 @@ export function AuthProvider({
       hasRole,
       isOwner,
       isAdmin,
-    ]
+    ],
   );
 
-  return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
+  );
 }

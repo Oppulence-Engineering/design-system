@@ -36,7 +36,7 @@ interface MiddlewareOptions<TContext> {
  * ```
  */
 export async function authMiddleware<TContext extends { auth: AuthContext }>(
-  opts: MiddlewareOptions<TContext>
+  opts: MiddlewareOptions<TContext>,
 ): Promise<unknown> {
   const { ctx, next } = opts;
 
@@ -62,7 +62,7 @@ export async function authMiddleware<TContext extends { auth: AuthContext }>(
  * ```
  */
 export async function orgMiddleware<TContext extends { auth: AuthContext }>(
-  opts: MiddlewareOptions<TContext>
+  opts: MiddlewareOptions<TContext>,
 ): Promise<unknown> {
   const { ctx, next } = opts;
 
@@ -70,7 +70,7 @@ export async function orgMiddleware<TContext extends { auth: AuthContext }>(
     throw new AuthError(
       "Organization selection required",
       "ORGANIZATION_NOT_FOUND",
-      403
+      403,
     );
   }
 
@@ -95,7 +95,7 @@ export async function orgMiddleware<TContext extends { auth: AuthContext }>(
  */
 export function roleMiddleware(role: OrganizationRole) {
   return async function <TContext extends { auth: AuthContext }>(
-    opts: MiddlewareOptions<TContext>
+    opts: MiddlewareOptions<TContext>,
   ): Promise<unknown> {
     const { ctx, next } = opts;
 
@@ -103,7 +103,7 @@ export function roleMiddleware(role: OrganizationRole) {
       throw new AuthError(
         "Organization membership required",
         "ORGANIZATION_MEMBERSHIP_NOT_FOUND",
-        403
+        403,
       );
     }
 
@@ -111,7 +111,7 @@ export function roleMiddleware(role: OrganizationRole) {
       throw new AuthError(
         `Role ${role} or higher required`,
         "PERMISSION_DENIED",
-        403
+        403,
       );
     }
 
@@ -137,7 +137,7 @@ export function roleMiddleware(role: OrganizationRole) {
  */
 export function permissionMiddleware(permission: Permission) {
   return async function <TContext extends { auth: AuthContext }>(
-    opts: MiddlewareOptions<TContext>
+    opts: MiddlewareOptions<TContext>,
   ): Promise<unknown> {
     const { ctx, next } = opts;
 
@@ -145,7 +145,7 @@ export function permissionMiddleware(permission: Permission) {
       throw new AuthError(
         "Organization membership required",
         "ORGANIZATION_MEMBERSHIP_NOT_FOUND",
-        403
+        403,
       );
     }
 
@@ -153,7 +153,7 @@ export function permissionMiddleware(permission: Permission) {
       throw new AuthError(
         `Permission ${permission} required`,
         "PERMISSION_DENIED",
-        403
+        403,
       );
     }
 
@@ -173,7 +173,7 @@ export function permissionMiddleware(permission: Permission) {
  */
 export function allPermissionsMiddleware(permissions: Permission[]) {
   return async function <TContext extends { auth: AuthContext }>(
-    opts: MiddlewareOptions<TContext>
+    opts: MiddlewareOptions<TContext>,
   ): Promise<unknown> {
     const { ctx, next } = opts;
 
@@ -181,19 +181,19 @@ export function allPermissionsMiddleware(permissions: Permission[]) {
       throw new AuthError(
         "Organization membership required",
         "ORGANIZATION_MEMBERSHIP_NOT_FOUND",
-        403
+        403,
       );
     }
 
     const missing = permissions.filter(
-      (p) => !ctx.auth.membership!.permissions.includes(p)
+      (p) => !ctx.auth.membership!.permissions.includes(p),
     );
 
     if (missing.length > 0) {
       throw new AuthError(
         `Missing permissions: ${missing.join(", ")}`,
         "PERMISSION_DENIED",
-        403
+        403,
       );
     }
 
@@ -209,7 +209,7 @@ export function allPermissionsMiddleware(permissions: Permission[]) {
  */
 export function anyPermissionMiddleware(permissions: Permission[]) {
   return async function <TContext extends { auth: AuthContext }>(
-    opts: MiddlewareOptions<TContext>
+    opts: MiddlewareOptions<TContext>,
   ): Promise<unknown> {
     const { ctx, next } = opts;
 
@@ -217,19 +217,19 @@ export function anyPermissionMiddleware(permissions: Permission[]) {
       throw new AuthError(
         "Organization membership required",
         "ORGANIZATION_MEMBERSHIP_NOT_FOUND",
-        403
+        403,
       );
     }
 
     const hasAny = permissions.some((p) =>
-      ctx.auth.membership!.permissions.includes(p)
+      ctx.auth.membership!.permissions.includes(p),
     );
 
     if (!hasAny) {
       throw new AuthError(
         `One of these permissions required: ${permissions.join(", ")}`,
         "PERMISSION_DENIED",
-        403
+        403,
       );
     }
 

@@ -235,11 +235,7 @@ export function SocialButtonGroup({
   ));
 
   if (layout === "horizontal") {
-    return (
-      <div className="flex gap-2 justify-center">
-        {buttons}
-      </div>
-    );
+    return <div className="flex gap-2 justify-center">{buttons}</div>;
   }
 
   return <Stack gap="sm">{buttons}</Stack>;
@@ -249,11 +245,17 @@ export function SocialButtonGroup({
 // Utility: Get all supported providers
 // ============================================================================
 
-export const SUPPORTED_PROVIDERS: OAuthProvider[] = ["google", "github", "microsoft"];
+export const SUPPORTED_PROVIDERS: OAuthProvider[] = [
+  "google",
+  "github",
+  "microsoft",
+];
 
 /**
  * Check if a provider is supported.
  */
-export function isProviderSupported(provider: string): provider is OAuthProvider {
+export function isProviderSupported(
+  provider: string,
+): provider is OAuthProvider {
   return SUPPORTED_PROVIDERS.includes(provider as OAuthProvider);
 }

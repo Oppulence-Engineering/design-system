@@ -8,7 +8,12 @@
 import { WorkOS } from "@workos-inc/node";
 import { assertServer, getEnvVar, debugLog } from "./env";
 import { AuthError } from "./types";
-import type { OAuthProvider, User, Organization, OrganizationMembership } from "./types";
+import type {
+  OAuthProvider,
+  User,
+  Organization,
+  OrganizationMembership,
+} from "./types";
 import { WORKOS_OAUTH_PROVIDERS } from "./constants";
 
 // ============================================================================
@@ -49,7 +54,9 @@ export function getClientId(): string {
 /**
  * Maps WorkOS user to our User type.
  */
-function mapWorkOSUser(workosUser: Awaited<ReturnType<WorkOS["userManagement"]["getUser"]>>): User {
+function mapWorkOSUser(
+  workosUser: Awaited<ReturnType<WorkOS["userManagement"]["getUser"]>>,
+): User {
   return {
     id: workosUser.id,
     email: workosUser.email,
@@ -83,7 +90,7 @@ export async function getUser(userId: string): Promise<User> {
  */
 export async function authenticateWithPassword(
   email: string,
-  password: string
+  password: string,
 ): Promise<{ user: User; accessToken: string; refreshToken: string }> {
   const client = getWorkOSClient();
 
@@ -103,16 +110,32 @@ export async function authenticateWithPassword(
     debugLog("Password authentication failed", { email, error });
 
     // WorkOS returns specific error codes we can map
-    const message = error instanceof Error ? error.message : "Authentication failed";
+    const message =
+      error instanceof Error ? error.message : "Authentication failed";
 
     if (message.includes("invalid")) {
-      throw new AuthError("Invalid email or password", "INVALID_CREDENTIALS", 401, error);
+      throw new AuthError(
+        "Invalid email or password",
+        "INVALID_CREDENTIALS",
+        401,
+        error,
+      );
     }
     if (message.includes("not verified")) {
-      throw new AuthError("Email not verified", "EMAIL_NOT_VERIFIED", 401, error);
+      throw new AuthError(
+        "Email not verified",
+        "EMAIL_NOT_VERIFIED",
+        401,
+        error,
+      );
     }
 
-    throw new AuthError("Authentication failed", "INVALID_CREDENTIALS", 401, error);
+    throw new AuthError(
+      "Authentication failed",
+      "INVALID_CREDENTIALS",
+      401,
+      error,
+    );
   }
 }
 
@@ -122,7 +145,7 @@ export async function authenticateWithPassword(
 export async function createUserWithPassword(
   email: string,
   password: string,
-  options?: { firstName?: string; lastName?: string }
+  options?: { firstName?: string; lastName?: string },
 ): Promise<User> {
   const client = getWorkOSClient();
 
@@ -139,10 +162,16 @@ export async function createUserWithPassword(
   } catch (error) {
     debugLog("Failed to create user", { email, error });
 
-    const message = error instanceof Error ? error.message : "User creation failed";
+    const message =
+      error instanceof Error ? error.message : "User creation failed";
 
     if (message.includes("already exists")) {
-      throw new AuthError("A user with this email already exists", "USER_ALREADY_EXISTS", 409, error);
+      throw new AuthError(
+        "A user with this email already exists",
+        "USER_ALREADY_EXISTS",
+        409,
+        error,
+      );
     }
 
     throw new AuthError("Failed to create user", "UNKNOWN_ERROR", 500, error);
@@ -171,7 +200,10 @@ export async function sendPasswordResetEmail(email: string): Promise<void> {
 /**
  * Resets a user's password with a token.
  */
-export async function resetPassword(token: string, newPassword: string): Promise<User> {
+export async function resetPassword(
+  token: string,
+  newPassword: string,
+): Promise<User> {
   const client = getWorkOSClient();
 
   try {
@@ -184,7 +216,12 @@ export async function resetPassword(token: string, newPassword: string): Promise
     return mapWorkOSUser(result.user);
   } catch (error) {
     debugLog("Password reset failed", { error });
-    throw new AuthError("Invalid or expired reset token", "INVALID_TOKEN", 400, error);
+    throw new AuthError(
+      "Invalid or expired reset token",
+      "INVALID_TOKEN",
+      400,
+      error,
+    );
   }
 }
 
@@ -201,7 +238,12 @@ export async function sendVerificationEmail(userId: string): Promise<void> {
     debugLog("Verification email sent", { userId });
   } catch (error) {
     debugLog("Failed to send verification email", { userId, error });
-    throw new AuthError("Failed to send verification email", "UNKNOWN_ERROR", 500, error);
+    throw new AuthError(
+      "Failed to send verification email",
+      "UNKNOWN_ERROR",
+      500,
+      error,
+    );
   }
 }
 
@@ -210,16 +252,17 @@ export async function sendVerificationEmail(userId: string): Promise<void> {
  */
 export async function verifyEmail(
   userId: string,
-  code: string
+  code: string,
 ): Promise<{ user: User; accessToken: string; refreshToken: string }> {
   const client = getWorkOSClient();
 
   try {
-    const result = await client.userManagement.authenticateWithEmailVerification({
-      clientId: getClientId(),
-      code,
-      pendingAuthenticationToken: userId, // This should actually be the pending token
-    });
+    const result =
+      await client.userManagement.authenticateWithEmailVerification({
+        clientId: getClientId(),
+        code,
+        pendingAuthenticationToken: userId, // This should actually be the pending token
+      });
 
     return {
       user: mapWorkOSUser(result.user),
@@ -228,7 +271,12 @@ export async function verifyEmail(
     };
   } catch (error) {
     debugLog("Email verification failed", { userId, error });
-    throw new AuthError("Invalid verification code", "INVALID_CODE", 400, error);
+    throw new AuthError(
+      "Invalid verification code",
+      "INVALID_CODE",
+      400,
+      error,
+    );
   }
 }
 
@@ -236,7 +284,7 @@ export async function verifyEmail(
  * Refreshes an access token using a refresh token.
  */
 export async function refreshAccessToken(
-  refreshToken: string
+  refreshToken: string,
 ): Promise<{ accessToken: string; refreshToken: string }> {
   const client = getWorkOSClient();
 
@@ -267,7 +315,7 @@ export async function refreshAccessToken(
 export function getOAuthAuthorizationUrl(
   provider: OAuthProvider,
   redirectUri: string,
-  state?: string
+  state?: string,
 ): string {
   const client = getWorkOSClient();
 
@@ -286,7 +334,7 @@ export function getOAuthAuthorizationUrl(
  * Handles the OAuth callback and exchanges code for tokens.
  */
 export async function handleOAuthCallback(
-  code: string
+  code: string,
 ): Promise<{ user: User; accessToken: string; refreshToken: string }> {
   const client = getWorkOSClient();
 
@@ -304,7 +352,12 @@ export async function handleOAuthCallback(
     };
   } catch (error) {
     debugLog("OAuth callback failed", { error });
-    throw new AuthError("OAuth authentication failed", "INVALID_CODE", 400, error);
+    throw new AuthError(
+      "OAuth authentication failed",
+      "INVALID_CODE",
+      400,
+      error,
+    );
   }
 }
 
@@ -316,7 +369,7 @@ export async function handleOAuthCallback(
  * Maps WorkOS organization to our Organization type.
  */
 function mapWorkOSOrganization(
-  workosOrg: Awaited<ReturnType<WorkOS["organizations"]["getOrganization"]>>
+  workosOrg: Awaited<ReturnType<WorkOS["organizations"]["getOrganization"]>>,
 ): Organization {
   // WorkOS Organization type may vary - cast to access optional fields
   const org = workosOrg as {
@@ -343,38 +396,55 @@ function mapWorkOSOrganization(
 /**
  * Gets an organization by ID.
  */
-export async function getOrganization(organizationId: string): Promise<Organization> {
+export async function getOrganization(
+  organizationId: string,
+): Promise<Organization> {
   const client = getWorkOSClient();
 
   try {
-    const workosOrg = await client.organizations.getOrganization(organizationId);
+    const workosOrg =
+      await client.organizations.getOrganization(organizationId);
     return mapWorkOSOrganization(workosOrg);
   } catch (error) {
     debugLog("Failed to get organization", { organizationId, error });
-    throw new AuthError("Organization not found", "ORGANIZATION_NOT_FOUND", 404, error);
+    throw new AuthError(
+      "Organization not found",
+      "ORGANIZATION_NOT_FOUND",
+      404,
+      error,
+    );
   }
 }
 
 /**
  * Lists organizations for a user.
  */
-export async function listUserOrganizations(userId: string): Promise<Organization[]> {
+export async function listUserOrganizations(
+  userId: string,
+): Promise<Organization[]> {
   const client = getWorkOSClient();
 
   try {
-    const memberships = await client.userManagement.listOrganizationMemberships({
-      userId,
-    });
+    const memberships = await client.userManagement.listOrganizationMemberships(
+      {
+        userId,
+      },
+    );
 
     const orgs = await Promise.all(
-      memberships.data.map((m) => getOrganization(m.organizationId))
+      memberships.data.map((m) => getOrganization(m.organizationId)),
     );
 
     debugLog("Listed user organizations", { userId, count: orgs.length });
     return orgs;
   } catch (error) {
     debugLog("Failed to list user organizations", { userId, error });
-    throw new AuthError("Failed to list organizations", "UNKNOWN_ERROR", 500, error);
+    throw new AuthError(
+      "Failed to list organizations",
+      "UNKNOWN_ERROR",
+      500,
+      error,
+    );
   }
 }
 
@@ -383,22 +453,24 @@ export async function listUserOrganizations(userId: string): Promise<Organizatio
  */
 export async function getOrganizationMembership(
   userId: string,
-  organizationId: string
+  organizationId: string,
 ): Promise<OrganizationMembership> {
   const client = getWorkOSClient();
 
   try {
-    const memberships = await client.userManagement.listOrganizationMemberships({
-      userId,
-      organizationId,
-    });
+    const memberships = await client.userManagement.listOrganizationMemberships(
+      {
+        userId,
+        organizationId,
+      },
+    );
 
     const membership = memberships.data[0];
     if (!membership) {
       throw new AuthError(
         "User is not a member of this organization",
         "ORGANIZATION_MEMBERSHIP_NOT_FOUND",
-        404
+        404,
       );
     }
 
@@ -406,13 +478,23 @@ export async function getOrganizationMembership(
       id: membership.id,
       userId: membership.userId,
       organizationId: membership.organizationId,
-      role: membership.role?.slug as OrganizationMembership["role"] ?? "member",
+      role:
+        (membership.role?.slug as OrganizationMembership["role"]) ?? "member",
       permissions: [], // WorkOS doesn't expose this directly; implement via role mapping
       createdAt: new Date(membership.createdAt),
     };
   } catch (error) {
     if (error instanceof AuthError) throw error;
-    debugLog("Failed to get organization membership", { userId, organizationId, error });
-    throw new AuthError("Failed to get membership", "UNKNOWN_ERROR", 500, error);
+    debugLog("Failed to get organization membership", {
+      userId,
+      organizationId,
+      error,
+    });
+    throw new AuthError(
+      "Failed to get membership",
+      "UNKNOWN_ERROR",
+      500,
+      error,
+    );
   }
 }

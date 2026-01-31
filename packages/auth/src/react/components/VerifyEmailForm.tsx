@@ -136,7 +136,8 @@ export function VerifyEmailForm({
   header,
   footer,
 }: VerifyEmailFormProps) {
-  const { verifyEmail, resendVerificationEmail, isLoading, error, clearError } = useAuth();
+  const { verifyEmail, resendVerificationEmail, isLoading, error, clearError } =
+    useAuth();
   const [code, setCode] = React.useState("");
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [isResending, setIsResending] = React.useState(false);
@@ -236,7 +237,9 @@ export function VerifyEmailForm({
       return (
         <div className="w-full max-w-md mx-auto">
           <Card>
-            <CardContent><div className="pt-6">{successContent}</div></CardContent>
+            <CardContent>
+              <div className="pt-6">{successContent}</div>
+            </CardContent>
           </Card>
         </div>
       );
@@ -285,7 +288,10 @@ export function VerifyEmailForm({
           <InputOTPSeparator />
           <InputOTPGroup>
             {Array.from({ length: Math.ceil(codeLength / 2) }).map((_, i) => (
-              <InputOTPSlot key={i + Math.floor(codeLength / 2)} index={i + Math.floor(codeLength / 2)} />
+              <InputOTPSlot
+                key={i + Math.floor(codeLength / 2)}
+                index={i + Math.floor(codeLength / 2)}
+              />
             ))}
           </InputOTPGroup>
         </InputOTP>

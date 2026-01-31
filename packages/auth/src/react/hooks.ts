@@ -51,7 +51,7 @@ export function useAuth(): AuthContextValue {
   if (!context) {
     throw new Error(
       "useAuth must be used within an AuthProvider. " +
-        "Make sure your component is wrapped in <AuthProvider>."
+        "Make sure your component is wrapped in <AuthProvider>.",
     );
   }
 
@@ -145,7 +145,8 @@ export function useOrganization(): {
   switchOrganization: (organizationId: string) => Promise<void>;
   clearOrganization: () => Promise<void>;
 } {
-  const { organization, membership, switchOrganization, clearOrganization } = useAuth();
+  const { organization, membership, switchOrganization, clearOrganization } =
+    useAuth();
 
   return useMemo(
     () => ({
@@ -154,7 +155,7 @@ export function useOrganization(): {
       switchOrganization,
       clearOrganization,
     }),
-    [organization, membership, switchOrganization, clearOrganization]
+    [organization, membership, switchOrganization, clearOrganization],
   );
 }
 
@@ -196,7 +197,7 @@ export function useOrganizations(): {
       organization,
       switchOrganization,
     }),
-    [organizations, organization, switchOrganization]
+    [organizations, organization, switchOrganization],
   );
 }
 
@@ -287,7 +288,7 @@ export function usePermissions(): {
       hasRole,
       isOwner,
       isAdmin,
-    ]
+    ],
   );
 }
 
@@ -328,7 +329,7 @@ export function useIsAuthenticated(): {
       isAuthenticated,
       isLoading,
     }),
-    [isAuthenticated, isLoading]
+    [isAuthenticated, isLoading],
   );
 }
 
@@ -362,7 +363,7 @@ export function useAuthError(): {
       error,
       clearError,
     }),
-    [error, clearError]
+    [error, clearError],
   );
 }
 
@@ -410,7 +411,7 @@ export function useSignIn(): {
       isLoading,
       error,
     }),
-    [signIn, signInWithOAuth, isLoading, error]
+    [signIn, signInWithOAuth, isLoading, error],
   );
 }
 
@@ -441,6 +442,6 @@ export function useSignOut(): {
       signOut,
       isLoading,
     }),
-    [signOut, isLoading]
+    [signOut, isLoading],
   );
 }

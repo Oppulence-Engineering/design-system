@@ -11,7 +11,7 @@ import { AuthContext, type AuthContextValue } from "../context";
 
 // Mock auth context
 const createMockAuthContext = (
-  overrides: Partial<AuthContextValue> = {}
+  overrides: Partial<AuthContextValue> = {},
 ): AuthContextValue => ({
   user: null,
   session: null,
@@ -73,7 +73,7 @@ describe("SignInForm", () => {
       render(
         <TestWrapper>
           <SignInForm />
-        </TestWrapper>
+        </TestWrapper>,
       );
 
       expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
@@ -84,11 +84,11 @@ describe("SignInForm", () => {
       render(
         <TestWrapper>
           <SignInForm />
-        </TestWrapper>
+        </TestWrapper>,
       );
 
       expect(
-        screen.getByRole("button", { name: /sign in/i })
+        screen.getByRole("button", { name: /sign in/i }),
       ).toBeInTheDocument();
     });
 
@@ -96,14 +96,14 @@ describe("SignInForm", () => {
       render(
         <TestWrapper>
           <SignInForm providers={["google", "github"]} />
-        </TestWrapper>
+        </TestWrapper>,
       );
 
       expect(
-        screen.getByRole("button", { name: /google/i })
+        screen.getByRole("button", { name: /google/i }),
       ).toBeInTheDocument();
       expect(
-        screen.getByRole("button", { name: /github/i })
+        screen.getByRole("button", { name: /github/i }),
       ).toBeInTheDocument();
     });
 
@@ -111,11 +111,11 @@ describe("SignInForm", () => {
       render(
         <TestWrapper>
           <SignInForm providers={[]} />
-        </TestWrapper>
+        </TestWrapper>,
       );
 
       expect(
-        screen.queryByRole("button", { name: /google/i })
+        screen.queryByRole("button", { name: /google/i }),
       ).not.toBeInTheDocument();
     });
 
@@ -123,7 +123,7 @@ describe("SignInForm", () => {
       render(
         <TestWrapper>
           <SignInForm />
-        </TestWrapper>
+        </TestWrapper>,
       );
 
       expect(screen.getByText(/forgot password/i)).toBeInTheDocument();
@@ -133,7 +133,7 @@ describe("SignInForm", () => {
       render(
         <TestWrapper>
           <SignInForm showForgotPassword={false} />
-        </TestWrapper>
+        </TestWrapper>,
       );
 
       expect(screen.queryByText(/forgot password/i)).not.toBeInTheDocument();
@@ -143,7 +143,7 @@ describe("SignInForm", () => {
       render(
         <TestWrapper>
           <SignInForm />
-        </TestWrapper>
+        </TestWrapper>,
       );
 
       expect(screen.getByText(/sign up/i)).toBeInTheDocument();
@@ -153,11 +153,11 @@ describe("SignInForm", () => {
       render(
         <TestWrapper>
           <SignInForm showSignUpLink={false} />
-        </TestWrapper>
+        </TestWrapper>,
       );
 
       expect(
-        screen.queryByText(/don't have an account/i)
+        screen.queryByText(/don't have an account/i),
       ).not.toBeInTheDocument();
     });
   });
@@ -170,7 +170,7 @@ describe("SignInForm", () => {
       render(
         <TestWrapper authContext={{ signInWithOAuth }}>
           <SignInForm providers={["google"]} />
-        </TestWrapper>
+        </TestWrapper>,
       );
 
       await user.click(screen.getByRole("button", { name: /google/i }));
@@ -184,7 +184,7 @@ describe("SignInForm", () => {
       render(
         <TestWrapper authContext={{ isLoading: true }}>
           <SignInForm />
-        </TestWrapper>
+        </TestWrapper>,
       );
 
       expect(screen.getByLabelText(/email/i)).toBeDisabled();
@@ -213,7 +213,7 @@ describe("SignInForm", () => {
       render(
         <TestWrapper authContext={{ error }}>
           <SignInForm />
-        </TestWrapper>
+        </TestWrapper>,
       );
 
       expect(screen.getByText(/invalid credentials/i)).toBeInTheDocument();

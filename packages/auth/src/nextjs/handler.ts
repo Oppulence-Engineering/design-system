@@ -77,7 +77,9 @@ export interface AuthHandlerConfig {
   /**
    * Custom webhook handlers.
    */
-  webhooks?: Partial<Record<WorkOSWebhookEvent, (payload: WorkOSWebhookPayload) => Promise<void>>>;
+  webhooks?: Partial<
+    Record<WorkOSWebhookEvent, (payload: WorkOSWebhookPayload) => Promise<void>>
+  >;
 
   /**
    * URL to redirect after sign-in (can be overridden per request).
@@ -99,7 +101,11 @@ export interface AuthHandlerConfig {
 // Response Helpers
 // ============================================================================
 
-function jsonResponse(data: unknown, status = 200, headers?: Record<string, string>): Response {
+function jsonResponse(
+  data: unknown,
+  status = 200,
+  headers?: Record<string, string>,
+): Response {
   return new Response(JSON.stringify(data), {
     status,
     headers: {
@@ -113,7 +119,10 @@ function errorResponse(error: AuthError): Response {
   return jsonResponse(error.toJSON(), error.status);
 }
 
-function redirectResponse(url: string, headers?: Record<string, string>): Response {
+function redirectResponse(
+  url: string,
+  headers?: Record<string, string>,
+): Response {
   return new Response(null, {
     status: 302,
     headers: {
@@ -189,7 +198,7 @@ async function handleSession(request: Request): Promise<Response> {
 
 async function handleSignIn(
   request: Request,
-  config: AuthHandlerConfig
+  config: AuthHandlerConfig,
 ): Promise<Response> {
   try {
     const body = await request.json();
@@ -197,14 +206,19 @@ async function handleSignIn(
 
     const { user, accessToken, refreshToken } = await authenticateWithPassword(
       data.email,
-      data.password
+      data.password,
     );
 
     // Create session
-    const sessionToken = await createSession(accessToken, refreshToken, user.id, {
-      ipAddress: request.headers.get("x-forwarded-for") ?? undefined,
-      userAgent: request.headers.get("user-agent") ?? undefined,
-    });
+    const sessionToken = await createSession(
+      accessToken,
+      refreshToken,
+      user.id,
+      {
+        ipAddress: request.headers.get("x-forwarded-for") ?? undefined,
+        userAgent: request.headers.get("user-agent") ?? undefined,
+      },
+    );
 
     // Get user's organizations
     const organizations = await listUserOrganizations(user.id);
@@ -219,7 +233,7 @@ async function handleSignIn(
         organizations,
       },
       200,
-      { "Set-Cookie": createSessionCookieHeader(sessionToken) }
+      { "Set-Cookie": createSessionCookieHeader(sessionToken) },
     );
   } catch (error) {
     if (error instanceof AuthError) {
@@ -227,7 +241,7 @@ async function handleSignIn(
     }
     debugLog("Sign-in error", { error });
     return errorResponse(
-      new AuthError("Sign-in failed", "INVALID_CREDENTIALS", 401, error)
+      new AuthError("Sign-in failed", "INVALID_CREDENTIALS", 401, error),
     );
   }
 }
@@ -243,21 +257,24 @@ async function handleSignUp(request: Request): Promise<Response> {
     });
 
     // Don't auto-sign-in - require email verification
-    return jsonResponse({ success: true, message: "Check your email to verify your account" });
+    return jsonResponse({
+      success: true,
+      message: "Check your email to verify your account",
+    });
   } catch (error) {
     if (error instanceof AuthError) {
       return errorResponse(error);
     }
     debugLog("Sign-up error", { error });
     return errorResponse(
-      new AuthError("Sign-up failed", "UNKNOWN_ERROR", 500, error)
+      new AuthError("Sign-up failed", "UNKNOWN_ERROR", 500, error),
     );
   }
 }
 
 async function handleSignOut(
   request: Request,
-  config: AuthHandlerConfig
+  config: AuthHandlerConfig,
 ): Promise<Response> {
   const token = getSessionFromRequest(request);
 
@@ -272,11 +289,9 @@ async function handleSignOut(
     }
   }
 
-  return jsonResponse(
-    { success: true },
-    200,
-    { "Set-Cookie": createClearSessionCookieHeader() }
-  );
+  return jsonResponse({ success: true }, 200, {
+    "Set-Cookie": createClearSessionCookieHeader(),
+  });
 }
 
 async function handleOAuthStart(request: Request): Promise<Response> {
@@ -285,7 +300,7 @@ async function handleOAuthStart(request: Request): Promise<Response> {
 
   if (!provider || !["google", "github", "microsoft"].includes(provider)) {
     return errorResponse(
-      new AuthError("Invalid OAuth provider", "CONFIGURATION_ERROR", 400)
+      new AuthError("Invalid OAuth provider", "CONFIGURATION_ERROR", 400),
     );
   }
 
@@ -301,7 +316,7 @@ async function handleOAuthStart(request: Request): Promise<Response> {
 
 async function handleOAuthCallback(
   request: Request,
-  config: AuthHandlerConfig
+  config: AuthHandlerConfig,
 ): Promise<Response> {
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
@@ -311,30 +326,38 @@ async function handleOAuthCallback(
   // Check for OAuth error
   if (error) {
     const redirectUrl = config.afterSignInUrl ?? "/sign-in";
-    return redirectResponse(`${redirectUrl}?error=${encodeURIComponent(error)}`);
+    return redirectResponse(
+      `${redirectUrl}?error=${encodeURIComponent(error)}`,
+    );
   }
 
   // Validate state
   if (!state || !validateOAuthState(state)) {
     return errorResponse(
-      new AuthError("Invalid OAuth state", "INVALID_TOKEN", 400)
+      new AuthError("Invalid OAuth state", "INVALID_TOKEN", 400),
     );
   }
 
   if (!code) {
     return errorResponse(
-      new AuthError("Missing authorization code", "INVALID_CODE", 400)
+      new AuthError("Missing authorization code", "INVALID_CODE", 400),
     );
   }
 
   try {
-    const { user, accessToken, refreshToken } = await processOAuthCallback(code);
+    const { user, accessToken, refreshToken } =
+      await processOAuthCallback(code);
 
     // Create session
-    const sessionToken = await createSession(accessToken, refreshToken, user.id, {
-      ipAddress: request.headers.get("x-forwarded-for") ?? undefined,
-      userAgent: request.headers.get("user-agent") ?? undefined,
-    });
+    const sessionToken = await createSession(
+      accessToken,
+      refreshToken,
+      user.id,
+      {
+        ipAddress: request.headers.get("x-forwarded-for") ?? undefined,
+        userAgent: request.headers.get("user-agent") ?? undefined,
+      },
+    );
 
     // Callback
     await config.onSignIn?.(user, !user.emailVerified); // New if not verified
@@ -355,7 +378,7 @@ async function handleRefresh(request: Request): Promise<Response> {
 
   if (!token) {
     return errorResponse(
-      new AuthError("No session to refresh", "SESSION_EXPIRED", 401)
+      new AuthError("No session to refresh", "SESSION_EXPIRED", 401),
     );
   }
 
@@ -363,24 +386,22 @@ async function handleRefresh(request: Request): Promise<Response> {
     const result = await resolveSession(token);
     if (!result) {
       return errorResponse(
-        new AuthError("Session expired", "SESSION_EXPIRED", 401)
+        new AuthError("Session expired", "SESSION_EXPIRED", 401),
       );
     }
 
     // If token was refreshed, send new cookie
     if (result.newToken) {
-      return jsonResponse(
-        { success: true },
-        200,
-        { "Set-Cookie": createSessionCookieHeader(result.newToken) }
-      );
+      return jsonResponse({ success: true }, 200, {
+        "Set-Cookie": createSessionCookieHeader(result.newToken),
+      });
     }
 
     return jsonResponse({ success: true });
   } catch (error) {
     debugLog("Refresh error", { error });
     return errorResponse(
-      new AuthError("Session refresh failed", "SESSION_EXPIRED", 401, error)
+      new AuthError("Session refresh failed", "SESSION_EXPIRED", 401, error),
     );
   }
 }
@@ -424,7 +445,7 @@ async function handleResetPassword(request: Request): Promise<Response> {
     }
     debugLog("Reset password error", { error });
     return errorResponse(
-      new AuthError("Password reset failed", "INVALID_TOKEN", 400, error)
+      new AuthError("Password reset failed", "INVALID_TOKEN", 400, error),
     );
   }
 }
@@ -437,41 +458,46 @@ async function handleVerifyEmail(request: Request): Promise<Response> {
     const token = getSessionFromRequest(request);
     if (!token) {
       return errorResponse(
-        new AuthError("Authentication required", "SESSION_EXPIRED", 401)
+        new AuthError("Authentication required", "SESSION_EXPIRED", 401),
       );
     }
 
     const result = await resolveSession(token);
     if (!result) {
       return errorResponse(
-        new AuthError("Session expired", "SESSION_EXPIRED", 401)
+        new AuthError("Session expired", "SESSION_EXPIRED", 401),
       );
     }
 
     if (action === "send") {
       await sendVerificationEmail(result.resolved.user.id);
-      return jsonResponse({ success: true, message: "Verification email sent" });
+      return jsonResponse({
+        success: true,
+        message: "Verification email sent",
+      });
     }
 
     if (action === "verify") {
       const data = verifyEmailSchema.parse({ code });
       const { user, accessToken, refreshToken } = await verifyEmailCode(
         result.resolved.user.id,
-        data.code
+        data.code,
       );
 
       // Create new session with verified user
-      const sessionToken = await createSession(accessToken, refreshToken, user.id);
-
-      return jsonResponse(
-        { user, success: true },
-        200,
-        { "Set-Cookie": createSessionCookieHeader(sessionToken) }
+      const sessionToken = await createSession(
+        accessToken,
+        refreshToken,
+        user.id,
       );
+
+      return jsonResponse({ user, success: true }, 200, {
+        "Set-Cookie": createSessionCookieHeader(sessionToken),
+      });
     }
 
     return errorResponse(
-      new AuthError("Invalid action", "CONFIGURATION_ERROR", 400)
+      new AuthError("Invalid action", "CONFIGURATION_ERROR", 400),
     );
   } catch (error) {
     if (error instanceof AuthError) {
@@ -479,14 +505,14 @@ async function handleVerifyEmail(request: Request): Promise<Response> {
     }
     debugLog("Verify email error", { error });
     return errorResponse(
-      new AuthError("Verification failed", "INVALID_CODE", 400, error)
+      new AuthError("Verification failed", "INVALID_CODE", 400, error),
     );
   }
 }
 
 async function handleOrgSwitch(
   request: Request,
-  config: AuthHandlerConfig
+  config: AuthHandlerConfig,
 ): Promise<Response> {
   try {
     const body = await request.json();
@@ -495,7 +521,7 @@ async function handleOrgSwitch(
     const token = getSessionFromRequest(request);
     if (!token) {
       return errorResponse(
-        new AuthError("Authentication required", "SESSION_EXPIRED", 401)
+        new AuthError("Authentication required", "SESSION_EXPIRED", 401),
       );
     }
 
@@ -513,18 +539,21 @@ async function handleOrgSwitch(
       }
     }
 
-    return jsonResponse(
-      { organization, membership },
-      200,
-      { "Set-Cookie": createSessionCookieHeader(newToken) }
-    );
+    return jsonResponse({ organization, membership }, 200, {
+      "Set-Cookie": createSessionCookieHeader(newToken),
+    });
   } catch (error) {
     if (error instanceof AuthError) {
       return errorResponse(error);
     }
     debugLog("Org switch error", { error });
     return errorResponse(
-      new AuthError("Organization switch failed", "ORGANIZATION_NOT_FOUND", 400, error)
+      new AuthError(
+        "Organization switch failed",
+        "ORGANIZATION_NOT_FOUND",
+        400,
+        error,
+      ),
     );
   }
 }
@@ -577,7 +606,7 @@ export function createAuthHandler(config: AuthHandlerConfig = {}) {
               return handleOAuthStart(request);
             }
             return errorResponse(
-              new AuthError("Route not found", "CONFIGURATION_ERROR", 404)
+              new AuthError("Route not found", "CONFIGURATION_ERROR", 404),
             );
         }
       }
@@ -608,13 +637,13 @@ export function createAuthHandler(config: AuthHandlerConfig = {}) {
           // case "webhook":
           default:
             return errorResponse(
-              new AuthError("Route not found", "CONFIGURATION_ERROR", 404)
+              new AuthError("Route not found", "CONFIGURATION_ERROR", 404),
             );
         }
       }
 
       return errorResponse(
-        new AuthError("Method not allowed", "CONFIGURATION_ERROR", 405)
+        new AuthError("Method not allowed", "CONFIGURATION_ERROR", 405),
       );
     } catch (error) {
       debugLog("Unhandled error in auth handler", { error });

@@ -238,7 +238,7 @@ export class AuthError extends Error {
     message: string,
     public readonly code: AuthErrorCode,
     public readonly status: number = 401,
-    public readonly cause?: unknown
+    public readonly cause?: unknown,
   ) {
     super(message);
 
@@ -255,7 +255,10 @@ export class AuthError extends Error {
    * Creates an AuthError from an unknown error.
    * Useful for wrapping caught exceptions.
    */
-  static from(error: unknown, fallbackCode: AuthErrorCode = "UNKNOWN_ERROR"): AuthError {
+  static from(
+    error: unknown,
+    fallbackCode: AuthErrorCode = "UNKNOWN_ERROR",
+  ): AuthError {
     if (error instanceof AuthError) {
       return error;
     }
@@ -268,7 +271,7 @@ export class AuthError extends Error {
       typeof error === "string" ? error : "An unknown error occurred",
       fallbackCode,
       500,
-      error
+      error,
     );
   }
 

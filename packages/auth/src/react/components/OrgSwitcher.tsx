@@ -194,7 +194,8 @@ export function OrgSwitcher({
   showCount = false,
   compact = false,
 }: OrgSwitcherProps) {
-  const { organizations, organization, switchOrganization } = useOrganizations();
+  const { organizations, organization, switchOrganization } =
+    useOrganizations();
   const [isLoading, setIsLoading] = React.useState(false);
 
   const handleOrgSwitch = async (org: Organization) => {

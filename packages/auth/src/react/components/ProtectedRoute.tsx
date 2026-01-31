@@ -224,7 +224,8 @@ export function ProtectedRoute({
 
     if (!isAuthenticated && redirectToSignIn) {
       setHasRedirected(true);
-      const returnUrl = typeof window !== "undefined" ? window.location.pathname : "/";
+      const returnUrl =
+        typeof window !== "undefined" ? window.location.pathname : "/";
       const url = `${signInUrl}?returnUrl=${encodeURIComponent(returnUrl)}`;
       window.location.href = url;
     }

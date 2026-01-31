@@ -41,7 +41,10 @@ const envSchema = z.object({
       error:
         "WORKOS_COOKIE_SECRET is required. Generate a random 32+ character string.",
     })
-    .min(32, "WORKOS_COOKIE_SECRET must be at least 32 characters for security"),
+    .min(
+      32,
+      "WORKOS_COOKIE_SECRET must be at least 32 characters for security",
+    ),
 
   // Public URL (required for OAuth redirects)
   NEXT_PUBLIC_APP_URL: z
@@ -101,7 +104,7 @@ export function validateEnv(): AuthEnv {
     throw new AuthError(
       `@oppulence/auth configuration error:\n${errors}\n\nSee https://docs.workos.com for setup instructions.`,
       "CONFIGURATION_ERROR",
-      500
+      500,
     );
   }
 
@@ -169,7 +172,7 @@ export function assertServer(operation: string): void {
       `${operation} can only be called on the server. ` +
         "If you need this on the client, use the API route handlers instead.",
       "CONFIGURATION_ERROR",
-      500
+      500,
     );
   }
 }

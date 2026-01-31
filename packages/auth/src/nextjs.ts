@@ -49,10 +49,7 @@ export {
 // API Handler
 // ============================================================================
 
-export {
-  createAuthHandler,
-  type AuthHandlerConfig,
-} from "./nextjs/handler";
+export { createAuthHandler, type AuthHandlerConfig } from "./nextjs/handler";
 
 // ============================================================================
 // Cookie Utilities (for advanced usage)

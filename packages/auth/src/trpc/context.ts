@@ -76,7 +76,7 @@ export interface AuthContext {
  * ```
  */
 export async function createAuthContext(
-  options: CreateAuthContextOptions
+  options: CreateAuthContextOptions,
 ): Promise<AuthContext> {
   const { headers } = options;
 
@@ -134,7 +134,10 @@ export async function createAuthContext(
 /**
  * Parses a specific cookie value from the cookie header.
  */
-function parseCookieValue(cookieHeader: string | null, name: string): string | null {
+function parseCookieValue(
+  cookieHeader: string | null,
+  name: string,
+): string | null {
   if (!cookieHeader) return null;
 
   const cookies = cookieHeader.split(";");

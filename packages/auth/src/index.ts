@@ -142,11 +142,23 @@ export {
 // React Components
 // ============================================================================
 
-export { SignInForm, type SignInFormProps } from "./react/components/SignInForm";
-export { SignUpForm, type SignUpFormProps } from "./react/components/SignUpForm";
-export { SignOutButton, type SignOutButtonProps } from "./react/components/SignOutButton";
+export {
+  SignInForm,
+  type SignInFormProps,
+} from "./react/components/SignInForm";
+export {
+  SignUpForm,
+  type SignUpFormProps,
+} from "./react/components/SignUpForm";
+export {
+  SignOutButton,
+  type SignOutButtonProps,
+} from "./react/components/SignOutButton";
 export { UserMenu, type UserMenuProps } from "./react/components/UserMenu";
-export { OrgSwitcher, type OrgSwitcherProps } from "./react/components/OrgSwitcher";
+export {
+  OrgSwitcher,
+  type OrgSwitcherProps,
+} from "./react/components/OrgSwitcher";
 export {
   ProtectedRoute,
   type ProtectedRouteProps,
@@ -157,15 +169,30 @@ export {
 } from "./react/components/ProtectedRoute";
 
 // Password Reset Components
-export { ForgotPasswordForm, type ForgotPasswordFormProps } from "./react/components/ForgotPasswordForm";
-export { ResetPasswordForm, type ResetPasswordFormProps } from "./react/components/ResetPasswordForm";
+export {
+  ForgotPasswordForm,
+  type ForgotPasswordFormProps,
+} from "./react/components/ForgotPasswordForm";
+export {
+  ResetPasswordForm,
+  type ResetPasswordFormProps,
+} from "./react/components/ResetPasswordForm";
 
 // Email Verification
-export { VerifyEmailForm, type VerifyEmailFormProps } from "./react/components/VerifyEmailForm";
+export {
+  VerifyEmailForm,
+  type VerifyEmailFormProps,
+} from "./react/components/VerifyEmailForm";
 
 // MFA Components
-export { MFAEnrollment, type MFAEnrollmentProps } from "./react/components/MFAEnrollment";
-export { MFAChallenge, type MFAChallengeProps } from "./react/components/MFAChallenge";
+export {
+  MFAEnrollment,
+  type MFAEnrollmentProps,
+} from "./react/components/MFAEnrollment";
+export {
+  MFAChallenge,
+  type MFAChallengeProps,
+} from "./react/components/MFAChallenge";
 
 // Form Base & Utilities
 export {

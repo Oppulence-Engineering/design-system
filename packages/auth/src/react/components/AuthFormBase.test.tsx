@@ -18,7 +18,7 @@ describe("AuthFormBase", () => {
       render(
         <AuthFormBase>
           <div data-testid="child">Content</div>
-        </AuthFormBase>
+        </AuthFormBase>,
       );
 
       expect(screen.getByTestId("child")).toBeInTheDocument();
@@ -28,7 +28,7 @@ describe("AuthFormBase", () => {
       render(
         <AuthFormBase title="Sign In" description="Welcome back!">
           <div>Content</div>
-        </AuthFormBase>
+        </AuthFormBase>,
       );
 
       expect(screen.getByText("Sign In")).toBeInTheDocument();
@@ -42,7 +42,7 @@ describe("AuthFormBase", () => {
           header={<div data-testid="custom-header">Custom Header</div>}
         >
           <div>Content</div>
-        </AuthFormBase>
+        </AuthFormBase>,
       );
 
       expect(screen.getByTestId("custom-header")).toBeInTheDocument();
@@ -53,7 +53,7 @@ describe("AuthFormBase", () => {
       render(
         <AuthFormBase footer={<div data-testid="footer">Footer Content</div>}>
           <div>Content</div>
-        </AuthFormBase>
+        </AuthFormBase>,
       );
 
       expect(screen.getByTestId("footer")).toBeInTheDocument();
@@ -63,7 +63,7 @@ describe("AuthFormBase", () => {
       const { container } = render(
         <AuthFormBase maxWidth="sm">
           <div>Content</div>
-        </AuthFormBase>
+        </AuthFormBase>,
       );
 
       expect(container.firstChild).toHaveClass("max-w-sm");
@@ -73,7 +73,7 @@ describe("AuthFormBase", () => {
       const { container } = render(
         <AuthFormBase maxWidth="lg">
           <div>Content</div>
-        </AuthFormBase>
+        </AuthFormBase>,
       );
 
       expect(container.firstChild).toHaveClass("max-w-lg");
@@ -83,7 +83,7 @@ describe("AuthFormBase", () => {
       const { container } = render(
         <AuthFormBase>
           <div>Content</div>
-        </AuthFormBase>
+        </AuthFormBase>,
       );
 
       expect(container.firstChild).toHaveClass("max-w-md");
@@ -95,7 +95,7 @@ describe("AuthFormBase", () => {
       render(
         <AuthFormBase mode="modal" open={true} title="Modal Title">
           <div data-testid="modal-content">Modal Content</div>
-        </AuthFormBase>
+        </AuthFormBase>,
       );
 
       // Dialog should be in the document when open
@@ -107,7 +107,7 @@ describe("AuthFormBase", () => {
       render(
         <AuthFormBase mode="modal" open={false}>
           <div data-testid="modal-content">Modal Content</div>
-        </AuthFormBase>
+        </AuthFormBase>,
       );
 
       expect(screen.queryByTestId("modal-content")).not.toBeInTheDocument();
@@ -140,7 +140,7 @@ describe("AuthFooterLink", () => {
         text="Don't have an account?"
         linkText="Sign up"
         href="/sign-up"
-      />
+      />,
     );
 
     expect(screen.getByText("Don't have an account?")).toBeInTheDocument();
@@ -156,7 +156,7 @@ describe("AuthFooterLink", () => {
         text="Already have an account?"
         linkText="Sign in"
         onClick={onClick}
-      />
+      />,
     );
 
     const button = screen.getByRole("button", { name: /sign in/i });
@@ -166,11 +166,7 @@ describe("AuthFooterLink", () => {
 
 describe("AuthBranding", () => {
   it("renders logo when provided", () => {
-    render(
-      <AuthBranding
-        logo={<div data-testid="logo">Logo</div>}
-      />
-    );
+    render(<AuthBranding logo={<div data-testid="logo">Logo</div>} />);
 
     expect(screen.getByTestId("logo")).toBeInTheDocument();
   });
@@ -191,7 +187,7 @@ describe("AuthBranding", () => {
         logo={<div data-testid="logo">Logo</div>}
         title="Welcome"
         description="Sign in to continue"
-      />
+      />,
     );
 
     expect(screen.getByTestId("logo")).toBeInTheDocument();

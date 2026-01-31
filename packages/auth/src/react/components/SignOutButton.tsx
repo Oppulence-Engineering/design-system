@@ -20,7 +20,13 @@ export interface SignOutButtonProps {
    * Button variant.
    * @default "ghost"
    */
-  variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
+  variant?:
+    | "default"
+    | "destructive"
+    | "outline"
+    | "secondary"
+    | "ghost"
+    | "link";
 
   /**
    * Button size.
@@ -92,11 +98,7 @@ function LogOutIcon() {
 
 function LoadingSpinner() {
   return (
-    <svg
-      className="size-4 animate-spin"
-      fill="none"
-      viewBox="0 0 24 24"
-    >
+    <svg className="size-4 animate-spin" fill="none" viewBox="0 0 24 24">
       <circle
         className="opacity-25"
         cx="12"
@@ -146,7 +148,9 @@ export function SignOutButton({
         window.location.href = redirectUrl;
       }
     } catch (error) {
-      onSignOutError?.(error instanceof Error ? error : new Error("Sign out failed"));
+      onSignOutError?.(
+        error instanceof Error ? error : new Error("Sign out failed"),
+      );
     } finally {
       setIsSigningOut(false);
     }

@@ -172,7 +172,9 @@ export function ForgotPasswordForm({
             </Text>
             <Text size="sm" variant="muted">
               We&apos;ve sent a password reset link to{" "}
-              <span className="font-medium text-foreground">{submittedEmail}</span>
+              <span className="font-medium text-foreground">
+                {submittedEmail}
+              </span>
             </Text>
           </div>
         </div>
@@ -194,7 +196,10 @@ export function ForgotPasswordForm({
         </Stack>
 
         <p className="text-center text-sm text-muted-foreground">
-          <a href={signInUrl} className="text-primary hover:underline font-medium inline-flex items-center gap-1">
+          <a
+            href={signInUrl}
+            className="text-primary hover:underline font-medium inline-flex items-center gap-1"
+          >
             <ArrowLeftIcon />
             Back to sign in
           </a>
@@ -206,7 +211,9 @@ export function ForgotPasswordForm({
       return (
         <div className="w-full max-w-md mx-auto">
           <Card>
-            <CardContent><div className="pt-6">{successContent}</div></CardContent>
+            <CardContent>
+              <div className="pt-6">{successContent}</div>
+            </CardContent>
           </Card>
         </div>
       );
@@ -244,11 +251,7 @@ export function ForgotPasswordForm({
             )}
           </Field>
 
-          <Button
-            width="full"
-            loading={isSubmitting}
-            disabled={isDisabled}
-          >
+          <Button width="full" loading={isSubmitting} disabled={isDisabled}>
             Send reset link
           </Button>
         </Stack>
@@ -256,7 +259,10 @@ export function ForgotPasswordForm({
 
       <p className="text-center text-sm text-muted-foreground">
         Remember your password?{" "}
-        <a href={signInUrl} className="text-primary hover:underline font-medium">
+        <a
+          href={signInUrl}
+          className="text-primary hover:underline font-medium"
+        >
           Sign in
         </a>
       </p>
@@ -273,7 +279,8 @@ export function ForgotPasswordForm({
               <>
                 <CardTitle>Forgot password?</CardTitle>
                 <CardDescription>
-                  Enter your email and we&apos;ll send you a link to reset your password.
+                  Enter your email and we&apos;ll send you a link to reset your
+                  password.
                 </CardDescription>
               </>
             )}

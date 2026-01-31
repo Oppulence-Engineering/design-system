@@ -135,7 +135,7 @@ export interface AuthProcedureBuilders<T extends TRPCInstance> {
  * ```
  */
 export function createAuthProcedures<T extends TRPCInstance>(
-  t: T
+  t: T,
 ): AuthProcedureBuilders<T> {
   // Auth required middleware
   const isAuthenticated = t.middleware(async ({ ctx, next }) => {
@@ -159,7 +159,7 @@ export function createAuthProcedures<T extends TRPCInstance>(
       throw new AuthError(
         "Organization selection required",
         "ORGANIZATION_NOT_FOUND",
-        403
+        403,
       );
     }
 
@@ -180,7 +180,7 @@ export function createAuthProcedures<T extends TRPCInstance>(
         throw new AuthError(
           `Role ${role} or higher required`,
           "PERMISSION_DENIED",
-          403
+          403,
         );
       }
 
@@ -196,7 +196,7 @@ export function createAuthProcedures<T extends TRPCInstance>(
         throw new AuthError(
           `Permission ${permission} required`,
           "PERMISSION_DENIED",
-          403
+          403,
         );
       }
 

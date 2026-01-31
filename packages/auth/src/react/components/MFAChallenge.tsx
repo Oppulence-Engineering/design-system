@@ -24,11 +24,7 @@ import {
   InputOTPSlot,
   Input,
 } from "@oppulence/design-system";
-import {
-  Field,
-  FieldLabel,
-  FieldContent,
-} from "@oppulence/design-system";
+import { Field, FieldLabel, FieldContent } from "@oppulence/design-system";
 import { Alert, AlertDescription } from "@oppulence/design-system";
 
 import { useAuth } from "../hooks";
@@ -192,7 +188,9 @@ export function MFAChallenge({
 }: MFAChallengeProps) {
   const { verifyMFA, sendMFASMS, isLoading, error, clearError } = useAuth();
 
-  const [selectedMethod, setSelectedMethod] = React.useState<MFAMethod>(methods[0] ?? "totp");
+  const [selectedMethod, setSelectedMethod] = React.useState<MFAMethod>(
+    methods[0] ?? "totp",
+  );
   const [code, setCode] = React.useState("");
   const [backupCode, setBackupCode] = React.useState("");
   const [rememberDevice, setRememberDevice] = React.useState(false);
@@ -211,7 +209,11 @@ export function MFAChallenge({
 
   // Auto-submit when OTP is complete
   React.useEffect(() => {
-    if ((selectedMethod === "totp" || selectedMethod === "sms") && code.length === 6 && !isSubmitting) {
+    if (
+      (selectedMethod === "totp" || selectedMethod === "sms") &&
+      code.length === 6 &&
+      !isSubmitting
+    ) {
       handleSubmit();
     }
   }, [code, selectedMethod]);
@@ -472,10 +474,7 @@ export function MFAChallenge({
             onCheckedChange={(checked) => setRememberDevice(checked === true)}
             disabled={isDisabled}
           />
-          <label
-            htmlFor="rememberDevice"
-            className="text-sm cursor-pointer"
-          >
+          <label htmlFor="rememberDevice" className="text-sm cursor-pointer">
             Remember this device for 30 days
           </label>
         </div>
@@ -502,11 +501,7 @@ export function MFAChallenge({
     return (
       <div className="w-full max-w-md mx-auto">
         <Card>
-          {header && (
-            <CardHeader>
-              {header}
-            </CardHeader>
-          )}
+          {header && <CardHeader>{header}</CardHeader>}
           <CardContent>
             <div className={header ? "" : "pt-6"}>{formContent}</div>
           </CardContent>

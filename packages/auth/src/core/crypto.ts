@@ -35,7 +35,7 @@ async function getEncryptionKey(): Promise<Uint8Array> {
     encoder.encode(secret),
     { name: "PBKDF2" },
     false,
-    ["deriveBits", "deriveKey"]
+    ["deriveBits", "deriveKey"],
   );
 
   const derivedKey = await crypto.subtle.deriveKey(
@@ -48,7 +48,7 @@ async function getEncryptionKey(): Promise<Uint8Array> {
     keyMaterial,
     { name: "AES-GCM", length: 256 },
     true,
-    ["encrypt", "decrypt"]
+    ["encrypt", "decrypt"],
   );
 
   // Export the key as raw bytes for jose
@@ -73,14 +73,16 @@ async function getEncryptionKey(): Promise<Uint8Array> {
  */
 export async function encrypt<T extends Record<string, unknown>>(
   payload: T,
-  expiresIn: string = "30d"
+  expiresIn: string = "30d",
 ): Promise<string> {
   assertServer("encrypt()");
 
   try {
     const key = await getEncryptionKey();
 
-    const jwt = await new EncryptJWT(payload as unknown as Record<string, unknown>)
+    const jwt = await new EncryptJWT(
+      payload as unknown as Record<string, unknown>,
+    )
       .setProtectedHeader({ alg: "dir", enc: "A256GCM" })
       .setIssuedAt()
       .setExpirationTime(expiresIn)
@@ -128,7 +130,12 @@ export async function decrypt<T>(token: string): Promise<T> {
       throw new AuthError("Invalid session token", "INVALID_TOKEN", 401, error);
     }
 
-    throw new AuthError("Failed to decrypt session", "INVALID_TOKEN", 401, error);
+    throw new AuthError(
+      "Failed to decrypt session",
+      "INVALID_TOKEN",
+      401,
+      error,
+    );
   }
 }
 
@@ -161,7 +168,10 @@ export function generateOAuthState(): string {
  * Validates an OAuth state parameter.
  * Checks that it's not too old (max 10 minutes).
  */
-export function validateOAuthState(state: string, maxAgeMs: number = 10 * 60 * 1000): boolean {
+export function validateOAuthState(
+  state: string,
+  maxAgeMs: number = 10 * 60 * 1000,
+): boolean {
   try {
     const [timestampStr] = state.split(".");
     if (!timestampStr) return false;
@@ -185,7 +195,10 @@ export function validateOAuthState(state: string, maxAgeMs: number = 10 * 60 * 1
  */
 export async function hash(data: string): Promise<string> {
   const encoder = new TextEncoder();
-  const hashBuffer = await crypto.subtle.digest("SHA-256", encoder.encode(data));
+  const hashBuffer = await crypto.subtle.digest(
+    "SHA-256",
+    encoder.encode(data),
+  );
   return base64url.encode(new Uint8Array(hashBuffer));
 }
 

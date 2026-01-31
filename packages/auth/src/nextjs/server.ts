@@ -55,7 +55,7 @@ interface NextCookiesInterface {
  * ```
  */
 export async function getSession(
-  cookies: NextCookiesInterface
+  cookies: NextCookiesInterface,
 ): Promise<Session | null> {
   const token = getSessionFromNextCookies(cookies as NextCookies);
   if (!token) return null;
@@ -83,7 +83,7 @@ export async function getSession(
  * ```
  */
 export async function getUser(
-  cookies: NextCookiesInterface
+  cookies: NextCookiesInterface,
 ): Promise<User | null> {
   const token = getSessionFromNextCookies(cookies as NextCookies);
   if (!token) return null;
@@ -111,7 +111,7 @@ export async function getUser(
  * ```
  */
 export async function getOrganization(
-  cookies: NextCookiesInterface
+  cookies: NextCookiesInterface,
 ): Promise<Organization | null> {
   const token = getSessionFromNextCookies(cookies as NextCookies);
   if (!token) return null;
@@ -127,7 +127,7 @@ export async function getOrganization(
  * @returns Membership data or null if no organization selected
  */
 export async function getMembership(
-  cookies: NextCookiesInterface
+  cookies: NextCookiesInterface,
 ): Promise<OrganizationMembership | null> {
   const token = getSessionFromNextCookies(cookies as NextCookies);
   if (!token) return null;
@@ -160,16 +160,12 @@ export async function getMembership(
  * ```
  */
 export async function requireAuth(
-  cookies: NextCookiesInterface
+  cookies: NextCookiesInterface,
 ): Promise<User> {
   const user = await getUser(cookies);
 
   if (!user) {
-    throw new AuthError(
-      "Authentication required",
-      "SESSION_EXPIRED",
-      401
-    );
+    throw new AuthError("Authentication required", "SESSION_EXPIRED", 401);
   }
 
   return user;
@@ -193,9 +189,7 @@ export async function requireAuth(
  * }
  * ```
  */
-export async function requireOrg(
-  cookies: NextCookiesInterface
-): Promise<{
+export async function requireOrg(cookies: NextCookiesInterface): Promise<{
   user: User;
   organization: Organization;
   membership: OrganizationMembership;
@@ -216,7 +210,7 @@ export async function requireOrg(
     throw new AuthError(
       "Organization selection required",
       "ORGANIZATION_NOT_FOUND",
-      403
+      403,
     );
   }
 
@@ -244,7 +238,7 @@ export async function requireOrg(
  */
 export async function requirePermission(
   cookies: NextCookiesInterface,
-  permission: Permission
+  permission: Permission,
 ): Promise<{
   user: User;
   organization: Organization;
@@ -256,7 +250,7 @@ export async function requirePermission(
     throw new AuthError(
       `Permission denied: ${permission} required`,
       "PERMISSION_DENIED",
-      403
+      403,
     );
   }
 
@@ -284,7 +278,7 @@ export async function requirePermission(
  */
 export async function requireRole(
   cookies: NextCookiesInterface,
-  role: OrganizationRole
+  role: OrganizationRole,
 ): Promise<{
   user: User;
   organization: Organization;
@@ -296,7 +290,7 @@ export async function requireRole(
     throw new AuthError(
       `Role denied: ${role} or higher required`,
       "PERMISSION_DENIED",
-      403
+      403,
     );
   }
 
@@ -314,9 +308,7 @@ export async function requireRole(
  * @param cookies - The cookies() object from next/headers
  * @returns Basic session info or null
  */
-export async function getSessionInfo(
-  cookies: NextCookiesInterface
-): Promise<{
+export async function getSessionInfo(cookies: NextCookiesInterface): Promise<{
   userId: string;
   organizationId: string | null;
   expiresAt: Date;
@@ -366,18 +358,24 @@ interface IncomingMessageLike {
  * ```
  */
 export async function getSessionFromRequest(
-  req: NextApiRequestLike | IncomingMessageLike
+  req: NextApiRequestLike | IncomingMessageLike,
 ): Promise<{
   session: { sessionId: string; userId: string; organizationId: string | null };
-  tokens: { accessToken: string; refreshToken: string; accessTokenExpiresAt: number; refreshTokenExpiresAt: number };
+  tokens: {
+    accessToken: string;
+    refreshToken: string;
+    accessTokenExpiresAt: number;
+    refreshTokenExpiresAt: number;
+  };
   user: User;
   organization: Organization | null;
   membership: OrganizationMembership | null;
 } | null> {
   // Get cookies from request
-  const cookies = 'cookies' in req && typeof req.cookies === 'object'
-    ? req.cookies ?? {}
-    : {};
+  const cookies =
+    "cookies" in req && typeof req.cookies === "object"
+      ? (req.cookies ?? {})
+      : {};
 
   // Create a minimal cookies-like interface for getSessionFromNextCookies
   const cookiesInterface = {
@@ -415,8 +413,6 @@ export async function getSessionFromRequest(
  * Gets user from session data.
  * Helper for consistent user retrieval.
  */
-export function getUserFromSession(session: {
-  user: User;
-}): User {
+export function getUserFromSession(session: { user: User }): User {
   return session.user;
 }

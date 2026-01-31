@@ -157,7 +157,8 @@ export function MFAEnrollment({
   mode = "page",
   header,
 }: MFAEnrollmentProps) {
-  const { enrollMFA, verifyMFAEnrollment, isLoading, error, clearError } = useAuth();
+  const { enrollMFA, verifyMFAEnrollment, isLoading, error, clearError } =
+    useAuth();
 
   const [step, setStep] = React.useState<EnrollmentStep>("setup");
   const [qrCodeUrl, setQrCodeUrl] = React.useState<string | null>(null);
@@ -282,7 +283,8 @@ export function MFAEnrollment({
               <TabsContent value="manual">
                 <div className="space-y-4 py-4">
                   <Text size="sm" variant="muted">
-                    If you can&apos;t scan the QR code, enter this secret key manually:
+                    If you can&apos;t scan the QR code, enter this secret key
+                    manually:
                   </Text>
                   <div className="flex items-center gap-2">
                     <code className="flex-1 rounded-md bg-muted px-3 py-2 text-sm font-mono break-all">
@@ -454,11 +456,7 @@ export function MFAEnrollment({
     return (
       <div className="w-full max-w-md mx-auto">
         <Card>
-          {header && (
-            <CardHeader>
-              {header}
-            </CardHeader>
-          )}
+          {header && <CardHeader>{header}</CardHeader>}
           <CardContent>
             <div className={header ? "" : "pt-6"}>{renderContent()}</div>
           </CardContent>

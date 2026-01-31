@@ -343,12 +343,16 @@ export function SignUpForm({
           <CardHeader>
             <CardTitle>Check your email</CardTitle>
             <CardDescription>
-              We&apos;ve sent a verification link to your email address. Please click the
-              link to verify your account.
+              We&apos;ve sent a verification link to your email address. Please
+              click the link to verify your account.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button variant="outline" width="full" onClick={() => setSuccess(false)}>
+            <Button
+              variant="outline"
+              width="full"
+              onClick={() => setSuccess(false)}
+            >
               Back to sign up
             </Button>
           </CardContent>
@@ -465,7 +469,9 @@ export function SignUpForm({
             </Field>
 
             <Field>
-              <FieldLabel htmlFor="confirmPassword">Confirm password</FieldLabel>
+              <FieldLabel htmlFor="confirmPassword">
+                Confirm password
+              </FieldLabel>
               <FieldContent>
                 <Input
                   id="confirmPassword"
@@ -478,7 +484,9 @@ export function SignUpForm({
                 />
               </FieldContent>
               {errors.confirmPassword && (
-                <FieldError errors={[{ message: errors.confirmPassword.message }]} />
+                <FieldError
+                  errors={[{ message: errors.confirmPassword.message }]}
+                />
               )}
             </Field>
 
@@ -502,13 +510,18 @@ export function SignUpForm({
                       Terms of Service
                     </a>{" "}
                     and{" "}
-                    <a href={privacyUrl} className="text-primary hover:underline">
+                    <a
+                      href={privacyUrl}
+                      className="text-primary hover:underline"
+                    >
                       Privacy Policy
                     </a>
                   </label>
                 </div>
                 {errors.acceptTerms && (
-                  <FieldError errors={[{ message: errors.acceptTerms.message }]} />
+                  <FieldError
+                    errors={[{ message: errors.acceptTerms.message }]}
+                  />
                 )}
               </Field>
             )}
@@ -529,7 +542,10 @@ export function SignUpForm({
       {showSignInLink && (
         <p className="text-center text-sm text-muted-foreground">
           Already have an account?{" "}
-          <a href={signInUrl} className="text-primary hover:underline font-medium">
+          <a
+            href={signInUrl}
+            className="text-primary hover:underline font-medium"
+          >
             Sign in
           </a>
         </p>

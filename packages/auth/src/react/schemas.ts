@@ -81,9 +81,7 @@ export const otpCodeSchema = z
 /**
  * Password reset token validation.
  */
-export const resetTokenSchema = z
-  .string()
-  .min(1, "Reset token is required");
+export const resetTokenSchema = z.string().min(1, "Reset token is required");
 
 // ============================================================================
 // Form Schemas
@@ -213,7 +211,9 @@ export interface PasswordStrengthResult {
  * @param password - Password to evaluate
  * @returns Strength result with score and criteria breakdown
  */
-export function evaluatePasswordStrength(password: string): PasswordStrengthResult {
+export function evaluatePasswordStrength(
+  password: string,
+): PasswordStrengthResult {
   const criteria = {
     minLength: password.length >= 12,
     hasUppercase: /[A-Z]/.test(password),

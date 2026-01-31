@@ -264,14 +264,16 @@ export function authMiddleware(config: AuthMiddlewareConfig = {}) {
     if (matcher) {
       const isProtected = matcher(pathname);
       if (isProtected && !isAuthenticated) {
-        if (debug) debugLog("Custom matcher: protected route, not authenticated");
+        if (debug)
+          debugLog("Custom matcher: protected route, not authenticated");
         return auth.redirectToSignIn();
       }
     } else {
       // Check explicit protected routes
       if (matchesPatterns(pathname, protectedRoutes)) {
         if (!isAuthenticated) {
-          if (debug) debugLog("Protected route, not authenticated", { pathname });
+          if (debug)
+            debugLog("Protected route, not authenticated", { pathname });
           return auth.redirectToSignIn();
         }
       }
@@ -373,7 +375,7 @@ function nextResponseWithCookies(): Response & {
     delete(name: string) {
       response.headers.append(
         "Set-Cookie",
-        `${name}=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT`
+        `${name}=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT`,
       );
     },
   };

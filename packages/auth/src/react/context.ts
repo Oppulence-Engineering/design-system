@@ -60,7 +60,7 @@ export interface AuthContextMethods {
   signUp: (
     email: string,
     password: string,
-    options?: { firstName?: string; lastName?: string }
+    options?: { firstName?: string; lastName?: string },
   ) => Promise<void>;
 
   /**
@@ -136,7 +136,7 @@ export interface AuthContextMethods {
     challengeId: string,
     code: string,
     method: "totp" | "sms" | "backup",
-    rememberDevice?: boolean
+    rememberDevice?: boolean,
   ) => Promise<void>;
 
   /**
@@ -194,9 +194,7 @@ export interface AuthContextPermissions {
  * Complete auth context value.
  */
 export interface AuthContextValue
-  extends AuthContextState,
-    AuthContextMethods,
-    AuthContextPermissions {}
+  extends AuthContextState, AuthContextMethods, AuthContextPermissions {}
 
 // ============================================================================
 // Context Definition

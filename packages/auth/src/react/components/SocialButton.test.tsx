@@ -21,24 +21,36 @@ describe("SocialButton", () => {
   describe("rendering", () => {
     it("renders Google button with correct label", () => {
       render(<SocialButton provider="google" onClick={() => {}} />);
-      expect(screen.getByRole("button", { name: /continue with google/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: /continue with google/i }),
+      ).toBeInTheDocument();
     });
 
     it("renders GitHub button with correct label", () => {
       render(<SocialButton provider="github" onClick={() => {}} />);
-      expect(screen.getByRole("button", { name: /continue with github/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: /continue with github/i }),
+      ).toBeInTheDocument();
     });
 
     it("renders Microsoft button with correct label", () => {
       render(<SocialButton provider="microsoft" onClick={() => {}} />);
-      expect(screen.getByRole("button", { name: /continue with microsoft/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: /continue with microsoft/i }),
+      ).toBeInTheDocument();
     });
 
     it("renders custom label when provided", () => {
       render(
-        <SocialButton provider="google" onClick={() => {}} label="Sign in with Google" />
+        <SocialButton
+          provider="google"
+          onClick={() => {}}
+          label="Sign in with Google"
+        />,
       );
-      expect(screen.getByRole("button", { name: /sign in with google/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: /sign in with google/i }),
+      ).toBeInTheDocument();
     });
 
     it("renders icon-only button when iconOnly is true", () => {
@@ -97,17 +109,23 @@ describe("SocialButtonGroup", () => {
         <SocialButtonGroup
           providers={["google", "github", "microsoft"]}
           onProviderClick={() => {}}
-        />
+        />,
       );
 
-      expect(screen.getByRole("button", { name: /google/i })).toBeInTheDocument();
-      expect(screen.getByRole("button", { name: /github/i })).toBeInTheDocument();
-      expect(screen.getByRole("button", { name: /microsoft/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: /google/i }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: /github/i }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: /microsoft/i }),
+      ).toBeInTheDocument();
     });
 
     it("renders nothing when providers array is empty", () => {
       const { container } = render(
-        <SocialButtonGroup providers={[]} onProviderClick={() => {}} />
+        <SocialButtonGroup providers={[]} onProviderClick={() => {}} />,
       );
       expect(container).toBeEmptyDOMElement();
     });
@@ -117,7 +135,7 @@ describe("SocialButtonGroup", () => {
         <SocialButtonGroup
           providers={["google", "github"]}
           onProviderClick={() => {}}
-        />
+        />,
       );
       // Stack component renders children vertically
       expect(container.firstChild).toBeInTheDocument();
@@ -129,7 +147,7 @@ describe("SocialButtonGroup", () => {
           providers={["google", "github"]}
           onProviderClick={() => {}}
           layout="horizontal"
-        />
+        />,
       );
       const wrapper = container.firstChild as HTMLElement;
       expect(wrapper).toHaveClass("flex");
@@ -145,7 +163,7 @@ describe("SocialButtonGroup", () => {
         <SocialButtonGroup
           providers={["google", "github"]}
           onProviderClick={onProviderClick}
-        />
+        />,
       );
 
       await user.click(screen.getByRole("button", { name: /google/i }));
@@ -163,7 +181,7 @@ describe("SocialButtonGroup", () => {
           providers={["google", "github"]}
           onProviderClick={() => {}}
           loadingProvider="google"
-        />
+        />,
       );
 
       const googleButton = screen.getByRole("button", { name: /google/i });
@@ -180,7 +198,7 @@ describe("SocialButtonGroup", () => {
           providers={["google", "github"]}
           onProviderClick={() => {}}
           loadingProvider="google"
-        />
+        />,
       );
 
       expect(screen.getByRole("button", { name: /google/i })).toBeDisabled();
@@ -195,7 +213,7 @@ describe("SocialButtonGroup", () => {
           providers={["google", "github"]}
           onProviderClick={() => {}}
           disabled
-        />
+        />,
       );
 
       expect(screen.getByRole("button", { name: /google/i })).toBeDisabled();

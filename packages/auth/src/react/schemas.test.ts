@@ -62,40 +62,40 @@ describe("passwordSchema (strong)", () => {
     const result = passwordSchema.safeParse("Short1!");
     expect(result.success).toBe(false);
     expect(result.error?.issues[0]?.message).toBe(
-      "Password must be at least 12 characters"
+      "Password must be at least 12 characters",
     );
   });
 
   it("rejects passwords without uppercase", () => {
     const result = passwordSchema.safeParse("mypassword123!");
     expect(result.success).toBe(false);
-    expect(result.error?.issues.some((e) => e.message.includes("uppercase"))).toBe(
-      true
-    );
+    expect(
+      result.error?.issues.some((e) => e.message.includes("uppercase")),
+    ).toBe(true);
   });
 
   it("rejects passwords without lowercase", () => {
     const result = passwordSchema.safeParse("MYPASSWORD123!");
     expect(result.success).toBe(false);
-    expect(result.error?.issues.some((e) => e.message.includes("lowercase"))).toBe(
-      true
-    );
+    expect(
+      result.error?.issues.some((e) => e.message.includes("lowercase")),
+    ).toBe(true);
   });
 
   it("rejects passwords without numbers", () => {
     const result = passwordSchema.safeParse("MyPasswordHere!");
     expect(result.success).toBe(false);
     expect(result.error?.issues.some((e) => e.message.includes("number"))).toBe(
-      true
+      true,
     );
   });
 
   it("rejects passwords without special characters", () => {
     const result = passwordSchema.safeParse("MyPassword1234");
     expect(result.success).toBe(false);
-    expect(result.error?.issues.some((e) => e.message.includes("special"))).toBe(
-      true
-    );
+    expect(
+      result.error?.issues.some((e) => e.message.includes("special")),
+    ).toBe(true);
   });
 
   it("rejects passwords that are too long", () => {
@@ -158,7 +158,9 @@ describe("otpCodeSchema", () => {
   it("rejects non-numeric codes", () => {
     const result = otpCodeSchema.safeParse("12345a");
     expect(result.success).toBe(false);
-    expect(result.error?.issues[0]?.message).toBe("Code must contain only numbers");
+    expect(result.error?.issues[0]?.message).toBe(
+      "Code must contain only numbers",
+    );
   });
 });
 
@@ -222,7 +224,7 @@ describe("signUpSchema", () => {
     });
     expect(result.success).toBe(false);
     expect(result.error?.issues[0]?.message).toBe(
-      "You must accept the terms and conditions"
+      "You must accept the terms and conditions",
     );
   });
 });
@@ -271,12 +273,16 @@ describe("evaluatePasswordStrength", () => {
 
 describe("getPasswordStrengthMessage", () => {
   it("returns appropriate messages", () => {
-    expect(getPasswordStrengthMessage("weak")).toBe("Weak - add more character types");
+    expect(getPasswordStrengthMessage("weak")).toBe(
+      "Weak - add more character types",
+    );
     expect(getPasswordStrengthMessage("fair")).toBe(
-      "Fair - consider adding more variety"
+      "Fair - consider adding more variety",
     );
     expect(getPasswordStrengthMessage("good")).toBe("Good - almost there");
-    expect(getPasswordStrengthMessage("strong")).toBe("Strong - excellent password");
+    expect(getPasswordStrengthMessage("strong")).toBe(
+      "Strong - excellent password",
+    );
   });
 });
 

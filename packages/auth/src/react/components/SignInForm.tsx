@@ -371,7 +371,10 @@ export function SignInForm({
       {showSignUpLink && (
         <p className="text-center text-sm text-muted-foreground">
           Don&apos;t have an account?{" "}
-          <a href={signUpUrl} className="text-primary hover:underline font-medium">
+          <a
+            href={signUpUrl}
+            className="text-primary hover:underline font-medium"
+          >
             Sign up
           </a>
         </p>

@@ -36,7 +36,7 @@ describe("authMiddleware", () => {
       method?: string;
       headers?: Record<string, string>;
       cookies?: Record<string, string>;
-    } = {}
+    } = {},
   ) {
     const url = `https://example.com${pathname}`;
     const cookieMap = new Map(Object.entries(options.cookies ?? {}));
@@ -205,7 +205,7 @@ describe("authMiddleware", () => {
           sessionId: "session-1",
           isAuthenticated: true,
         }),
-        expect.anything()
+        expect.anything(),
       );
     });
 
