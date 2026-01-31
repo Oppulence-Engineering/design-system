@@ -93,7 +93,7 @@ export const resetTokenSchema = z.string().min(1, "Reset token is required");
 export const signInSchema = z.object({
   email: emailSchema,
   password: signInPasswordSchema,
-  rememberMe: z.boolean().default(false),
+  rememberMe: z.boolean(),
 });
 
 export type SignInFormData = z.infer<typeof signInSchema>;
@@ -167,7 +167,7 @@ export type MFAEnrollFormData = z.infer<typeof mfaEnrollSchema>;
  */
 export const mfaChallengeSchema = z.object({
   code: otpCodeSchema,
-  rememberDevice: z.boolean().default(false),
+  rememberDevice: z.boolean(),
 });
 
 export type MFAChallengeFormData = z.infer<typeof mfaChallengeSchema>;
