@@ -15,6 +15,11 @@ const dirname =
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   test: {
+    server: {
+      deps: {
+        inline: ["@oppulence/design-system", "streamdown", "katex"],
+      },
+    },
     coverage: {
       provider: "v8",
       reporter: ["text", "json", "html"],

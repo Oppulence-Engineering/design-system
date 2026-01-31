@@ -15,7 +15,7 @@
     "build": "storybook build",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "test": "vitest",
+    "test": "vitest --project unit",
     "test:ui": "vitest --ui",
     "test:storybook": "vitest --project storybook",
     "test:unit": "vitest --project unit",
