@@ -67,8 +67,7 @@ export const optionalNameSchema = z
   .string()
   .max(100, "Name is too long")
   .trim()
-  .optional()
-  .transform((val) => (val === "" ? undefined : val));
+  .optional();
 
 /**
  * OTP code validation (6 digits).
