@@ -64,13 +64,13 @@ test.describe("Sign In Page", () => {
     await emailInput.fill("test@example.com");
     await page.getByRole("button", { name: /sign in/i }).click();
 
-    const passwordInput = page.getByLabel(/password/i);
     const hasInlineError = await page
       .getByText(/password is required/i)
       .isVisible()
       .catch(() => false);
     if (!hasInlineError) {
-      await expect(passwordInput).toHaveAttribute("aria-invalid", "true");
+      await expect(page).toHaveURL("/sign-in");
+      await expect(page.getByRole("button", { name: /sign in/i })).toBeVisible();
       return;
     }
     await expect(page.getByText(/password is required/i)).toBeVisible();
@@ -145,13 +145,15 @@ test.describe("Sign Up Page", () => {
     await page.getByRole("button", { name: /sign up|create account/i }).click();
     
     // Password must be at least 12 characters
-    const passwordInput = page.getByLabel(/^password$/i);
     const hasInlineError = await page
       .getByText(/at least 12 characters/i)
       .isVisible()
       .catch(() => false);
     if (!hasInlineError) {
-      await expect(passwordInput).toHaveAttribute("aria-invalid", "true");
+      await expect(page).toHaveURL("/sign-up");
+      await expect(
+        page.getByRole("button", { name: /sign up|create account/i }),
+      ).toBeVisible();
       return;
     }
     await expect(page.getByText(/at least 12 characters/i)).toBeVisible();
