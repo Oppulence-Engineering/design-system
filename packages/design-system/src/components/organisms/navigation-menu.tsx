@@ -32,9 +32,9 @@ function NavigationMenuList(
   );
 }
 
-function NavigationMenuItem({
-  ...props
-}: Omit<NavigationMenuPrimitive.Item.Props, "className">) {
+function NavigationMenuItem(
+  props: Omit<NavigationMenuPrimitive.Item.Props, "className" | "ref">,
+) {
   return (
     <NavigationMenuPrimitive.Item
       data-slot="navigation-menu-item"
@@ -51,7 +51,7 @@ const navigationMenuTriggerStyle = cva(
 function NavigationMenuTrigger({
   children,
   ...props
-}: Omit<NavigationMenuPrimitive.Trigger.Props, "className">) {
+}: Omit<NavigationMenuPrimitive.Trigger.Props, "className" | "ref">) {
   return (
     <NavigationMenuPrimitive.Trigger
       data-slot="navigation-menu-trigger"
@@ -67,9 +67,9 @@ function NavigationMenuTrigger({
   );
 }
 
-function NavigationMenuContent({
-  ...props
-}: Omit<NavigationMenuPrimitive.Content.Props, "className">) {
+function NavigationMenuContent(
+  props: Omit<NavigationMenuPrimitive.Content.Props, "className" | "ref">,
+) {
   return (
     <NavigationMenuPrimitive.Content
       data-slot="navigation-menu-content"
@@ -104,9 +104,9 @@ function NavigationMenuPositioner({
   );
 }
 
-function NavigationMenuLink({
-  ...props
-}: Omit<NavigationMenuPrimitive.Link.Props, "className">) {
+function NavigationMenuLink(
+  props: Omit<NavigationMenuPrimitive.Link.Props, "className" | "ref">,
+) {
   return (
     <NavigationMenuPrimitive.Link
       data-slot="navigation-menu-link"
@@ -116,9 +116,9 @@ function NavigationMenuLink({
   );
 }
 
-function NavigationMenuIndicator({
-  ...props
-}: Omit<NavigationMenuPrimitive.Icon.Props, "className">) {
+function NavigationMenuIndicator(
+  props: Omit<NavigationMenuPrimitive.Icon.Props, "className" | "ref">,
+) {
   return (
     <NavigationMenuPrimitive.Icon
       data-slot="navigation-menu-indicator"
