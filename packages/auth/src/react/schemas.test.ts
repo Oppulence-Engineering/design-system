@@ -174,18 +174,19 @@ describe("signInSchema", () => {
     expect(result.success).toBe(true);
   });
 
-  it("applies default for rememberMe", () => {
-    const result = signInSchema.parse({
+  it("requires rememberMe field", () => {
+    const result = signInSchema.safeParse({
       email: "test@example.com",
       password: "mypassword",
     });
-    expect(result.rememberMe).toBe(false);
+    expect(result.success).toBe(false);
   });
 
   it("normalizes email to lowercase", () => {
     const result = signInSchema.parse({
       email: "TEST@EXAMPLE.COM",
       password: "mypassword",
+      rememberMe: false,
     });
     expect(result.email).toBe("test@example.com");
   });
