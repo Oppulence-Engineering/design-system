@@ -20,7 +20,7 @@ const envSchema = z.object({
   // Required variables
   WORKOS_API_KEY: z
     .string({
-      required_error: "WORKOS_API_KEY is required. Get it from your WorkOS Dashboard.",
+      error: "WORKOS_API_KEY is required. Get it from your WorkOS Dashboard.",
     })
     .min(1, "WORKOS_API_KEY cannot be empty")
     .refine((val) => val.startsWith("sk_"), {
@@ -29,7 +29,7 @@ const envSchema = z.object({
 
   WORKOS_CLIENT_ID: z
     .string({
-      required_error: "WORKOS_CLIENT_ID is required. Get it from your WorkOS Dashboard.",
+      error: "WORKOS_CLIENT_ID is required. Get it from your WorkOS Dashboard.",
     })
     .min(1, "WORKOS_CLIENT_ID cannot be empty")
     .refine((val) => val.startsWith("client_"), {
@@ -38,7 +38,7 @@ const envSchema = z.object({
 
   WORKOS_COOKIE_SECRET: z
     .string({
-      required_error:
+      error:
         "WORKOS_COOKIE_SECRET is required. Generate a random 32+ character string.",
     })
     .min(32, "WORKOS_COOKIE_SECRET must be at least 32 characters for security"),
@@ -46,7 +46,7 @@ const envSchema = z.object({
   // Public URL (required for OAuth redirects)
   NEXT_PUBLIC_APP_URL: z
     .string({
-      required_error:
+      error:
         "NEXT_PUBLIC_APP_URL is required. Set it to your app's base URL (e.g., https://app.example.com)",
     })
     .url("NEXT_PUBLIC_APP_URL must be a valid URL"),
@@ -94,7 +94,7 @@ export function validateEnv(): AuthEnv {
   });
 
   if (!result.success) {
-    const errors = result.error.errors
+    const errors = result.error.issues
       .map((err) => `  - ${err.path.join(".")}: ${err.message}`)
       .join("\n");
 

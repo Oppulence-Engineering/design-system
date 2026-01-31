@@ -298,5 +298,5 @@ export function isValidPassword(password: string): boolean {
 export function getPasswordErrors(password: string): string[] {
   const result = passwordSchema.safeParse(password);
   if (result.success) return [];
-  return result.error.errors.map((e) => e.message);
+  return result.error.issues.map((e) => e.message);
 }

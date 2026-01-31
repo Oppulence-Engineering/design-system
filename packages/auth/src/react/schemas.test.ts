@@ -34,7 +34,7 @@ describe("emailSchema", () => {
   it("rejects empty email", () => {
     const result = emailSchema.safeParse("");
     expect(result.success).toBe(false);
-    expect(result.error?.errors[0]?.message).toBe("Email is required");
+    expect(result.error?.issues[0]?.message).toBe("Email is required");
   });
 
   it("rejects invalid email formats", () => {
@@ -48,7 +48,7 @@ describe("emailSchema", () => {
     const longEmail = "a".repeat(250) + "@example.com";
     const result = emailSchema.safeParse(longEmail);
     expect(result.success).toBe(false);
-    expect(result.error?.errors[0]?.message).toBe("Email is too long");
+    expect(result.error?.issues[0]?.message).toBe("Email is too long");
   });
 });
 
@@ -61,7 +61,7 @@ describe("passwordSchema (strong)", () => {
   it("rejects passwords shorter than 12 characters", () => {
     const result = passwordSchema.safeParse("Short1!");
     expect(result.success).toBe(false);
-    expect(result.error?.errors[0]?.message).toBe(
+    expect(result.error?.issues[0]?.message).toBe(
       "Password must be at least 12 characters"
     );
   });
@@ -69,7 +69,7 @@ describe("passwordSchema (strong)", () => {
   it("rejects passwords without uppercase", () => {
     const result = passwordSchema.safeParse("mypassword123!");
     expect(result.success).toBe(false);
-    expect(result.error?.errors.some((e) => e.message.includes("uppercase"))).toBe(
+    expect(result.error?.issues.some((e) => e.message.includes("uppercase"))).toBe(
       true
     );
   });
@@ -77,7 +77,7 @@ describe("passwordSchema (strong)", () => {
   it("rejects passwords without lowercase", () => {
     const result = passwordSchema.safeParse("MYPASSWORD123!");
     expect(result.success).toBe(false);
-    expect(result.error?.errors.some((e) => e.message.includes("lowercase"))).toBe(
+    expect(result.error?.issues.some((e) => e.message.includes("lowercase"))).toBe(
       true
     );
   });
@@ -85,7 +85,7 @@ describe("passwordSchema (strong)", () => {
   it("rejects passwords without numbers", () => {
     const result = passwordSchema.safeParse("MyPasswordHere!");
     expect(result.success).toBe(false);
-    expect(result.error?.errors.some((e) => e.message.includes("number"))).toBe(
+    expect(result.error?.issues.some((e) => e.message.includes("number"))).toBe(
       true
     );
   });
@@ -93,7 +93,7 @@ describe("passwordSchema (strong)", () => {
   it("rejects passwords without special characters", () => {
     const result = passwordSchema.safeParse("MyPassword1234");
     expect(result.success).toBe(false);
-    expect(result.error?.errors.some((e) => e.message.includes("special"))).toBe(
+    expect(result.error?.issues.some((e) => e.message.includes("special"))).toBe(
       true
     );
   });
@@ -102,7 +102,7 @@ describe("passwordSchema (strong)", () => {
     const longPassword = "A".repeat(129) + "a1!";
     const result = passwordSchema.safeParse(longPassword);
     expect(result.success).toBe(false);
-    expect(result.error?.errors[0]?.message).toBe("Password is too long");
+    expect(result.error?.issues[0]?.message).toBe("Password is too long");
   });
 });
 
@@ -115,7 +115,7 @@ describe("signInPasswordSchema", () => {
   it("rejects empty password", () => {
     const result = signInPasswordSchema.safeParse("");
     expect(result.success).toBe(false);
-    expect(result.error?.errors[0]?.message).toBe("Password is required");
+    expect(result.error?.issues[0]?.message).toBe("Password is required");
   });
 });
 
@@ -133,14 +133,14 @@ describe("nameSchema", () => {
   it("rejects empty names", () => {
     const result = nameSchema.safeParse("");
     expect(result.success).toBe(false);
-    expect(result.error?.errors[0]?.message).toBe("Name is required");
+    expect(result.error?.issues[0]?.message).toBe("Name is required");
   });
 
   it("rejects names that are too long", () => {
     const longName = "a".repeat(101);
     const result = nameSchema.safeParse(longName);
     expect(result.success).toBe(false);
-    expect(result.error?.errors[0]?.message).toBe("Name is too long");
+    expect(result.error?.issues[0]?.message).toBe("Name is too long");
   });
 });
 
@@ -158,7 +158,7 @@ describe("otpCodeSchema", () => {
   it("rejects non-numeric codes", () => {
     const result = otpCodeSchema.safeParse("12345a");
     expect(result.success).toBe(false);
-    expect(result.error?.errors[0]?.message).toBe("Code must contain only numbers");
+    expect(result.error?.issues[0]?.message).toBe("Code must contain only numbers");
   });
 });
 
@@ -210,7 +210,7 @@ describe("signUpSchema", () => {
       acceptTerms: true,
     });
     expect(result.success).toBe(false);
-    expect(result.error?.errors[0]?.message).toBe("Passwords do not match");
+    expect(result.error?.issues[0]?.message).toBe("Passwords do not match");
   });
 
   it("rejects when terms not accepted", () => {
@@ -221,7 +221,7 @@ describe("signUpSchema", () => {
       acceptTerms: false,
     });
     expect(result.success).toBe(false);
-    expect(result.error?.errors[0]?.message).toBe(
+    expect(result.error?.issues[0]?.message).toBe(
       "You must accept the terms and conditions"
     );
   });
