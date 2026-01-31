@@ -1,6 +1,6 @@
 {
   "name": "@oppulence/auth",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Enterprise-grade authentication package built on WorkOS with custom UI components",
   "type": "module",
   "main": "./src/index.ts",
