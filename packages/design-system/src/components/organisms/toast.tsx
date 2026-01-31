@@ -7,7 +7,10 @@ const ToastProvider = ToastPrimitives.Provider;
 
 const ToastViewport = React.forwardRef<
   React.ElementRef<typeof ToastPrimitives.Viewport>,
-  Omit<React.ComponentPropsWithoutRef<typeof ToastPrimitives.Viewport>, "className">
+  Omit<
+    React.ComponentPropsWithoutRef<typeof ToastPrimitives.Viewport>,
+    "className"
+  >
 >((props, ref) => (
   <ToastPrimitives.Viewport
     ref={ref}
@@ -40,7 +43,10 @@ const toastVariants = cva(
 
 const Toast = React.forwardRef<
   React.ElementRef<typeof ToastPrimitives.Root>,
-  Omit<React.ComponentPropsWithoutRef<typeof ToastPrimitives.Root>, "className"> &
+  Omit<
+    React.ComponentPropsWithoutRef<typeof ToastPrimitives.Root>,
+    "className"
+  > &
     VariantProps<typeof toastVariants>
 >(({ variant, ...props }, ref) => {
   return (
@@ -55,7 +61,10 @@ Toast.displayName = ToastPrimitives.Root.displayName;
 
 const ToastAction = React.forwardRef<
   React.ElementRef<typeof ToastPrimitives.Action>,
-  Omit<React.ComponentPropsWithoutRef<typeof ToastPrimitives.Action>, "className">
+  Omit<
+    React.ComponentPropsWithoutRef<typeof ToastPrimitives.Action>,
+    "className"
+  >
 >((props, ref) => (
   <ToastPrimitives.Action
     ref={ref}
@@ -67,7 +76,10 @@ ToastAction.displayName = ToastPrimitives.Action.displayName;
 
 const ToastClose = React.forwardRef<
   React.ElementRef<typeof ToastPrimitives.Close>,
-  Omit<React.ComponentPropsWithoutRef<typeof ToastPrimitives.Close>, "className">
+  Omit<
+    React.ComponentPropsWithoutRef<typeof ToastPrimitives.Close>,
+    "className"
+  >
 >((props, ref) => (
   <ToastPrimitives.Close
     ref={ref}
@@ -82,13 +94,12 @@ ToastClose.displayName = ToastPrimitives.Close.displayName;
 
 const ToastTitle = React.forwardRef<
   React.ElementRef<typeof ToastPrimitives.Title>,
-  Omit<React.ComponentPropsWithoutRef<typeof ToastPrimitives.Title>, "className">
+  Omit<
+    React.ComponentPropsWithoutRef<typeof ToastPrimitives.Title>,
+    "className"
+  >
 >((props, ref) => (
-  <ToastPrimitives.Title
-    ref={ref}
-    className="text-sm"
-    {...props}
-  />
+  <ToastPrimitives.Title ref={ref} className="text-sm" {...props} />
 ));
 ToastTitle.displayName = ToastPrimitives.Title.displayName;
 

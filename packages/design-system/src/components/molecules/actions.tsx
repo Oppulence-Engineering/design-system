@@ -37,7 +37,9 @@ export const Action = ({
     return (
       <Tooltip>
         <TooltipTrigger
-          render={<Button size={size} type="button" variant={variant} {...props} />}
+          render={
+            <Button size={size} type="button" variant={variant} {...props} />
+          }
         >
           {children}
           <span className="sr-only">{label || tooltip}</span>

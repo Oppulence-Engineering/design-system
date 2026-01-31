@@ -33,7 +33,12 @@ export function ToolCallIndicator({ toolName }: ToolCallIndicatorProps) {
         <div className="flex items-center justify-center size-3.5">
           <config.icon size={14} />
         </div>
-        <TextShimmer size="xs" baseColor="#707070" gradientColor="#111111" duration={1}>
+        <TextShimmer
+          size="xs"
+          baseColor="#707070"
+          gradientColor="#111111"
+          duration={1}
+        >
           {config.displayText}
         </TextShimmer>
       </div>

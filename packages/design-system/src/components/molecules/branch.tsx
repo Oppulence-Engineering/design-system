@@ -75,7 +75,10 @@ export const Branch = ({
   );
 };
 
-export type BranchMessagesProps = Omit<HTMLAttributes<HTMLDivElement>, "className">;
+export type BranchMessagesProps = Omit<
+  HTMLAttributes<HTMLDivElement>,
+  "className"
+>;
 
 export const BranchMessages = ({ children, ...props }: BranchMessagesProps) => {
   const { currentBranch, setBranches, branches } = useBranch();
@@ -101,7 +104,10 @@ export const BranchMessages = ({ children, ...props }: BranchMessagesProps) => {
   ));
 };
 
-export type BranchSelectorProps = Omit<HTMLAttributes<HTMLDivElement>, "className"> & {
+export type BranchSelectorProps = Omit<
+  HTMLAttributes<HTMLDivElement>,
+  "className"
+> & {
   from: ChatRole;
 };
 

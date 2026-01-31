@@ -78,11 +78,7 @@ export function PromptInputAttachment({
   const attachments = usePromptInputAttachments();
 
   return (
-    <div
-      className="group relative h-14 w-14 border"
-      key={data.id}
-      {...props}
-    >
+    <div className="group relative h-14 w-14 border" key={data.id} {...props}>
       {data.mediaType?.startsWith("image/") && data.url ? (
         <img
           alt={data.filename || "attachment"}

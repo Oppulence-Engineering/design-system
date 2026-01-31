@@ -9,9 +9,7 @@ export type SuggestionsProps = Omit<ComponentProps<"div">, "className">;
 
 export const Suggestions = ({ children, ...props }: SuggestionsProps) => (
   <div className="w-full overflow-x-auto whitespace-nowrap" {...props}>
-    <div className="flex w-max flex-nowrap items-center gap-2">
-      {children}
-    </div>
+    <div className="flex w-max flex-nowrap items-center gap-2">{children}</div>
   </div>
 );
 

@@ -100,13 +100,7 @@ export const Response = memo(
         ),
         a: (componentProps) => {
           if (isExternalUrl(componentProps.href)) {
-            return (
-              <a
-                {...componentProps}
-                rel="noreferrer"
-                target="_blank"
-              />
-            );
+            return <a {...componentProps} rel="noreferrer" target="_blank" />;
           }
 
           return <a {...componentProps} />;

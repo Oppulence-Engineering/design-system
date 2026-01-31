@@ -206,10 +206,10 @@ export const TextEffect = ({
 
   const baseContainer = preset
     ? presetVariants[preset].container
-    : variants?.container ?? defaultContainerVariants;
+    : (variants?.container ?? defaultContainerVariants);
   const baseItem = preset
     ? presetVariants[preset].item
-    : variants?.item ?? defaultItemVariants;
+    : (variants?.item ?? defaultItemVariants);
 
   const staggerChildren = speedSegment ?? defaultStaggerTimes[per];
 

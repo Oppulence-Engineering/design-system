@@ -5,8 +5,7 @@ type SubmitButtonProps = {
   children: ReactNode;
   isSubmitting: boolean;
   disabled?: boolean;
-} &
-  Omit<ButtonProps, "loading">;
+} & Omit<ButtonProps, "loading">;
 
 export function SubmitButton({
   children,

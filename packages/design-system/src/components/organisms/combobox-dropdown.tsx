@@ -4,7 +4,13 @@ import { Check, ChevronsUpDown } from "lucide-react";
 import * as React from "react";
 
 import { Command } from "./command";
-import { CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "./command";
+import {
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "./command";
 import { Button } from "../atoms/button";
 import { Popover, PopoverContent, PopoverTrigger } from "../molecules/popover";
 
@@ -22,7 +28,10 @@ type Props<T> = {
   selectedItem?: T;
   renderSelectedItem?: (selectedItem: T) => React.ReactNode;
   renderOnCreate?: (value: string) => React.ReactNode;
-  renderListItem?: (listItem: { isChecked: boolean; item: T }) => React.ReactNode;
+  renderListItem?: (listItem: {
+    isChecked: boolean;
+    item: T;
+  }) => React.ReactNode;
   emptyResults?: React.ReactNode;
   popoverProps?: Omit<React.ComponentProps<typeof PopoverContent>, "className">;
   disabled?: boolean;
@@ -97,7 +106,9 @@ export function ComboboxDropdown<T extends ComboboxItem>({
                   <>
                     <Check
                       className={
-                        isChecked ? "mr-2 h-4 w-4 opacity-100" : "mr-2 h-4 w-4 opacity-0"
+                        isChecked
+                          ? "mr-2 h-4 w-4 opacity-100"
+                          : "mr-2 h-4 w-4 opacity-0"
                       }
                     />
                     {item.label}
@@ -150,7 +161,7 @@ export function ComboboxDropdown<T extends ComboboxItem>({
                   : selectedItem.label}
               </span>
             ) : (
-              placeholder ?? "Select item..."
+              (placeholder ?? "Select item...")
             )}
           </span>
           <ChevronsUpDown className="size-4 opacity-50" />

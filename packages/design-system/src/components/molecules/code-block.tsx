@@ -20,7 +20,10 @@ const CodeBlockContext = createContext<CodeBlockContextType>({
   code: "",
 });
 
-export type CodeBlockProps = Omit<HTMLAttributes<HTMLDivElement>, "className"> & {
+export type CodeBlockProps = Omit<
+  HTMLAttributes<HTMLDivElement>,
+  "className"
+> & {
   code: string;
   language: string;
   showLineNumbers?: boolean;

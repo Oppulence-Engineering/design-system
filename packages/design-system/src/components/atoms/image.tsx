@@ -6,12 +6,7 @@ export type ImageProps = GeneratedImage &
     alt?: string;
   };
 
-export function Image({
-  base64,
-  mediaType,
-  alt,
-  ...props
-}: ImageProps) {
+export function Image({ base64, mediaType, alt, ...props }: ImageProps) {
   return (
     <img
       {...props}

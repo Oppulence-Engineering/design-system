@@ -45,7 +45,11 @@ export type TaskTriggerProps = Omit<
   title: string;
 };
 
-export const TaskTrigger = ({ children, title, ...props }: TaskTriggerProps) => (
+export const TaskTrigger = ({
+  children,
+  title,
+  ...props
+}: TaskTriggerProps) => (
   <CollapsibleTrigger className="group" {...props}>
     {children ?? (
       <div className="flex cursor-pointer items-center gap-2 text-muted-foreground hover:text-foreground">

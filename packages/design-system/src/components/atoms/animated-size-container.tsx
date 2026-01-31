@@ -16,7 +16,10 @@ type AnimatedSizeContainerProps = PropsWithChildren<{
   width?: boolean;
   height?: boolean;
 }> &
-  Omit<ComponentPropsWithoutRef<typeof motion.div>, "animate" | "children" | "className">;
+  Omit<
+    ComponentPropsWithoutRef<typeof motion.div>,
+    "animate" | "children" | "className"
+  >;
 
 /**
  * A container with animated width and height (each optional) based on children dimensions.
@@ -26,7 +29,9 @@ const AnimatedSizeContainer = forwardRef<
   AnimatedSizeContainerProps
 >(({ width = false, height = false, transition, children, ...rest }, ref) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const resizeObserverEntry = useResizeObserver(containerRef as RefObject<Element>);
+  const resizeObserverEntry = useResizeObserver(
+    containerRef as RefObject<Element>,
+  );
 
   return (
     <motion.div

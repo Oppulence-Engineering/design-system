@@ -24,10 +24,7 @@ export type MessageContentProps = Omit<
   "className"
 >;
 
-export const MessageContent = ({
-  children,
-  ...props
-}: MessageContentProps) => (
+export const MessageContent = ({ children, ...props }: MessageContentProps) => (
   <div
     className={cn(
       "flex flex-col gap-2 overflow-hidden rounded-lg px-4 py-3 text-foreground text-sm",
@@ -57,8 +54,6 @@ export const MessageAvatar = ({
 }: MessageAvatarProps) => (
   <Avatar size={size} {...props}>
     <AvatarImage alt="" src={src} />
-    <AvatarFallback>
-      {name?.slice(0, 1) || "M"}
-    </AvatarFallback>
+    <AvatarFallback>{name?.slice(0, 1) || "M"}</AvatarFallback>
   </Avatar>
 );

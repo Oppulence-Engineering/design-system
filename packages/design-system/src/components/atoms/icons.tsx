@@ -1,7 +1,13 @@
 import { ArchiveIcon } from "@radix-ui/react-icons";
 import { FiGithub } from "react-icons/fi";
 import type { IconType as BaseIconType } from "react-icons/lib";
-import type { ComponentType, FC, ReactNode, SVGAttributes, SVGProps } from "react";
+import type {
+  ComponentType,
+  FC,
+  ReactNode,
+  SVGAttributes,
+  SVGProps,
+} from "react";
 import {
   MdArrowBack,
   MdArrowDownward,
@@ -131,9 +137,7 @@ type RadixIconProps = Omit<SVGAttributes<SVGElement>, "children"> & {
 
 const createReactIcon =
   (Icon: BaseIconType) =>
-  ({ size = 20, color }: IconProps) => (
-    <Icon size={size} color={color} />
-  );
+  ({ size = 20, color }: IconProps) => <Icon size={size} color={color} />;
 
 const createRadixIcon =
   (Icon: ComponentType<RadixIconProps>) =>
@@ -573,10 +577,7 @@ export const Icons = {
       <path d="M480-80 200-360l56-57 184 184v-287h80v287l184-183 56 56L480-80Zm-40-520v-120h80v120h-80Zm0-200v-80h80v80h-80Z" />
     </svg>
   ),
-  Delete: ({
-    size = 24,
-    ...props
-  }: SvgProps) => (
+  Delete: ({ size = 24, ...props }: SvgProps) => (
     <svg
       xmlns="http://www.w3.org/2000/svg"
       width={size}
@@ -730,7 +731,13 @@ export const Icons = {
   Instagram: (props: SVGIconProps) => (
     <SVGIcon {...props} viewBox="0 0 24 24">
       <defs>
-        <linearGradient id="instagram-gradient" x1="0%" y1="100%" x2="100%" y2="0%">
+        <linearGradient
+          id="instagram-gradient"
+          x1="0%"
+          y1="100%"
+          x2="100%"
+          y2="0%"
+        >
           <stop offset="0%" stopColor="#FEDA77" />
           <stop offset="25%" stopColor="#FA7E1E" />
           <stop offset="50%" stopColor="#D62976" />
@@ -749,7 +756,14 @@ export const Icons = {
         strokeWidth="2"
         fill="none"
       />
-      <circle cx="12" cy="12" r="3.5" stroke="#fff" strokeWidth="2" fill="none" />
+      <circle
+        cx="12"
+        cy="12"
+        r="3.5"
+        stroke="#fff"
+        strokeWidth="2"
+        fill="none"
+      />
       <circle cx="17" cy="7" r="1.5" fill="#fff" />
     </SVGIcon>
   ),

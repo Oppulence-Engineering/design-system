@@ -62,7 +62,9 @@ export function ToastToaster() {
                       </div>
                     </div>
 
-                    {props.variant === "progress" && <Progress value={progress} />}
+                    {props.variant === "progress" && (
+                      <Progress value={progress} />
+                    )}
 
                     {description && (
                       <ToastDescription>{description}</ToastDescription>

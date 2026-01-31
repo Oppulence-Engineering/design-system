@@ -10,7 +10,11 @@ import {
 } from "react-icons/md";
 import { cn } from "../../../../../../lib/utils";
 import { buttonVariants } from "../../../../atoms/button";
-import { Popover, PopoverContent, PopoverTrigger } from "../../../../molecules/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "../../../../molecules/popover";
 import { formatUrlWithProtocol } from "../../utils";
 import { BubbleMenuButton } from "./bubble-menu-button";
 
@@ -44,7 +48,9 @@ export function LinkItem({ editor, open, setOpen }: LinkItemProps) {
   return (
     <Popover modal={false} open={open} onOpenChange={setOpen}>
       <PopoverTrigger
-        render={<BubbleMenuButton isActive={isActive} action={() => setOpen(true)} />}
+        render={
+          <BubbleMenuButton isActive={isActive} action={() => setOpen(true)} />
+        }
       >
         {linkValue ? (
           <MdOutlineLinkOff className="size-4" />

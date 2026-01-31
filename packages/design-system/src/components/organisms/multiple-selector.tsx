@@ -463,13 +463,10 @@ const MultipleSelector = React.forwardRef<
         filter={commandFilter()}
       >
         <div
-          className={cn(
-            "min-h-10 border-b border-border text-sm",
-            {
-              "py-1": selected.length !== 0,
-              "cursor-text": !disabled && selected.length !== 0,
-            },
-          )}
+          className={cn("min-h-10 border-b border-border text-sm", {
+            "py-1": selected.length !== 0,
+            "cursor-text": !disabled && selected.length !== 0,
+          })}
           onClick={() => {
             if (disabled) return;
             inputRef?.current?.focus();

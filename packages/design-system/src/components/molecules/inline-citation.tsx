@@ -20,19 +20,13 @@ import {
 } from "../organisms/carousel";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "./hover-card";
 
-export type InlineCitationProps = Omit<
-  ComponentProps<"span">,
-  "className"
->;
+export type InlineCitationProps = Omit<ComponentProps<"span">, "className">;
 
 export const InlineCitation = ({ ...props }: InlineCitationProps) => (
   <span className="group inline items-center gap-1" {...props} />
 );
 
-export type InlineCitationTextProps = Omit<
-  ComponentProps<"span">,
-  "className"
->;
+export type InlineCitationTextProps = Omit<ComponentProps<"span">, "className">;
 
 export const InlineCitationText = ({ ...props }: InlineCitationTextProps) => (
   <span className="transition-colors group-hover:bg-accent" {...props} />
@@ -44,10 +38,12 @@ export const InlineCitationCard = (props: InlineCitationCardProps) => (
   <HoverCard {...props} />
 );
 
-export type InlineCitationCardTriggerProps =
-  Omit<ComponentProps<"span">, "className"> & {
-    sources: string[];
-  };
+export type InlineCitationCardTriggerProps = Omit<
+  ComponentProps<"span">,
+  "className"
+> & {
+  sources: string[];
+};
 
 export const InlineCitationCardTrigger = ({
   sources,
@@ -68,7 +64,8 @@ export const InlineCitationCardTrigger = ({
   >
     {sources.length ? (
       <>
-        {new URL(sources[0]!).hostname} {sources.length > 1 && `+${sources.length - 1}`}
+        {new URL(sources[0]!).hostname}{" "}
+        {sources.length > 1 && `+${sources.length - 1}`}
       </>
     ) : (
       "unknown"

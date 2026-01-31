@@ -47,7 +47,12 @@ const getStatusBadge = (status: ToolUIPart["state"]) => {
   } as const;
 
   return (
-    <span className={cn(badgeVariants({ variant: "secondary" }), "gap-1.5 rounded-full text-xs")}>
+    <span
+      className={cn(
+        badgeVariants({ variant: "secondary" }),
+        "gap-1.5 rounded-full text-xs",
+      )}
+    >
       {icons[status]}
       {labels[status]}
     </span>

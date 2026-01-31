@@ -10,7 +10,10 @@ import {
   CollapsibleTrigger,
 } from "./collapsible";
 
-export type SourcesProps = Omit<ComponentProps<typeof Collapsible>, "className">;
+export type SourcesProps = Omit<
+  ComponentProps<typeof Collapsible>,
+  "className"
+>;
 
 export const Sources = ({ ...props }: SourcesProps) => (
   <Collapsible className="not-prose mb-4 text-primary text-xs" {...props} />
