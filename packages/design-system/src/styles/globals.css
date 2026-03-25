@@ -208,6 +208,21 @@
   @apply backdrop-blur-md mask-b-from-65%;
 }
 
+@utility no-scrollbar {
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@utility glass {
+  backdrop-filter: blur(12px);
+  [data-reduced-glass] & {
+    backdrop-filter: none;
+  }
+}
+
 .mapboxgl-ctrl-logo {
   @apply hidden!;
 }

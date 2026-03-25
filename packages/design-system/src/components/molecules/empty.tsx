@@ -88,10 +88,36 @@ function EmptyContent({
   );
 }
 
+function EmptyActions({
+  ...props
+}: Omit<React.ComponentProps<"div">, "className">) {
+  return (
+    <div
+      data-slot="empty-actions"
+      className="gap-2 flex flex-row items-center justify-center pt-2"
+      {...props}
+    />
+  );
+}
+
+function EmptyFooter({
+  ...props
+}: Omit<React.ComponentProps<"div">, "className">) {
+  return (
+    <div
+      data-slot="empty-footer"
+      className="text-xs text-muted-foreground pt-4"
+      {...props}
+    />
+  );
+}
+
 export {
   Empty,
+  EmptyActions,
   EmptyContent,
   EmptyDescription,
+  EmptyFooter,
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,

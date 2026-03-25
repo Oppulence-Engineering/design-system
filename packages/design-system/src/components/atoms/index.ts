@@ -1,4 +1,5 @@
 export * from "./aspect-ratio";
+export * from "./copy-button";
 export * from "./animated-size-container";
 export * from "./avatar";
 export * from "./badge";
@@ -21,6 +22,7 @@ export * from "./separator";
 export * from "./skeleton";
 export * from "./slider";
 export * from "./spinner";
+export * from "./status-indicator";
 export * from "./stack";
 export * from "./submit-button";
 export * from "./switch";
