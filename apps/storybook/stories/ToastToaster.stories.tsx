@@ -1,10 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import {
-  Button,
-  Stack,
-  ToastToaster,
-  toast,
-} from "@oppulence/design-system";
+import { Button, Stack, ToastToaster, toast } from "@oppulence/design-system";
 
 const meta = {
   title: "Organisms/ToastToaster",

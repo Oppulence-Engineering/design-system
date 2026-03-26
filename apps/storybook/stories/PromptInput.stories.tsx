@@ -57,9 +57,7 @@ export const Default: Story = {
           <PromptInput onSubmit={handleSubmit}>
             <PromptInputBody>
               <PromptInputAttachments>
-                {(attachment) => (
-                  <PromptInputAttachment data={attachment} />
-                )}
+                {(attachment) => <PromptInputAttachment data={attachment} />}
               </PromptInputAttachments>
               <PromptInputTextarea />
             </PromptInputBody>

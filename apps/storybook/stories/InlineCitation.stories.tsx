@@ -49,7 +49,10 @@ export const Default: Story = {
       <p>
         Our pipeline reflects stronger enterprise momentum
         <InlineCitation>
-          <InlineCitationText> based on fresh Q4 disclosures</InlineCitationText>
+          <InlineCitationText>
+            {" "}
+            based on fresh Q4 disclosures
+          </InlineCitationText>
           <InlineCitationCard>
             <InlineCitationCardTrigger
               sources={sources.map((source) => source.url)}

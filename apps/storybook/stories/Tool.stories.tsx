@@ -1,5 +1,11 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { Tool, ToolContent, ToolHeader, ToolInput, ToolOutput } from "@oppulence/design-system";
+import {
+  Tool,
+  ToolContent,
+  ToolHeader,
+  ToolInput,
+  ToolOutput,
+} from "@oppulence/design-system";
 
 const meta = {
   title: "Molecules/Tool",
@@ -19,9 +25,7 @@ export const Default: Story = {
       <Tool defaultOpen>
         <ToolHeader type="web_search" state="output-available" />
         <ToolContent>
-          <ToolInput
-            input={{ query: "enterprise churn rate", limit: 3 }}
-          />
+          <ToolInput input={{ query: "enterprise churn rate", limit: 3 }} />
           <ToolOutput
             errorText={null}
             output={
