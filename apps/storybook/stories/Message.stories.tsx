@@ -23,20 +23,14 @@ export const Default: Story = {
     <div className="w-[420px]">
       <Stack gap="4">
         <Message from="assistant">
-          <MessageAvatar
-            src="https://i.pravatar.cc/40?img=12"
-            name="A"
-          />
+          <MessageAvatar src="https://i.pravatar.cc/40?img=12" name="A" />
           <MessageContent>
             <p>Here is the overview of Q4 performance.</p>
             <p>Would you like a breakdown by region?</p>
           </MessageContent>
         </Message>
         <Message from="user">
-          <MessageAvatar
-            src="https://i.pravatar.cc/40?img=32"
-            name="J"
-          />
+          <MessageAvatar src="https://i.pravatar.cc/40?img=32" name="J" />
           <MessageContent>
             <p>Yes, show North America and EMEA first.</p>
           </MessageContent>

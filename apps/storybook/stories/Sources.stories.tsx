@@ -28,10 +28,7 @@ export const Default: Story = {
             href="https://example.com/earnings"
             title="Q4 Earnings Summary"
           />
-          <Source
-            href="https://example.com/market"
-            title="Market Snapshot"
-          />
+          <Source href="https://example.com/market" title="Market Snapshot" />
         </SourcesContent>
       </Sources>
     </div>

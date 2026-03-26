@@ -166,6 +166,7 @@
         "vaul": "^1.1.2",
       },
       "devDependencies": {
+        "@repo/typescript-config": "workspace:*",
         "@tailwindcss/postcss": "^4.1.10",
         "@types/node": "^22.18.0",
         "@types/react": "^19.2.7",

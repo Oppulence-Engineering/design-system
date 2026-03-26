@@ -33,9 +33,7 @@ export const Default: Story = {
             Matching vendor: Acme Cloud
             <TaskItemFile>acme-cloud.csv</TaskItemFile>
           </TaskItem>
-          <TaskItem>
-            Ready to export summary report.
-          </TaskItem>
+          <TaskItem>Ready to export summary report.</TaskItem>
         </TaskContent>
       </Task>
     </div>
