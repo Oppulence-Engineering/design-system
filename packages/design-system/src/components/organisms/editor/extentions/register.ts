@@ -1,18 +1,17 @@
 // You can find the list of extensions here: https://tiptap.dev/docs/editor/extensions/functionality
 
-import Link from "@tiptap/extension-link";
 import Placeholder from "@tiptap/extension-placeholder";
-import Underline from "@tiptap/extension-underline";
 import StarterKit from "@tiptap/starter-kit";
 
-// Add your extensions here
+// StarterKit v3 bundles the Link and Underline extensions, so configure Link
+// through StarterKit rather than registering a duplicate extension.
 const extensions = [
-  StarterKit,
-  Underline,
-  Link.configure({
-    openOnClick: false,
-    autolink: true,
-    defaultProtocol: "https",
+  StarterKit.configure({
+    link: {
+      openOnClick: false,
+      autolink: true,
+      defaultProtocol: "https",
+    },
   }),
 ];
 
