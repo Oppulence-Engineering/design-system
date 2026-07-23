@@ -7,6 +7,7 @@
     "src/headless/index.ts",
     "src/panels/index.ts",
     "src/collab/index.ts",
+    "src/agent/index.ts",
     "src/testing/index.ts"
   ],
   "exclude": ["node_modules", "dist", "src/collab/yjs", "**/*.test.ts", "**/*.test.tsx"]

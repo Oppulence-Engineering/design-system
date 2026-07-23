@@ -27,6 +27,11 @@
       "import": "./src/panels/index.ts",
       "default": "./src/panels/index.ts"
     },
+    "./agent": {
+      "types": "./src/agent/index.ts",
+      "import": "./src/agent/index.ts",
+      "default": "./src/agent/index.ts"
+    },
     "./collab": {
       "types": "./src/collab/index.ts",
       "import": "./src/collab/index.ts",

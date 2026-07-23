@@ -93,3 +93,10 @@ export type {
   CanvasOperationType,
   OperationBatch,
 } from "../operations/operations";
+export {
+  operationArraySchema,
+  operationSchema,
+  operationsJsonSchema,
+  parseOperations,
+  safeParseOperations,
+} from "../operations/schema";

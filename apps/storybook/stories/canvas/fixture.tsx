@@ -11,7 +11,15 @@ import {
 
 /* ---- a registered component the canvas can place ---- */
 
-const StatCard = ({ label, value, accent }: { label: string; value: string; accent: string }) => (
+const StatCard = ({
+  label,
+  value,
+  accent,
+}: {
+  label: string;
+  value: string;
+  accent: string;
+}) => (
   <div
     style={{
       display: "flex",
@@ -26,10 +34,19 @@ const StatCard = ({ label, value, accent }: { label: string; value: string; acce
       boxSizing: "border-box",
     }}
   >
-    <span style={{ fontSize: 12, color: "#71717a", textTransform: "uppercase", letterSpacing: 0.5 }}>
+    <span
+      style={{
+        fontSize: 12,
+        color: "#71717a",
+        textTransform: "uppercase",
+        letterSpacing: 0.5,
+      }}
+    >
       {label}
     </span>
-    <span style={{ fontSize: 28, fontWeight: 700, color: accent }}>{value}</span>
+    <span style={{ fontSize: 28, fontWeight: 700, color: accent }}>
+      {value}
+    </span>
   </div>
 );
 
@@ -37,7 +54,11 @@ export const registry = createComponentRegistry({
   "stat-card": defineComponent({
     key: "stat-card",
     label: "Stat Card",
-    schema: z.object({ label: z.string(), value: z.string(), accent: z.string() }),
+    schema: z.object({
+      label: z.string(),
+      value: z.string(),
+      accent: z.string(),
+    }),
     component: StatCard,
     defaultProps: { label: "Revenue", value: "$12.4k", accent: "#3b82f6" },
     defaultSize: { width: 220, height: 120 },
@@ -49,7 +70,9 @@ export const registry = createComponentRegistry({
 let seq = 0;
 const key = () => `a${(seq++).toString(36).padStart(3, "0")}`;
 
-function n(node: Partial<SceneNode> & Pick<SceneNode, "type" | "id">): SceneNode {
+function n(
+  node: Partial<SceneNode> & Pick<SceneNode, "type" | "id">,
+): SceneNode {
   return {
     parentId: null,
     sortKey: key(),
@@ -100,7 +123,12 @@ export function sampleDocument(): CanvasDocument {
       parentId: hero,
       name: "Title",
       text: "Design in real HTML.",
-      style: { fontSize: 40, fontWeight: 800, color: "#ffffff", lineHeight: 1.1 },
+      style: {
+        fontSize: 40,
+        fontWeight: 800,
+        color: "#ffffff",
+        lineHeight: 1.1,
+      },
     } as never),
     n({
       type: "text",
@@ -121,7 +149,12 @@ export function sampleDocument(): CanvasDocument {
         padding: { top: 10, bottom: 10, left: 20, right: 20 },
         background: { type: "solid", color: "#3b82f6" },
         color: "#ffffff",
-        borderRadius: { topLeft: 8, topRight: 8, bottomRight: 8, bottomLeft: 8 },
+        borderRadius: {
+          topLeft: 8,
+          topRight: 8,
+          bottomRight: 8,
+          bottomLeft: 8,
+        },
         fontSize: 14,
         fontWeight: 600,
         margin: { top: 8, bottom: 0, left: 0, right: 0 },
@@ -154,7 +187,11 @@ export function sampleDocument(): CanvasDocument {
       width: 0,
       height: 0,
       clipsContent: false,
-      style: { display: "flex", gap: 16, width: { unit: "%", value: 100 } as never },
+      style: {
+        display: "flex",
+        gap: 16,
+        width: { unit: "%", value: 100 } as never,
+      },
     } as never),
     n({
       type: "component",

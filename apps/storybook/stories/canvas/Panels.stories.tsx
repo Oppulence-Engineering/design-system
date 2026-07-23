@@ -1,7 +1,10 @@
 import * as React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { CanvasProvider, CanvasRoot } from "@oppulence/infinite-canvas";
-import { CanvasInspectorPanel, CanvasLayersPanel } from "@oppulence/infinite-canvas/panels";
+import {
+  CanvasInspectorPanel,
+  CanvasLayersPanel,
+} from "@oppulence/infinite-canvas/panels";
 import { registry, sampleDocument } from "./fixture";
 
 const meta: Meta = {
@@ -16,7 +19,13 @@ type Story = StoryObj;
 export const LayersPanel: Story = {
   render: () => (
     <CanvasProvider initialDocument={sampleDocument()} registry={registry}>
-      <div style={{ display: "grid", gridTemplateColumns: "240px 1fr", height: "100vh" }}>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "240px 1fr",
+          height: "100vh",
+        }}
+      >
         <CanvasLayersPanel />
         <CanvasRoot />
       </div>
@@ -28,7 +37,13 @@ export const LayersPanel: Story = {
 export const InspectorPanel: Story = {
   render: () => (
     <CanvasProvider initialDocument={sampleDocument()} registry={registry}>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 280px", height: "100vh" }}>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 280px",
+          height: "100vh",
+        }}
+      >
         <CanvasRoot />
         <CanvasInspectorPanel />
       </div>

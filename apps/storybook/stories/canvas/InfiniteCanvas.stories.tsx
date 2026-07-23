@@ -1,7 +1,11 @@
 import * as React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, waitFor, within } from "storybook/test";
-import { CanvasProvider, CanvasRoot, type CanvasDocument } from "@oppulence/infinite-canvas";
+import {
+  CanvasProvider,
+  CanvasRoot,
+  type CanvasDocument,
+} from "@oppulence/infinite-canvas";
 import {
   CanvasInspectorPanel,
   CanvasLayersPanel,
@@ -16,7 +20,11 @@ import { registry, sampleDocument, selfIdentity } from "./fixture";
  */
 function EditorShell({ doc }: { doc: CanvasDocument }) {
   return (
-    <CanvasProvider initialDocument={doc} registry={registry} self={selfIdentity}>
+    <CanvasProvider
+      initialDocument={doc}
+      registry={registry}
+      self={selfIdentity}
+    >
       <div
         style={{
           display: "grid",
@@ -26,7 +34,14 @@ function EditorShell({ doc }: { doc: CanvasDocument }) {
         }}
       >
         <CanvasLayersPanel />
-        <div style={{ position: "relative", display: "grid", gridTemplateRows: "auto 1fr", minWidth: 0 }}>
+        <div
+          style={{
+            position: "relative",
+            display: "grid",
+            gridTemplateRows: "auto 1fr",
+            minWidth: 0,
+          }}
+        >
           <CanvasToolbar />
           <CanvasRoot />
         </div>
@@ -53,7 +68,11 @@ export const EditorShellStory: Story = {
 export const CanvasOnly: Story = {
   name: "Canvas Only",
   render: () => (
-    <CanvasProvider initialDocument={sampleDocument()} registry={registry} self={selfIdentity}>
+    <CanvasProvider
+      initialDocument={sampleDocument()}
+      registry={registry}
+      self={selfIdentity}
+    >
       <div style={{ height: "100vh" }}>
         <CanvasRoot />
       </div>
@@ -67,7 +86,9 @@ export const CanvasOnly: Story = {
       expect(root).not.toBeNull();
     });
     await waitFor(() => {
-      const heroTitle = canvasElement.querySelector('[data-canvas-node="hero-title"]');
+      const heroTitle = canvasElement.querySelector(
+        '[data-canvas-node="hero-title"]',
+      );
       expect(heroTitle?.textContent).toContain("Design in real HTML");
     });
   },
@@ -77,10 +98,22 @@ export const EmptyDocument: Story = {
   name: "Empty Document",
   render: () => (
     <CanvasProvider
-      initialDocument={{ schemaVersion: 1, id: "empty" as never, meta: { name: "Empty" }, nodes: {} }}
+      initialDocument={{
+        schemaVersion: 1,
+        id: "empty" as never,
+        meta: { name: "Empty" },
+        nodes: {},
+      }}
       registry={registry}
     >
-      <div style={{ position: "relative", display: "grid", gridTemplateRows: "auto 1fr", height: "100vh" }}>
+      <div
+        style={{
+          position: "relative",
+          display: "grid",
+          gridTemplateRows: "auto 1fr",
+          height: "100vh",
+        }}
+      >
         <CanvasToolbar />
         <CanvasRoot />
       </div>

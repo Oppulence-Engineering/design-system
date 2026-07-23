@@ -1,8 +1,14 @@
 import * as React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { CanvasProvider, CanvasRoot } from "@oppulence/infinite-canvas";
-import { CanvasInspectorPanel, CanvasLayersPanel } from "@oppulence/infinite-canvas/panels";
-import { InMemoryCollabAdapter, InMemoryHub } from "@oppulence/infinite-canvas/testing";
+import {
+  CanvasInspectorPanel,
+  CanvasLayersPanel,
+} from "@oppulence/infinite-canvas/panels";
+import {
+  InMemoryCollabAdapter,
+  InMemoryHub,
+} from "@oppulence/infinite-canvas/testing";
 import { registry, sampleDocument } from "./fixture";
 
 /**
@@ -17,7 +23,15 @@ function CollabSimulation() {
   const collabB = React.useMemo(() => new InMemoryCollabAdapter(hub), [hub]);
 
   return (
-    <div style={{ display: "grid", gridTemplateRows: "1fr 1fr", height: "100vh", gap: 2, background: "#e4e4e7" }}>
+    <div
+      style={{
+        display: "grid",
+        gridTemplateRows: "1fr 1fr",
+        height: "100vh",
+        gap: 2,
+        background: "#e4e4e7",
+      }}
+    >
       <Editor label="Client A" collab={collabA} doc={doc} accent="#3b82f6" />
       <Editor label="Client B" collab={collabB} doc={doc} accent="#10b981" />
     </div>
@@ -40,9 +54,22 @@ function Editor({
       initialDocument={structuredClone(doc)}
       registry={registry}
       collab={collab}
-      self={{ clientId: label, userId: label, name: label, color: accent, access: "write" }}
+      self={{
+        clientId: label,
+        userId: label,
+        name: label,
+        color: accent,
+        access: "write",
+      }}
     >
-      <div style={{ position: "relative", display: "grid", gridTemplateColumns: "180px 1fr 220px", minHeight: 0 }}>
+      <div
+        style={{
+          position: "relative",
+          display: "grid",
+          gridTemplateColumns: "180px 1fr 220px",
+          minHeight: 0,
+        }}
+      >
         <CanvasLayersPanel />
         <div style={{ position: "relative", minWidth: 0 }}>
           <div
