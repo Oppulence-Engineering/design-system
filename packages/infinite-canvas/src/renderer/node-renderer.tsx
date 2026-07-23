@@ -30,7 +30,11 @@ import {
 import { resolveNodeStyle, stylesFromMeta } from "../styles-lib/resolve";
 import { styleToCss } from "./style-to-css";
 import { NodeErrorBoundary } from "./node-error-boundary";
-import { ArtboardContext, useRectCache } from "./renderer-context";
+import {
+  ArtboardContext,
+  SuppressRectRegistrationContext,
+  useRectCache,
+} from "./renderer-context";
 
 export function NodeRenderer({ id }: { id: NodeId }): React.ReactNode {
   const node = useNode(id);
@@ -55,7 +59,10 @@ export function NodeRenderer({ id }: { id: NodeId }): React.ReactNode {
           data={itemScope(binding.data, item, i, node.repeatAs)}
           filters={binding.filters}
         >
-          <NodeBody node={node} />
+          {/* Only the first projection registers in the rect cache (shared node.id). */}
+          <RectSuppress suppress={i > 0}>
+            <NodeBody node={node} />
+          </RectSuppress>
         </BindingProvider>
       ));
     }
@@ -64,18 +71,38 @@ export function NodeRenderer({ id }: { id: NodeId }): React.ReactNode {
   return <NodeBody node={node} />;
 }
 
+/**
+ * Provider that suppresses rect-cache registration for a subtree (repeated projections
+ * beyond the first). ORs with any inherited suppression so nested repeats stay suppressed.
+ */
+function RectSuppress({
+  suppress,
+  children,
+}: {
+  suppress: boolean;
+  children: React.ReactNode;
+}): React.JSX.Element {
+  const inherited = React.useContext(SuppressRectRegistrationContext);
+  return (
+    <SuppressRectRegistrationContext.Provider value={inherited || suppress}>
+      {children}
+    </SuppressRectRegistrationContext.Provider>
+  );
+}
+
 /** Callback ref that registers a node's element into the rect cache for its artboard. */
 function useNodeRegistration(id: NodeId): (el: HTMLElement | null) => void {
   const cache = useRectCache();
   const artboardId = React.useContext(ArtboardContext);
+  const suppressed = React.useContext(SuppressRectRegistrationContext);
   return React.useCallback(
     (el: HTMLElement | null) => {
-      if (cache === null || el === null) return;
+      if (suppressed || cache === null || el === null) return;
       const cleanup = cache.register(id, el, artboardId);
       // React 19 callback-ref cleanup.
       return cleanup;
     },
-    [cache, id, artboardId],
+    [cache, id, artboardId, suppressed],
   );
 }
 

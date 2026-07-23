@@ -94,10 +94,17 @@ export function resolveTemplate(
   template: string,
   data: BindingData,
   filters: FilterMap = DEFAULT_FILTERS,
+  /**
+   * Optional per-value transform for the RESOLVED binding value only (not the literal
+   * template text). Pass an HTML-escaper when injecting resolved values into a raw-HTML
+   * context (e.g. a print header/footer) so dynamic/untrusted data can't inject markup.
+   */
+  escape?: (value: string) => string,
 ): string {
   return template.replace(BINDING_RE, (_match, expr: string) => {
     const value = applyExpression(expr, data, filters);
-    return value == null ? "" : String(value);
+    const str = value == null ? "" : String(value);
+    return escape !== undefined ? escape(str) : str;
   });
 }
 

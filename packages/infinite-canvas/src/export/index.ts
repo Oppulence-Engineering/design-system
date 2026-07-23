@@ -32,7 +32,13 @@ export { printHtmlDocument, downloadTextFile } from "./print";
 /** Pagination options for print/PDF. */
 export interface PdfOptions {
   page?: { size?: string; margin?: string };
+  /**
+   * Raw-HTML print chrome repeated on every page. The literal string is TRUSTED — put
+   * dynamic/untrusted data in `{{…}}` bindings (resolved against the live data context and
+   * HTML-escaped), never string-concatenated in.
+   */
   runningHeader?: string;
+  /** See {@link PdfOptions.runningHeader} — same raw-HTML / escaped-binding rules. */
   runningFooter?: string;
 }
 

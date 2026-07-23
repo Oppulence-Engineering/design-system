@@ -87,6 +87,26 @@ describe("exportToHtml", () => {
     expect(html).toContain("confidential");
   });
 
+  it("running header/footer: literal HTML passes through, bound values are escaped", () => {
+    const { doc, frameId } = invoiceDoc();
+    const html = exportToHtml(doc, frameId, {
+      fullDocument: true,
+      page: { size: "A4" },
+      data: { customer: { name: "<img src=x onerror=alert(1)>" } },
+      runningHeader: "<div class='hdr'>Bill to: {{customer.name}}</div>", // literal HTML kept, binding escaped
+      runningFooter: "Page footer",
+    });
+    // Literal structure survives.
+    expect(html).toContain('<div class="ic-running-header">');
+    expect(html).toContain("<div class='hdr'>Bill to:");
+    // The bound (untrusted) value is HTML-escaped — no live <img> injected.
+    expect(html).toContain("&lt;img src=x onerror=alert(1)&gt;");
+    expect(html).not.toContain("<img src=x onerror=alert(1)>");
+    // Fixed positioning is scoped to @media print.
+    expect(html).toContain("@media print{");
+    expect(html).toContain(".ic-running-footer{position:fixed");
+  });
+
   it("renderTemplateToHtml fills a template server-side (no browser)", () => {
     const { doc, frameId } = invoiceDoc();
     const html = renderTemplateToHtml(

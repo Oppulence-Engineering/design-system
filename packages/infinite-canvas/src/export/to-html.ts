@@ -44,7 +44,14 @@ export interface HtmlExportOptions {
    * on every printed page (Chrome print / headless). Only applied with `fullDocument`.
    */
   page?: { size?: string; margin?: string };
+  /**
+   * Print-chrome slot repeated on every page. This is RAW HTML (a `<div>` with a logo /
+   * page layout is the point) and the literal string is TRUSTED — never string-concatenate
+   * untrusted data into it. Dynamic values belong in `{{…}}` bindings, which resolve
+   * against `data` and are HTML-escaped, so a hostile `{{customer.name}}` can't inject markup.
+   */
   runningHeader?: string;
+  /** See {@link HtmlExportOptions.runningHeader} — same raw-HTML / escaped-binding rules. */
   runningFooter?: string;
 }
 
@@ -214,25 +221,31 @@ export function exportToHtml(
     opts.page !== undefined
       ? `@page{size:${opts.page.size ?? "A4"};margin:${opts.page.margin ?? "20mm"}}`
       : "";
-  // Running header/footer repeat on every printed page (position:fixed in print engines).
-  const headerCss =
-    opts.runningHeader !== undefined
-      ? ".ic-running-header{position:fixed;top:0;left:0;right:0}"
-      : "";
-  const footerCss =
-    opts.runningFooter !== undefined
-      ? ".ic-running-footer{position:fixed;bottom:0;left:0;right:0}"
-      : "";
-  const breakCss = paginated
-    ? "@media print{.ic-repeat-item{break-inside:avoid;page-break-inside:avoid}}"
+  // Print-only rules: fixed header/footer + row break-avoid. Scoped to @media print so the
+  // fixed chrome doesn't overlap content in an on-screen preview.
+  const printCss = paginated
+    ? "@media print{.ic-repeat-item{break-inside:avoid;page-break-inside:avoid}" +
+      (opts.runningHeader !== undefined
+        ? ".ic-running-header{position:fixed;top:0;left:0;right:0}"
+        : "") +
+      (opts.runningFooter !== undefined
+        ? ".ic-running-footer{position:fixed;bottom:0;left:0;right:0}"
+        : "") +
+      "}"
     : "";
+  // Resolve {{…}} in the chrome against the data context, HTML-escaping the resolved
+  // values (the literal structure is the caller's trusted HTML — see the type doc).
+  const chrome = (html: string): string =>
+    opts.data !== undefined
+      ? resolveTemplate(html, opts.data, opts.filters, escapeHtml)
+      : html;
   const header =
     opts.runningHeader !== undefined
-      ? `    <div class="ic-running-header">${opts.runningHeader}</div>\n`
+      ? `    <div class="ic-running-header">${chrome(opts.runningHeader)}</div>\n`
       : "";
   const footer =
     opts.runningFooter !== undefined
-      ? `    <div class="ic-running-footer">${opts.runningFooter}</div>\n`
+      ? `    <div class="ic-running-footer">${chrome(opts.runningFooter)}</div>\n`
       : "";
 
   return [
@@ -241,7 +254,7 @@ export function exportToHtml(
     "  <head>",
     '    <meta charset="utf-8" />',
     `    <title>${escapeHtml(opts.title ?? doc.meta.name)}</title>`,
-    `    <style>*{box-sizing:border-box}body{margin:0;font-family:system-ui,sans-serif}${pageCss}${headerCss}${footerCss}${breakCss}</style>`,
+    `    <style>*{box-sizing:border-box}body{margin:0;font-family:system-ui,sans-serif}${pageCss}${printCss}</style>`,
     "  </head>",
     "  <body>",
     header + body + "\n" + footer,
