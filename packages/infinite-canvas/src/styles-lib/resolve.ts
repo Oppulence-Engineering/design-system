@@ -45,7 +45,15 @@ export function resolveNodeStyle(
   styles: StyleLibrary,
 ): NodeStyle {
   if (node.styleRef === undefined) return node.style;
+  // Guard the direct index (styleRef bypasses the binding path-walker's proto guard):
+  // `styles["__proto__"]` would read Object.prototype rather than a real named style.
+  if (
+    node.styleRef === "__proto__" ||
+    node.styleRef === "constructor" ||
+    node.styleRef === "prototype"
+  )
+    return node.style;
   const named = styles[node.styleRef];
-  if (named === undefined) return node.style;
+  if (named === undefined || typeof named.style !== "object") return node.style;
   return { ...named.style, ...node.style };
 }

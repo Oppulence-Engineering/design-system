@@ -131,7 +131,12 @@ export function createDocumentStore(
   }
 
   const store = createStore<DocumentStoreState>((set, get) => ({
-    ...createState(initialDocument),
+    // SECURITY: sanitize the seed document too — otherwise a tampered stored JSON
+    // (or a restored version snapshot) enters the live DOM unsanitized (§3c).
+    ...sanitizeState(
+      createState(initialDocument),
+      Object.keys(initialDocument.nodes) as NodeId[],
+    ),
     revision: 0,
     history: createHistory(),
     delegatedUndo: null,
@@ -279,11 +284,16 @@ export function createDocumentStore(
     },
 
     loadSnapshot(doc) {
-      const state = createState(doc);
+      // SECURITY: version-restore / load is a document-entry gate — sanitize every node
+      // (§3c), then rebuild the children index from the repaired nodes.
+      const sanitized = sanitizeState(
+        createState(doc),
+        Object.keys(doc.nodes) as NodeId[],
+      );
       const revision = get().revision + 1;
       set({
-        document: state.document,
-        childrenIndex: state.childrenIndex,
+        document: sanitized.document,
+        childrenIndex: buildChildrenIndex(sanitized.document.nodes),
         revision,
         history: createHistory(),
       });

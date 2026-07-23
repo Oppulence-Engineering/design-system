@@ -61,6 +61,39 @@ describe("document store — local editing", () => {
     expect(style?.custom).toEqual({ color: "red" }); // position:fixed dropped
   });
 
+  it("sanitizes the seed document on construction (unsafe css stripped)", () => {
+    const frame = makeFrame({ id: "f1" });
+    const el = {
+      ...makeElement(frame.id, { id: "e1" }),
+      style: { custom: { position: "fixed", color: "red" } },
+    };
+    const { store } = createDocumentStore(makeDocument([frame, el]) as never, {
+      clientId: asClientId("c1"),
+      now: () => 0,
+    });
+    expect(store.getState().document.nodes.e1?.style.custom).toEqual({
+      color: "red",
+    }); // position:fixed dropped at load, not just at apply/applyRemote
+  });
+
+  it("sanitizes on loadSnapshot / version restore", () => {
+    const { store, handle } = createDocumentStore(fixture(), {
+      clientId: asClientId("c1"),
+      now: () => 0,
+    });
+    const frame = makeFrame({ id: "f1" });
+    const bad = {
+      ...makeElement(frame.id, { id: "e1" }),
+      style: { custom: { position: "sticky", color: "blue" } },
+    };
+    // A tampered version snapshot restored through the store must be sanitized.
+    handle.loadSnapshot(makeDocument([frame, bad]) as never);
+    expect(store.getState().document.nodes.e1?.style.custom).toEqual({
+      color: "blue",
+    });
+    expect(store.getState().revision).toBe(1);
+  });
+
   it("does not push remote batches onto the local undo stack", () => {
     const { store, handle } = createDocumentStore(fixture(), {
       clientId: asClientId("c1"),

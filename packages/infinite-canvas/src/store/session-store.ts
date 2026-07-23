@@ -107,8 +107,16 @@ export function createSessionStore(
     commentMode: false,
     commentAuthor: null,
 
-    setCamera: (camera) =>
-      set({ camera: { ...camera, zoom: clampZoom(camera.zoom) } }),
+    setCamera: (camera) => {
+      const zoom = clampZoom(camera.zoom);
+      const cur = get().camera;
+      // Preserve the reference on a value-equal set. `camera !== prev.camera` drives the
+      // content-layer transform, the presence camera-publish, and follow-mode mirroring;
+      // a fresh object on every no-op set makes mutual follow (A follows B while B follows
+      // A) ping-pong value-equal cameras forever. Dedupe by value to break that loop.
+      if (cur.x === camera.x && cur.y === camera.y && cur.zoom === zoom) return;
+      set({ camera: { x: camera.x, y: camera.y, zoom } });
+    },
     panBy: (dx, dy) => {
       const { camera } = get();
       set({ camera: { ...camera, x: camera.x + dx, y: camera.y + dy } });
