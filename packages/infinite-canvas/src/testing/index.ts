@@ -13,6 +13,10 @@ export {
   testIdFactory,
 } from "./factories";
 export type { FrameOptions } from "./factories";
-export { InMemoryCollabAdapter, InMemoryHub } from "./in-memory-adapter";
+export {
+  InMemoryCollabAdapter,
+  InMemoryHub,
+  InMemoryPresenceHub,
+} from "./in-memory-adapter";
 export { createLinkedAdapterPair } from "./linked-pair";
 export type { LinkedClient, LinkedPair } from "./linked-pair";

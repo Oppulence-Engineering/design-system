@@ -83,6 +83,8 @@ export interface PresencePeer {
   cursor: { x: number; y: number } | null;
   selectedNodeIds: readonly string[];
   access: CollabAccess;
+  /** The peer's viewport camera — enables follow-mode (jump to / track a teammate). */
+  camera?: { x: number; y: number; zoom: number };
   /** Client-locally stamped; departed peers are retained as ghosts for a grace window. */
   lastSeenAt: number;
 }
@@ -97,6 +99,8 @@ export interface PresenceAdapter {
   leave(): void;
   updateCursor(cursor: { x: number; y: number } | null): void;
   updateSelection(selectedNodeIds: readonly string[]): void;
+  /** Broadcast the local viewport so peers can follow it (optional). */
+  updateViewport?(camera: { x: number; y: number; zoom: number }): void;
   subscribe(listener: (peers: readonly PresencePeer[]) => void): () => void;
   /** SSE-only presence degrades to avatars + selection tints (no live cursors). */
   readonly capabilities: { cursors: boolean; liveSelection: boolean };
@@ -151,6 +155,12 @@ export class LocalPresenceAdapter implements PresenceAdapter {
   updateSelection(selectedNodeIds: readonly string[]): void {
     if (this.self !== null) {
       this.self = { ...this.self, selectedNodeIds };
+      this.emit();
+    }
+  }
+  updateViewport(camera: { x: number; y: number; zoom: number }): void {
+    if (this.self !== null) {
+      this.self = { ...this.self, camera };
       this.emit();
     }
   }

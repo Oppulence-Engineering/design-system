@@ -30,15 +30,13 @@ export function useStyleLibrary(): StyleLibraryApi {
   );
 
   const setLibrary = (lib: StyleLibrary) => {
-    documentStore
-      .getState()
-      .apply([
-        {
-          type: "set-document-meta",
-          set: { styles: lib as unknown as JsonValue },
-          unset: [],
-        },
-      ]);
+    documentStore.getState().apply([
+      {
+        type: "set-document-meta",
+        set: { styles: lib as unknown as JsonValue },
+        unset: [],
+      },
+    ]);
   };
   const currentLib = (): StyleLibrary =>
     stylesFromMeta(documentStore.getState().document.meta);

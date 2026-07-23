@@ -34,6 +34,7 @@ import type { BindingData, FilterMap } from "../binding/resolve";
 import { themeToCssVars, type CanvasTheme } from "../theme/theme";
 import { createCommentsStore, type Comment } from "../comments/store";
 import { createBlockStore, type Block } from "../blocks/store";
+import { createVersionStore, type DocumentVersion } from "../versioning/store";
 import { CanvasContext, type CanvasContextValue } from "./context";
 import { createDocumentStore } from "./document-store";
 import { createSessionStore } from "./session-store";
@@ -83,6 +84,9 @@ export interface CanvasProviderProps {
   /** Seed the block/template library (consumer-persisted). */
   initialBlocks?: readonly Block[];
   onBlocksChange?: (blocks: Block[]) => void;
+  /** Seed version history (consumer-persisted). */
+  initialVersions?: readonly DocumentVersion[];
+  onVersionsChange?: (versions: DocumentVersion[]) => void;
   /** Brand the canvas chrome. Sets `--ic-*` tokens; falls back to design-system `--color-*`. */
   theme?: CanvasTheme;
   apiRef?: React.Ref<CanvasApi>;
@@ -117,6 +121,9 @@ export function CanvasProvider(props: CanvasProviderProps): React.JSX.Element {
   const blockBundleRef = React.useRef<ReturnType<
     typeof createBlockStore
   > | null>(null);
+  const versionBundleRef = React.useRef<ReturnType<
+    typeof createVersionStore
+  > | null>(null);
   const statusRef = React.useRef<CanvasStatus>(
     collab === undefined ? "ready" : "syncing",
   );
@@ -144,6 +151,8 @@ export function CanvasProvider(props: CanvasProviderProps): React.JSX.Element {
     commentsBundleRef.current = commentsBundle;
     const blockBundle = createBlockStore(props.initialBlocks);
     blockBundleRef.current = blockBundle;
+    const versionBundle = createVersionStore(props.initialVersions);
+    versionBundleRef.current = versionBundle;
     const toolRegistry = new ToolRegistry(tools);
     const api = createCanvasApi({
       documentStore,
@@ -159,6 +168,7 @@ export function CanvasProvider(props: CanvasProviderProps): React.JSX.Element {
       presenceStore,
       commentsStore: commentsBundle.store,
       blockStore: blockBundle.store,
+      versionStore: versionBundle.store,
       handle,
       registry,
       toolRegistry,
@@ -206,11 +216,15 @@ export function CanvasProvider(props: CanvasProviderProps): React.JSX.Element {
       ctx.presenceStore.getState().setPeers(peers),
     );
     if (self !== undefined) adapter.join(self);
-    // Push local selection to presence.
+    // Push local selection + camera (for follow-mode) to presence.
     const offSel = ctx.sessionStore.subscribe((state, prev) => {
       if (state.selection !== prev.selection)
         adapter.updateSelection(state.selection);
+      if (state.camera !== prev.camera && adapter.updateViewport !== undefined)
+        adapter.updateViewport(state.camera);
     });
+    if (adapter.updateViewport !== undefined)
+      adapter.updateViewport(ctx.sessionStore.getState().camera);
     return () => {
       offSel();
       off();
@@ -268,6 +282,14 @@ export function CanvasProvider(props: CanvasProviderProps): React.JSX.Element {
       return;
     return blockBundleRef.current.onChange(props.onBlocksChange);
   }, [props.onBlocksChange, ctx]);
+  React.useEffect(() => {
+    if (
+      props.onVersionsChange === undefined ||
+      versionBundleRef.current === null
+    )
+      return;
+    return versionBundleRef.current.onChange(props.onVersionsChange);
+  }, [props.onVersionsChange, ctx]);
 
   // Theme tokens cascade to the canvas AND panels via a display:contents wrapper (custom
   // properties inherit through it without affecting the consumer's layout).

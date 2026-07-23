@@ -129,6 +129,24 @@ export type { CanvasTheme } from "./theme/theme";
 export { CanvasViewer } from "./viewer/index";
 export type { CanvasViewerProps } from "./viewer/index";
 
+// Command palette (⌘K)
+export { CanvasCommandPalette } from "./command-palette/index";
+export type {
+  CanvasCommandPaletteProps,
+  Command,
+} from "./command-palette/index";
+
+// Version history / audit
+export { diffCount, diffDocuments } from "./versioning/diff";
+export type { DocumentDiff } from "./versioning/diff";
+export { useVersionHistory } from "./versioning/hooks";
+export type { VersionHistory } from "./versioning/hooks";
+export type { DocumentVersion } from "./versioning/store";
+
+// Follow-mode (multiplayer)
+export { useFollow } from "./follow/index";
+export type { FollowApi } from "./follow/index";
+
 // Shared design styles
 export { resolveNodeStyle, stylesFromMeta } from "./styles-lib/resolve";
 export type { NamedStyle, StyleLibrary } from "./styles-lib/resolve";

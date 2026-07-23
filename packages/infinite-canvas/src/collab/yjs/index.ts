@@ -225,6 +225,9 @@ export class YjsPresenceAdapter implements PresenceAdapter {
       selectedNodeIds.slice(0, 50),
     );
   }
+  updateViewport(camera: { x: number; y: number; zoom: number }): void {
+    this.awareness.setLocalStateField("camera", camera);
+  }
   subscribe(listener: (peers: readonly PresencePeer[]) => void): () => void {
     const onChange = () => listener(this.collect());
     this.awareness.on("change", onChange);
@@ -245,6 +248,9 @@ export class YjsPresenceAdapter implements PresenceAdapter {
       const cursor =
         (state.cursor as { x: number; y: number } | null | undefined) ?? null;
       const selection = (state.selection as string[] | undefined) ?? [];
+      const camera = state.camera as
+        | { x: number; y: number; zoom: number }
+        | undefined;
       const peer: PresencePeer = {
         clientId: user.clientId,
         userId: user.userId,
@@ -253,6 +259,7 @@ export class YjsPresenceAdapter implements PresenceAdapter {
         cursor,
         selectedNodeIds: selection,
         access: user.access,
+        camera,
         lastSeenAt: this.now(),
       };
       peers.push(peer);
