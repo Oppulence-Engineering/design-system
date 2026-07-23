@@ -19,6 +19,13 @@ export interface NamedStyle {
 
 export type StyleLibrary = Record<string, NamedStyle>;
 
+/**
+ * Stable empty library. MUST be a shared frozen constant, never a fresh `{}` — this is
+ * returned from a zustand selector (`useDocumentStore(s => stylesFromMeta(s.document.meta))`),
+ * and a new object each call makes the snapshot change on every render → infinite re-render.
+ */
+const EMPTY_STYLE_LIBRARY: StyleLibrary = Object.freeze({});
+
 /** Read the style library out of document meta (untyped JSON) into a typed map. */
 export function stylesFromMeta(meta: DocumentMeta): StyleLibrary {
   const raw = (meta as Record<string, JsonValue | undefined>).styles;
@@ -28,7 +35,7 @@ export function stylesFromMeta(meta: DocumentMeta): StyleLibrary {
     typeof raw !== "object" ||
     Array.isArray(raw)
   )
-    return {};
+    return EMPTY_STYLE_LIBRARY;
   return raw as unknown as StyleLibrary;
 }
 
