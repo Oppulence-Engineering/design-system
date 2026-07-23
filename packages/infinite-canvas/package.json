@@ -1,6 +1,6 @@
 {
   "name": "@oppulence/infinite-canvas",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Infinite canvas spatial editor for HTML/React designs — DOM artboards, layers, inspector, undo/redo, pluggable collaboration",
   "type": "module",
   "main": "./src/index.ts",
@@ -121,6 +121,7 @@
     }
   },
   "devDependencies": {
+    "@hocuspocus/provider": "^3.4.4",
     "@oppulence/design-system": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@testing-library/react": "^16.0.0",
@@ -135,9 +136,8 @@
     "react-dom": "^19.0.0",
     "typescript": "^5.9.0",
     "vitest": "^4.0.0",
-    "yjs": "^13.6.31",
     "y-protocols": "^1.0.7",
-    "@hocuspocus/provider": "^3.4.4",
+    "yjs": "^13.6.31",
     "zod": "^4.3.6",
     "zustand": "^5.0.0"
   }
