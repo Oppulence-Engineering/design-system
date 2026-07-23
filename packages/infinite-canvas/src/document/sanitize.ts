@@ -22,7 +22,104 @@ import type {
   TextNode,
 } from "./nodes";
 import { HTML_TAGS } from "./nodes";
+import {
+  RICH_BLOCK_TYPES,
+  type RichBlock,
+  type RichBlockType,
+  type RichMarks,
+  type RichText,
+} from "./rich-text";
 import type { NodeStyle } from "./styles";
+
+const RICH_ALIGNS = new Set(["left", "center", "right"]);
+const RICH_BLOCK_SET = new Set<string>(RICH_BLOCK_TYPES);
+
+/**
+ * Sanitize a rich-text value (§14b): drop unsafe link schemes and dangerous color CSS,
+ * coerce/validate block+mark shapes, and bound total size. Returns null if `rich` is not a
+ * usable array (the node falls back to plain `text`).
+ */
+function sanitizeRich(
+  rich: unknown,
+  limits: SanitizeLimits,
+  issues: string[],
+): { rich: RichText | null; changed: boolean } {
+  if (!Array.isArray(rich)) return { rich: null, changed: false };
+  let changed = false;
+  let total = 0;
+  const blocks: RichBlock[] = [];
+  for (const rawBlock of rich) {
+    if (rawBlock === null || typeof rawBlock !== "object") {
+      changed = true;
+      continue;
+    }
+    const b = rawBlock as { type?: unknown; align?: unknown; runs?: unknown };
+    const type: RichBlockType = RICH_BLOCK_SET.has(b.type as string)
+      ? (b.type as RichBlockType)
+      : "paragraph";
+    if (type !== b.type) changed = true;
+    const block: RichBlock = { type, runs: [] };
+    if (typeof b.align === "string" && RICH_ALIGNS.has(b.align))
+      block.align = b.align as RichBlock["align"];
+    else if (b.align !== undefined) changed = true;
+    const runs = Array.isArray(b.runs) ? b.runs : [];
+    if (!Array.isArray(b.runs)) changed = true;
+    for (const rawRun of runs) {
+      if (rawRun === null || typeof rawRun !== "object") {
+        changed = true;
+        continue;
+      }
+      const r = rawRun as { text?: unknown; marks?: unknown };
+      let text = typeof r.text === "string" ? r.text : "";
+      if (typeof r.text !== "string") changed = true;
+      if (total + text.length > limits.maxTextLength) {
+        text = text.slice(0, Math.max(0, limits.maxTextLength - total));
+        issues.push("clamped oversized rich text");
+        changed = true;
+      }
+      total += text.length;
+      const marks = sanitizeMarks(r.marks, issues);
+      if (marks.changed) changed = true;
+      block.runs.push(
+        marks.marks === undefined ? { text } : { text, marks: marks.marks },
+      );
+    }
+    blocks.push(block);
+  }
+  return { rich: blocks, changed };
+}
+
+function sanitizeMarks(
+  raw: unknown,
+  issues: string[],
+): { marks: RichMarks | undefined; changed: boolean } {
+  if (raw === null || typeof raw !== "object")
+    return { marks: undefined, changed: raw !== undefined };
+  const m = raw as Record<string, unknown>;
+  const out: RichMarks = {};
+  let changed = false;
+  for (const flag of ["bold", "italic", "underline", "strike", "code"] as const)
+    if (m[flag] === true) out[flag] = true;
+  if (typeof m.link === "string") {
+    if (isSafeUrl(m.link)) out.link = m.link;
+    else {
+      issues.push("dropped unsafe rich-text link");
+      changed = true;
+    }
+  }
+  if (typeof m.color === "string") {
+    if (!CSS_DANGEROUS_VALUE.test(m.color) && !m.color.includes(";"))
+      out.color = m.color;
+    else {
+      issues.push("dropped unsafe rich-text color");
+      changed = true;
+    }
+  }
+  return {
+    marks: Object.keys(out).length > 0 ? out : undefined,
+    changed,
+  };
+}
 
 export interface SanitizeLimits {
   maxTextLength: number;
@@ -267,6 +364,16 @@ function sanitizeText(
     out.text = out.text.slice(0, limits.maxTextLength);
     issues.push("clamped oversized text");
     changed = true;
+  }
+  if (out.rich !== undefined) {
+    const richResult = sanitizeRich(out.rich, limits, issues);
+    if (richResult.rich === null) {
+      delete out.rich;
+      changed = true;
+    } else {
+      out.rich = richResult.rich;
+      changed = changed || richResult.changed;
+    }
   }
   const styleResult = sanitizeStyle(out.style, limits, issues);
   out.style = styleResult.style;

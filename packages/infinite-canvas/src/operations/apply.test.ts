@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { asNodeId } from "../document/ids";
-import { makeDocument, makeElement, makeFrame } from "../testing/factories";
+import {
+  makeDocument,
+  makeElement,
+  makeFrame,
+  makeText,
+} from "../testing/factories";
 import { applyBatch, createState } from "./apply";
 import { buildChildrenIndex, childrenOf } from "./children-index";
 import { invertBatch } from "./invert";
@@ -146,5 +151,26 @@ describe("children index", () => {
     // 'b' > 'a' → b detaches to root; a stays under b.
     expect(childrenOf(index, ROOT_PARENT)).toContain("b");
     expect(childrenOf(index, b.id)).toContain("a");
+  });
+
+  it("set-rich-text applies, inverts, and JSON-round-trips", () => {
+    const frame = makeFrame({ id: "f" });
+    const text = makeText(frame.id, { id: "t", text: "plain" });
+    const state = createState(makeDocument([frame, text]));
+    const ops: CanvasOperation[] = roundTripJson([
+      {
+        type: "set-rich-text",
+        nodeId: asNodeId("t"),
+        rich: [{ type: "h1", runs: [{ text: "Hi", marks: { bold: true } }] }],
+      },
+    ]);
+    const inverse = invertBatch(state, ops);
+    const next = applyBatch(state, ops);
+    const n = next.document.nodes.t;
+    expect(n?.type === "text" && n.rich?.[0]?.type).toBe("h1");
+    // Inverse (prev had no rich) clears it back to plain.
+    const restored = applyBatch(next, inverse);
+    const r = restored.document.nodes.t;
+    expect(r?.type === "text" && r.rich).toBeUndefined();
   });
 });

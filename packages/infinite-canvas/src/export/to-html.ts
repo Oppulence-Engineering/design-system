@@ -9,6 +9,13 @@
 import type { CanvasDocument } from "../document/document";
 import { ROOT_PARENT, type NodeId } from "../document/ids";
 import type { SceneNode } from "../document/nodes";
+import {
+  blockTag,
+  marksToCss,
+  type RichRun,
+  type RichText,
+} from "../document/rich-text";
+import { isSafeUrl } from "../document/sanitize";
 import { childrenOf } from "../operations/children-index";
 import { buildChildrenIndex } from "../operations/children-index";
 import { styleToCss } from "../renderer/style-to-css";
@@ -56,6 +63,60 @@ export interface HtmlExportOptions {
 }
 
 const VOID_TAGS = new Set(["img", "br", "hr", "input"]);
+
+/** Rich runs → inline HTML (bindings resolved + escaped; links scheme-checked). */
+function richRunsHtml(
+  runs: readonly RichRun[],
+  scope: BindingData | undefined,
+  filters: FilterMap | undefined,
+): string {
+  return runs
+    .map((run) => {
+      const raw =
+        scope !== undefined
+          ? resolveTemplate(run.text, scope, filters)
+          : run.text;
+      const text = escapeHtml(raw);
+      const styleStr = cssToInline(marksToCss(run.marks));
+      const styleAttr =
+        styleStr.length > 0 ? ` style="${escapeHtml(styleStr)}"` : "";
+      const link = run.marks?.link;
+      if (link !== undefined && isSafeUrl(link))
+        return `<a href="${escapeHtml(link)}"${styleAttr} rel="noopener noreferrer">${text}</a>`;
+      return `<span${styleAttr}>${text}</span>`;
+    })
+    .join("");
+}
+
+/** A rich-text value → block-level HTML (consecutive list-items grouped into a <ul>). */
+function richToHtml(
+  rich: RichText,
+  scope: BindingData | undefined,
+  filters: FilterMap | undefined,
+): string {
+  let html = "";
+  let i = 0;
+  while (i < rich.length) {
+    const block = rich[i]!;
+    if (block.type === "list-item") {
+      let items = "";
+      while (i < rich.length && rich[i]!.type === "list-item") {
+        const li = rich[i]!;
+        const align =
+          li.align !== undefined ? ` style="text-align:${li.align}"` : "";
+        items += `<li${align}>${richRunsHtml(li.runs, scope, filters)}</li>`;
+        i++;
+      }
+      html += `<ul style="margin:0;padding-left:1.5em">${items}</ul>`;
+      continue;
+    }
+    const tag = blockTag(block.type);
+    const align = block.align !== undefined ? `;text-align:${block.align}` : "";
+    html += `<${tag} style="margin:0${align}">${richRunsHtml(block.runs, scope, filters)}</${tag}>`;
+    i++;
+  }
+  return html;
+}
 
 export function escapeHtml(str: string): string {
   return str
@@ -165,6 +226,8 @@ function nodeToHtmlBody(
     case "group":
       return `${pad}<div${classAttr}${styleAttr}>${renderChildren()}</div>`;
     case "text": {
+      if (node.rich !== undefined)
+        return `${pad}<div${classAttr}${styleAttr}>${richToHtml(node.rich, scope, opts.filters)}</div>`;
       const text =
         scope !== undefined
           ? resolveTemplate(node.text, scope, opts.filters)

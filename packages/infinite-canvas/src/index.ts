@@ -35,11 +35,13 @@ export type {
   ViewportBridge,
 } from "./store/canvas-api";
 export { zoomCameraAtScreenPoint } from "./store/canvas-api";
+export type { AlignEdge, DistributeAxis } from "./commands/edit-commands";
 
 // Renderer
 export { CanvasRoot } from "./renderer/canvas-root";
 export type { CanvasRootProps } from "./renderer/canvas-root";
 export { NodeRenderer } from "./renderer/node-renderer";
+export { RichTextView } from "./renderer/rich-text";
 export { styleToCss } from "./renderer/style-to-css";
 
 // Registry

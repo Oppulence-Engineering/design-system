@@ -8,8 +8,51 @@
 import type { CanvasDocument } from "../document/document";
 import { ROOT_PARENT, type NodeId } from "../document/ids";
 import type { SceneNode } from "../document/nodes";
+import {
+  blockTag,
+  marksToCss,
+  type RichRun,
+  type RichText,
+} from "../document/rich-text";
+import { isSafeUrl } from "../document/sanitize";
 import { buildChildrenIndex, childrenOf } from "../operations/children-index";
 import { styleToCss } from "../renderer/style-to-css";
+
+function richRunsJsx(runs: readonly RichRun[]): string {
+  return runs
+    .map((run) => {
+      const text = `{${JSON.stringify(run.text)}}`;
+      const css = marksToCss(run.marks);
+      const styleAttr =
+        Object.keys(css).length > 0 ? ` style={${JSON.stringify(css)}}` : "";
+      const link = run.marks?.link;
+      if (link !== undefined && isSafeUrl(link))
+        return `<a href={${JSON.stringify(link)}}${styleAttr} rel="noopener noreferrer">${text}</a>`;
+      return `<span${styleAttr}>${text}</span>`;
+    })
+    .join("");
+}
+
+function richToJsx(rich: RichText): string {
+  let out = "";
+  let i = 0;
+  while (i < rich.length) {
+    const block = rich[i]!;
+    if (block.type === "list-item") {
+      let items = "";
+      while (i < rich.length && rich[i]!.type === "list-item") {
+        items += `<li>${richRunsJsx(rich[i]!.runs)}</li>`;
+        i++;
+      }
+      out += `<ul>${items}</ul>`;
+      continue;
+    }
+    const tag = blockTag(block.type);
+    out += `<${tag}>${richRunsJsx(block.runs)}</${tag}>`;
+    i++;
+  }
+  return out;
+}
 
 export interface ReactExportOptions {
   /** Name of the generated component (default "Design"). */
@@ -67,7 +110,9 @@ function nodeToJsx(
         : `${pad}<div${styleAttr} />`;
     }
     case "text":
-      return `${pad}<div${styleAttr}>{${JSON.stringify(node.text)}}</div>`;
+      return node.rich !== undefined
+        ? `${pad}<div${styleAttr}>${richToJsx(node.rich)}</div>`
+        : `${pad}<div${styleAttr}>{${JSON.stringify(node.text)}}</div>`;
     case "element": {
       const attrs = Object.entries(node.attrs)
         .map(([k, v]) => ` ${k}=${JSON.stringify(v)}`)

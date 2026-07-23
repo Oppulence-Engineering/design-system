@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { asNodeId } from "../document/ids";
+import type { RichText } from "../document/rich-text";
 import {
   makeDocument,
   makeElement,
@@ -105,6 +106,29 @@ describe("exportToHtml", () => {
     // Fixed positioning is scoped to @media print.
     expect(html).toContain("@media print{");
     expect(html).toContain(".ic-running-footer{position:fixed");
+  });
+
+  it("renders a rich-text node as block/inline HTML with escaped links", () => {
+    const frame = makeFrame({ id: "f" });
+    const rich: RichText = [
+      { type: "h1", runs: [{ text: "Invoice" }] },
+      {
+        type: "paragraph",
+        runs: [
+          { text: "b", marks: { bold: true } },
+          { text: "L", marks: { link: "https://x.example" } },
+          { text: "evil", marks: { link: "javascript:alert(1)" } },
+        ],
+      },
+    ];
+    const t = { ...makeText(frame.id, { id: "t", text: "Invoice one" }), rich };
+    const html = exportToHtml(makeDocument([frame, t]), frame.id);
+    expect(html).toContain("<h1");
+    expect(html).toContain("font-weight: 700");
+    expect(html).toContain('href="https://x.example"');
+    // Unsafe link never becomes an href — rendered as a plain span.
+    expect(html).not.toContain('href="javascript:alert(1)"');
+    expect(html).toContain(">evil</span>");
   });
 
   it("renderTemplateToHtml fills a template server-side (no browser)", () => {

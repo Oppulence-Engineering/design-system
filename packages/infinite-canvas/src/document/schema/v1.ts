@@ -63,10 +63,30 @@ const elementNode = z.looseObject({
   style: nodeStyle,
 });
 
+const richMarks = z.looseObject({
+  bold: z.boolean().optional(),
+  italic: z.boolean().optional(),
+  underline: z.boolean().optional(),
+  strike: z.boolean().optional(),
+  code: z.boolean().optional(),
+  link: z.string().optional(),
+  color: z.string().optional(),
+});
+const richRun = z.looseObject({
+  text: z.string(),
+  marks: richMarks.optional(),
+});
+const richBlock = z.looseObject({
+  type: z.enum(["paragraph", "h1", "h2", "h3", "list-item"]),
+  align: z.enum(["left", "center", "right"]).optional(),
+  runs: z.array(richRun),
+});
+
 const textNode = z.looseObject({
   ...baseFields,
   type: z.literal("text"),
   text: z.string(),
+  rich: z.array(richBlock).optional(),
   style: nodeStyle,
 });
 

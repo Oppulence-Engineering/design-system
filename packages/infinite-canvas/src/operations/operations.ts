@@ -9,6 +9,7 @@
 import type { BatchId, ClientId, NodeId } from "../document/ids";
 import type { JsonValue } from "../document/json";
 import type { SceneNode } from "../document/nodes";
+import type { RichText } from "../document/rich-text";
 import type { NodeStyle } from "../document/styles";
 
 export interface InsertNodeOp {
@@ -41,6 +42,13 @@ export interface SetTextOp {
   type: "set-text";
   nodeId: NodeId;
   text: string;
+}
+
+/** Set (or clear, with `null`) a text node's rich representation. Independent of `set-text`. */
+export interface SetRichTextOp {
+  type: "set-rich-text";
+  nodeId: NodeId;
+  rich: RichText | null;
 }
 
 export interface SetNodeFlagsOp {
@@ -95,6 +103,7 @@ export type CanvasOperation =
   | MoveNodeOp
   | SetNodeGeometryOp
   | SetTextOp
+  | SetRichTextOp
   | SetNodeFlagsOp
   | SetNodeAttrsOp
   | SetComponentPropsOp

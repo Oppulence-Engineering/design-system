@@ -73,6 +73,15 @@ function applyToNodes(nodes: NodeMap, op: NodeOp): NodeMap {
       return withKey<SceneNode>(nodes, op.nodeId, { ...node, text: op.text });
     }
 
+    case "set-rich-text": {
+      const node = nodes[op.nodeId];
+      if (node === undefined || node.type !== "text") return nodes;
+      const next = { ...node };
+      if (op.rich === null) delete next.rich;
+      else next.rich = op.rich;
+      return withKey<SceneNode>(nodes, op.nodeId, next);
+    }
+
     case "set-node-flags": {
       const node = nodes[op.nodeId];
       if (node === undefined) return nodes;
