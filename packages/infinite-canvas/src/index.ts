@@ -99,5 +99,18 @@ export {
 } from "./viewport/camera";
 export type { Point, Rect, Size } from "./viewport/geometry";
 
+// Data binding (templates)
+export {
+  DEFAULT_FILTERS,
+  hasBinding,
+  resolveAttrs,
+  resolvePath,
+  resolveTemplate,
+  resolveValue,
+} from "./binding/resolve";
+export type { BindingData, BindingFilter, FilterMap } from "./binding/resolve";
+export { BindingProvider, useBinding } from "./binding/context";
+export type { BindingContextValue } from "./binding/context";
+
 // Everything server-safe (document model, ops, schemas, sanitize).
 export * from "./document";

@@ -29,6 +29,8 @@ import { ToolRegistry } from "../tools/tool-registry";
 import type { Tool } from "../tools/tool";
 import type { Camera } from "../viewport/camera";
 import type { ClipboardPayload } from "../commands/clipboard";
+import { BindingProvider } from "../binding/context";
+import type { BindingData, FilterMap } from "../binding/resolve";
 import { CanvasContext, type CanvasContextValue } from "./context";
 import { createDocumentStore } from "./document-store";
 import { createSessionStore } from "./session-store";
@@ -68,6 +70,10 @@ export interface CanvasProviderProps {
     nodeId?: NodeId;
     error: unknown;
   }) => void;
+  /** Data context for `{{…}}` bindings — makes the design render as a live template. */
+  data?: BindingData;
+  /** Extra binding filters (merged with the built-in currency/number/date/…). */
+  filters?: FilterMap;
   apiRef?: React.Ref<CanvasApi>;
   children?: React.ReactNode;
 }
@@ -219,7 +225,11 @@ export function CanvasProvider(props: CanvasProviderProps): React.JSX.Element {
   }, [onCameraChange, ctx]);
 
   return (
-    <CanvasContext.Provider value={ctx}>{children}</CanvasContext.Provider>
+    <CanvasContext.Provider value={ctx}>
+      <BindingProvider data={props.data} filters={props.filters}>
+        {children}
+      </BindingProvider>
+    </CanvasContext.Provider>
   );
 }
 

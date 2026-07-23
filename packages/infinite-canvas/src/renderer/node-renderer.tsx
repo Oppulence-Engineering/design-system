@@ -13,6 +13,12 @@ import type { SceneNode } from "../document/nodes";
 import { assertNever } from "../document/nodes";
 import { useCanvas } from "../store/context";
 import { useChildren, useNode, useSessionStore } from "../store/hooks";
+import { useBinding } from "../binding/context";
+import {
+  resolveAttrs,
+  resolveTemplate,
+  resolveValue,
+} from "../binding/resolve";
 import { styleToCss } from "./style-to-css";
 import { NodeErrorBoundary } from "./node-error-boundary";
 import { ArtboardContext, useRectCache } from "./renderer-context";
@@ -46,6 +52,7 @@ function NodeChildren({ id }: { id: NodeId }): React.ReactNode {
 function NodeBody({ node }: { node: SceneNode }): React.ReactNode {
   const css = styleToCss(node.style);
   const register = useNodeRegistration(node.id);
+  const binding = useBinding();
 
   switch (node.type) {
     case "frame": {
@@ -88,13 +95,17 @@ function NodeBody({ node }: { node: SceneNode }): React.ReactNode {
 
     case "element": {
       const Tag = node.tag as keyof React.JSX.IntrinsicElements;
+      const attrs =
+        binding !== null
+          ? resolveAttrs(node.attrs, binding.data, binding.filters)
+          : node.attrs;
       return React.createElement(
         Tag,
         {
           ref: register,
           "data-canvas-node": node.id,
           style: css,
-          ...node.attrs,
+          ...attrs,
         },
         <NodeChildren id={node.id} />,
       );
@@ -132,8 +143,14 @@ function TextNodeBody({
   register: (el: HTMLElement | null) => void;
 }): React.ReactNode {
   const { sessionStore, documentStore } = useCanvas();
+  const binding = useBinding();
   const editing = useSessionStore((s) => s.editingTextId === node.id);
   const editorRef = React.useRef<HTMLDivElement>(null);
+  // With a data context, resolve `{{…}}` to live values; while editing, show raw template.
+  const displayText =
+    binding !== null && !editing
+      ? resolveTemplate(node.text, binding.data, binding.filters)
+      : node.text;
 
   React.useEffect(() => {
     if (editing && editorRef.current !== null) {
@@ -193,7 +210,7 @@ function TextNodeBody({
       data-node-type="text"
       style={css}
     >
-      {node.text}
+      {displayText}
     </div>
   );
 }
@@ -208,6 +225,7 @@ function ComponentNodeBody({
   register: (el: HTMLElement | null) => void;
 }): React.ReactNode {
   const { registry, onError } = useCanvas();
+  const binding = useBinding();
   const def = registry.get(node.componentKey);
 
   if (def === undefined) {
@@ -222,7 +240,12 @@ function ComponentNodeBody({
     );
   }
 
-  const parsed = def.schema.safeParse(node.props);
+  // Resolve `{{…}}` in props against the data context before validating/rendering.
+  const props =
+    binding !== null
+      ? resolveValue(node.props, binding.data, binding.filters)
+      : node.props;
+  const parsed = def.schema.safeParse(props);
   if (!parsed.success) {
     return (
       <div
