@@ -49,6 +49,9 @@ export interface SessionState {
     length: number;
     horizontal: boolean;
   } | null;
+  /** When true, a click on the canvas drops a review comment pin instead of selecting. */
+  commentMode: boolean;
+  commentAuthor: { name: string; color: string } | null;
 
   setCamera: (camera: Camera) => void;
   panBy: (dx: number, dy: number) => void;
@@ -65,6 +68,10 @@ export interface SessionState {
   setSnapping: (snapping: Partial<SessionState["snapping"]>) => void;
   setSnapGuides: (guides: readonly SnapGuide[]) => void;
   setDropIndicator: (indicator: SessionState["dropIndicator"]) => void;
+  setCommentMode: (
+    on: boolean,
+    author?: { name: string; color: string },
+  ) => void;
 }
 
 /** A snap guide line in canvas space (either fully vertical or fully horizontal). */
@@ -97,6 +104,8 @@ export function createSessionStore(
     snapping: { enabled: true, threshold: 6 },
     snapGuides: [],
     dropIndicator: null,
+    commentMode: false,
+    commentAuthor: null,
 
     setCamera: (camera) =>
       set({ camera: { ...camera, zoom: clampZoom(camera.zoom) } }),
@@ -132,5 +141,7 @@ export function createSessionStore(
       set({ snapping: { ...get().snapping, ...snapping } }),
     setSnapGuides: (snapGuides) => set({ snapGuides: [...snapGuides] }),
     setDropIndicator: (dropIndicator) => set({ dropIndicator }),
+    setCommentMode: (commentMode, author) =>
+      set({ commentMode, commentAuthor: author ?? get().commentAuthor }),
   }));
 }

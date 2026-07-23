@@ -99,6 +99,11 @@ export {
 } from "./viewport/camera";
 export type { Point, Rect, Size } from "./viewport/geometry";
 
+// Review comments
+export { useComments } from "./comments/hooks";
+export type { CommentsApi } from "./comments/hooks";
+export type { Comment, CommentReply } from "./comments/store";
+
 // Data binding (templates)
 export {
   DEFAULT_FILTERS,

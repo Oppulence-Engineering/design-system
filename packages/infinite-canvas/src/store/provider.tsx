@@ -31,6 +31,7 @@ import type { Camera } from "../viewport/camera";
 import type { ClipboardPayload } from "../commands/clipboard";
 import { BindingProvider } from "../binding/context";
 import type { BindingData, FilterMap } from "../binding/resolve";
+import { createCommentsStore, type Comment } from "../comments/store";
 import { CanvasContext, type CanvasContextValue } from "./context";
 import { createDocumentStore } from "./document-store";
 import { createSessionStore } from "./session-store";
@@ -74,6 +75,9 @@ export interface CanvasProviderProps {
   data?: BindingData;
   /** Extra binding filters (merged with the built-in currency/number/date/…). */
   filters?: FilterMap;
+  /** Seed review comments (consumer-persisted). */
+  initialComments?: readonly Comment[];
+  onCommentsChange?: (comments: Comment[]) => void;
   apiRef?: React.Ref<CanvasApi>;
   children?: React.ReactNode;
 }
@@ -100,6 +104,9 @@ export function CanvasProvider(props: CanvasProviderProps): React.JSX.Element {
   const clientIdRef = React.useRef<ClientId>(asClientId(idFactory.clientId()));
   const clipboardRef = React.useRef<ClipboardPayload | null>(null);
   const viewportBridge = React.useRef<ViewportBridge | null>(null);
+  const commentsBundleRef = React.useRef<ReturnType<
+    typeof createCommentsStore
+  > | null>(null);
   const statusRef = React.useRef<CanvasStatus>(
     collab === undefined ? "ready" : "syncing",
   );
@@ -123,6 +130,8 @@ export function CanvasProvider(props: CanvasProviderProps): React.JSX.Element {
           : { x: 0, y: 0, zoom: 1 },
     });
     const presenceStore = createPresenceStore();
+    const commentsBundle = createCommentsStore(props.initialComments);
+    commentsBundleRef.current = commentsBundle;
     const toolRegistry = new ToolRegistry(tools);
     const api = createCanvasApi({
       documentStore,
@@ -136,6 +145,7 @@ export function CanvasProvider(props: CanvasProviderProps): React.JSX.Element {
       documentStore,
       sessionStore,
       presenceStore,
+      commentsStore: commentsBundle.store,
       handle,
       registry,
       toolRegistry,
@@ -223,6 +233,23 @@ export function CanvasProvider(props: CanvasProviderProps): React.JSX.Element {
       if (state.camera !== prev.camera) onCameraChange(state.camera);
     });
   }, [onCameraChange, ctx]);
+
+  // --- comments: persist changes + default author from `self` ---
+  React.useEffect(() => {
+    if (self !== undefined) {
+      ctx.sessionStore
+        .getState()
+        .setCommentMode(false, { name: self.name, color: self.color });
+    }
+  }, [self, ctx]);
+  React.useEffect(() => {
+    if (
+      props.onCommentsChange === undefined ||
+      commentsBundleRef.current === null
+    )
+      return;
+    return commentsBundleRef.current.onChange(props.onCommentsChange);
+  }, [props.onCommentsChange, ctx]);
 
   return (
     <CanvasContext.Provider value={ctx}>

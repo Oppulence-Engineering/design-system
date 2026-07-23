@@ -19,6 +19,7 @@ import { canvasRectToScreen, canvasToScreen } from "../viewport/camera";
 import type { Rect } from "../viewport/geometry";
 import { useRectCache } from "./renderer-context";
 import { TransformHandles } from "./transform-handles";
+import { CommentPins } from "../comments/pins";
 
 export function Overlay(): React.JSX.Element {
   const { documentStore } = useCanvas();
@@ -169,6 +170,7 @@ export function Overlay(): React.JSX.Element {
         })()}
 
       <TransformHandles />
+      <CommentPins />
 
       {peers.map((peer) =>
         peer.cursor === null ? null : (
