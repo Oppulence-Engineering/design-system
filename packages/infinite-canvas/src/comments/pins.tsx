@@ -131,8 +131,8 @@ function Pin({
             top: 32,
             left: 0,
             width: 220,
-            background: "#fff",
-            border: "1px solid #e4e4e7",
+            background: "var(--ic-artboard-bg, #fff)",
+            border: "1px solid var(--ic-border, #e4e4e7)",
             borderRadius: 8,
             boxShadow: "0 4px 16px rgba(0,0,0,0.15)",
             padding: 10,
@@ -147,7 +147,10 @@ function Pin({
             <div style={{ marginBottom: 6 }}>{comment.body}</div>
           ) : null}
           {comment.replies.map((r) => (
-            <div key={r.id} style={{ marginBottom: 4, color: "#334155" }}>
+            <div
+              key={r.id}
+              style={{ marginBottom: 4, color: "var(--ic-muted, #334155)" }}
+            >
               <strong>{r.author.name}: </strong>
               {r.body}
             </div>
@@ -165,7 +168,7 @@ function Pin({
                   boxSizing: "border-box",
                   font: "13px system-ui",
                   padding: 6,
-                  border: "1px solid #e4e4e7",
+                  border: "1px solid var(--ic-border, #e4e4e7)",
                   borderRadius: 6,
                 }}
               />
@@ -177,7 +180,7 @@ function Pin({
                   padding: "4px 10px",
                   borderRadius: 6,
                   border: "none",
-                  background: "#3b82f6",
+                  background: "var(--ic-accent, #3b82f6)",
                   color: "#fff",
                   cursor: "pointer",
                 }}
@@ -192,8 +195,8 @@ function Pin({
                 marginTop: 4,
                 padding: "3px 8px",
                 borderRadius: 6,
-                border: "1px solid #e4e4e7",
-                background: "#fff",
+                border: "1px solid var(--ic-border, #e4e4e7)",
+                background: "var(--ic-artboard-bg, #fff)",
                 cursor: "pointer",
                 font: "12px system-ui",
               }}

@@ -31,6 +31,7 @@ import type { Camera } from "../viewport/camera";
 import type { ClipboardPayload } from "../commands/clipboard";
 import { BindingProvider } from "../binding/context";
 import type { BindingData, FilterMap } from "../binding/resolve";
+import { themeToCssVars, type CanvasTheme } from "../theme/theme";
 import { createCommentsStore, type Comment } from "../comments/store";
 import { createBlockStore, type Block } from "../blocks/store";
 import { CanvasContext, type CanvasContextValue } from "./context";
@@ -82,6 +83,8 @@ export interface CanvasProviderProps {
   /** Seed the block/template library (consumer-persisted). */
   initialBlocks?: readonly Block[];
   onBlocksChange?: (blocks: Block[]) => void;
+  /** Brand the canvas chrome. Sets `--ic-*` tokens; falls back to design-system `--color-*`. */
+  theme?: CanvasTheme;
   apiRef?: React.Ref<CanvasApi>;
   children?: React.ReactNode;
 }
@@ -266,10 +269,19 @@ export function CanvasProvider(props: CanvasProviderProps): React.JSX.Element {
     return blockBundleRef.current.onChange(props.onBlocksChange);
   }, [props.onBlocksChange, ctx]);
 
+  // Theme tokens cascade to the canvas AND panels via a display:contents wrapper (custom
+  // properties inherit through it without affecting the consumer's layout).
+  const themeVars = React.useMemo(
+    () => themeToCssVars(props.theme),
+    [props.theme],
+  );
+
   return (
     <CanvasContext.Provider value={ctx}>
       <BindingProvider data={props.data} filters={props.filters}>
-        {children}
+        <div data-canvas-theme="" style={{ display: "contents", ...themeVars }}>
+          {children}
+        </div>
       </BindingProvider>
     </CanvasContext.Provider>
   );

@@ -144,6 +144,33 @@ the Hocuspocus server's CRDT bytea is authoritative; JSON `onDocumentChange` sav
 derived read-model. Corinthian (no CRDT infra) implements `PresenceAdapter` only over its
 own transport and keeps `NullCollabAdapter`.
 
+## Theming
+
+The canvas chrome (selection, handles, marquee, grid, panels, comment pins) is driven by
+`--ic-*` CSS variables whose **defaults map to the design-system `--color-*` tokens** — so
+an app that already ships the design system themes the canvas automatically. Three ways to
+brand it, in order of convenience:
+
+```tsx
+// 1. Programmatic — a theme object (sets the tokens inline; cascades to canvas + panels)
+<CanvasProvider theme={{ accent: "#7c3aed", canvasBackground: "#faf5ff", gridColor: "#e9d5ff", showGrid: true }} … />
+```
+
+```css
+/* 2. CSS — override any token in your own stylesheet, scoped however you like */
+.my-canvas-shell {
+  --ic-accent: #7c3aed;
+  --ic-canvas-bg: #faf5ff;
+}
+```
+
+3. **Nothing** — if your app already sets the design-system `--color-primary` / `--color-border`
+   / `--color-background` variables, the canvas inherits them out of the box.
+
+Tokens: `--ic-accent`, `--ic-accent-fade`, `--ic-canvas-bg`, `--ic-artboard-bg`, `--ic-border`,
+`--ic-muted`, `--ic-error`, `--ic-snap`, `--ic-grid`, `--ic-font`, `--ic-handle-size`. See the
+**Canvas/Theming** story for grape/emerald/midnight examples.
+
 ## Security
 
 Documents are **untrusted** (in collab, other users author them). `sanitizeNode` runs at

@@ -5,6 +5,11 @@
  * Import once: `import "@oppulence/infinite-canvas/styles.css"`.
  */
 
+/*
+ * Theme tokens. Defaults map to the design-system `--color-*` variables, so an app that
+ * ships the design system themes the canvas automatically. Override any of these in your
+ * own CSS, or pass a `theme` prop to <CanvasProvider> (which sets them inline).
+ */
 :root {
   --ic-canvas-bg: var(--color-muted, #f4f4f5);
   --ic-artboard-bg: var(--color-background, #ffffff);
@@ -15,6 +20,8 @@
   --ic-muted: var(--color-muted-foreground, #71717a);
   --ic-error: var(--color-destructive, #e5484d);
   --ic-error-bg: color-mix(in srgb, var(--ic-error) 8%, transparent);
+  --ic-grid: color-mix(in srgb, var(--ic-border) 60%, transparent);
+  --ic-font: var(--font-sans, system-ui), -apple-system, sans-serif;
   --ic-handle-size: 8px;
 }
 
@@ -24,12 +31,7 @@
   touch-action: none;
   outline: none;
   background:
-    radial-gradient(
-        circle,
-        color-mix(in srgb, var(--ic-border) 60%, transparent) 1px,
-        transparent 1px
-      )
-      0 0 / 24px 24px,
+    radial-gradient(circle, var(--ic-grid) 1px, transparent 1px) 0 0 / 24px 24px,
     var(--ic-canvas-bg);
   user-select: none;
 }

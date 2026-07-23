@@ -121,6 +121,10 @@ export type {
   ResponsivePreviewProps,
 } from "./responsive/index";
 
+// Theming
+export { themeToCssVars } from "./theme/theme";
+export type { CanvasTheme } from "./theme/theme";
+
 // Design linting (a11y / contrast)
 export {
   contrastRatio,
