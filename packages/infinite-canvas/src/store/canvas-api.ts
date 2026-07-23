@@ -27,7 +27,11 @@ import {
 } from "../viewport/geometry";
 import type { ClipboardPayload } from "../commands/clipboard";
 import * as commands from "../commands/edit-commands";
-import type { CommandContext } from "../commands/edit-commands";
+import type {
+  AlignEdge,
+  CommandContext,
+  DistributeAxis,
+} from "../commands/edit-commands";
 import type { DocumentStoreState } from "./document-store";
 import type { SessionState } from "./session-store";
 
@@ -70,6 +74,8 @@ export interface CanvasApi {
     sendBackward(ids?: readonly NodeId[]): void;
     bringToFront(ids?: readonly NodeId[]): void;
     sendToBack(ids?: readonly NodeId[]): void;
+    align(edge: AlignEdge, ids?: readonly NodeId[]): void;
+    distribute(axis: DistributeAxis, ids?: readonly NodeId[]): void;
     selectAll(): void;
   };
   apply(ops: readonly CanvasOperation[]): void;
@@ -212,6 +218,8 @@ export function createCanvasApi(deps: CanvasApiDeps): CanvasApi {
       sendBackward: (ids) => commands.sendBackward(commandContext, ids),
       bringToFront: (ids) => commands.bringToFront(commandContext, ids),
       sendToBack: (ids) => commands.sendToBack(commandContext, ids),
+      align: (edge, ids) => commands.align(commandContext, edge, ids),
+      distribute: (axis, ids) => commands.distribute(commandContext, axis, ids),
       selectAll: () => commands.selectAll(commandContext),
     },
 

@@ -17,6 +17,12 @@ import {
   type ReactExportResult,
 } from "./to-react";
 import { downloadTextFile, printHtmlDocument } from "./print";
+import {
+  exportToSvg,
+  rasterizeSvg,
+  type RasterOptions,
+  type SvgExportOptions,
+} from "./to-image";
 
 export {
   exportToHtml,
@@ -28,6 +34,8 @@ export type { HtmlExportOptions } from "./to-html";
 export { exportToReact } from "./to-react";
 export type { ReactExportOptions, ReactExportResult } from "./to-react";
 export { printHtmlDocument, downloadTextFile } from "./print";
+export { exportToSvg, rasterizeSvg } from "./to-image";
+export type { SvgExportOptions, RasterOptions } from "./to-image";
 
 /** Pagination options for print/PDF. */
 export interface PdfOptions {
@@ -52,6 +60,19 @@ export interface CanvasExport {
   printPdf: (artboardId?: NodeId, pdf?: PdfOptions) => void;
   downloadHtml: (artboardId?: NodeId, filename?: string) => void;
   downloadReact: (artboardId?: NodeId, filename?: string) => void;
+  /** Serialize an artboard to an SVG string (binding-resolved, lossless, server-safe shape). */
+  toSvg: (artboardId?: NodeId, opts?: SvgExportOptions) => string;
+  /** Rasterize an artboard to a PNG/JPEG/WebP Blob (browser-only; rejects on tainted canvas). */
+  toImageBlob: (
+    artboardId?: NodeId,
+    opts?: SvgExportOptions & RasterOptions,
+  ) => Promise<Blob>;
+  downloadSvg: (artboardId?: NodeId, filename?: string) => void;
+  downloadImage: (
+    artboardId?: NodeId,
+    filename?: string,
+    opts?: SvgExportOptions & RasterOptions,
+  ) => Promise<void>;
 }
 
 /** Export the current document (respecting the active data-binding context). */
@@ -96,6 +117,47 @@ export function useCanvasExport(): CanvasExport {
           artboardId,
         );
         downloadTextFile(filename, code, "text/plain");
+      },
+      toSvg: (artboardId, opts) =>
+        exportToSvg(documentStore.getState().document, artboardId, {
+          data: binding?.data,
+          filters: binding?.filters,
+          ...opts,
+        }),
+      toImageBlob: (artboardId, opts) =>
+        rasterizeSvg(
+          exportToSvg(documentStore.getState().document, artboardId, {
+            data: binding?.data,
+            filters: binding?.filters,
+            ...opts,
+          }),
+          opts ?? {},
+        ),
+      downloadSvg: (artboardId, filename = "design.svg") => {
+        const svg = exportToSvg(documentStore.getState().document, artboardId, {
+          data: binding?.data,
+          filters: binding?.filters,
+        });
+        downloadTextFile(filename, svg, "image/svg+xml");
+      },
+      downloadImage: async (artboardId, filename = "design.png", opts) => {
+        const blob = await rasterizeSvg(
+          exportToSvg(documentStore.getState().document, artboardId, {
+            data: binding?.data,
+            filters: binding?.filters,
+            ...opts,
+          }),
+          opts ?? {},
+        );
+        if (typeof document === "undefined") return;
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
       },
     };
   }, [documentStore, binding]);

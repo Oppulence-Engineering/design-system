@@ -11,6 +11,7 @@ import type { CanvasOperation } from "../operations/operations";
 import { ROOT_PARENT, type IdFactory, type NodeId } from "../document/ids";
 import { asNodeId } from "../document/ids";
 import type { GroupNode, SceneNode } from "../document/nodes";
+import type { Dimension } from "../document/styles";
 import { generateKeyBetween } from "../document/fractional-index";
 import {
   CLIPBOARD_MIME,
@@ -312,6 +313,139 @@ export const bringToFront = (ctx: CommandContext, ids?: readonly NodeId[]) =>
   reorder(ctx, "front", ids);
 export const sendToBack = (ctx: CommandContext, ids?: readonly NodeId[]) =>
   reorder(ctx, "back", ids);
+
+/* ---------- Align & distribute (§14b) ---------- */
+
+export type AlignEdge =
+  | "left"
+  | "hcenter"
+  | "right"
+  | "top"
+  | "vcenter"
+  | "bottom";
+export type DistributeAxis = "horizontal" | "vertical";
+
+interface PositionedNode {
+  id: NodeId;
+  kind: "frame" | "absolute";
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+/** px value of a Dimension, or null for %/auto/rem/etc. (align works in canvas px). */
+function pxOf(dim: Dimension | undefined): number | null {
+  if (dim === undefined) return null;
+  if (typeof dim === "number") return dim;
+  return dim.unit === "px" ? dim.value : null;
+}
+
+/**
+ * Nodes align/distribute can move: root artboards (stored geometry) and absolute children
+ * with fully-resolvable px geometry. Flow children (no stored position) and %/auto sizes
+ * are skipped — CSS layout already positions those.
+ */
+function collectPositioned(
+  state: CanvasState,
+  selection: readonly NodeId[],
+): PositionedNode[] {
+  const out: PositionedNode[] = [];
+  for (const id of selection) {
+    const node = state.document.nodes[id];
+    if (node === undefined || node.locked) continue;
+    if (node.type === "frame" && node.parentId === null) {
+      out.push({
+        id,
+        kind: "frame",
+        x: node.x,
+        y: node.y,
+        width: node.width,
+        height: node.height,
+      });
+    } else if (node.style.position === "absolute") {
+      const x = pxOf(node.style.left);
+      const y = pxOf(node.style.top);
+      const width = pxOf(node.style.width);
+      const height = pxOf(node.style.height);
+      if (x !== null && y !== null && width !== null && height !== null)
+        out.push({ id, kind: "absolute", x, y, width, height });
+    }
+  }
+  return out;
+}
+
+function moveOp(p: PositionedNode, x: number, y: number): CanvasOperation {
+  const rx = Math.round(x);
+  const ry = Math.round(y);
+  return p.kind === "frame"
+    ? { type: "set-node-geometry", nodeId: p.id, x: rx, y: ry }
+    : {
+        type: "set-node-style",
+        nodeId: p.id,
+        set: { left: rx, top: ry },
+        unset: [],
+      };
+}
+
+/** Align the selection's positioned nodes to a shared edge/center of their union bbox. */
+export function align(
+  ctx: CommandContext,
+  edge: AlignEdge,
+  ids?: readonly NodeId[],
+): void {
+  const state = ctx.getState();
+  const nodes = collectPositioned(state, ids ?? ctx.getSelection());
+  if (nodes.length < 2) return;
+  const minX = Math.min(...nodes.map((n) => n.x));
+  const maxX = Math.max(...nodes.map((n) => n.x + n.width));
+  const minY = Math.min(...nodes.map((n) => n.y));
+  const maxY = Math.max(...nodes.map((n) => n.y + n.height));
+  const cx = (minX + maxX) / 2;
+  const cy = (minY + maxY) / 2;
+  const ops: CanvasOperation[] = [];
+  for (const n of nodes) {
+    let { x, y } = n;
+    if (edge === "left") x = minX;
+    else if (edge === "right") x = maxX - n.width;
+    else if (edge === "hcenter") x = cx - n.width / 2;
+    else if (edge === "top") y = minY;
+    else if (edge === "bottom") y = maxY - n.height;
+    else if (edge === "vcenter") y = cy - n.height / 2;
+    if (Math.round(x) !== Math.round(n.x) || Math.round(y) !== Math.round(n.y))
+      ops.push(moveOp(n, x, y));
+  }
+  if (ops.length > 0) ctx.apply(ops);
+}
+
+/** Distribute positioned nodes with equal gaps along an axis (ends fixed). */
+export function distribute(
+  ctx: CommandContext,
+  axis: DistributeAxis,
+  ids?: readonly NodeId[],
+): void {
+  const state = ctx.getState();
+  const nodes = collectPositioned(state, ids ?? ctx.getSelection());
+  if (nodes.length < 3) return;
+  const horizontal = axis === "horizontal";
+  const size = (n: PositionedNode) => (horizontal ? n.width : n.height);
+  const pos = (n: PositionedNode) => (horizontal ? n.x : n.y);
+  const sorted = [...nodes].sort((a, b) => pos(a) - pos(b));
+  const start = pos(sorted[0]!);
+  const lastNode = sorted[sorted.length - 1]!;
+  const end = pos(lastNode) + size(lastNode);
+  const totalSize = sorted.reduce((s, n) => s + size(n), 0);
+  const gap = (end - start - totalSize) / (sorted.length - 1);
+  const ops: CanvasOperation[] = [];
+  let cursor = start;
+  for (const n of sorted) {
+    const target = cursor;
+    if (Math.round(target) !== Math.round(pos(n)))
+      ops.push(horizontal ? moveOp(n, target, n.y) : moveOp(n, n.x, target));
+    cursor += size(n) + gap;
+  }
+  if (ops.length > 0) ctx.apply(ops);
+}
 
 /** Select all nodes in the current artboard scope (or all top-level artboards). */
 export function selectAll(ctx: CommandContext): void {

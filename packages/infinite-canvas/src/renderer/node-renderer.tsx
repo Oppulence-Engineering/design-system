@@ -28,6 +28,7 @@ import {
   resolveValue,
 } from "../binding/resolve";
 import { resolveNodeStyle, stylesFromMeta } from "../styles-lib/resolve";
+import { BoundRichText, RichTextEditor } from "./rich-text";
 import { styleToCss } from "./style-to-css";
 import { NodeErrorBoundary } from "./node-error-boundary";
 import {
@@ -209,67 +210,30 @@ function TextNodeBody({
   css: React.CSSProperties;
   register: (el: HTMLElement | null) => void;
 }): React.ReactNode {
-  const { sessionStore, documentStore } = useCanvas();
   const binding = useBinding();
   const editing = useSessionStore((s) => s.editingTextId === node.id);
-  const editorRef = React.useRef<HTMLDivElement>(null);
-  // With a data context, resolve `{{…}}` to live values; while editing, show raw template.
-  const displayText =
-    binding !== null && !editing
-      ? resolveTemplate(node.text, binding.data, binding.filters)
-      : node.text;
 
-  React.useEffect(() => {
-    if (editing && editorRef.current !== null) {
-      editorRef.current.focus();
-      // Place caret at end.
-      const range = document.createRange();
-      range.selectNodeContents(editorRef.current);
-      range.collapse(false);
-      const sel = window.getSelection();
-      sel?.removeAllRanges();
-      sel?.addRange(range);
-    }
-  }, [editing]);
+  // Rich editing/display when a rich value is present (or once the user formats a plain node).
+  if (editing) return <RichTextEditor node={node} css={css} />;
 
-  if (editing) {
-    // Uncontrolled contentEditable — reconciling `text` mid-edit would break IME.
-    const commit = () => {
-      const value = editorRef.current?.innerText ?? node.text;
-      sessionStore.getState().setEditingText(null);
-      if (value !== node.text) {
-        sessionStore.getState().setSelection([node.id]);
-        documentStore
-          .getState()
-          .apply([{ type: "set-text", nodeId: node.id, text: value }]);
-      }
-    };
+  if (node.rich !== undefined) {
     return (
       <div
-        ref={editorRef}
+        ref={register}
         data-canvas-node={node.id}
         data-node-type="text"
-        contentEditable
-        suppressContentEditableWarning
-        onBlur={commit}
-        onKeyDown={(e) => {
-          if (e.key === "Escape" || (e.key === "Enter" && !e.shiftKey)) {
-            e.preventDefault();
-            commit();
-          }
-        }}
-        style={{
-          ...css,
-          pointerEvents: "auto",
-          outline: "1px solid var(--ic-accent, #3b82f6)",
-          cursor: "text",
-        }}
+        style={css}
       >
-        {node.text}
+        <BoundRichText rich={node.rich} />
       </div>
     );
   }
 
+  // Plain text: resolve `{{…}}` to live values when a data context is present.
+  const displayText =
+    binding !== null
+      ? resolveTemplate(node.text, binding.data, binding.filters)
+      : node.text;
   return (
     <div
       ref={register}

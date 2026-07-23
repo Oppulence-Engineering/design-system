@@ -40,6 +40,34 @@ export const operationSchema = z.discriminatedUnion("type", [
   }),
   z.object({ type: z.literal("set-text"), nodeId, text: z.string() }),
   z.object({
+    type: z.literal("set-rich-text"),
+    nodeId,
+    rich: z
+      .array(
+        z.looseObject({
+          type: z.enum(["paragraph", "h1", "h2", "h3", "list-item"]),
+          align: z.enum(["left", "center", "right"]).optional(),
+          runs: z.array(
+            z.looseObject({
+              text: z.string(),
+              marks: z
+                .looseObject({
+                  bold: z.boolean().optional(),
+                  italic: z.boolean().optional(),
+                  underline: z.boolean().optional(),
+                  strike: z.boolean().optional(),
+                  code: z.boolean().optional(),
+                  link: z.string().optional(),
+                  color: z.string().optional(),
+                })
+                .optional(),
+            }),
+          ),
+        }),
+      )
+      .nullable(),
+  }),
+  z.object({
     type: z.literal("set-node-flags"),
     nodeId,
     name: z.string().optional(),

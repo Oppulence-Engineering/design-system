@@ -6,6 +6,7 @@
 
 import type { NodeId } from "./ids";
 import type { JsonValue } from "./json";
+import type { RichText } from "./rich-text";
 import type { NodeStyle } from "./styles";
 
 /** Curated safe HTML tag subset. Interactive/dangerous tags (input/iframe/script/base/meta/object/embed) are excluded from v1. */
@@ -85,10 +86,15 @@ export interface ElementNode extends SceneNodeBase {
   style: NodeStyle;
 }
 
-/** A plain-text node (rich text is a future schema version). */
+/**
+ * A text node. `text` is always the plain-text value; `rich` (optional) is a typed
+ * block/inline model that overrides it for display/edit/export when present, with `text`
+ * kept in sync as a lossless fallback (search, plain export, older readers).
+ */
 export interface TextNode extends SceneNodeBase {
   type: "text";
   text: string;
+  rich?: RichText;
   style: NodeStyle;
 }
 

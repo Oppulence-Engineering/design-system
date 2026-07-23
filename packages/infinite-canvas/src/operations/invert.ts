@@ -83,6 +83,16 @@ function invertOne(
       return { type: "set-text", nodeId: op.nodeId, text: prev.text };
     }
 
+    case "set-rich-text": {
+      const prev = nodes[op.nodeId];
+      if (prev === undefined || prev.type !== "text") return null;
+      return {
+        type: "set-rich-text",
+        nodeId: op.nodeId,
+        rich: prev.rich ?? null,
+      };
+    }
+
     case "set-node-flags": {
       const prev = nodes[op.nodeId];
       if (prev === undefined) return null;

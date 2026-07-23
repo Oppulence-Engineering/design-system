@@ -42,6 +42,20 @@ export type {
 } from "./nodes";
 export { assertNever, HTML_TAGS, isArtboard } from "./nodes";
 export type {
+  RichAlign,
+  RichBlock,
+  RichBlockType,
+  RichMarks,
+  RichRun,
+  RichText,
+} from "./rich-text";
+export {
+  blockTag,
+  marksToCss,
+  RICH_BLOCK_TYPES,
+  richToPlainText,
+} from "./rich-text";
+export type {
   BorderStyle,
   BoxEdges,
   CompoundStyleKey,
