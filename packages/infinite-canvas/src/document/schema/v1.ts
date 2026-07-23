@@ -37,6 +37,9 @@ const baseFields = {
   visible: z.boolean(),
   locked: z.boolean(),
   rotation: z.number(),
+  visibleWhen: z.string().optional(),
+  repeat: z.string().optional(),
+  repeatAs: z.string().optional(),
 };
 
 const frameNode = z.looseObject({

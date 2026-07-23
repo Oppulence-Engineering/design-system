@@ -82,6 +82,13 @@ function applyToNodes(nodes: NodeMap, op: NodeOp): NodeMap {
       if (op.locked !== undefined) next.locked = op.locked;
       if (op.clipsContent !== undefined && next.type === "frame")
         next.clipsContent = op.clipsContent;
+      // Binding directives — "" clears the directive back to a static node.
+      if (op.visibleWhen !== undefined)
+        next.visibleWhen = op.visibleWhen === "" ? undefined : op.visibleWhen;
+      if (op.repeat !== undefined)
+        next.repeat = op.repeat === "" ? undefined : op.repeat;
+      if (op.repeatAs !== undefined)
+        next.repeatAs = op.repeatAs === "" ? undefined : op.repeatAs;
       return withKey<SceneNode>(nodes, op.nodeId, next);
     }
 

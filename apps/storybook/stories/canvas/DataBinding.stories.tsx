@@ -34,7 +34,7 @@ function templateDoc(): CanvasDocument {
       x: 0,
       y: 0,
       width: 420,
-      height: 460,
+      height: 640,
       clipsContent: true,
       style: {
         display: "flex",
@@ -76,6 +76,53 @@ function templateDoc(): CanvasDocument {
         background: { type: "solid", color: "#e2e8f0" },
         margin: { top: 8, bottom: 8, left: 0, right: 0 },
       },
+    } as never),
+    // Line items — a row that REPEATS over invoice.items (a variable-length list).
+    base({
+      type: "frame",
+      id: "rows" as never,
+      parentId: "inv" as never,
+      x: 0,
+      y: 0,
+      width: 0,
+      height: 0,
+      clipsContent: false,
+      style: { display: "flex", flexDirection: "column", gap: 4 },
+    } as never),
+    base({
+      type: "frame",
+      id: "row" as never,
+      parentId: "rows" as never,
+      repeat: "invoice.items",
+      x: 0,
+      y: 0,
+      width: 0,
+      height: 0,
+      clipsContent: false,
+      style: { display: "flex", justifyContent: "space-between" },
+    } as never),
+    base({
+      type: "text",
+      id: "row-desc" as never,
+      parentId: "row" as never,
+      text: "{{item.qty}}× {{item.description}}",
+      style: { fontSize: 14, color: "#0f172a" },
+    } as never),
+    base({
+      type: "text",
+      id: "row-amt" as never,
+      parentId: "row" as never,
+      text: "{{item.amount | currency}}",
+      style: { fontSize: 14, fontWeight: 600, color: "#0f172a" },
+    } as never),
+    // Conditional — only shows when there's a discount.
+    base({
+      type: "text",
+      id: "discount" as never,
+      parentId: "inv" as never,
+      visibleWhen: "invoice.discount",
+      text: "Discount applied: −{{invoice.discount | currency}}",
+      style: { fontSize: 13, color: "#059669" },
     } as never),
     base({
       type: "text",
@@ -125,6 +172,12 @@ const DATASETS = {
       total: 12400,
       date: "2026-01-15",
       status: "paid",
+      discount: 0,
+      items: [
+        { qty: 2, description: "Design sprint", amount: 6000 },
+        { qty: 1, description: "Consulting", amount: 4400 },
+        { qty: 4, description: "Support hours", amount: 2000 },
+      ],
     },
     customer: { name: "Acme Corp" },
   },
@@ -134,6 +187,11 @@ const DATASETS = {
       total: 8750.5,
       date: "2026-02-02",
       status: "overdue",
+      discount: 500,
+      items: [
+        { qty: 1, description: "Migration", amount: 7250.5 },
+        { qty: 3, description: "Training", amount: 2000 },
+      ],
     },
     customer: { name: "Globex Inc" },
   },
@@ -213,8 +271,12 @@ export const InvoiceTemplate: Story = {
       expect(canvasElement.textContent).toContain("INVOICE INV-2043");
       expect(canvasElement.textContent).toContain("$12,400.00");
       expect(canvasElement.textContent).toContain("Acme Corp");
+      // Repeater expanded all 3 line items; conditional discount hidden (0).
+      expect(canvasElement.textContent).toContain("2× Design sprint");
+      expect(canvasElement.textContent).toContain("4× Support hours");
+      expect(canvasElement.textContent).not.toContain("Discount applied");
     });
-    // Switch datasets → the same design renders different values.
+    // Switch datasets → different values, different line-item count, discount now shows.
     (
       canvasElement.querySelector(
         '[data-testid="data-Globex"]',
@@ -223,6 +285,8 @@ export const InvoiceTemplate: Story = {
     await waitFor(() => {
       expect(canvasElement.textContent).toContain("Globex Inc");
       expect(canvasElement.textContent).toContain("INV-2044");
+      expect(canvasElement.textContent).toContain("1× Migration");
+      expect(canvasElement.textContent).toContain("Discount applied");
     });
     // Raw template mode shows the {{…}} placeholders.
     (

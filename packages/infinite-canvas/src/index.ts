@@ -140,7 +140,10 @@ export type { DesignLint, LintIssue, LintSeverity } from "./lint/index";
 export {
   DEFAULT_FILTERS,
   hasBinding,
+  itemScope,
+  resolveArray,
   resolveAttrs,
+  resolveCondition,
   resolvePath,
   resolveTemplate,
   resolveValue,

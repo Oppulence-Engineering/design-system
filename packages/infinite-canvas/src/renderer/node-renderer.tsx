@@ -13,9 +13,12 @@ import type { SceneNode } from "../document/nodes";
 import { assertNever } from "../document/nodes";
 import { useCanvas } from "../store/context";
 import { useChildren, useNode, useSessionStore } from "../store/hooks";
-import { useBinding } from "../binding/context";
+import { BindingProvider, useBinding } from "../binding/context";
 import {
+  itemScope,
+  resolveArray,
   resolveAttrs,
+  resolveCondition,
   resolveTemplate,
   resolveValue,
 } from "../binding/resolve";
@@ -25,7 +28,33 @@ import { ArtboardContext, useRectCache } from "./renderer-context";
 
 export function NodeRenderer({ id }: { id: NodeId }): React.ReactNode {
   const node = useNode(id);
+  const binding = useBinding();
   if (node === undefined || !node.visible) return null;
+
+  // Data-binding directives only apply when a data context is present (§ templates);
+  // otherwise the node renders statically so the designer sees the template.
+  if (binding !== null) {
+    if (
+      node.visibleWhen !== undefined &&
+      node.visibleWhen.length > 0 &&
+      !resolveCondition(node.visibleWhen, binding.data, binding.filters)
+    ) {
+      return null;
+    }
+    if (node.repeat !== undefined && node.repeat.length > 0) {
+      const items = resolveArray(node.repeat, binding.data);
+      return items.map((item, i) => (
+        <BindingProvider
+          key={i}
+          data={itemScope(binding.data, item, i, node.repeatAs)}
+          filters={binding.filters}
+        >
+          <NodeBody node={node} />
+        </BindingProvider>
+      ));
+    }
+  }
+
   return <NodeBody node={node} />;
 }
 

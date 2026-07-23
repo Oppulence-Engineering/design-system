@@ -50,6 +50,9 @@ export interface SetNodeFlagsOp {
   visible?: boolean;
   locked?: boolean;
   clipsContent?: boolean;
+  visibleWhen?: string;
+  repeat?: string;
+  repeatAs?: string;
 }
 
 export interface SetNodeAttrsOp {

@@ -13,7 +13,10 @@ import { childrenOf } from "../operations/children-index";
 import { buildChildrenIndex } from "../operations/children-index";
 import { styleToCss } from "../renderer/style-to-css";
 import {
+  itemScope,
+  resolveArray,
   resolveAttrs,
+  resolveCondition,
   resolveTemplate,
   type BindingData,
   type FilterMap,
@@ -66,9 +69,49 @@ function nodeToHtml(
   id: NodeId,
   opts: HtmlExportOptions,
   depth: number,
+  scope: BindingData | undefined,
 ): string {
   const node: SceneNode | undefined = doc.nodes[id];
   if (node === undefined || !node.visible) return "";
+
+  // Data-binding directives (only when a data scope is present).
+  if (scope !== undefined) {
+    if (
+      node.visibleWhen !== undefined &&
+      node.visibleWhen.length > 0 &&
+      !resolveCondition(node.visibleWhen, scope, opts.filters)
+    ) {
+      return "";
+    }
+    if (node.repeat !== undefined && node.repeat.length > 0) {
+      const items = resolveArray(node.repeat, scope);
+      return items
+        .map((item, i) =>
+          nodeToHtmlBody(
+            doc,
+            index,
+            node,
+            opts,
+            depth,
+            itemScope(scope, item, i, node.repeatAs),
+          ),
+        )
+        .filter((s) => s.length > 0)
+        .join("\n");
+    }
+  }
+
+  return nodeToHtmlBody(doc, index, node, opts, depth, scope);
+}
+
+function nodeToHtmlBody(
+  doc: CanvasDocument,
+  index: ReturnType<typeof buildChildrenIndex>,
+  node: SceneNode,
+  opts: HtmlExportOptions,
+  depth: number,
+  scope: BindingData | undefined,
+): string {
   const pad = (opts.indent ?? "  ").repeat(depth);
   const cssObj = styleToCss(node.style) as Record<string, unknown>;
   // Responsive preview: render root artboards fluid at the override width.
@@ -87,8 +130,8 @@ function nodeToHtml(
     styleStr.length > 0 ? ` style="${escapeHtml(styleStr)}"` : "";
 
   const renderChildren = (): string => {
-    const kids = childrenOf(index, id)
-      .map((c) => nodeToHtml(doc, index, c, opts, depth + 1))
+    const kids = childrenOf(index, node.id)
+      .map((c) => nodeToHtml(doc, index, c, opts, depth + 1, scope))
       .filter((s) => s.length > 0);
     return kids.length > 0 ? `\n${kids.join("\n")}\n${pad}` : "";
   };
@@ -99,15 +142,15 @@ function nodeToHtml(
       return `${pad}<div${styleAttr}>${renderChildren()}</div>`;
     case "text": {
       const text =
-        opts.data !== undefined
-          ? resolveTemplate(node.text, opts.data, opts.filters)
+        scope !== undefined
+          ? resolveTemplate(node.text, scope, opts.filters)
           : node.text;
       return `${pad}<div${styleAttr}>${escapeHtml(text)}</div>`;
     }
     case "element": {
       const attrs =
-        opts.data !== undefined
-          ? resolveAttrs(node.attrs, opts.data, opts.filters)
+        scope !== undefined
+          ? resolveAttrs(node.attrs, scope, opts.filters)
           : node.attrs;
       const attrStr = Object.entries(attrs)
         .map(([k, v]) => ` ${k}="${escapeHtml(v)}"`)
@@ -134,7 +177,14 @@ export function exportToHtml(
     artboardId !== undefined ? [artboardId] : childrenOf(index, ROOT_PARENT);
   const body = roots
     .map((r) =>
-      nodeToHtml(doc, index, r, opts, opts.fullDocument === true ? 2 : 0),
+      nodeToHtml(
+        doc,
+        index,
+        r,
+        opts,
+        opts.fullDocument === true ? 2 : 0,
+        opts.data,
+      ),
     )
     .join("\n");
   if (opts.fullDocument !== true) return body;

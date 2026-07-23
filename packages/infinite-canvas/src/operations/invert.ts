@@ -95,6 +95,10 @@ function invertOne(
       if (op.locked !== undefined) inv.locked = prev.locked;
       if (op.clipsContent !== undefined && prev.type === "frame")
         inv.clipsContent = prev.clipsContent;
+      if (op.visibleWhen !== undefined)
+        inv.visibleWhen = prev.visibleWhen ?? "";
+      if (op.repeat !== undefined) inv.repeat = prev.repeat ?? "";
+      if (op.repeatAs !== undefined) inv.repeatAs = prev.repeatAs ?? "";
       return inv;
     }
 

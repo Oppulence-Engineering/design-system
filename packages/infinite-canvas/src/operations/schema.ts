@@ -46,6 +46,9 @@ export const operationSchema = z.discriminatedUnion("type", [
     visible: z.boolean().optional(),
     locked: z.boolean().optional(),
     clipsContent: z.boolean().optional(),
+    visibleWhen: z.string().optional(),
+    repeat: z.string().optional(),
+    repeatAs: z.string().optional(),
   }),
   z.object({
     type: z.literal("set-node-attrs"),

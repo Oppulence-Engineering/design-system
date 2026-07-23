@@ -30,6 +30,9 @@ export const agentCommandSchema = z.discriminatedUnion("op", [
     background: z.string().optional(),
     layout: z.enum(["row", "column", "none"]).optional(),
     style: styleObject.optional(),
+    /** Template directives: repeat over an array path, and/or show only when a path is truthy. */
+    repeat: z.string().optional(),
+    visibleWhen: z.string().optional(),
   }),
   z.object({
     op: z.literal("add-text"),
@@ -40,6 +43,7 @@ export const agentCommandSchema = z.discriminatedUnion("op", [
     fontWeight: z.number().optional(),
     color: z.string().optional(),
     style: styleObject.optional(),
+    visibleWhen: z.string().optional(),
   }),
   z.object({
     op: z.literal("add-element"),
@@ -161,6 +165,10 @@ export function compileAgentCommands(
           height: cmd.height ?? (isRoot ? 300 : 120),
           clipsContent: true,
           style,
+          ...(cmd.repeat !== undefined ? { repeat: cmd.repeat } : {}),
+          ...(cmd.visibleWhen !== undefined
+            ? { visibleWhen: cmd.visibleWhen }
+            : {}),
         };
         ops.push({ type: "insert-node", node });
         break;
@@ -191,6 +199,9 @@ export function compileAgentCommands(
           rotation: 0,
           text: cmd.text,
           style,
+          ...(cmd.visibleWhen !== undefined
+            ? { visibleWhen: cmd.visibleWhen }
+            : {}),
         };
         ops.push({ type: "insert-node", node });
         break;

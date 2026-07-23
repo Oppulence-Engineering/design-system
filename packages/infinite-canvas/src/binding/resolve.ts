@@ -134,6 +134,39 @@ export function resolveValue(
   return value;
 }
 
+/** Evaluate a `visibleWhen` expression to a boolean (falsy: undefined/null/false/0/""/[]). */
+export function resolveCondition(
+  expr: string,
+  data: BindingData,
+  filters: FilterMap = DEFAULT_FILTERS,
+): boolean {
+  // Support a leading "!" for negation.
+  const negate = expr.trim().startsWith("!");
+  const clean = negate ? expr.trim().slice(1).trim() : expr.trim();
+  const value =
+    clean.length === 0 ? undefined : applyExpression(clean, data, filters);
+  let truthy: boolean;
+  if (Array.isArray(value)) truthy = value.length > 0;
+  else truthy = Boolean(value);
+  return negate ? !truthy : truthy;
+}
+
+/** Resolve a `repeat` array path to a JS array (empty if not an array). */
+export function resolveArray(expr: string, data: BindingData): unknown[] {
+  const value = resolvePath(data, expr.trim());
+  return Array.isArray(value) ? value : [];
+}
+
+/** Build the item-scoped data for one repeat iteration (merged with the parent scope). */
+export function itemScope(
+  parent: BindingData,
+  item: unknown,
+  index: number,
+  as = "item",
+): BindingData {
+  return { ...parent, [as]: item, item, index, "@index": index };
+}
+
 /** Resolve a record of string attrs. */
 export function resolveAttrs(
   attrs: Record<string, string>,

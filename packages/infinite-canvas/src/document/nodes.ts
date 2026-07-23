@@ -47,6 +47,16 @@ export interface SceneNodeBase {
   locked: boolean;
   /** Reserved for a future version; always 0 in v1 (hit-testing is AABB-only). */
   rotation: number;
+  /**
+   * Data-binding directives (§ templates). Resolved only when a data context is present:
+   * - `visibleWhen`: a binding path; the node (and subtree) is hidden if it resolves falsy.
+   * - `repeat`: an array binding path; the node's subtree is cloned once per item, each
+   *   scoped so `{{item.*}}` / `{{index}}` (or `{{repeatAs.*}}`) resolve to that element.
+   * Empty/undefined = a normal, static node.
+   */
+  visibleWhen?: string;
+  repeat?: string;
+  repeatAs?: string;
 }
 
 /** A frame. At the root (`parentId === null`) it is an artboard with canvas-space geometry. */
