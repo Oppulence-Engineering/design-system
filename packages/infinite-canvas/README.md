@@ -95,8 +95,35 @@ save (1.5–2s) and call `getSnapshot()` at flush time only.
 | `.../panels`                 | Shipped UI: `CanvasLayersPanel`, `CanvasInspectorPanel`, `CanvasToolbar`                                      |
 | `.../collab`                 | `CollabAdapter`/`PresenceAdapter` interfaces + `NullCollabAdapter`/`LocalPresenceAdapter` (**yjs-free**)      |
 | `.../collab/yjs`             | `createYjsCanvasCollab` — the only entry that imports yjs/hocuspocus                                          |
+| `.../agent`                  | AI op-authoring: LLM-friendly commands → validated op batches, JSON-Schema tool contracts, `describeCanvas`   |
+| `.../export`                 | `exportToHtml` / `exportToReact` / PDF (`useCanvasExport`) — design → shippable code                          |
 | `.../testing`                | `createLinkedAdapterPair`, `InMemoryCollabAdapter`, document factories (**yjs-free**)                         |
 | `.../styles.css`             | Load-bearing canvas chrome                                                                                    |
+
+## Capabilities
+
+Beyond the editor, the package ships product-grade capabilities for AI/finance/invoicing use cases:
+
+- **AI op-authoring** (`./agent`) — `useAgentAuthoring()` turns an LLM's high-level commands
+  (`add-frame`/`add-text`/`add-component`/…) into validated, sanitized op batches. Hand the
+  model `agentCommandsJsonSchema()` as a tool and `describeCanvas()` as context; it builds
+  and edits designs. Guardrailed by the same sanitize boundary as human edits.
+- **Data-binding → templates** — text/attrs/props hold `{{ path | filter }}` expressions;
+  pass `data` to `CanvasProvider` and the design renders live (currency/number/date filters
+  built in). Design an invoice once, render it per-customer.
+- **Export** (`./export`) — real HTML (`exportToHtml`), a React component
+  (`exportToReact`, components stay real), or PDF via native print. Directly usable for
+  Conduitt invoice PDFs.
+- **Review comments** — `useComments()` + canvas-anchored pins with replies/resolve,
+  consumer-persisted (`initialComments`/`onCommentsChange`).
+- **Block/template library** — `useBlockLibrary()` saves a selection as a reusable,
+  id-remappable block; a shared library of invoice sections / dashboard cards.
+- **Responsive** — `<ResponsivePreview>` shows an artboard reflowing at multiple widths.
+- **Insert palette** — `<CanvasPalette>` drops frames/text/images/registered components.
+- **A11y lint** — `useDesignLint()` / `lintDocument()` flag WCAG contrast, missing alt,
+  small fonts.
+
+Every capability is demonstrated in Storybook under **Canvas/** with browser play tests.
 
 ## Collaboration
 

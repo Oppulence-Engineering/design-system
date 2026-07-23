@@ -228,7 +228,12 @@ export function CanvasRoot({
   );
 
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    e.currentTarget.setPointerCapture(e.pointerId);
+    // Synthetic / edge-case pointer events may lack an active pointer id; capture is best-effort.
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch {
+      /* no active pointer to capture */
+    }
     activeTool()?.onPointerDown?.(toPointerEvent(e), toolContext);
   };
   const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -236,8 +241,12 @@ export function CanvasRoot({
   };
   const onPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
     activeTool()?.onPointerUp?.(toPointerEvent(e), toolContext);
-    if (e.currentTarget.hasPointerCapture(e.pointerId))
-      e.currentTarget.releasePointerCapture(e.pointerId);
+    try {
+      if (e.currentTarget.hasPointerCapture(e.pointerId))
+        e.currentTarget.releasePointerCapture(e.pointerId);
+    } catch {
+      /* ignore */
+    }
   };
 
   // Double-click a text node to edit it inline.
