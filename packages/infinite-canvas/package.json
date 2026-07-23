@@ -32,6 +32,11 @@
       "import": "./src/agent/index.ts",
       "default": "./src/agent/index.ts"
     },
+    "./export": {
+      "types": "./src/export/index.ts",
+      "import": "./src/export/index.ts",
+      "default": "./src/export/index.ts"
+    },
     "./collab": {
       "types": "./src/collab/index.ts",
       "import": "./src/collab/index.ts",
