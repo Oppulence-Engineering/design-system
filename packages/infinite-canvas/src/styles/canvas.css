@@ -1,0 +1,88 @@
+/*
+ * Load-bearing canvas chrome (§1). Shipped as a CSS export so the interactive canvas
+ * never silently loses its selection UI even if a consumer forgets the Tailwind
+ * `@source` glob. Themed via design-system CSS custom properties with local fallbacks.
+ * Import once: `import "@oppulence/infinite-canvas/styles.css"`.
+ */
+
+/*
+ * Theme tokens. Defaults map to the design-system `--color-*` variables, so an app that
+ * ships the design system themes the canvas automatically. Override any of these in your
+ * own CSS, or pass a `theme` prop to <CanvasProvider> (which sets them inline).
+ */
+:root {
+  --ic-canvas-bg: var(--color-muted, #f4f4f5);
+  --ic-artboard-bg: var(--color-background, #ffffff);
+  --ic-accent: var(--color-primary, #3b82f6);
+  --ic-accent-fade: color-mix(in srgb, var(--ic-accent) 8%, transparent);
+  --ic-snap: #f43f5e;
+  --ic-border: var(--color-border, #d4d4d8);
+  --ic-muted: var(--color-muted-foreground, #71717a);
+  --ic-error: var(--color-destructive, #e5484d);
+  --ic-error-bg: color-mix(in srgb, var(--ic-error) 8%, transparent);
+  --ic-grid: color-mix(in srgb, var(--ic-border) 60%, transparent);
+  --ic-font: var(--font-sans, system-ui), -apple-system, sans-serif;
+  --ic-handle-size: 8px;
+}
+
+[data-canvas-root] {
+  position: relative;
+  overflow: hidden;
+  touch-action: none;
+  outline: none;
+  background:
+    radial-gradient(circle, var(--ic-grid) 1px, transparent 1px) 0 0 / 24px 24px,
+    var(--ic-canvas-bg);
+  user-select: none;
+}
+
+[data-canvas-content] {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: 0 0;
+  will-change: transform;
+  pointer-events: none;
+}
+
+[data-canvas-overlay] {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+[data-canvas-selection] {
+  border: 1px solid var(--ic-accent);
+  box-sizing: border-box;
+}
+
+[data-canvas-marquee] {
+  border: 1px solid var(--ic-accent);
+  background: var(--ic-accent-fade);
+}
+
+[data-canvas-handle] {
+  position: absolute;
+  width: var(--ic-handle-size);
+  height: var(--ic-handle-size);
+  background: var(--color-background, #fff);
+  border: 1px solid var(--ic-accent);
+  box-sizing: border-box;
+}
+
+[data-canvas-node-error] {
+  border: 1px solid var(--ic-error);
+  background: var(--ic-error-bg);
+  color: var(--ic-error);
+  font:
+    12px/1.4 system-ui,
+    sans-serif;
+  padding: 8px 10px;
+  border-radius: 6px;
+}
+
+/* Preview mode restores interactivity to the content. */
+[data-canvas-root][data-mode="preview"] [data-canvas-content] {
+  pointer-events: auto;
+}

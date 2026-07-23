@@ -7,6 +7,7 @@ on:
     paths:
       - 'packages/design-system/**'
       - 'packages/auth/**'
+      - 'packages/infinite-canvas/**'
   release:
     types: [published]
   workflow_dispatch:
@@ -19,7 +20,9 @@ on:
         options:
           - design-system
           - auth
+          - infinite-canvas
           - both
+          - all
       version:
         description: 'Version bump type'
         required: false
@@ -37,6 +40,7 @@ jobs:
     outputs:
       design-system: ${{ steps.filter.outputs.design-system }}
       auth: ${{ steps.filter.outputs.auth }}
+      infinite-canvas: ${{ steps.filter.outputs.infinite-canvas }}
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
@@ -47,6 +51,8 @@ jobs:
               - 'packages/design-system/**'
             auth:
               - 'packages/auth/**'
+            infinite-canvas:
+              - 'packages/infinite-canvas/**'
 
   publish-design-system:
     name: Publish @oppulence/design-system
@@ -56,6 +62,7 @@ jobs:
       github.event_name == 'release' ||
       github.event.inputs.package == 'design-system' ||
       github.event.inputs.package == 'both' ||
+      github.event.inputs.package == 'all' ||
       (github.event_name == 'push' && needs.detect-changes.outputs.design-system == 'true')
     permissions:
       contents: write
@@ -120,6 +127,7 @@ jobs:
       (
         github.event.inputs.package == 'auth' ||
         github.event.inputs.package == 'both' ||
+        github.event.inputs.package == 'all' ||
         (github.event_name == 'push' && needs.detect-changes.outputs.auth == 'true')
       )
     permissions:
@@ -184,4 +192,76 @@ jobs:
           git add packages/auth/package.json
           VERSION=$(node -p "require('./packages/auth/package.json').version")
           git commit -m "chore: bump @oppulence/auth to v${VERSION}" || echo "No changes to commit"
+          git push || echo "Nothing to push"
+
+  publish-infinite-canvas:
+    name: Publish @oppulence/infinite-canvas
+    runs-on: ubuntu-latest
+    # Serialize after the other publish jobs so the bot version-bump commits do not race
+    # on `git push` (the loser's push is silently swallowed, drifting package.json).
+    needs: [detect-changes, publish-design-system, publish-auth]
+    if: |
+      always() &&
+      (needs.publish-design-system.result == 'success' || needs.publish-design-system.result == 'skipped') &&
+      (needs.publish-auth.result == 'success' || needs.publish-auth.result == 'skipped') &&
+      (
+        github.event.inputs.package == 'infinite-canvas' ||
+        github.event.inputs.package == 'all' ||
+        (github.event_name == 'push' && needs.detect-changes.outputs.infinite-canvas == 'true')
+      )
+    permissions:
+      contents: write
+      id-token: write # npm provenance (OIDC trusted publishing)
+    defaults:
+      run:
+        working-directory: packages/infinite-canvas
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.5
+
+      - name: Setup Node.js for npm publish
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Bump version
+        env:
+          VERSION_BUMP: ${{ github.event.inputs.version || 'patch' }}
+        run: |
+          PKG_NAME=$(node -p "require('./package.json').name")
+          LOCAL=$(node -p "require('./package.json').version")
+          NPM=$(npm view "$PKG_NAME" version 2>/dev/null || echo "0.0.0")
+          BASE=$(npx --yes semver "$LOCAL" "$NPM" | tail -1)
+          NEW=$(npx --yes semver -i "$VERSION_BUMP" "$BASE")
+          npm pkg set version="$NEW"
+          echo "Local: $LOCAL, NPM: $NPM, Base: $BASE → New: $NEW"
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+        working-directory: .
+
+      - name: Run package tests (scoped)
+        run: bun run --filter @oppulence/infinite-canvas test
+
+      - name: Typecheck + import-boundary guard
+        run: bun run lint && bun run typecheck
+
+      - name: Publish to npm (with provenance)
+        run: npm publish --access public --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Commit version bump
+        working-directory: .
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git pull --rebase || true
+          git add packages/infinite-canvas/package.json
+          VERSION=$(node -p "require('./packages/infinite-canvas/package.json').version")
+          git commit -m "chore: bump @oppulence/infinite-canvas to v${VERSION}" || echo "No changes to commit"
           git push || echo "Nothing to push"

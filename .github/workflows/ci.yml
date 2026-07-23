@@ -59,6 +59,51 @@ jobs:
       - name: Run unit tests
         run: bun run --filter @comp/storybook test:unit
 
+  test-infinite-canvas:
+    name: Infinite Canvas Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.5
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Test + typecheck + import-boundary guard
+        run: |
+          bun run --filter @oppulence/infinite-canvas lint
+          bun run --filter @oppulence/infinite-canvas typecheck
+          bun run --filter @oppulence/infinite-canvas test
+
+  boundary-smoke-infinite-canvas:
+    name: Infinite Canvas yjs-boundary smoke
+    runs-on: ubuntu-latest
+    # Proves the yjs-free entrypoints typecheck with yjs ABSENT — the regression gate for
+    # corinthian (which never installs yjs). Uses a fixture tsconfig covering only the
+    # non-yjs entrypoints, after removing the yjs stack from node_modules.
+    defaults:
+      run:
+        working-directory: packages/infinite-canvas
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.5
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+        working-directory: .
+
+      - name: Remove the yjs stack
+        run: rm -rf ../../node_modules/yjs ../../node_modules/y-protocols ../../node_modules/@hocuspocus ../../node_modules/.bun/yjs* ../../node_modules/.bun/@hocuspocus* ../../node_modules/.bun/y-protocols*
+
+      - name: Typecheck yjs-free entrypoints
+        run: ../../node_modules/.bin/tsc -p tsconfig.boundary.json
+
   test-storybook:
     name: Storybook Tests
     runs-on: ubuntu-latest

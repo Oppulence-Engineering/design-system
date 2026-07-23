@@ -1,0 +1,15 @@
+{
+  "//": "yjs-boundary smoke fixture (§13). Typechecks ONLY the yjs-free entrypoints — the six subpaths a consumer like corinthian resolves without ever installing yjs. src/collab/yjs/** is excluded; the CI job runs this with the yjs stack removed from node_modules to prove independence.",
+  "extends": "./tsconfig.json",
+  "include": [
+    "src/index.ts",
+    "src/document/index.ts",
+    "src/headless/index.ts",
+    "src/panels/index.ts",
+    "src/collab/index.ts",
+    "src/agent/index.ts",
+    "src/export/index.ts",
+    "src/testing/index.ts"
+  ],
+  "exclude": ["node_modules", "dist", "src/collab/yjs", "**/*.test.ts", "**/*.test.tsx"]
+}
