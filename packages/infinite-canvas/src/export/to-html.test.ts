@@ -6,7 +6,7 @@ import {
   makeFrame,
   makeText,
 } from "../testing/factories";
-import { cssToInline, escapeHtml, exportToHtml } from "./to-html";
+import { cssToInline, escapeHtml, exportToHtml, renderTemplateToHtml } from "./to-html";
 import { exportToReact } from "./to-react";
 
 function invoiceDoc() {
@@ -66,6 +66,27 @@ describe("exportToHtml", () => {
     expect(cssToInline({ fontSize: "14px", marginTop: 8 })).toBe(
       "font-size: 14px; margin-top: 8px",
     );
+  });
+
+  it("paginates with @page, running header/footer, and no-break rows", () => {
+    const { doc, frameId } = invoiceDoc();
+    const html = exportToHtml(doc, frameId, {
+      fullDocument: true,
+      page: { size: "A4", margin: "18mm" },
+      runningHeader: "<b>ACME</b>",
+      runningFooter: "confidential",
+    });
+    expect(html).toContain("@page{size:A4;margin:18mm}");
+    expect(html).toContain('class="ic-running-header"');
+    expect(html).toContain("break-inside:avoid");
+    expect(html).toContain("confidential");
+  });
+
+  it("renderTemplateToHtml fills a template server-side (no browser)", () => {
+    const { doc, frameId } = invoiceDoc();
+    const html = renderTemplateToHtml(doc, { invoice: { total: 999 } }, { artboardId: frameId });
+    expect(html.startsWith("<!doctype html>")).toBe(true);
+    expect(html).toContain("Total: 999");
   });
 });
 

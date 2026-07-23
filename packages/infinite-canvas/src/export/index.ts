@@ -18,11 +18,18 @@ import {
 } from "./to-react";
 import { downloadTextFile, printHtmlDocument } from "./print";
 
-export { exportToHtml, escapeHtml, cssToInline } from "./to-html";
+export { exportToHtml, escapeHtml, cssToInline, renderTemplateToHtml } from "./to-html";
 export type { HtmlExportOptions } from "./to-html";
 export { exportToReact } from "./to-react";
 export type { ReactExportOptions, ReactExportResult } from "./to-react";
 export { printHtmlDocument, downloadTextFile } from "./print";
+
+/** Pagination options for print/PDF. */
+export interface PdfOptions {
+  page?: { size?: string; margin?: string };
+  runningHeader?: string;
+  runningFooter?: string;
+}
 
 export interface CanvasExport {
   toHtml: (artboardId?: NodeId, opts?: HtmlExportOptions) => string;
@@ -30,8 +37,8 @@ export interface CanvasExport {
     artboardId?: NodeId,
     opts?: ReactExportOptions,
   ) => ReactExportResult;
-  /** Print the artboard as a PDF (native browser print), binding-resolved with live data. */
-  printPdf: (artboardId?: NodeId) => void;
+  /** Print the artboard as a PDF (native browser print), binding-resolved with live data + pagination. */
+  printPdf: (artboardId?: NodeId, pdf?: PdfOptions) => void;
   downloadHtml: (artboardId?: NodeId, filename?: string) => void;
   downloadReact: (artboardId?: NodeId, filename?: string) => void;
 }
@@ -56,11 +63,11 @@ export function useCanvasExport(): CanvasExport {
         ),
       toReact: (artboardId, opts) =>
         exportToReact(documentStore.getState().document, artboardId, opts),
-      printPdf: (artboardId) => {
+      printPdf: (artboardId, pdf) => {
         const html = exportToHtml(
           documentStore.getState().document,
           artboardId,
-          withData({ fullDocument: true }),
+          withData({ fullDocument: true, ...pdf }),
         );
         printHtmlDocument(html);
       },

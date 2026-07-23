@@ -7,7 +7,35 @@ import {
   type CanvasDocument,
   type SceneNode,
 } from "@oppulence/infinite-canvas";
+import { useCanvasExport } from "@oppulence/infinite-canvas/export";
 import { registry } from "./fixture";
+
+/** A print button that paginates the filled invoice to a PDF (native print). */
+function PrintInvoiceButton() {
+  const exporter = useCanvasExport();
+  return (
+    <button
+      data-testid="print-invoice"
+      onClick={() =>
+        exporter.printPdf("inv" as never, {
+          page: { size: "A4", margin: "18mm" },
+          runningFooter:
+            "<div style='font:11px system-ui;color:#94a3b8;text-align:center'>Thank you for your business</div>",
+        })
+      }
+      style={{
+        padding: "4px 12px",
+        borderRadius: 6,
+        border: "1px solid #e4e4e7",
+        cursor: "pointer",
+        background: "#0f172a",
+        color: "#fff",
+      }}
+    >
+      Print PDF (paginated)
+    </button>
+  );
+}
 
 /** An invoice TEMPLATE — text/props hold {{bindings}}, resolved against a data context. */
 function templateDoc(): CanvasDocument {
@@ -247,7 +275,25 @@ function DataBindingDemo() {
         </span>
       </div>
       <CanvasProvider initialDocument={doc} registry={registry} data={data}>
-        <CanvasRoot />
+        <div
+          style={{
+            position: "relative",
+            display: "grid",
+            gridTemplateRows: "auto 1fr",
+            minHeight: 0,
+          }}
+        >
+          <div
+            style={{
+              padding: 8,
+              borderBottom: "1px solid #e4e4e7",
+              background: "#fff",
+            }}
+          >
+            <PrintInvoiceButton />
+          </div>
+          <CanvasRoot />
+        </div>
       </CanvasProvider>
     </div>
   );

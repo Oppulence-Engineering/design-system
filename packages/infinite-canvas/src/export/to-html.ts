@@ -37,6 +37,14 @@ export interface HtmlExportOptions {
    * previews at different breakpoints.
    */
   rootWidthOverride?: number;
+  /**
+   * Paginate for print/PDF (§ paginated PDF). `page` sets the CSS `@page` size/margin;
+   * repeated line-item rows get `break-inside: avoid`; running header/footer HTML repeats
+   * on every printed page (Chrome print / headless). Only applied with `fullDocument`.
+   */
+  page?: { size?: string; margin?: string };
+  runningHeader?: string;
+  runningFooter?: string;
 }
 
 const VOID_TAGS = new Set(["img", "br", "hr", "input"]);
@@ -94,6 +102,7 @@ function nodeToHtml(
             opts,
             depth,
             itemScope(scope, item, i, node.repeatAs),
+            true,
           ),
         )
         .filter((s) => s.length > 0)
@@ -101,7 +110,7 @@ function nodeToHtml(
     }
   }
 
-  return nodeToHtmlBody(doc, index, node, opts, depth, scope);
+  return nodeToHtmlBody(doc, index, node, opts, depth, scope, false);
 }
 
 function nodeToHtmlBody(
@@ -111,6 +120,7 @@ function nodeToHtmlBody(
   opts: HtmlExportOptions,
   depth: number,
   scope: BindingData | undefined,
+  isRepeatItem: boolean,
 ): string {
   const pad = (opts.indent ?? "  ").repeat(depth);
   const cssObj = styleToCss(node.style) as Record<string, unknown>;
@@ -128,6 +138,8 @@ function nodeToHtmlBody(
   const styleStr = cssToInline(cssObj);
   const styleAttr =
     styleStr.length > 0 ? ` style="${escapeHtml(styleStr)}"` : "";
+  // Repeated rows must not split across printed pages.
+  const classAttr = isRepeatItem ? ' class="ic-repeat-item"' : "";
 
   const renderChildren = (): string => {
     const kids = childrenOf(index, node.id)
@@ -139,13 +151,13 @@ function nodeToHtmlBody(
   switch (node.type) {
     case "frame":
     case "group":
-      return `${pad}<div${styleAttr}>${renderChildren()}</div>`;
+      return `${pad}<div${classAttr}${styleAttr}>${renderChildren()}</div>`;
     case "text": {
       const text =
         scope !== undefined
           ? resolveTemplate(node.text, scope, opts.filters)
           : node.text;
-      return `${pad}<div${styleAttr}>${escapeHtml(text)}</div>`;
+      return `${pad}<div${classAttr}${styleAttr}>${escapeHtml(text)}</div>`;
     }
     case "element": {
       const attrs =
@@ -156,11 +168,11 @@ function nodeToHtmlBody(
         .map(([k, v]) => ` ${k}="${escapeHtml(v)}"`)
         .join("");
       if (VOID_TAGS.has(node.tag))
-        return `${pad}<${node.tag}${styleAttr}${attrStr} />`;
-      return `${pad}<${node.tag}${styleAttr}${attrStr}>${renderChildren()}</${node.tag}>`;
+        return `${pad}<${node.tag}${classAttr}${styleAttr}${attrStr} />`;
+      return `${pad}<${node.tag}${classAttr}${styleAttr}${attrStr}>${renderChildren()}</${node.tag}>`;
     }
     case "component":
-      return `${pad}<div${styleAttr} data-component="${escapeHtml(node.componentKey)}"><!-- ${escapeHtml(node.componentKey)} --></div>`;
+      return `${pad}<div${classAttr}${styleAttr} data-component="${escapeHtml(node.componentKey)}"><!-- ${escapeHtml(node.componentKey)} --></div>`;
     default:
       return "";
   }
@@ -188,17 +200,44 @@ export function exportToHtml(
     )
     .join("\n");
   if (opts.fullDocument !== true) return body;
+
+  const paginated = opts.page !== undefined || opts.runningHeader !== undefined || opts.runningFooter !== undefined;
+  const pageCss =
+    opts.page !== undefined
+      ? `@page{size:${opts.page.size ?? "A4"};margin:${opts.page.margin ?? "20mm"}}`
+      : "";
+  // Running header/footer repeat on every printed page (position:fixed in print engines).
+  const headerCss = opts.runningHeader !== undefined ? ".ic-running-header{position:fixed;top:0;left:0;right:0}" : "";
+  const footerCss = opts.runningFooter !== undefined ? ".ic-running-footer{position:fixed;bottom:0;left:0;right:0}" : "";
+  const breakCss = paginated ? "@media print{.ic-repeat-item{break-inside:avoid;page-break-inside:avoid}}" : "";
+  const header = opts.runningHeader !== undefined ? `    <div class="ic-running-header">${opts.runningHeader}</div>\n` : "";
+  const footer = opts.runningFooter !== undefined ? `    <div class="ic-running-footer">${opts.runningFooter}</div>\n` : "";
+
   return [
     "<!doctype html>",
     '<html lang="en">',
     "  <head>",
     '    <meta charset="utf-8" />',
     `    <title>${escapeHtml(opts.title ?? doc.meta.name)}</title>`,
-    "    <style>*{box-sizing:border-box}body{margin:0;font-family:system-ui,sans-serif}</style>",
+    `    <style>*{box-sizing:border-box}body{margin:0;font-family:system-ui,sans-serif}${pageCss}${headerCss}${footerCss}${breakCss}</style>`,
     "  </head>",
     "  <body>",
-    body,
+    header + body + "\n" + footer,
     "  </body>",
     "</html>",
   ].join("\n");
+}
+
+/**
+ * Server-safe convenience: render a filled template to a standalone HTML document. Pure —
+ * call it in a Node job to batch-render thousands of invoices, then pipe the HTML to your
+ * own HTML→PDF engine (Puppeteer / WeasyPrint / Prince). No browser or React required.
+ */
+export function renderTemplateToHtml(
+  doc: CanvasDocument,
+  data: BindingData,
+  opts: Omit<HtmlExportOptions, "data" | "fullDocument"> & { artboardId?: NodeId } = {},
+): string {
+  const { artboardId, ...rest } = opts;
+  return exportToHtml(doc, artboardId, { ...rest, data, fullDocument: true });
 }
