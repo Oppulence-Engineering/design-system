@@ -5,10 +5,12 @@
  * server-safe (string only); `rasterizeSvg`/`exportToPng` are browser-only (canvas).
  *
  * Known limits (DOM-to-image is genuinely hard): fonts must be available in the rendering
- * context (embed @font-face data-URIs via `fontCss` for a headless renderer); cross-origin
- * `<img>` without CORS taints the canvas and makes PNG rasterization throw (SVG still
- * works); consumer React components are NOT included (they're runtime — use the live
- * canvas or `exportToReact`). SVG is lossless and the recommended default.
+ * context (embed @font-face data-URIs via `fontCss` for a headless renderer). External
+ * `http(s)` images are inlined as `data:` URIs before rasterizing (`inlineAssets`, default
+ * on) so fetchable (same-origin / CORS) images no longer taint the PNG canvas — only images
+ * that can't be fetched at all still taint it (SVG export is unaffected regardless). Consumer
+ * React components are NOT included (they're runtime — use the live canvas or `exportToReact`).
+ * SVG is lossless and the recommended default.
  */
 
 import type { CanvasDocument } from "../document/document";
@@ -65,6 +67,71 @@ export interface RasterOptions {
   type?: "image/png" | "image/jpeg" | "image/webp";
   /** 0–1 for jpeg/webp. */
   quality?: number;
+  /**
+   * Inline external `http(s)` assets (`<img src>`, CSS `url(...)`) referenced in the SVG as
+   * `data:` URIs before rasterizing (default **true**). This is what lets PNG export succeed:
+   * a cross-origin resource loaded straight into the offscreen canvas taints it and makes
+   * `toBlob` return null. Fetchable assets (same-origin or CORS-enabled) inline and export
+   * cleanly; unfetchable ones are left as-is (that PNG is still tainted — a browser security
+   * limit, not a bug). Set `false` to skip the fetch round-trip when you know every asset is
+   * already a data URI. SVG export itself is unaffected either way.
+   */
+  inlineAssets?: boolean;
+}
+
+/**
+ * Fetch a URL and resolve it to a `data:` URI, or `null` if it can't be fetched (cross-origin
+ * without CORS, network/decoding error). Best-effort by design — callers keep the original URL
+ * on `null` rather than failing the whole export.
+ */
+async function urlToDataUri(url: string): Promise<string | null> {
+  try {
+    const res = await fetch(url, { mode: "cors" });
+    if (!res.ok) return null;
+    const blob = await res.blob();
+    return await new Promise<string | null>((resolve) => {
+      const reader = new FileReader();
+      reader.onload = () =>
+        resolve(typeof reader.result === "string" ? reader.result : null);
+      reader.onerror = () => resolve(null);
+      reader.readAsDataURL(blob);
+    });
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Replace external `http(s)` asset references in an SVG string with `data:` URIs so canvas
+ * rasterization is not tainted by cross-origin resources. Scans both HTML attributes
+ * (`src`/`href`) and CSS `url(...)` inside the foreignObject. Browser-only (uses `fetch`).
+ * Returns a new SVG string; assets that can't be fetched are left untouched.
+ */
+export async function inlineSvgAssets(svg: string): Promise<string> {
+  const urls = new Set<string>();
+  const patterns = [
+    /(?:src|href)\s*=\s*["'](https?:\/\/[^"']+)["']/gi,
+    /url\(\s*['"]?(https?:\/\/[^'")]+?)['"]?\s*\)/gi,
+  ];
+  for (const re of patterns) {
+    for (const match of svg.matchAll(re)) {
+      const u = match[1];
+      if (u !== undefined) urls.add(u);
+    }
+  }
+  if (urls.size === 0) return svg;
+
+  const replacements = new Map<string, string>();
+  await Promise.all(
+    [...urls].map(async (u) => {
+      const data = await urlToDataUri(u);
+      if (data !== null) replacements.set(u, data);
+    }),
+  );
+
+  let out = svg;
+  for (const [url, data] of replacements) out = out.split(url).join(data);
+  return out;
 }
 
 function svgDimensions(svg: string): { width: number; height: number } {
@@ -80,21 +147,22 @@ function svgDimensions(svg: string): { width: number; height: number } {
  * Rasterize an SVG string to a Blob via an offscreen canvas (browser-only). Rejects if the
  * canvas is tainted by a cross-origin image without CORS (a browser security constraint).
  */
-export function rasterizeSvg(
+export async function rasterizeSvg(
   svg: string,
   opts: RasterOptions = {},
 ): Promise<Blob> {
   if (typeof document === "undefined")
-    return Promise.reject(
-      new Error("rasterizeSvg requires a browser (canvas)"),
-    );
+    throw new Error("rasterizeSvg requires a browser (canvas)");
   const { scale = 2, type = "image/png", quality } = opts;
-  const { width, height } = svgDimensions(svg);
+  // Inline cross-origin assets first (default on) so the offscreen canvas isn't tainted.
+  const prepared =
+    opts.inlineAssets === false ? svg : await inlineSvgAssets(svg);
+  const { width, height } = svgDimensions(prepared);
   if (width === 0 || height === 0)
-    return Promise.reject(new Error("SVG has no measurable size"));
+    throw new Error("SVG has no measurable size");
 
-  const url = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
-  return new Promise<Blob>((resolve, reject) => {
+  const url = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(prepared)}`;
+  return await new Promise<Blob>((resolve, reject) => {
     const img = new Image();
     img.onload = () => {
       try {

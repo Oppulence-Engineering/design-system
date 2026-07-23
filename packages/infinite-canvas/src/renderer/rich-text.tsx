@@ -23,6 +23,14 @@ import { isSafeUrl } from "../document/sanitize";
 import { useCanvas } from "../store/context";
 import { useBinding } from "../binding/context";
 import { resolveTemplate } from "../binding/resolve";
+import {
+  applyLink,
+  type BlockTag,
+  type MarkTag,
+  setBlockTag,
+  toggleInlineMark,
+  toggleUnorderedList,
+} from "./rich-text-commands";
 
 /* ----------------------------- display ----------------------------- */
 
@@ -298,22 +306,39 @@ export function RichTextEditor({
     ]);
   }, [documentStore, sessionStore, node.id]);
 
-  const exec = (command: string, value?: string) => {
-    ref.current?.focus();
-    // execCommand is deprecated but the pragmatic v1 rich-edit primitive (a full
-    // ProseMirror/TipTap dep is out of scope for a raw-source package). DOM is the truth
-    // — domToRich re-derives marks from whatever markup the browser produced.
-    document.execCommand(command, false, value);
-  };
+  // Run a Selection/Range command (the modern replacement for the deprecated execCommand):
+  // read the live range from the editor, apply the DOM edit, then reselect the result. DOM is
+  // the truth — domToRich re-derives marks from whatever markup the command produced on commit.
+  const runCommand = React.useCallback(
+    (fn: (editor: HTMLElement, range: Range) => Range) => {
+      const el = ref.current;
+      if (el === null) return;
+      el.focus();
+      const sel = window.getSelection();
+      if (sel === null || sel.rangeCount === 0) return;
+      const range = sel.getRangeAt(0);
+      if (!el.contains(range.commonAncestorContainer)) return;
+      const next = fn(el, range);
+      sel.removeAllRanges();
+      sel.addRange(next);
+    },
+    [],
+  );
 
-  const setBlock = (tag: string) => exec("formatBlock", tag);
+  const mark = (tag: MarkTag) =>
+    runCommand((editor, range) => toggleInlineMark(editor, range, tag));
+
+  const setBlock = (tag: BlockTag) =>
+    runCommand((editor, range) => setBlockTag(editor, range, tag));
 
   const link = () => {
     const url = window.prompt("Link URL");
-    if (url !== null && url !== "") {
-      if (isSafeUrl(url)) exec("createLink", url);
-      else window.alert("Unsupported or unsafe URL scheme.");
+    if (url === null || url === "") return;
+    if (!isSafeUrl(url)) {
+      window.alert("Unsupported or unsafe URL scheme.");
+      return;
     }
+    runCommand((editor, range) => applyLink(editor, range, url));
   };
 
   return (
@@ -338,25 +363,25 @@ export function RichTextEditor({
         <button
           style={{ ...TB_BTN, fontWeight: 700 }}
           data-testid="rt-bold"
-          onClick={() => exec("bold")}
+          onClick={() => mark("STRONG")}
         >
           B
         </button>
         <button
           style={{ ...TB_BTN, fontStyle: "italic" }}
-          onClick={() => exec("italic")}
+          onClick={() => mark("EM")}
         >
           I
         </button>
         <button
           style={{ ...TB_BTN, textDecoration: "underline" }}
-          onClick={() => exec("underline")}
+          onClick={() => mark("U")}
         >
           U
         </button>
         <button
           style={{ ...TB_BTN, textDecoration: "line-through" }}
-          onClick={() => exec("strikeThrough")}
+          onClick={() => mark("S")}
         >
           S
         </button>
@@ -382,7 +407,7 @@ export function RichTextEditor({
         <button
           style={TB_BTN}
           data-testid="rt-ul"
-          onClick={() => exec("insertUnorderedList")}
+          onClick={() => runCommand(toggleUnorderedList)}
         >
           • List
         </button>
