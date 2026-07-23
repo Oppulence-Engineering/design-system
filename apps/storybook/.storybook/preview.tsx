@@ -1,5 +1,6 @@
 import type { Preview } from "@storybook/react-vite";
 import "../styles/globals.css";
+import "@oppulence/infinite-canvas/styles.css";
 
 const preview: Preview = {
   parameters: {

@@ -1,0 +1,233 @@
+/**
+ * CanvasProvider (§5b) — the facade that mounts the three per-instance stores, tool +
+ * component registries, the imperative CanvasApi, and wires optional collab/presence
+ * adapters and the storage seam. Loading is consumer-owned: `initialDocument` is
+ * synchronous (the consumer loads/parses and mounts keyed by document id).
+ */
+
+"use client";
+
+import * as React from "react";
+import type { CanvasDocument } from "../document/document";
+import {
+  asClientId,
+  defaultIdFactory,
+  type ClientId,
+  type IdFactory,
+  type NodeId,
+} from "../document/ids";
+import type {
+  CollabAccess,
+  CollabAdapter,
+  PresenceAdapter,
+  LocalPresence,
+} from "../collab";
+import { LocalPresenceAdapter, NullCollabAdapter } from "../collab";
+import type { ComponentRegistry } from "../registry/component-registry";
+import { emptyRegistry } from "../registry/component-registry";
+import { ToolRegistry } from "../tools/tool-registry";
+import type { Tool } from "../tools/tool";
+import type { Camera } from "../viewport/camera";
+import type { ClipboardPayload } from "../commands/clipboard";
+import { CanvasContext, type CanvasContextValue } from "./context";
+import { createDocumentStore } from "./document-store";
+import { createSessionStore } from "./session-store";
+import { createPresenceStore } from "./presence-store";
+import {
+  createCanvasApi,
+  type CanvasApi,
+  type CanvasStatus,
+  type ViewportBridge,
+} from "./canvas-api";
+
+export interface CanvasStorageBinding {
+  onDocumentChange?: (e: {
+    getSnapshot: () => CanvasDocument;
+    revision: number;
+    origin: "local" | "local-undo" | "remote";
+  }) => void;
+}
+
+export interface CanvasProviderProps {
+  /** Synchronous — the consumer loads/parses and mounts keyed by document id (§5b). */
+  initialDocument: CanvasDocument;
+  registry?: ComponentRegistry;
+  access?: CollabAccess;
+  collab?: CollabAdapter;
+  presence?: PresenceAdapter;
+  storage?: CanvasStorageBinding;
+  tools?: readonly Tool[];
+  idFactory?: IdFactory;
+  /** Presence identity for the local user. */
+  self?: LocalPresence;
+  initialCamera?: Camera | "fit";
+  onCameraChange?: (camera: Camera) => void;
+  onSelectionChange?: (ids: readonly NodeId[]) => void;
+  onError?: (e: {
+    scope: "render" | "apply" | "collab" | "validation";
+    nodeId?: NodeId;
+    error: unknown;
+  }) => void;
+  apiRef?: React.Ref<CanvasApi>;
+  children?: React.ReactNode;
+}
+
+export function CanvasProvider(props: CanvasProviderProps): React.JSX.Element {
+  const {
+    initialDocument,
+    registry = emptyRegistry(),
+    access = "write",
+    collab,
+    presence,
+    storage,
+    tools,
+    idFactory = defaultIdFactory,
+    self,
+    initialCamera,
+    onCameraChange,
+    onSelectionChange,
+    apiRef,
+    children,
+  } = props;
+
+  // Stable per-instance identity + registries.
+  const clientIdRef = React.useRef<ClientId>(asClientId(idFactory.clientId()));
+  const clipboardRef = React.useRef<ClipboardPayload | null>(null);
+  const viewportBridge = React.useRef<ViewportBridge | null>(null);
+  const statusRef = React.useRef<CanvasStatus>(
+    collab === undefined ? "ready" : "syncing",
+  );
+
+  // Effective access = min(prop, adapter access).
+  const effectiveAccess = minAccess(access, collab?.access ?? "write");
+
+  const ctx = React.useMemo<CanvasContextValue>(() => {
+    const { store: documentStore, handle } = createDocumentStore(
+      initialDocument,
+      {
+        clientId: clientIdRef.current,
+        idFactory,
+      },
+    );
+    const sessionStore = createSessionStore({
+      activeToolId: new ToolRegistry(tools).defaultToolId,
+      camera:
+        initialCamera !== undefined && initialCamera !== "fit"
+          ? initialCamera
+          : { x: 0, y: 0, zoom: 1 },
+    });
+    const presenceStore = createPresenceStore();
+    const toolRegistry = new ToolRegistry(tools);
+    const api = createCanvasApi({
+      documentStore,
+      sessionStore,
+      idFactory,
+      clipboardRef,
+      viewportBridge,
+      getStatus: () => statusRef.current,
+    });
+    return {
+      documentStore,
+      sessionStore,
+      presenceStore,
+      handle,
+      registry,
+      toolRegistry,
+      clientId: clientIdRef.current,
+      idFactory,
+      api,
+      viewportBridge,
+      access: effectiveAccess,
+      onError: props.onError,
+    };
+    // Intentionally construct once per provider instance; consumers reset via `key`.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  React.useImperativeHandle(apiRef, () => ctx.api, [ctx.api]);
+
+  // --- collab adapter lifecycle ---
+  React.useEffect(() => {
+    const adapter: CollabAdapter = collab ?? new NullCollabAdapter(access);
+    const detach = adapter.attach(ctx.handle);
+    if (adapter.undoManager !== undefined) {
+      ctx.documentStore.getState().setDelegatedUndo(adapter.undoManager);
+    }
+    const offStatus = adapter.onStatusChange((s) => {
+      statusRef.current =
+        s === "connected" ? "ready" : s === "error" ? "error" : "syncing";
+    });
+    let cancelled = false;
+    void adapter.connect().then(() => {
+      if (!cancelled) statusRef.current = "ready";
+    });
+    return () => {
+      cancelled = true;
+      offStatus();
+      ctx.documentStore.getState().setDelegatedUndo(null);
+      detach();
+      adapter.disconnect();
+    };
+  }, [collab, access, ctx]);
+
+  // --- presence adapter lifecycle ---
+  React.useEffect(() => {
+    const adapter = presence ?? new LocalPresenceAdapter();
+    const off = adapter.subscribe((peers) =>
+      ctx.presenceStore.getState().setPeers(peers),
+    );
+    if (self !== undefined) adapter.join(self);
+    // Push local selection to presence.
+    const offSel = ctx.sessionStore.subscribe((state, prev) => {
+      if (state.selection !== prev.selection)
+        adapter.updateSelection(state.selection);
+    });
+    return () => {
+      offSel();
+      off();
+      adapter.leave();
+    };
+  }, [presence, self, ctx]);
+
+  // --- storage: notify on revision change ---
+  React.useEffect(() => {
+    if (storage?.onDocumentChange === undefined) return;
+    return ctx.handle.onRevision((revision) => {
+      storage.onDocumentChange?.({
+        getSnapshot: () => ctx.handle.getSnapshot(),
+        revision,
+        origin: "local",
+      });
+    });
+  }, [storage, ctx]);
+
+  // --- selection change callback ---
+  React.useEffect(() => {
+    if (onSelectionChange === undefined) return;
+    return ctx.sessionStore.subscribe((state, prev) => {
+      if (state.selection !== prev.selection)
+        onSelectionChange(state.selection);
+    });
+  }, [onSelectionChange, ctx]);
+
+  // --- camera change callback (trailing) ---
+  React.useEffect(() => {
+    if (onCameraChange === undefined) return;
+    return ctx.sessionStore.subscribe((state, prev) => {
+      if (state.camera !== prev.camera) onCameraChange(state.camera);
+    });
+  }, [onCameraChange, ctx]);
+
+  return (
+    <CanvasContext.Provider value={ctx}>{children}</CanvasContext.Provider>
+  );
+}
+
+const ACCESS_RANK: Record<CollabAccess, number> = {
+  read: 0,
+  comment: 1,
+  write: 2,
+};
+function minAccess(a: CollabAccess, b: CollabAccess): CollabAccess {
+  return ACCESS_RANK[a] <= ACCESS_RANK[b] ? a : b;
+}

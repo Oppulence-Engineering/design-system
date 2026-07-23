@@ -6,3 +6,4 @@
 /* Scan for Tailwind classes in stories and design-system components */
 @source "../stories";
 @source "../../../packages/design-system/src";
+@source "../../../packages/infinite-canvas/src";

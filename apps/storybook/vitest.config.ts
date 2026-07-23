@@ -17,7 +17,12 @@ export default defineConfig({
   test: {
     server: {
       deps: {
-        inline: ["@oppulence/design-system", "streamdown", "katex"],
+        inline: [
+          "@oppulence/design-system",
+          "@oppulence/infinite-canvas",
+          "streamdown",
+          "katex",
+        ],
       },
     },
     coverage: {
