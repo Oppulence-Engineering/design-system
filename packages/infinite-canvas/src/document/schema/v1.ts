@@ -40,6 +40,7 @@ const baseFields = {
   visibleWhen: z.string().optional(),
   repeat: z.string().optional(),
   repeatAs: z.string().optional(),
+  styleRef: z.string().optional(),
 };
 
 const frameNode = z.looseObject({

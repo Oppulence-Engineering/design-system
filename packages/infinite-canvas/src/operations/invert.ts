@@ -99,6 +99,7 @@ function invertOne(
         inv.visibleWhen = prev.visibleWhen ?? "";
       if (op.repeat !== undefined) inv.repeat = prev.repeat ?? "";
       if (op.repeatAs !== undefined) inv.repeatAs = prev.repeatAs ?? "";
+      if (op.styleRef !== undefined) inv.styleRef = prev.styleRef ?? "";
       return inv;
     }
 

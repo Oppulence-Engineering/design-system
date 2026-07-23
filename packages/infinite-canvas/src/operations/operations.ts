@@ -53,6 +53,7 @@ export interface SetNodeFlagsOp {
   visibleWhen?: string;
   repeat?: string;
   repeatAs?: string;
+  styleRef?: string;
 }
 
 export interface SetNodeAttrsOp {

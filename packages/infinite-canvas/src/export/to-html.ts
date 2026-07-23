@@ -12,6 +12,7 @@ import type { SceneNode } from "../document/nodes";
 import { childrenOf } from "../operations/children-index";
 import { buildChildrenIndex } from "../operations/children-index";
 import { styleToCss } from "../renderer/style-to-css";
+import { resolveNodeStyle, stylesFromMeta } from "../styles-lib/resolve";
 import {
   itemScope,
   resolveArray,
@@ -123,7 +124,11 @@ function nodeToHtmlBody(
   isRepeatItem: boolean,
 ): string {
   const pad = (opts.indent ?? "  ").repeat(depth);
-  const cssObj = styleToCss(node.style) as Record<string, unknown>;
+  const effectiveStyle =
+    node.styleRef !== undefined
+      ? resolveNodeStyle(node, stylesFromMeta(doc.meta))
+      : node.style;
+  const cssObj = styleToCss(effectiveStyle) as Record<string, unknown>;
   // Responsive preview: render root artboards fluid at the override width.
   if (
     opts.rootWidthOverride !== undefined &&
@@ -201,17 +206,34 @@ export function exportToHtml(
     .join("\n");
   if (opts.fullDocument !== true) return body;
 
-  const paginated = opts.page !== undefined || opts.runningHeader !== undefined || opts.runningFooter !== undefined;
+  const paginated =
+    opts.page !== undefined ||
+    opts.runningHeader !== undefined ||
+    opts.runningFooter !== undefined;
   const pageCss =
     opts.page !== undefined
       ? `@page{size:${opts.page.size ?? "A4"};margin:${opts.page.margin ?? "20mm"}}`
       : "";
   // Running header/footer repeat on every printed page (position:fixed in print engines).
-  const headerCss = opts.runningHeader !== undefined ? ".ic-running-header{position:fixed;top:0;left:0;right:0}" : "";
-  const footerCss = opts.runningFooter !== undefined ? ".ic-running-footer{position:fixed;bottom:0;left:0;right:0}" : "";
-  const breakCss = paginated ? "@media print{.ic-repeat-item{break-inside:avoid;page-break-inside:avoid}}" : "";
-  const header = opts.runningHeader !== undefined ? `    <div class="ic-running-header">${opts.runningHeader}</div>\n` : "";
-  const footer = opts.runningFooter !== undefined ? `    <div class="ic-running-footer">${opts.runningFooter}</div>\n` : "";
+  const headerCss =
+    opts.runningHeader !== undefined
+      ? ".ic-running-header{position:fixed;top:0;left:0;right:0}"
+      : "";
+  const footerCss =
+    opts.runningFooter !== undefined
+      ? ".ic-running-footer{position:fixed;bottom:0;left:0;right:0}"
+      : "";
+  const breakCss = paginated
+    ? "@media print{.ic-repeat-item{break-inside:avoid;page-break-inside:avoid}}"
+    : "";
+  const header =
+    opts.runningHeader !== undefined
+      ? `    <div class="ic-running-header">${opts.runningHeader}</div>\n`
+      : "";
+  const footer =
+    opts.runningFooter !== undefined
+      ? `    <div class="ic-running-footer">${opts.runningFooter}</div>\n`
+      : "";
 
   return [
     "<!doctype html>",
@@ -236,7 +258,9 @@ export function exportToHtml(
 export function renderTemplateToHtml(
   doc: CanvasDocument,
   data: BindingData,
-  opts: Omit<HtmlExportOptions, "data" | "fullDocument"> & { artboardId?: NodeId } = {},
+  opts: Omit<HtmlExportOptions, "data" | "fullDocument"> & {
+    artboardId?: NodeId;
+  } = {},
 ): string {
   const { artboardId, ...rest } = opts;
   return exportToHtml(doc, artboardId, { ...rest, data, fullDocument: true });

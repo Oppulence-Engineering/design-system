@@ -89,6 +89,8 @@ function applyToNodes(nodes: NodeMap, op: NodeOp): NodeMap {
         next.repeat = op.repeat === "" ? undefined : op.repeat;
       if (op.repeatAs !== undefined)
         next.repeatAs = op.repeatAs === "" ? undefined : op.repeatAs;
+      if (op.styleRef !== undefined)
+        next.styleRef = op.styleRef === "" ? undefined : op.styleRef;
       return withKey<SceneNode>(nodes, op.nodeId, next);
     }
 

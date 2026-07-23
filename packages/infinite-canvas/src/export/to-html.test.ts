@@ -6,7 +6,12 @@ import {
   makeFrame,
   makeText,
 } from "../testing/factories";
-import { cssToInline, escapeHtml, exportToHtml, renderTemplateToHtml } from "./to-html";
+import {
+  cssToInline,
+  escapeHtml,
+  exportToHtml,
+  renderTemplateToHtml,
+} from "./to-html";
 import { exportToReact } from "./to-react";
 
 function invoiceDoc() {
@@ -84,7 +89,11 @@ describe("exportToHtml", () => {
 
   it("renderTemplateToHtml fills a template server-side (no browser)", () => {
     const { doc, frameId } = invoiceDoc();
-    const html = renderTemplateToHtml(doc, { invoice: { total: 999 } }, { artboardId: frameId });
+    const html = renderTemplateToHtml(
+      doc,
+      { invoice: { total: 999 } },
+      { artboardId: frameId },
+    );
     expect(html.startsWith("<!doctype html>")).toBe(true);
     expect(html).toContain("Total: 999");
   });

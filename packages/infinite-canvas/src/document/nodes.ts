@@ -57,6 +57,12 @@ export interface SceneNodeBase {
   visibleWhen?: string;
   repeat?: string;
   repeatAs?: string;
+  /**
+   * Reference to a named shared style in `document.meta.styles` (§ shared styles). The
+   * referenced style is the BASE; the node's own `style` overrides it. Editing a shared
+   * style updates every node that references it.
+   */
+  styleRef?: string;
 }
 
 /** A frame. At the root (`parentId === null`) it is an artboard with canvas-space geometry. */

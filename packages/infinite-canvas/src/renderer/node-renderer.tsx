@@ -12,7 +12,12 @@ import type { NodeId } from "../document/ids";
 import type { SceneNode } from "../document/nodes";
 import { assertNever } from "../document/nodes";
 import { useCanvas } from "../store/context";
-import { useChildren, useNode, useSessionStore } from "../store/hooks";
+import {
+  useChildren,
+  useDocumentStore,
+  useNode,
+  useSessionStore,
+} from "../store/hooks";
 import { BindingProvider, useBinding } from "../binding/context";
 import {
   itemScope,
@@ -22,6 +27,7 @@ import {
   resolveTemplate,
   resolveValue,
 } from "../binding/resolve";
+import { resolveNodeStyle, stylesFromMeta } from "../styles-lib/resolve";
 import { styleToCss } from "./style-to-css";
 import { NodeErrorBoundary } from "./node-error-boundary";
 import { ArtboardContext, useRectCache } from "./renderer-context";
@@ -79,7 +85,12 @@ function NodeChildren({ id }: { id: NodeId }): React.ReactNode {
 }
 
 function NodeBody({ node }: { node: SceneNode }): React.ReactNode {
-  const css = styleToCss(node.style);
+  // Shared styles: a referenced style is the base, node.style overrides. Subscribes to
+  // the library so editing a style re-renders every node that uses it.
+  const styleLib = useDocumentStore((s) => stylesFromMeta(s.document.meta));
+  const css = styleToCss(
+    node.styleRef !== undefined ? resolveNodeStyle(node, styleLib) : node.style,
+  );
   const register = useNodeRegistration(node.id);
   const binding = useBinding();
 

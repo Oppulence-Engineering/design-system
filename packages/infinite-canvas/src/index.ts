@@ -125,6 +125,16 @@ export type {
 export { themeToCssVars } from "./theme/theme";
 export type { CanvasTheme } from "./theme/theme";
 
+// Read-only viewer / embed
+export { CanvasViewer } from "./viewer/index";
+export type { CanvasViewerProps } from "./viewer/index";
+
+// Shared design styles
+export { resolveNodeStyle, stylesFromMeta } from "./styles-lib/resolve";
+export type { NamedStyle, StyleLibrary } from "./styles-lib/resolve";
+export { useStyleLibrary } from "./styles-lib/hooks";
+export type { StyleLibraryApi } from "./styles-lib/hooks";
+
 // Design linting (a11y / contrast)
 export {
   contrastRatio,

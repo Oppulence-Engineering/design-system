@@ -18,7 +18,12 @@ import {
 } from "./to-react";
 import { downloadTextFile, printHtmlDocument } from "./print";
 
-export { exportToHtml, escapeHtml, cssToInline, renderTemplateToHtml } from "./to-html";
+export {
+  exportToHtml,
+  escapeHtml,
+  cssToInline,
+  renderTemplateToHtml,
+} from "./to-html";
 export type { HtmlExportOptions } from "./to-html";
 export { exportToReact } from "./to-react";
 export type { ReactExportOptions, ReactExportResult } from "./to-react";
