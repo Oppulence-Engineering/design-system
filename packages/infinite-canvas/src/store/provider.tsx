@@ -32,6 +32,7 @@ import type { ClipboardPayload } from "../commands/clipboard";
 import { BindingProvider } from "../binding/context";
 import type { BindingData, FilterMap } from "../binding/resolve";
 import { createCommentsStore, type Comment } from "../comments/store";
+import { createBlockStore, type Block } from "../blocks/store";
 import { CanvasContext, type CanvasContextValue } from "./context";
 import { createDocumentStore } from "./document-store";
 import { createSessionStore } from "./session-store";
@@ -78,6 +79,9 @@ export interface CanvasProviderProps {
   /** Seed review comments (consumer-persisted). */
   initialComments?: readonly Comment[];
   onCommentsChange?: (comments: Comment[]) => void;
+  /** Seed the block/template library (consumer-persisted). */
+  initialBlocks?: readonly Block[];
+  onBlocksChange?: (blocks: Block[]) => void;
   apiRef?: React.Ref<CanvasApi>;
   children?: React.ReactNode;
 }
@@ -107,6 +111,9 @@ export function CanvasProvider(props: CanvasProviderProps): React.JSX.Element {
   const commentsBundleRef = React.useRef<ReturnType<
     typeof createCommentsStore
   > | null>(null);
+  const blockBundleRef = React.useRef<ReturnType<
+    typeof createBlockStore
+  > | null>(null);
   const statusRef = React.useRef<CanvasStatus>(
     collab === undefined ? "ready" : "syncing",
   );
@@ -132,6 +139,8 @@ export function CanvasProvider(props: CanvasProviderProps): React.JSX.Element {
     const presenceStore = createPresenceStore();
     const commentsBundle = createCommentsStore(props.initialComments);
     commentsBundleRef.current = commentsBundle;
+    const blockBundle = createBlockStore(props.initialBlocks);
+    blockBundleRef.current = blockBundle;
     const toolRegistry = new ToolRegistry(tools);
     const api = createCanvasApi({
       documentStore,
@@ -146,6 +155,7 @@ export function CanvasProvider(props: CanvasProviderProps): React.JSX.Element {
       sessionStore,
       presenceStore,
       commentsStore: commentsBundle.store,
+      blockStore: blockBundle.store,
       handle,
       registry,
       toolRegistry,
@@ -250,6 +260,11 @@ export function CanvasProvider(props: CanvasProviderProps): React.JSX.Element {
       return;
     return commentsBundleRef.current.onChange(props.onCommentsChange);
   }, [props.onCommentsChange, ctx]);
+  React.useEffect(() => {
+    if (props.onBlocksChange === undefined || blockBundleRef.current === null)
+      return;
+    return blockBundleRef.current.onChange(props.onBlocksChange);
+  }, [props.onBlocksChange, ctx]);
 
   return (
     <CanvasContext.Provider value={ctx}>

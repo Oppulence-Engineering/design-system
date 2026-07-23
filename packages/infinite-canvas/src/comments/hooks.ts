@@ -65,14 +65,12 @@ export function useComments(): CommentsApi {
         name: "Anonymous",
         color: "#71717a",
       };
-      commentsStore
-        .getState()
-        .reply(id, {
-          id: idFactory.nodeId(),
-          author,
-          body,
-          createdAt: nowMs(),
-        });
+      commentsStore.getState().reply(id, {
+        id: idFactory.nodeId(),
+        author,
+        body,
+        createdAt: nowMs(),
+      });
     },
     remove: (id) => commentsStore.getState().remove(id),
   };

@@ -104,6 +104,34 @@ export { useComments } from "./comments/hooks";
 export type { CommentsApi } from "./comments/hooks";
 export type { Comment, CommentReply } from "./comments/store";
 
+// Template & block library
+export { useBlockLibrary } from "./blocks/hooks";
+export type { BlockLibrary } from "./blocks/hooks";
+export type { Block } from "./blocks/store";
+
+// Responsive breakpoints
+export {
+  BREAKPOINTS,
+  ResponsivePreview,
+  useResponsive,
+} from "./responsive/index";
+export type {
+  Breakpoint,
+  Responsive,
+  ResponsivePreviewProps,
+} from "./responsive/index";
+
+// Design linting (a11y / contrast)
+export {
+  contrastRatio,
+  lintDocument,
+  lintNode,
+  meetsAA,
+  parseColor,
+  useDesignLint,
+} from "./lint/index";
+export type { DesignLint, LintIssue, LintSeverity } from "./lint/index";
+
 // Data binding (templates)
 export {
   DEFAULT_FILTERS,

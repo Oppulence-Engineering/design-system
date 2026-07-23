@@ -7,3 +7,4 @@
 export { CanvasLayersPanel } from "./layers-panel";
 export { CanvasInspectorPanel } from "./inspector-panel";
 export { CanvasToolbar } from "./toolbar";
+export { CanvasPalette } from "./palette";

@@ -27,14 +27,12 @@ describe("comments store", () => {
     store.getState().resolve("c1", true);
     expect(store.getState().comments.c1?.resolved).toBe(true);
 
-    store
-      .getState()
-      .reply("c1", {
-        id: "r1",
-        author: { name: "B", color: "#111" },
-        body: "ok",
-        createdAt: 1,
-      });
+    store.getState().reply("c1", {
+      id: "r1",
+      author: { name: "B", color: "#111" },
+      body: "ok",
+      createdAt: 1,
+    });
     expect(store.getState().comments.c1?.replies).toHaveLength(1);
 
     store.getState().remove("c1");

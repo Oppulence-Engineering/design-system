@@ -28,6 +28,12 @@ export interface HtmlExportOptions {
   /** Emit a full standalone HTML document (for saving/printing) vs a fragment. */
   fullDocument?: boolean;
   title?: string;
+  /**
+   * Render root artboards at this width with `position: relative; height: auto` (instead
+   * of their fixed canvas geometry) so flow/flex children reflow — used for responsive
+   * previews at different breakpoints.
+   */
+  rootWidthOverride?: number;
 }
 
 const VOID_TAGS = new Set(["img", "br", "hr", "input"]);
@@ -64,9 +70,19 @@ function nodeToHtml(
   const node: SceneNode | undefined = doc.nodes[id];
   if (node === undefined || !node.visible) return "";
   const pad = (opts.indent ?? "  ").repeat(depth);
-  const styleStr = cssToInline(
-    styleToCss(node.style) as Record<string, unknown>,
-  );
+  const cssObj = styleToCss(node.style) as Record<string, unknown>;
+  // Responsive preview: render root artboards fluid at the override width.
+  if (
+    opts.rootWidthOverride !== undefined &&
+    node.type === "frame" &&
+    node.parentId === null
+  ) {
+    cssObj.position = "relative";
+    cssObj.width = `${opts.rootWidthOverride}px`;
+    cssObj.height = "auto";
+    cssObj.minHeight = `${node.height}px`;
+  }
+  const styleStr = cssToInline(cssObj);
   const styleAttr =
     styleStr.length > 0 ? ` style="${escapeHtml(styleStr)}"` : "";
 

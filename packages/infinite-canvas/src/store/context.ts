@@ -11,6 +11,7 @@ import type { CollabAccess, CollabDocumentHandle } from "../collab";
 import type { ComponentRegistry } from "../registry/component-registry";
 import type { ToolRegistry } from "../tools/tool-registry";
 import type { CommentsState } from "../comments/store";
+import type { BlockStoreState } from "../blocks/store";
 import type { CanvasApi, ViewportBridge } from "./canvas-api";
 import type { DocumentStoreState } from "./document-store";
 import type { PresenceState } from "./presence-store";
@@ -21,6 +22,7 @@ export interface CanvasContextValue {
   sessionStore: StoreApi<SessionState>;
   presenceStore: StoreApi<PresenceState>;
   commentsStore: StoreApi<CommentsState>;
+  blockStore: StoreApi<BlockStoreState>;
   handle: CollabDocumentHandle;
   registry: ComponentRegistry;
   toolRegistry: ToolRegistry;

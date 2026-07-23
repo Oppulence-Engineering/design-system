@@ -75,7 +75,7 @@ export function buildPayload(
 }
 
 /** Remap a payload's ids to fresh ones and return insert ops under `targetParent`. */
-function insertOpsFromPayload(
+export function insertOpsFromPayload(
   payload: ClipboardPayload,
   state: CanvasState,
   idFactory: IdFactory,
