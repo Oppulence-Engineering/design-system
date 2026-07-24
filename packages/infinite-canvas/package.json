@@ -1,6 +1,6 @@
 {
   "name": "@oppulence/infinite-canvas",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Infinite canvas spatial editor for HTML/React designs — DOM artboards, layers, inspector, undo/redo, pluggable collaboration",
   "type": "module",
   "main": "./src/index.ts",
