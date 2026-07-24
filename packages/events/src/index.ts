@@ -173,24 +173,6 @@ export {
 } from "./server-tracker";
 
 // ============================================================================
-// Client-Side Analytics (React)
-// ============================================================================
-
-export {
-  // Components
-  AnalyticsProvider,
-  // Types
-  type ClientAnalyticsConfig,
-  Provider, // Legacy, deprecated
-  // Functions
-  track, // Legacy, deprecated
-  // Hooks
-  useAnalytics,
-  // HOC
-  withAnalytics,
-} from "./client";
-
-// ============================================================================
 // Default Analytics Instance Factory
 // ============================================================================
 

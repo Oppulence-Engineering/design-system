@@ -1,6 +1,6 @@
 {
   "name": "@oppulence/events",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Typed analytics events and OpenPanel adapters for Oppulence applications",
   "type": "module",
   "sideEffects": false,
@@ -44,6 +44,11 @@
       "types": "./dist/server-tracker.d.ts",
       "import": "./dist/server-tracker.js",
       "default": "./dist/server-tracker.js"
+    },
+    "./types": {
+      "types": "./dist/types.d.ts",
+      "import": "./dist/types.js",
+      "default": "./dist/types.js"
     }
   },
   "main": "./dist/index.js",
@@ -63,13 +68,16 @@
   },
   "license": "MIT",
   "scripts": {
-    "build": "tsc -p tsconfig.build.json && bun build src/index.ts src/server.ts src/client.tsx src/corinthian.ts src/events.ts src/identity.ts src/gate.ts src/server-tracker.ts --root src --outdir dist --target node --format esm --packages=external",
+    "build": "tsc -p tsconfig.build.json && bun run build:server && bun run build:client && bun run verify:artifacts",
+    "build:client": "bun build src/client.tsx src/identity.ts --root src --outdir dist --target browser --format esm --packages=external --banner='\"use client\";'",
+    "build:server": "bun build src/index.ts src/server.ts src/corinthian.ts src/events.ts src/gate.ts src/server-tracker.ts src/types.ts --root src --outdir dist --target node --format esm --packages=external",
     "clean": "rm -rf .turbo dist tsconfig.build.tsbuildinfo",
     "format": "prettier --write \"{src,tests}/**/*.{ts,tsx}\"",
     "lint": "prettier --check \"{src,tests}/**/*.{ts,tsx}\"",
     "prepublishOnly": "bun run clean && bun run build",
     "test": "bun test tests",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "verify:artifacts": "bun test tests/artifacts.test.ts"
   },
   "dependencies": {
     "@openpanel/nextjs": "^1.0.8",

@@ -4,8 +4,6 @@
  *   module provides client-side event tracking with OpenPanel integration.
  */
 
-"use client";
-
 import {
   getInitSnippet,
   type TrackProperties,
