@@ -182,12 +182,29 @@ as escaped React text; raw HTML injection is banned package-wide (lint-enforced)
 **Consumer responsibility:** component **prop values** are untrusted data — a registered
 component must never interpolate a prop into an `href` or raw HTML.
 
+## Rich text, image export & align/distribute
+
+- **Rich text** (`TextNode.rich`) edits through a floating toolbar backed by the standard
+  Selection/Range DOM APIs (`renderer/rich-text-commands.ts`) — bold/italic/underline/strike,
+  links, block type (H1/H2/P) and lists — **not** the deprecated `document.execCommand`. The
+  contentEditable DOM is the source of truth; `domToRich` re-derives the typed model on commit.
+- **Image export**: `exportToSvg` is lossless and server-safe; `rasterizeSvg`/`toImageBlob`
+  produce PNG/JPEG/WebP and, by default (`inlineAssets`), inline external `http(s)` images as
+  `data:` URIs first so fetchable (same-origin / CORS) images no longer taint the canvas. An
+  image that can't be fetched at all still taints the PNG (a browser security limit); SVG is
+  unaffected. Consumer React components are runtime-only and never appear in an export.
+- **Align & distribute** ship as pure op-math commands (`api.commands`).
+
 ## v1 limitations & non-goals
 
 - **Leaf components only** in the registry — serializable props, no `children`/ReactNode/
   function props (a `slots` design is reserved for a later schema version).
-- **No rotation** (schema reserves the field), no image export (data/JSON export only),
-  no rulers/align-distribute, plain text (no rich text).
+- **Repeaters register one rect per logical node.** A `repeat` node renders N DOM copies that
+  share one `node.id`; only the canonical (first) projection registers in the rect cache, so
+  hit-testing/selection resolves to that logical node, not the individual copy under the
+  pointer. Per-instance selection needs an instance-addressing model (composite rect keys +
+  hit-test/culling resolution) and is deferred.
+- **No rotation** (the schema reserves the field); no rulers/grid-settings.
 - Flow-child drag is reorder-only in v1; reparent via the layers panel.
 - Interactive HTML tags (`input`/`iframe`/`script`/`base`/`meta`) are excluded.
 - Library chrome strings are English-only.

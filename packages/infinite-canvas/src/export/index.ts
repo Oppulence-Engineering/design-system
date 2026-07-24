@@ -34,7 +34,7 @@ export type { HtmlExportOptions } from "./to-html";
 export { exportToReact } from "./to-react";
 export type { ReactExportOptions, ReactExportResult } from "./to-react";
 export { printHtmlDocument, downloadTextFile } from "./print";
-export { exportToSvg, rasterizeSvg } from "./to-image";
+export { exportToSvg, rasterizeSvg, inlineSvgAssets } from "./to-image";
 export type { SvgExportOptions, RasterOptions } from "./to-image";
 
 /** Pagination options for print/PDF. */
