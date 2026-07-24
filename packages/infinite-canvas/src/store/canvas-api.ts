@@ -9,6 +9,7 @@
 import type { StoreApi } from "zustand/vanilla";
 import type { NodeId } from "../document/ids";
 import { type IdFactory } from "../document/ids";
+import type { CanvasDocument } from "../document/document";
 import type { SceneNode } from "../document/nodes";
 import type { CanvasOperation } from "../operations/operations";
 import type { CanvasState } from "../operations/apply";
@@ -44,6 +45,10 @@ export type CanvasStatus =
   | "error";
 
 export interface CanvasApi {
+  document: {
+    get(): CanvasDocument;
+    loadSnapshot(document: CanvasDocument): void;
+  };
   camera: {
     get(): Camera;
     set(camera: Camera): void;
@@ -166,6 +171,11 @@ export function createCanvasApi(deps: CanvasApiDeps): CanvasApi {
   };
 
   return {
+    document: {
+      get: () => documentStore.getState().getSnapshot(),
+      loadSnapshot: (document) =>
+        documentStore.getState().loadSnapshot(document),
+    },
     camera: {
       get: camera,
       set: (c) => sessionStore.getState().setCamera(c),

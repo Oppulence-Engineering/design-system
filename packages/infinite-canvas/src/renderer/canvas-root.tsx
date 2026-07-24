@@ -16,6 +16,7 @@ import { generateKeyBetween } from "../document/fractional-index";
 import { ROOT_PARENT } from "../document/ids";
 import { screenToCanvas, zoomAtPoint } from "../viewport/camera";
 import type { Point } from "../viewport/geometry";
+import { clientPointToElement } from "../viewport/rect-cache";
 import { cameraToFit } from "../viewport/camera";
 import { unionRects, type Rect } from "../viewport/geometry";
 import { useCanvas } from "../store/context";
@@ -25,6 +26,16 @@ import type { ViewportBridge } from "../store/canvas-api";
 import { ContentLayer } from "./content-layer";
 import { Overlay } from "./overlay";
 import { RectCacheContext } from "./renderer-context";
+
+const INTERACTIVE_TARGET_SELECTOR =
+  'a,button,input,select,textarea,[role="button"],[contenteditable="true"]';
+
+function isInteractiveTarget(target: EventTarget | null): boolean {
+  return (
+    target instanceof Element &&
+    target.closest(INTERACTIVE_TARGET_SELECTOR) !== null
+  );
+}
 
 export interface CanvasRootProps {
   /** Fit all artboards on mount (default true). */
@@ -210,8 +221,10 @@ export function CanvasRoot({
   const toPointerEvent = React.useCallback(
     (e: React.PointerEvent): CanvasPointerEvent => {
       const root = rootRef.current!;
-      const box = root.getBoundingClientRect();
-      const screen: Point = { x: e.clientX - box.left, y: e.clientY - box.top };
+      const screen: Point = clientPointToElement(root, {
+        x: e.clientX,
+        y: e.clientY,
+      });
       const canvas = screenToCanvas(screen, sessionStore.getState().camera);
       return {
         screen,
@@ -228,6 +241,7 @@ export function CanvasRoot({
   );
 
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (isInteractiveTarget(e.target)) return;
     // Synthetic / edge-case pointer events may lack an active pointer id; capture is best-effort.
     try {
       e.currentTarget.setPointerCapture(e.pointerId);
@@ -237,9 +251,11 @@ export function CanvasRoot({
     activeTool()?.onPointerDown?.(toPointerEvent(e), toolContext);
   };
   const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (isInteractiveTarget(e.target)) return;
     activeTool()?.onPointerMove?.(toPointerEvent(e), toolContext);
   };
   const onPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (isInteractiveTarget(e.target)) return;
     activeTool()?.onPointerUp?.(toPointerEvent(e), toolContext);
     try {
       if (e.currentTarget.hasPointerCapture(e.pointerId))
@@ -265,10 +281,12 @@ export function CanvasRoot({
 
   const onWheel = (e: React.WheelEvent<HTMLDivElement>) => {
     const root = rootRef.current!;
-    const box = root.getBoundingClientRect();
     const camera = sessionStore.getState().camera;
     if (e.ctrlKey || e.metaKey) {
-      const screenPoint = { x: e.clientX - box.left, y: e.clientY - box.top };
+      const screenPoint = clientPointToElement(root, {
+        x: e.clientX,
+        y: e.clientY,
+      });
       const factor = Math.exp(-e.deltaY * 0.01);
       sessionStore
         .getState()

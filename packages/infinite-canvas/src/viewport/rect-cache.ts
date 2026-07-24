@@ -18,6 +18,55 @@ interface Registration {
   artboardId: NodeId | null;
 }
 
+function safeScale(screenSize: number, layoutSize: number): number {
+  if (screenSize <= 0 || layoutSize <= 0) return 1;
+  return screenSize / layoutSize;
+}
+
+export function elementScreenScale(
+  element: HTMLElement,
+  box = element.getBoundingClientRect(),
+): Point {
+  return {
+    x: safeScale(box.width, element.offsetWidth),
+    y: safeScale(box.height, element.offsetHeight),
+  };
+}
+
+export function clientPointToElement(
+  element: HTMLElement,
+  point: Point,
+): Point {
+  const box = element.getBoundingClientRect();
+  const scale = elementScreenScale(element, box);
+  return {
+    x: (point.x - box.left) / scale.x,
+    y: (point.y - box.top) / scale.y,
+  };
+}
+
+function clientRectToElement(element: HTMLElement, rect: DOMRect): Rect {
+  const box = element.getBoundingClientRect();
+  const scale = elementScreenScale(element, box);
+  return {
+    x: (rect.left - box.left) / scale.x,
+    y: (rect.top - box.top) / scale.y,
+    width: rect.width / scale.x,
+    height: rect.height / scale.y,
+  };
+}
+
+function comparePaintOrder(
+  a: { el: HTMLElement; area: number },
+  b: { el: HTMLElement; area: number },
+): number {
+  const position = a.el.compareDocumentPosition(b.el);
+  if (position & Node.DOCUMENT_POSITION_DISCONNECTED) return a.area - b.area;
+  if (position & Node.DOCUMENT_POSITION_FOLLOWING) return 1;
+  if (position & Node.DOCUMENT_POSITION_PRECEDING) return -1;
+  return a.area - b.area;
+}
+
 export class RectCache {
   private registrations = new Map<NodeId, Registration>();
   private cache = new Map<NodeId, Rect>();
@@ -68,30 +117,34 @@ export class RectCache {
 
   /** Node ids whose canvas rect contains the point, deepest (front-most) first. */
   hitTest(canvasPoint: Point, camera: Camera): NodeId[] {
-    const hits: { id: NodeId; area: number }[] = [];
-    for (const id of this.registrations.keys()) {
+    const hits: { id: NodeId; el: HTMLElement; area: number }[] = [];
+    for (const [id, registration] of this.registrations) {
       const rect = this.getRect(id, camera);
       if (rect !== null && rectContainsPoint(rect, canvasPoint)) {
-        hits.push({ id, area: rect.width * rect.height });
+        hits.push({
+          id,
+          el: registration.el,
+          area: rect.width * rect.height,
+        });
       }
     }
-    // Smaller area ≈ deeper/front-most for nested content.
-    hits.sort((a, b) => a.area - b.area);
+    // Later DOM nodes paint on top of earlier siblings. The area fallback covers
+    // disconnected test elements where document order cannot be established.
+    hits.sort(comparePaintOrder);
     return hits.map((h) => h.id);
   }
 
   private measure(el: HTMLElement, camera: Camera): Rect | null {
     if (this.rootEl === null) return null;
-    const elBox = el.getBoundingClientRect();
-    const rootBox = this.rootEl.getBoundingClientRect();
-    // Screen position relative to the canvas root, then invert the camera transform.
-    const screenX = elBox.left - rootBox.left;
-    const screenY = elBox.top - rootBox.top;
+    const localBox = clientRectToElement(
+      this.rootEl,
+      el.getBoundingClientRect(),
+    );
     return {
-      x: (screenX - camera.x) / camera.zoom,
-      y: (screenY - camera.y) / camera.zoom,
-      width: elBox.width / camera.zoom,
-      height: elBox.height / camera.zoom,
+      x: (localBox.x - camera.x) / camera.zoom,
+      y: (localBox.y - camera.y) / camera.zoom,
+      width: localBox.width / camera.zoom,
+      height: localBox.height / camera.zoom,
     };
   }
 

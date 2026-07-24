@@ -14,6 +14,7 @@ import { useCanvas } from "../store/context";
 import { useCamera, useSelection } from "../store/hooks";
 import { canvasRectToScreen } from "../viewport/camera";
 import type { Rect } from "../viewport/geometry";
+import { elementScreenScale } from "../viewport/rect-cache";
 import { useRectCache } from "./renderer-context";
 
 const HANDLES: { key: ResizeHandle; cx: number; cy: number; cursor: string }[] =
@@ -56,11 +57,12 @@ export function TransformHandles(): React.JSX.Element | null {
       const startZoom = camera.zoom;
       const start = { x: e.clientX, y: e.clientY };
       const startRect = { ...canvasRect };
+      const screenScale = elementScreenScale(e.currentTarget);
       const gestureId = `resize-${id}-${e.pointerId}`;
 
       const move = (ev: PointerEvent) => {
-        const ddx = (ev.clientX - start.x) / startZoom;
-        const ddy = (ev.clientY - start.y) / startZoom;
+        const ddx = (ev.clientX - start.x) / screenScale.x / startZoom;
+        const ddy = (ev.clientY - start.y) / screenScale.y / startZoom;
         const next = resizeRect(startRect, handle, ddx, ddy);
         if (isArtboard) {
           documentStore.getState().apply(
