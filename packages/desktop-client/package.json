@@ -1,0 +1,78 @@
+{
+  "name": "@oppulence/desktop-client",
+  "version": "0.1.0",
+  "description": "Tauri desktop utilities for Oppulence applications",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./platform": {
+      "import": "./dist/platform.js",
+      "types": "./dist/platform.d.ts"
+    },
+    "./deep-links": {
+      "import": "./dist/platform.js",
+      "types": "./dist/platform.d.ts"
+    },
+    "./desktop-variants": {
+      "import": "./dist/desktop-variants.js",
+      "types": "./dist/desktop-variants.d.ts"
+    },
+    "./core": {
+      "import": "./dist/core.js",
+      "types": "./dist/core.d.ts"
+    },
+    "./types": {
+      "import": "./dist/types/index.js",
+      "types": "./dist/types/index.d.ts"
+    },
+    "./utils": {
+      "import": "./dist/utils/index.js",
+      "types": "./dist/utils/index.d.ts"
+    }
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Oppulence-Engineering/design-system.git",
+    "directory": "packages/desktop-client"
+  },
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json && bun build src/index.ts src/platform.ts src/desktop-variants.ts src/core.ts src/types/index.ts src/utils/index.ts --root src --outdir dist --target browser --format esm --packages=external",
+    "clean": "rm -rf .turbo dist tsconfig.build.tsbuildinfo",
+    "format": "prettier --write \"src/**/*.{ts,tsx}\"",
+    "lint": "prettier --check \"src/**/*.{ts,tsx}\"",
+    "prepublishOnly": "bun run clean && bun run build",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^2.5.0",
+    "@tauri-apps/plugin-opener": "^2",
+    "zod": "^4.3.5"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "tailwindcss": "^4.2.4",
+    "typescript": "^5.9.3"
+  },
+  "peerDependencies": {
+    "tailwindcss": "4.2.4"
+  },
+  "peerDependenciesMeta": {
+    "tailwindcss": {
+      "optional": true
+    }
+  }
+}

@@ -1,10 +1,17 @@
-# Design System Monorepo
+# Oppulence Shared Packages
 
-A Turborepo containing the design system component library and Storybook documentation.
+A Turborepo containing Oppulence's design system and independently versioned shared packages.
 
 ## Packages
 
 - `@oppulence/design-system` - React component library with Tailwind CSS
+- `@oppulence/auth` - WorkOS-backed authentication primitives
+- `@oppulence/infinite-canvas` - Collaborative spatial editor
+- `@oppulence/core` - Runtime utilities and typed socket primitives
+- `@oppulence/desktop-client` - Tauri desktop utilities
+- `@oppulence/e-invoicing` - Peppol/UBL e-invoicing primitives
+- `@oppulence/events` - Typed analytics events and OpenPanel adapters
+- `@oppulence/import` - Financial transaction import primitives
 - `@comp/storybook` - Storybook documentation and component playground
 
 ## Getting Started
