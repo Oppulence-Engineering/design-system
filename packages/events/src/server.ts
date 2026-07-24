@@ -6,7 +6,7 @@
 
 import { OpenPanel, type TrackProperties } from "@openpanel/nextjs";
 import { waitUntil } from "@vercel/functions";
-import { cookies } from "next/headers";
+import { cookies } from "next/headers.js";
 import { isEmissionEnabledFromProcessEnv } from "./gate";
 import {
   type AnalyticsClient,

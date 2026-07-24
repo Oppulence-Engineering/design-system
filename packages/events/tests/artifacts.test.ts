@@ -23,4 +23,11 @@ describe("published artifacts", () => {
 
     expect(rootArtifact).not.toContain(CLIENT_DIRECTIVE);
   });
+
+  test("the server entry uses Node-resolvable Next.js imports", async () => {
+    const serverArtifact = await readArtifact("server.js");
+
+    expect(serverArtifact).toContain('from "next/headers.js"');
+    expect(serverArtifact).not.toContain('from "next/headers"');
+  });
 });
