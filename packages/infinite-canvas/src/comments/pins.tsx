@@ -9,6 +9,7 @@ import * as React from "react";
 import { useCanvas } from "../store/context";
 import { useCamera, useSessionStore } from "../store/hooks";
 import { canvasToScreen, screenToCanvas } from "../viewport/camera";
+import { clientPointToElement } from "../viewport/rect-cache";
 import { useComments } from "./hooks";
 import type { Comment } from "./store";
 
@@ -21,9 +22,11 @@ export function CommentPins(): React.JSX.Element | null {
   const [draftBody, setDraftBody] = React.useState("");
 
   const placeAt = (e: React.PointerEvent<HTMLDivElement>) => {
-    const box = e.currentTarget.getBoundingClientRect();
     const canvas = screenToCanvas(
-      { x: e.clientX - box.left, y: e.clientY - box.top },
+      clientPointToElement(e.currentTarget, {
+        x: e.clientX,
+        y: e.clientY,
+      }),
       camera,
     );
     const created = addComment(canvas, "");

@@ -1,9 +1,8 @@
 /**
- * Content layer (§6). The transformed div holding all artboards. Subscribes to the
+ * Content layer (§6). The transformed div holding every root node. Subscribes to the
  * camera OUTSIDE React for the transform (pan/zoom stay smooth). A separate rAF-throttled
- * camera subscription drives viewport CULLING: offscreen artboards UNMOUNT their children
- * and render a fixed-size placeholder (bounding both DOM and store-subscription counts);
- * `content-visibility` on visible artboards is the browser-level LOD assist.
+ * camera subscription drives viewport CULLING for root artboards; free-floating root
+ * nodes render directly because their bounds come from measured DOM.
  */
 
 "use client";
@@ -70,7 +69,7 @@ export function ContentLayer(): React.JSX.Element {
       }}
     >
       {roots.map((id) => (
-        <Artboard
+        <RootNode
           key={id}
           id={id}
           visible={visible}
@@ -81,8 +80,8 @@ export function ContentLayer(): React.JSX.Element {
   );
 }
 
-/** Renders a root artboard, or a fixed-size placeholder when fully offscreen. */
-function Artboard({
+/** Renders a root node, culling frame artboards only when they are fully offscreen. */
+function RootNode({
   id,
   visible,
   documentStore,
@@ -92,7 +91,8 @@ function Artboard({
   documentStore: ReturnType<typeof useCanvas>["documentStore"];
 }): React.JSX.Element | null {
   const node = documentStore.getState().document.nodes[id];
-  if (node === undefined || node.type !== "frame") return null;
+  if (node === undefined) return null;
+  if (node.type !== "frame") return <NodeRenderer id={id} />;
   const bounds: Rect = {
     x: node.x,
     y: node.y,
