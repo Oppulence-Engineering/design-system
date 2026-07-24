@@ -17,6 +17,10 @@
     "typescript": "5.9.2"
   },
   "overrides": {
+    "@types/react": "19.2.7",
+    "@types/react-dom": "19.2.3",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
     "esbuild": "0.25.12"
   },
   "packageManager": "bun@1.2.5",

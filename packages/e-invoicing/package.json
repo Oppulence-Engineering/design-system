@@ -1,0 +1,55 @@
+{
+  "name": "@oppulence/e-invoicing",
+  "version": "1.0.0",
+  "description": "E-invoicing package for Peppol/UBL support via Storecove",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./providers": {
+      "types": "./dist/providers/index.d.ts",
+      "import": "./dist/providers/index.js",
+      "default": "./dist/providers/index.js"
+    },
+    "./ubl": {
+      "types": "./dist/ubl/index.d.ts",
+      "import": "./dist/ubl/index.js",
+      "default": "./dist/ubl/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Oppulence-Engineering/design-system.git",
+    "directory": "packages/e-invoicing"
+  },
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json && bun build src/index.ts src/providers/index.ts src/ubl/index.ts --root src --outdir dist --target node --format esm --packages=external",
+    "clean": "rm -rf dist .turbo",
+    "dev": "tsc -w -p tsconfig.build.json",
+    "format": "prettier --write \"src/**/*.{ts,tsx}\"",
+    "lint": "prettier --check \"src/**/*.{ts,tsx}\"",
+    "prepublishOnly": "bun run clean && bun run build",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "zod": "^4.3.5"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.9.3"
+  }
+}
