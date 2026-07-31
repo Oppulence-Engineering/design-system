@@ -1,0 +1,134 @@
+{
+  "name": "@oppulence/integrations",
+  "version": "0.1.0",
+  "description": "Browser-safe integration catalogue, contracts, parity reporting, and directory helpers for Oppulence products",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./catalog": {
+      "types": "./dist/catalog.d.ts",
+      "import": "./dist/catalog.js",
+      "default": "./dist/catalog.js"
+    },
+    "./contracts": {
+      "types": "./dist/contracts.d.ts",
+      "import": "./dist/contracts.js",
+      "default": "./dist/contracts.js"
+    },
+    "./connection": {
+      "types": "./dist/connection.d.ts",
+      "import": "./dist/connection.js",
+      "default": "./dist/connection.js"
+    },
+    "./documentation": {
+      "types": "./dist/documentation.d.ts",
+      "import": "./dist/documentation.js",
+      "default": "./dist/documentation.js"
+    },
+    "./golden-journey": {
+      "types": "./dist/golden-journey.d.ts",
+      "import": "./dist/golden-journey.js",
+      "default": "./dist/golden-journey.js"
+    },
+    "./kit": {
+      "types": "./dist/kit.d.ts",
+      "import": "./dist/kit.js",
+      "default": "./dist/kit.js"
+    },
+    "./parity": {
+      "types": "./dist/parity.d.ts",
+      "import": "./dist/parity.js",
+      "default": "./dist/parity.js"
+    },
+    "./react": {
+      "types": "./dist/react.d.ts",
+      "import": "./dist/react.js",
+      "default": "./dist/react.js"
+    },
+    "./registry": {
+      "types": "./dist/registry.d.ts",
+      "import": "./dist/registry.js",
+      "default": "./dist/registry.js"
+    },
+    "./support": {
+      "types": "./dist/support.d.ts",
+      "import": "./dist/support.js",
+      "default": "./dist/support.js"
+    },
+    "./server": {
+      "types": "./dist/server/index.d.ts",
+      "browser": "./dist/server/browser.js",
+      "node": "./dist/server/index.js",
+      "import": "./dist/server/index.js",
+      "default": "./dist/server/index.js"
+    },
+    "./templates": {
+      "types": "./dist/templates.d.ts",
+      "import": "./dist/templates.js",
+      "default": "./dist/templates.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Oppulence-Engineering/design-system.git",
+    "directory": "packages/integrations"
+  },
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json && bun run build:root && bun run build:subpaths && bun run build:server && bun run build:server-browser && bun run build:react && bun run build:manifest && bun run verify:artifacts",
+    "build:manifest": "bun scripts/build-public-manifest.ts",
+    "build:react": "bun build src/react.tsx --outdir dist --target browser --format esm --packages=external --banner='\"use client\";'",
+    "build:root": "esbuild src/index.ts --bundle --platform=browser --format=esm --packages=external --outfile=dist/index.js",
+    "build:server": "esbuild src/server/index.ts --bundle --platform=node --format=esm --packages=external --outfile=dist/server/index.js",
+    "build:server-browser": "esbuild src/server/browser.ts --bundle --platform=browser --format=esm --outfile=dist/server/browser.js",
+    "build:subpaths": "bun build src/catalog.ts src/contracts.ts src/connection.ts src/documentation.ts src/golden-journey.ts src/kit.ts src/parity.ts src/registry.ts src/support.ts src/templates.ts --root src --outdir dist --target browser --format esm --packages=external",
+    "clean": "rm -rf .turbo dist tsconfig.build.tsbuildinfo",
+    "format": "prettier --write \"{src,tests,scripts}/**/*.{ts,tsx}\"",
+    "lint": "prettier --check \"{src,tests,scripts}/**/*.{ts,tsx}\"",
+    "prepublishOnly": "bun run clean && bun run build",
+    "refresh:simstudio": "bun scripts/refresh-simstudio-baseline.ts",
+    "test": "bun test tests --path-ignore-patterns='**/artifacts.test.ts'",
+    "typecheck": "tsc --noEmit",
+    "verify:artifacts": "bun test tests/artifacts.test.ts"
+  },
+  "dependencies": {
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@types/node": "^22.18.0",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.7",
+    "bun-types": "*",
+    "esbuild": "0.25.12",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "typescript": "^5.9.3"
+  },
+  "peerDependencies": {
+    "react": ">=19",
+    "react-dom": ">=19"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    },
+    "react-dom": {
+      "optional": true
+    }
+  }
+}

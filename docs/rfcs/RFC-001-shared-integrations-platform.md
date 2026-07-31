@@ -1,20 +1,20 @@
 # RFC-001: Shared Integrations Platform
 
 **Status:** Proposed
-**Owners:** Design System, Eigenn, Corinthian
+**Owners:** Design System, Eigenn, Conduitt
 **Date:** 2026-07-31
 
 ## Decision
 
-Create a publishable @oppulence/integrations package in this repository. Its core owns canonical integration metadata, capability vocabulary, product availability, safe connection projections, search/filter helpers, database-resolver contracts, and generated public catalogue data. Ship its React adapter in Phase 0 and add controlled integration-directory primitives to @oppulence/design-system.
+Create a publishable @oppulence/integrations package in this repository. Its browser-safe core owns canonical integration metadata, capability vocabulary, product availability, safe connection projections, search/filter helpers, database-resolver contracts, and generated public catalogue data. Its server-only entry owns reusable provider SDKs, OAuth/PKCE flows, encrypted credential envelopes, credential refresh/retry, and mountable route handlers. Ship its React adapter in Phase 0 and add controlled integration-directory primitives to @oppulence/design-system.
 
-Eigenn and Corinthian retain OAuth, encrypted credentials, provider SDKs, databases, webhooks, sync jobs, authorization, actions, and audit records. The shared package is a contract and experience layer, not a shared connector runtime or credential vault.
+Eigenn and Conduitt retain only their storage adapters, KMS/keyring adapter, authenticated subject resolution, entitlement/business policy, domain normalization, sync-business rules, and audit ownership. The shared server runtime owns provider protocol behavior and credential lifecycle; it never imports a product database, KMS client, or router.
 
 ## Summary
 
-Eigenn and Corinthian need one honest integration experience: the same provider identity, categories, capability language, health states, and expansion path while preserving each product's data and governance boundary.
+Eigenn and Conduitt need one honest integration experience: the same provider identity, categories, capability language, health states, OAuth/credential behavior, and expansion path while preserving each product's data and governance boundary.
 
-Today, @canvas/app-store is useful provider-implementation evidence but it is Canvas-specific: it includes database/server helpers, provider actions, callbacks, and transport dependencies. Eigenn also carries a separate accounting catalogue. Corinthian web owns a static APP_CATALOG, while Corinthian API derives some accounting metadata from @canvas/app-store. Those sources have already drifted on IDs, availability, and capability claims.
+Today, @canvas/app-store is useful provider-implementation evidence but it is Canvas-specific: it includes database/server helpers, provider actions, callbacks, and transport dependencies. Eigenn also carries a separate accounting catalogue. Conduitt (currently implemented in Canvas's `corinthian` code area) owns a static APP_CATALOG, while its API derives some accounting metadata from @canvas/app-store. Those sources have already drifted on IDs, availability, and capability claims.
 
 The new package gives both products a durable source of truth, with a design inspired by Sim's useful boundary: a normalized integration catalogue separate from workspace credentials and permissioned connection state. Sim Studio catalogue parity is the explicit product target. We adopt its provider coverage and catalogue discipline, not its provider code, schemas, branding, or product claims.
 
@@ -32,8 +32,8 @@ The new package gives both products a durable source of truth, with a design ins
 
 ## Non-goals
 
-- Shared OAuth callbacks, token storage, provider SDKs, databases, workers, or API routers.
-- Moving provider implementations from @canvas/app-store, @canvas/accounting, @canvas/engine, or Corinthian services.
+- Product database clients, KMS clients, tenant authorization, business-policy decisions, domain normalization, workers, or audit storage.
+- Copying product-specific accounting/collections business behavior out of @canvas/app-store, @canvas/accounting, @canvas/engine, or Conduitt services.
 - Copying Sim Studio's provider code, block schemas, credential storage, brand assets, or generic workflow product.
 - Shipping third-party logo assets without legal/design approval.
 - A general-purpose ETL platform, workflow engine, or automation marketplace.
@@ -44,12 +44,12 @@ The new package gives both products a durable source of truth, with a design ins
 
 An integration qualifies for shipped only when it improves at least one named product loop:
 
-| Loop                         | Qualifying value                                                                                      |
-| ---------------------------- | ----------------------------------------------------------------------------------------------------- |
-| Eigenn planning truth        | Accounting actuals, bank cash, payroll costs, subscription MRR, operational drivers, source freshness |
-| Eigenn owner decision        | Forecast variance explanation, scenario driver, cash/runway alert, reconciled evidence                |
-| Corinthian revenue execution | Invoice/payment import, promise evidence, communication context, reconciliation, governed action      |
-| Cross-product intelligence   | Permissioned AR outcomes improve forecasts; approved forecast directives become Corinthian work       |
+| Loop                       | Qualifying value                                                                                      |
+| -------------------------- | ----------------------------------------------------------------------------------------------------- |
+| Eigenn planning truth      | Accounting actuals, bank cash, payroll costs, subscription MRR, operational drivers, source freshness |
+| Eigenn owner decision      | Forecast variance explanation, scenario driver, cash/runway alert, reconciled evidence                |
+| Conduitt revenue execution | Invoice/payment import, promise evidence, communication context, reconciliation, governed action      |
+| Cross-product intelligence | Permissioned AR outcomes improve forecasts; approved forecast directives become Conduitt work         |
 
 ### Catalogue truth is separate from connection truth
 
@@ -57,7 +57,7 @@ The catalogue says what a provider could do for a product. The owning product AP
 
 ### Availability is per product and evidence-based
 
-The same provider can be shipped for Corinthian and planned for Eigenn. Shipped requires a verified authorized connection, the promised business outcome, observable health/freshness, recovery behavior, and an audit trail. An SDK, callback stub, or marketing card alone is not sufficient.
+The same provider can be shipped for Conduitt and planned for Eigenn. Shipped requires a verified authorized connection, the promised business outcome, observable health/freshness, recovery behavior, and an audit trail. A shared SDK, callback stub, or marketing card alone is not sufficient.
 
 ### Sim Studio parity is versioned and measurable
 
@@ -95,21 +95,29 @@ packages/integrations                 @oppulence/integrations
 ├── capabilities                       outcome, operation, and trigger vocabulary
 ├── registry                           IDs, aliases, search, and filters
 ├── connection                         catalogue merge + injected resolver contract
+├── kit                                shared directory, entitlement, and command orchestration
 ├── parity                             pinned Sim Studio baseline + generated report
 ├── support                            lifecycle, entitlement, SLO, and data-contract metadata
 ├── templates                          provider outcome templates and discovery data
 ├── documentation                      sanitized generated-manifest helpers
+├── golden-journey                     common functional-provider release gate
 └── react                              Phase-0 typed loader and React hooks
+
+packages/integrations/server          @oppulence/integrations/server
+├── provider SDKs                      OAuth2 clients and provider presets
+├── credential envelope                AES-GCM encryption/decryption and refresh lifecycle
+├── OAuth runtime                      PKCE, state consumption, callback exchange, credential save
+└── routes                             mountable Fetch-standard directory, command, and OAuth handlers
 
 packages/design-system                @oppulence/design-system
 └── integrations                       controlled visual primitives over contracts
 
-apps/web and Corinthian web           product-specific query and command adapters
-└── their own APIs/workers             credentials, providers, sync, authorization,
-                                       actions, source data, and audit ownership
+apps/web and Conduitt web             product storage and business-policy adapters
+└── their own APIs/workers             authenticated subject, DB/KMS adapters, entitlement,
+                                       domain normalization, actions, source data, and audit ownership
 ```
 
-The core package must be safe for a browser, Next server, worker, or API process. Its only runtime dependency should be zod. It must not import a product database, secret manager, OAuth SDK, provider SDK, router, Next.js, or server-only module.
+The core package must be safe for a browser, Next server, worker, or API process. Its only runtime dependency is zod. It must not import a product database, secret manager, OAuth SDK, provider SDK, router, Next.js, or server-only module. The separate `/server` entry is Node-targeted and may run OAuth/provider protocol code, but it still must not import a product database, secret manager, KMS client, or application router.
 
 The Design System may depend on @oppulence/integrations for contracts and controlled view models only. It must not acquire provider client libraries.
 
@@ -126,11 +134,14 @@ packages/integrations/
 ├── src/capabilities.ts
 ├── src/registry.ts
 ├── src/connection.ts
+├── src/kit.ts
 ├── src/parity.ts
 ├── src/support.ts
 ├── src/templates.ts
 ├── src/documentation.ts
+├── src/golden-journey.ts
 ├── src/react.ts
+├── src/server/{credentials,oauth2,runtime,routes,index}.ts
 ├── tests/{registry,contracts,availability,parity,artifacts}.test.ts
 ├── package.json
 ├── tsconfig.json
@@ -161,13 +172,20 @@ export {
 
 export { getSimStudioParityReport } from "./parity";
 
+export {
+  createIntegrationConnectionResolver,
+  createProductIntegrationKit,
+} from "./kit";
+
+export { runIntegrationGoldenJourney } from "./golden-journey";
+
 export type {
   IntegrationConnectionResolver,
   IntegrationDirectoryLoader,
 } from "./connection";
 ```
 
-The `/react` entry point ships in Phase 0. It exposes `useIntegrationDirectory` and `IntegrationDirectoryProvider` over a product-supplied `IntegrationDirectoryLoader`, with no React Query, database, router, or provider-SDK dependency. Subpaths `/catalog`, `/contracts`, `/connection`, `/react`, and `/documentation` prevent a consumer from importing more than it needs.
+The `/react` entry point ships in Phase 0. It exposes `useIntegrationDirectory` and `IntegrationDirectoryProvider` over a product-supplied `IntegrationDirectoryLoader`, with no React Query, database, router, or provider-SDK dependency. The framework-neutral `/kit` entry point centralizes directory assembly, canonical-ID normalization, entitlement gating, safe command validation, permitted-action checks, and support-contract validation. The `/server` entry provides the connector implementation for OAuth providers: routes, PKCE, token exchange, encrypted credential storage through a product-supplied vault/keyring, refresh/retry, and provider API requests. Products supply only authorized record lookups, policy evaluation, storage/keyring adapters, and business actions. Subpaths `/catalog`, `/contracts`, `/connection`, `/kit`, `/golden-journey`, `/server`, `/react`, and `/documentation` prevent a consumer from importing more than it needs.
 
 ## Canonical data model
 
@@ -190,7 +208,7 @@ interface IntegrationDefinition {
 }
 
 interface ProductIntegration {
-  product: "eigenn" | "corinthian";
+  product: "eigenn" | "conduitt";
   availability: "shipped" | "beta" | "planned" | "retired";
   authMethods: readonly IntegrationAuthMethod[];
   enabledCapabilities: readonly IntegrationCapability[];
@@ -238,7 +256,7 @@ Each owning API adapts its private records into this browser-safe contract:
 interface IntegrationConnectionProjection {
   id: string;
   integrationId: IntegrationId;
-  product: "eigenn" | "corinthian";
+  product: "eigenn" | "conduitt";
   displayName: string;
   state:
     | "not_connected"
@@ -294,14 +312,16 @@ const directory = await resolveEigennDirectory({ organizationId, actorId });
 
 `createIntegrationDirectoryResolver()` validates and filters the returned projections against the registry, so a database record with an unknown provider ID, invalid product, or unsupported capability cannot leak into a directory. The React loader calls a product-owned query endpoint or server-action bridge; it must never receive a database client or resolve credentials in the browser.
 
+`createIntegrationConnectionResolver()` removes repeatable adapter boilerplate: the product lists already-authorized private records and maps each one into `IntegrationConnectionProjection`; the shared package strictly parses the browser-safe output. `createProductIntegrationKit()` then uses those projections to build the directory, batch entitlement checks, normalize aliases before connect, enforce declared authentication modes and permitted actions, and validate functional support records. It remains framework-neutral: Canvas/Eigenn expose its methods through their own route/action layer.
+
 ### Product connector and command contract
 
-The shared package also defines the contract that every product-owned connector adapter must satisfy. An adapter is implemented in the owning product or service, where its provider SDK, OAuth callback, tokens, database records, rate-limit handling, and workers live. The package exports only typed descriptors and request/result schemas.
+The shared browser core defines the contract for product commands. The separate `@oppulence/integrations/server` entry owns configured OAuth2 provider clients, PKCE callback flow, encrypted credential envelopes, refresh/retry, and Fetch-standard directory, connect, action, health, start, and callback routes. The owning product provides only durable vault/state adapters, KMS key access, authenticated subject resolution, entitlement policy, and its domain actions, data mapping, workers, and audit records.
 
 ```ts
 interface IntegrationSupportContract {
   integrationId: IntegrationId;
-  product: "eigenn" | "corinthian";
+  product: "eigenn" | "conduitt";
   connectionModes: readonly IntegrationAuthMethod[];
   syncMode: "on_demand" | "polling" | "webhook" | "hybrid" | "none";
   dataContracts: readonly IntegrationDataContract[];
@@ -327,7 +347,7 @@ interface ProductIntegrationConnector<TContext> {
 }
 ```
 
-`beginConnection` may return an OAuth redirect, a signed Link session, a validated API-key setup state, or a file-upload next step. `performAction` is allow-listed by `permittedActions`, but the adapter reauthorizes it server-side. A connector is never loaded into the Design System, registry, React adapter, or browser bundle.
+`beginConnection` may return the shared OAuth start path, a product-owned signed Link session, a validated API-key setup state, or a file-upload next step. `createOAuthRouteConnector()` supplies the OAuth path while `createIntegrationOAuthRoutes()` performs the redirect, callback exchange, and encrypted vault save. The OAuth start and callback routes both require the product's authorization callback: the callback rechecks present-tense access before a credential is exchanged or saved. The durable state adapter consumes a schema-validated state exactly once, purges expired state, and atomically enforces the runtime's per-subject cap. Provider authorization, token, and API endpoints require HTTPS; only a redirect URI may use loopback HTTP for development. Provider configuration cannot override package-owned OAuth/PKCE parameters, and token response reads have bounded time and size. Credential work is serialized per connection so revocation cannot lose a race with refresh; a pluggable distributed lock supplies the same guarantee for multi-replica deployments. The shared product kit rejects unavailable providers, unsupported auth modes, denied entitlements, inaccessible connection IDs, and actions outside `permittedActions`; product actions reauthorize every command server-side. No server connector is loaded into the Design System, registry, React adapter, or browser bundle.
 
 The support contract is the functional-parity ledger. For each Sim Studio provider, it records one or more product owners, the authorized setup path, supported source operations/triggers, known limitations, and the outcome the connection produces. This makes it possible to say exactly what “provided” means without claiming generic Sim workflow behavior.
 
@@ -386,14 +406,14 @@ Every provider receives these generated, consistent surfaces:
 | Directory card       | Identity, categories, availability, auth summary, health/count             | Primary allowed action and plan/entitlement state                |
 | Provider detail      | Description, operations, triggers, setup modes, source docs, limitations   | Business outcome, model/collection impact, permissions, recovery |
 | Connection detail    | Account label, source scope, freshness, coverage, health, audit-safe issue | Resync/configure/disconnect command callbacks                    |
-| Outcome templates    | Named provider-to-outcome starting point and inputs                        | Eigenn model driver/lineage or Corinthian governed action/policy |
+| Outcome templates    | Named provider-to-outcome starting point and inputs                        | Eigenn model driver/lineage or Conduitt governed action/policy   |
 | Documentation/export | Public catalogue metadata and versioned parity status                      | No tenant state, secrets, raw errors, or customer data           |
 
 Templates are not generic workflow clones. They are outcome-specific recipes that prefill a supported operation, expected data contract, and success metric. Examples: QuickBooks actuals → forecast variance; Plaid balances → cash runway; Stripe collections → liquidity scenario; Salesforce pipeline → revenue scenario; Gmail promises → governed follow-up. Templates must reference only product-supported operations and may be disabled by entitlement or policy.
 
 ### Data contracts, lineage, and modelling impact
 
-Each supported source operation declares an `IntegrationDataContract`: stable object/metric name, schema version, field classification, normalization rule, permitted use, retention/deletion owner, and source-to-output lineage. For Eigenn, the contract also identifies the model driver(s), time grain, currency/units, historical coverage, refresh timestamp, and forecasting use. For Corinthian, it identifies the evidence record, action policy, idempotency key, and audit event.
+Each supported source operation declares an `IntegrationDataContract`: stable object/metric name, schema version, field classification, normalization rule, permitted use, retention/deletion owner, and source-to-output lineage. For Eigenn, the contract also identifies the model driver(s), time grain, currency/units, historical coverage, refresh timestamp, and forecasting use. For Conduitt, it identifies the evidence record, action policy, idempotency key, and audit event.
 
 The data contract prevents silent modelling errors: a customer sees which connection supplied a model input, when it was last refreshed, which source scope it covers, and whether an assumption overrides it. Disconnect, scope reduction, or source deletion makes dependent model/collection outputs visibly stale and preserves only the audit-safe lineage required by policy.
 
@@ -409,10 +429,10 @@ The registry starts from all 232 pinned Sim Studio providers, retaining their so
 
 The initial public matrix is conservative:
 
-| Product    | Initial shipped entries                                            | Rule                                                                                                     |
-| ---------- | ------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------- |
-| Eigenn     | Plaid and QuickBooks after end-to-end verification                 | Honors the current product position; other implementation fragments remain planned or beta until proven. |
-| Corinthian | Only providers whose full journey is verified by Corinthian owners | Static cards and callback fragments do not qualify.                                                      |
+| Product  | Initial shipped entries                                          | Rule                                                                                                     |
+| -------- | ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| Eigenn   | Plaid and QuickBooks after end-to-end verification               | Honors the current product position; other implementation fragments remain planned or beta until proven. |
+| Conduitt | Only providers whose full journey is verified by Conduitt owners | Static cards and callback fragments do not qualify.                                                      |
 
 Promotion from planned to beta requires an owner, customer outcome, permission model, connection-health contract, and test plan. Promotion to shipped requires all acceptance gates in this RFC. Sim Studio operations and triggers are recorded as source capability metadata on day one; an operation becomes functional only when mapped to a product outcome and a governed product command or data contract.
 
@@ -420,20 +440,20 @@ Promotion from planned to beta requires an owner, customer outcome, permission m
 
 ### Eigenn
 
-Eigenn retains Plaid Link, accounting OAuth, source snapshots, forecast-signal normalization, evaluator inputs, refresh jobs, and provenance. apps/web imports the shared catalogue and adapts authorized team connection state to IntegrationConnectionProjection. The scenario-model grid/dashboard displays the same freshness/lineage; a catalogue entry never proves a model source is fresh.
+Eigenn supplies only its durable database/KMS adapters, authenticated team authorization, and its business work: Plaid Link-specific handoff, source snapshots, forecast-signal normalization, evaluator inputs, refresh jobs, and provenance. It mounts the shared OAuth routes for configured OAuth2 providers such as QuickBooks and Xero; the package owns provider protocol, callbacks, credential envelopes, refresh/retry, provider SDKs, and the common route mechanics. apps/web imports the shared catalogue and adapts authorized team connection state to `IntegrationConnectionProjection`. The scenario-model grid/dashboard displays the same freshness/lineage; a catalogue entry never proves a model source is fresh.
 
-### Corinthian
+### Conduitt
 
-Corinthian retains organization authorization, encrypted connection records, accounting import, payment/webhook processing, governed communication actions, and audit timeline. corinthian-web imports the same directory contracts and Design System primitives, while its own tRPC commands carry out actions. Its separate static catalogue and API accounting catalogue migrate to canonical IDs with product-specific copy overlays only where necessary.
+Conduitt supplies its organization authorization and durable database/KMS adapters, then owns accounting import, payment/webhook business processing, governed communication actions, and its audit timeline. It mounts the shared OAuth routes and imports the same directory contracts and Design System primitives; the package owns provider SDKs/protocol, callback validation, encrypted credential handling, refresh/retry, and common route mechanics, while Conduitt API commands carry out only domain actions. Its existing Canvas source tree remains internally named `corinthian`; its separate static catalogue and API accounting catalogue migrate to canonical IDs with product-specific copy overlays only where necessary.
 
 ### Cross-product bridge
 
-The registry may present Eigenn–Corinthian as an integration, but it owns only catalogue metadata and safe state labels. Signing keys, directives, organization matching, events, permissions, and audit evidence stay in the product bridge services.
+The registry may present Eigenn–Conduitt as an integration, but it owns only catalogue metadata and safe state labels. Signing keys, directives, organization matching, events, permissions, and audit evidence stay in the product bridge services.
 
 ## Security and privacy requirements
 
-1. The package never imports an OAuth SDK, database client, secrets client, provider SDK, router, or server-only module.
-2. Schemas reject tokens, client secrets, webhook secrets, raw API errors, financial records, bank details, and credential payloads.
+1. The browser-safe core never imports an OAuth SDK, database client, secrets client, provider SDK, router, or server-only module. The `/server` export resolves to a throwing browser stub and may run provider protocol code only in a server environment; it never imports a product database, KMS client, or application router.
+2. Browser schemas reject tokens, client secrets, webhook secrets, raw API errors, financial records, bank details, and credential payloads. The server vault stores only AES-GCM encrypted envelopes bound to the product, integration, and connection IDs.
 3. Product APIs authorize every connection/action; permittedActions is UI data, never an authorization mechanism.
 4. Connect, reconnect, scope change, sync, configuration, disconnect, credential rotation, and action execution are audited by the owning product.
 5. Source freshness/coverage can be shown without revealing source records to users who lack that permission.
@@ -470,16 +490,17 @@ The CI parity check compares the generated source snapshot with the committed pa
 1. Add packages/integrations with explicit build exports, contracts, canonical IDs/aliases, vocabulary, resolver factory, Phase-0 `/react` loader/hooks, and tests.
 2. Import the pinned Sim Studio baseline into a generated provider/operation/trigger manifest, create all 232 registry records with source-parity references, and publish the parity report.
 3. Document and test a product-owned authorized database resolver adapter; it returns only IntegrationConnectionProjection data to the package.
-4. Add controlled directory primitives, Storybook stories, accessibility tests, and no-className conformance to @oppulence/design-system.
-5. Add an availability-promotion review checklist and public-manifest build.
+4. Add a framework-neutral product kit and a reusable golden-journey release harness, plus a server-only OAuth/provider runtime and Fetch route handler. Product database, KMS, router, and business-runtime adapters remain outside the package.
+5. Add controlled directory primitives, Storybook stories, accessibility tests, and no-className conformance to @oppulence/design-system.
+6. Add an availability-promotion review checklist and public-manifest build.
 
-**Exit:** package publishes independently; all 232 Sim Studio providers, their source operations, and triggers have a one-to-one generated catalogue record; both a server resolver and React query bridge can connect without importing a database into the package or browser; no provider runtime code moves; a planned provider never renders as connectable.
+**Exit:** package publishes independently; all 232 Sim Studio providers, their source operations, and triggers have a one-to-one generated catalogue record; both a server resolver and React query bridge can connect without importing a database into the package or browser; the server subpath supplies OAuth2, encrypted envelopes, provider presets, and routes without importing product DB/KMS/business runtime; a planned provider never renders as connectable.
 
 ### Phase 1 — Migrate read paths
 
 1. Replace Eigenn's duplicate accounting display metadata with the registry.
-2. Replace Corinthian web/API identity, category, availability, and capability metadata with registry definitions plus local copy overlays where needed.
-3. Implement Eigenn and Corinthian database resolvers that emit safe connection projections through the shared resolver factory.
+2. Replace Conduitt web/API identity, category, availability, and capability metadata with registry definitions plus local copy overlays where needed.
+3. Implement Eigenn and Conduitt database resolvers plus vault/keyring/state/subject adapters that emit safe connection projections through the shared resolver factory and mount the shared OAuth routes.
 4. Migrate both directories to shared category/capability/search helpers.
 
 **Exit:** IDs, categories, availability, and capability labels cannot diverge between the two product directories.
@@ -494,9 +515,9 @@ The CI parity check compares the generated source snapshot with the committed pa
 
 ### Phase 3 — Functional Sim Studio provider parity
 
-1. Convert every catalogue-parity record into at least one functional path in Eigenn, Corinthian, or both. A product-specific data adapter may be intentionally read-only; its value contract must say why.
+1. Convert every catalogue-parity record into at least one functional path in Eigenn, Conduitt, or both. A product-specific data adapter may be intentionally read-only; its value contract must say why.
 2. Eigenn prioritizes planning truth: Plaid/QuickBooks, accounting, billing, payroll, spreadsheet, warehouse, CRM, and operations sources when they feed a model, provenance, or owner action loop.
-3. Corinthian prioritizes revenue execution: invoice/payment, mailbox, CRM, communication, and support sources when they improve evidence or governed action.
+3. Conduitt prioritizes revenue execution: invoice/payment, mailbox, CRM, communication, and support sources when they improve evidence or governed action.
 4. Introduce generic signed webhooks before Zapier, n8n, Make, or MCP-specific UI expansion, then map their provider-specific source operations as governed capabilities.
 
 **Exit:** all 232 providers have at least one verified owned-product connection or configuration path, and the parity report has no `catalogue_only`, `missing`, or unreviewed source changes.
@@ -519,6 +540,7 @@ The CI parity check compares the generated source snapshot with the committed pa
 - Search/filter output is deterministic and browser-safe.
 - Connection projections reject secret-like fields and unknown IDs.
 - The resolver factory rejects unknown provider IDs, wrong-product projections, and capabilities unsupported by the registry before building a directory.
+- The product kit normalizes legacy IDs, gates directories and commands through the same entitlement policy, rejects disallowed actions, and preserves the owner-side reauthorization boundary.
 - The React loader accepts only a product-provided async loader and has loading, error, refresh, and unmount-safe behavior without a database dependency.
 - The pinned Sim Studio baseline maps exactly 232 unique source slugs/types to registry entries; category totals, source auth types, operation count, and trigger count match the snapshot.
 - A parity-diff test fails when a Sim Studio provider is unmapped, ambiguously mapped, silently renamed, or has changed source operations/triggers without an explicit review record.
@@ -526,7 +548,12 @@ The CI parity check compares the generated source snapshot with the committed pa
 - Generated summaries contain no long-form operation/template payload; details load by ID and retain deterministic search over provider, operation, and trigger text.
 - Entitlement projections never expose tenant state or unavailable commands, and every denied command has a safe UI explanation.
 - Template validation rejects an unavailable provider, unsupported operation, missing data contract, or mismatched product capability.
+- Credential envelopes bind AES-GCM authenticated data to the product, canonical provider, and connection ID; an envelope cannot decrypt for another connection.
+- OAuth state is single-use, expiring, schema-validated after durable read, atomically capped per subject, and purged when abandoned. Start and callback authorization, PKCE, callback mismatch, provider denial, token exchange, refresh, revocation, and one 401 retry have safe failure behavior.
+- Fetch-standard OAuth routes authorize before recording state, reject bounded oversized JSON bodies, redirect without exposing provider tokens or raw provider errors, and the browser-safe build resolves the server entry to a throwing stub.
+- Provider SDK URL joining preserves configured API path prefixes, provider requests are time-bounded, and concurrent refreshes are single-flight per connection (with a distributed-lock adapter required when replicas share a vault).
 - Built artifacts expose every documented subpath; the manifest matches the registry.
+- The golden-journey harness blocks release until the support/coverage gates pass and each product-owned authorization, sync, freshness, recovery, audit, and disconnect assertion succeeds.
 
 ### Design System tests
 
@@ -536,17 +563,18 @@ The CI parity check compares the generated source snapshot with the committed pa
 
 ### Product golden journeys
 
-For each shipped provider: authorized connect, entitlement denial, initial sync, normal update, freshness expiry, stale/error state, recovery, audit event, and disconnect all pass. The API must enforce the same permission for each visible command. Any data source used by an Eigenn model must also prove source-to-driver lineage, period/coverage validation, and stale/deleted-source propagation. Any Corinthian action source must prove idempotency, policy evaluation, evidence persistence, and audit correlation.
+For each shipped provider: authorized connect, entitlement denial, initial sync, normal update, freshness expiry, stale/error state, recovery, audit event, and disconnect all pass. The API must enforce the same permission for each visible command. Any data source used by an Eigenn model must also prove source-to-driver lineage, period/coverage validation, and stale/deleted-source propagation. Any Conduitt action source must prove idempotency, policy evaluation, evidence persistence, and audit correlation.
 
 ## Acceptance criteria
 
 - [ ] @oppulence/integrations is independently published from this repository.
-- [ ] It has no product database, secret, provider SDK, router, OAuth callback, worker, or server-only dependency.
+- [ ] Its browser-safe core has no product database, secret, provider SDK, router, OAuth callback, worker, or server-only dependency; its `/server` entry has no product database, KMS, router, or business-runtime dependency.
 - [ ] Every integration has a canonical ID and explicit legacy aliases.
 - [ ] The generated parity report maps all 232 providers in the pinned Sim Studio snapshot, preserving their source identity, category, authentication method, operations, and triggers.
 - [ ] The registry covers the named finance, operations, and data categories while tracking product availability independently.
-- [ ] Eigenn and Corinthian consume its identity, availability, capability, and directory-filter contracts.
-- [ ] Their APIs return safe projections and retain credentials, data movement, authorization, and audit ownership.
+- [ ] Eigenn and Conduitt consume its identity, availability, capability, and directory-filter contracts.
+- [ ] Their APIs return safe projections and retain credential storage/KMS, data movement, authorization, and audit ownership; the shared server entry owns OAuth, credential envelopes, refresh, and provider routes.
+- [ ] Conduitt/Eigenn can use the product kit and server runtime for common directory, entitlement, command validation, OAuth, and provider requests while retaining their own storage, policy, domain connector actions, and business routes.
 - [ ] Planned providers do not offer connect actions; shipped providers pass the complete golden journey.
 - [ ] Every Sim Studio parity provider has a verified owned-product connection or configuration path before the programme is declared functionally at parity.
 - [ ] Every functional provider has an owner, support contract, entitlement policy, source freshness/SLO policy, recovery action, and data/action lineage.
