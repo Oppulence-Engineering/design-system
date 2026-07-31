@@ -176,12 +176,26 @@ export function AuthProvider({
       setOrganizations(data.organizations);
       setError(null);
     } catch (err) {
-      // Session fetch failed - user is not authenticated
-      setUser(null);
-      setSession(null);
-      setOrganization(null);
-      setMembership(null);
-      setOrganizations([]);
+      const authError = AuthError.from(err, "NETWORK_ERROR");
+      setError(authError);
+
+      // Only the server can tell us the caller is signed out, and it does that
+      // with a 401. Everything else that lands here — offline, DNS failure,
+      // 5xx, a proxy error page, malformed JSON — means we could not determine
+      // the session, which is not the same thing.
+      //
+      // The distinction matters because this runs on an interval and on window
+      // focus, not just at mount: treating a transient failure as a sign-out
+      // wipes a session the user still has, and the app abruptly claims they
+      // are logged out. Consumers that need to react to the failure can read
+      // `error`, which is now populated instead of being silently dropped.
+      if (authError.status === 401) {
+        setUser(null);
+        setSession(null);
+        setOrganization(null);
+        setMembership(null);
+        setOrganizations([]);
+      }
     } finally {
       setIsLoading(false);
     }
