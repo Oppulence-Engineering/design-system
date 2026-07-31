@@ -18,12 +18,12 @@ Every provider moves through the following states independently for Eigenn and
 Conduitt. This is deliberately stricter than a catalogue card or a generated
 SDK constructor.
 
-| State | Shared package deliverable | Product deliverable | Customer claim |
-| --- | --- | --- | --- |
-| `catalogued` | Canonical ID, aliases, source operations/triggers, auth class, and directory metadata | None | Tracked only |
-| `protocol-ready` | Provider configuration/SDK, encrypted credential lifecycle, callback or setup route, and protocol tests | Secret configuration only | Setup can be enabled in a controlled environment |
-| `product-ready` | Validated connection and capability contracts, health/recovery protocol, and golden-journey fixtures | Authorized storage adapter, entitlement policy, normalization/business handler, and audit sink | Beta |
-| `functional` | Versioned support contract and operation/trigger coverage gate | Production evidence for outcome, freshness, recovery, lineage, and authorization | Shipped |
+| State            | Shared package deliverable                                                                              | Product deliverable                                                                            | Customer claim                                   |
+| ---------------- | ------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | ------------------------------------------------ |
+| `catalogued`     | Canonical ID, aliases, source operations/triggers, auth class, and directory metadata                   | None                                                                                           | Tracked only                                     |
+| `protocol-ready` | Provider configuration/SDK, encrypted credential lifecycle, callback or setup route, and protocol tests | Secret configuration only                                                                      | Setup can be enabled in a controlled environment |
+| `product-ready`  | Validated connection and capability contracts, health/recovery protocol, and golden-journey fixtures    | Authorized storage adapter, entitlement policy, normalization/business handler, and audit sink | Beta                                             |
+| `functional`     | Versioned support contract and operation/trigger coverage gate                                          | Production evidence for outcome, freshness, recovery, lineage, and authorization               | Shipped                                          |
 
 No state transition is inferred from a provider's source catalogue metadata.
 `planned`, `beta`, and `shipped` continue to be product-specific fields in the
@@ -38,7 +38,11 @@ coverage separately.
   Fetch-standard OAuth/directory/command routes.
 - `@oppulence/integrations/server`: credentials never cross to a browser;
   provider callback data is allowlisted; routes re-authorize before persisting
-  a connection.
+  a connection. Its shared transports cover the pinned Sim Studio auth classes:
+  OAuth 2.0, API key, and no-auth HTTPS clients. OAuth callbacks, API-key
+  setup, and no-auth connection confirmation are all mountable Fetch-standard
+  routes; each product provides only authorization plus its database/audit
+  callback.
 - Eigenn and Conduitt: authenticated subject resolution, tenant/role/plan
   policy, DB/KMS implementations of the package interfaces, provider data
   normalization, sync and action business logic, lineage, and audit records.

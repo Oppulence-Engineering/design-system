@@ -14,6 +14,18 @@ import {
   type ProductIntegrationKit,
 } from "../kit";
 import type { IntegrationOAuthSubject } from "./runtime";
+import type { IntegrationApiKeySubject } from "./api-key-runtime";
+import {
+  createIntegrationApiKeyRuntime,
+  IntegrationApiKeyRuntimeError,
+  type IntegrationApiKeyRuntimeConfig,
+} from "./api-key-runtime";
+import type { IntegrationNoAuthSubject } from "./no-auth-runtime";
+import {
+  createIntegrationNoAuthRuntime,
+  IntegrationNoAuthRuntimeError,
+  type IntegrationNoAuthRuntimeConfig,
+} from "./no-auth-runtime";
 import {
   createIntegrationOAuthRuntime,
   IntegrationRuntimeError,
@@ -37,6 +49,31 @@ export interface IntegrationOAuthRoutesConfig extends IntegrationOAuthRuntimeCon
   ): Promise<void>;
   basePath?: string;
   maxJsonBodyBytes?: number;
+}
+
+export interface IntegrationApiKeyRoutesConfig extends IntegrationApiKeyRuntimeConfig {
+  /** Resolves the product's authenticated tenant/actor context for API-key setup. */
+  resolveSubject(request: Request): Promise<IntegrationApiKeySubject>;
+  /** Required authorization immediately before an API key is persisted. */
+  authorizeConnect(
+    subject: IntegrationApiKeySubject,
+    integrationId: string,
+    request: Request,
+  ): Promise<void>;
+  basePath?: string;
+  maxJsonBodyBytes?: number;
+}
+
+export interface IntegrationNoAuthRoutesConfig extends IntegrationNoAuthRuntimeConfig {
+  /** Resolves the product's authenticated tenant/actor context for setup. */
+  resolveSubject(request: Request): Promise<IntegrationNoAuthSubject>;
+  /** Required authorization immediately before a no-auth connection is persisted. */
+  authorizeConnect(
+    subject: IntegrationNoAuthSubject,
+    integrationId: string,
+    request: Request,
+  ): Promise<void>;
+  basePath?: string;
 }
 
 class IntegrationRouteRequestError extends Error {
@@ -66,7 +103,11 @@ function jsonError(error: unknown): Response {
             ? [404, error.code]
             : error instanceof IntegrationRuntimeError
               ? [400, error.code]
-              : [400, "INTEGRATION_REQUEST_INVALID"];
+              : error instanceof IntegrationApiKeyRuntimeError
+                ? [400, error.code]
+                : error instanceof IntegrationNoAuthRuntimeError
+                  ? [400, error.code]
+                  : [400, "INTEGRATION_REQUEST_INVALID"];
   return Response.json(
     { error: { code, message: "Integration request failed." } },
     { status },
@@ -344,6 +385,112 @@ export function createIntegrationOAuthRoutes(
   };
 }
 
+/**
+ * Fetch-standard API-key setup route. It accepts the key only in the request
+ * body, encrypts it before the product callback runs, and never reflects it in
+ * a response, browser projection, or redirect URL.
+ */
+export function createIntegrationApiKeyRoutes(
+  config: IntegrationApiKeyRoutesConfig,
+) {
+  const runtime = createIntegrationApiKeyRuntime(config);
+  const basePath = normalizeBasePath(config.basePath ?? "/integrations");
+  const maximumBodyBytes = maxJsonBodyBytes(config.maxJsonBodyBytes);
+  const escapedBasePath = basePath.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
+  const connectPattern = new RegExp(
+    `^${escapedBasePath}/([^/]+)/api-key$`,
+    "u",
+  );
+
+  return {
+    async handle(request: Request): Promise<Response | undefined> {
+      const url = new URL(request.url);
+      const connect = connectPattern.exec(url.pathname);
+      if (!connect || request.method !== "POST") {
+        return undefined;
+      }
+      try {
+        const body = await requestJsonObject(request, maximumBodyBytes);
+        const subject = await config.resolveSubject(request);
+        const integrationId = decodeURIComponent(connect[1] ?? "");
+        const result = await runtime.connect(
+          {
+            ...subject,
+            integrationId,
+            apiKey: typeof body.apiKey === "string" ? body.apiKey : "",
+          },
+          (authorization) =>
+            config.authorizeConnect(
+              {
+                product: authorization.product,
+                subjectId: authorization.subjectId,
+              },
+              authorization.integrationId,
+              request,
+            ),
+        );
+        return Response.json({
+          connectionId: result.connectionId,
+          state: "connected",
+          safeNextStep: "The API key was connected securely.",
+        });
+      } catch (error) {
+        return jsonError(error);
+      }
+    },
+  };
+}
+
+/**
+ * Fetch-standard confirmation route for providers that need no customer
+ * credential. It still establishes an authorized, auditable connection record
+ * instead of allowing product code to treat a catalogue card as connected.
+ */
+export function createIntegrationNoAuthRoutes(
+  config: IntegrationNoAuthRoutesConfig,
+) {
+  const runtime = createIntegrationNoAuthRuntime(config);
+  const basePath = normalizeBasePath(config.basePath ?? "/integrations");
+  const escapedBasePath = basePath.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
+  const connectPattern = new RegExp(
+    `^${escapedBasePath}/([^/]+)/no-auth$`,
+    "u",
+  );
+
+  return {
+    async handle(request: Request): Promise<Response | undefined> {
+      const url = new URL(request.url);
+      const connect = connectPattern.exec(url.pathname);
+      if (!connect || request.method !== "POST") {
+        return undefined;
+      }
+      try {
+        const subject = await config.resolveSubject(request);
+        const integrationId = decodeURIComponent(connect[1] ?? "");
+        const result = await runtime.connect(
+          { ...subject, integrationId },
+          (authorization) =>
+            config.authorizeConnect(
+              {
+                product: authorization.product,
+                subjectId: authorization.subjectId,
+              },
+              authorization.integrationId,
+              request,
+            ),
+        );
+        return Response.json({
+          connectionId: result.connectionId,
+          state: "connected",
+          safeNextStep: "The provider connection was confirmed.",
+        });
+      } catch (error) {
+        return jsonError(error);
+      }
+    },
+  };
+}
+
 export interface OAuthRouteConnectorActions<TContext> {
   performAction(
     context: TContext,
@@ -379,6 +526,59 @@ export function createOAuthRouteConnector<TContext>(input: {
         state: "redirect",
         safeNextStep: "Continue to the secure provider connection.",
         redirectPath: `${basePath}/${encodeURIComponent(request.integrationId)}/oauth/start`,
+      };
+    },
+    performAction: input.actions.performAction,
+    getConnectionHealth: input.actions.getConnectionHealth,
+  };
+}
+
+/**
+ * Plug this into `createProductIntegrationKit` for API-key providers. The
+ * product presents its setup form; this package owns the mounted API-key route,
+ * encrypted credential persistence, and authenticated provider requests.
+ */
+export function createApiKeyRouteConnector<TContext>(input: {
+  actions: OAuthRouteConnectorActions<TContext>;
+}): ProductIntegrationConnector<TContext> {
+  return {
+    async beginConnection(
+      _context: TContext,
+      request: ConnectRequest,
+    ): Promise<ConnectResult> {
+      if (request.mode !== "api_key") {
+        throw new IntegrationRuntimeError(
+          "INTEGRATION_CONNECTION_MODE_UNSUPPORTED",
+        );
+      }
+      return {
+        state: "setup_required",
+        safeNextStep: "Enter the provider API key in the secure setup form.",
+      };
+    },
+    performAction: input.actions.performAction,
+    getConnectionHealth: input.actions.getConnectionHealth,
+  };
+}
+
+/** Shared kit connector for the no-auth confirmation route. */
+export function createNoAuthRouteConnector<TContext>(input: {
+  actions: OAuthRouteConnectorActions<TContext>;
+}): ProductIntegrationConnector<TContext> {
+  return {
+    async beginConnection(
+      _context: TContext,
+      request: ConnectRequest,
+    ): Promise<ConnectResult> {
+      if (request.mode !== "none") {
+        throw new IntegrationRuntimeError(
+          "INTEGRATION_CONNECTION_MODE_UNSUPPORTED",
+        );
+      }
+      return {
+        state: "setup_required",
+        safeNextStep:
+          "Confirm the provider connection in the secure setup flow.",
       };
     },
     performAction: input.actions.performAction,

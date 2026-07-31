@@ -2,6 +2,10 @@ import { describe, expect, test } from "bun:test";
 
 import { INTEGRATION_CATALOGUE, SIMSTUDIO_BASELINE } from "../src/catalog";
 import { assertSimStudioParity, getSimStudioParityReport } from "../src/parity";
+import {
+  assertSimStudioProviderProtocolParity,
+  getSimStudioProviderProtocolReport,
+} from "../src/provider-protocols";
 
 describe("Sim Studio parity baseline", () => {
   test("preserves every provider, operation, and trigger from the pinned source", () => {
@@ -32,5 +36,17 @@ describe("Sim Studio parity baseline", () => {
     expect(() => assertSimStudioParity(INTEGRATION_CATALOGUE.slice(1))).toThrow(
       "Sim Studio parity drift detected",
     );
+  });
+
+  test("maps every pinned source provider to a shared credential transport family", () => {
+    const report = getSimStudioProviderProtocolReport();
+    expect(report.baseline).toEqual({
+      providers: 232,
+      protocols: { api_key: 163, oauth2: 50, none: 19 },
+    });
+    expect(report.catalogue.covered).toBe(232);
+    expect(report.catalogue.missing).toHaveLength(0);
+    expect(report.catalogue.authMethodMismatches).toHaveLength(0);
+    assertSimStudioProviderProtocolParity();
   });
 });

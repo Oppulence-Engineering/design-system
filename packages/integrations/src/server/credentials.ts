@@ -17,6 +17,17 @@ export const IntegrationOAuthCredentialSchema = z
   })
   .strict();
 
+/**
+ * Stored only in the server-side encrypted envelope. API-key provider SDKs
+ * receive this value directly from the vault; it never belongs in a browser
+ * connection projection or public manifest.
+ */
+export const IntegrationApiKeyCredentialSchema = z
+  .object({
+    apiKey: z.string().min(1).max(16_384),
+  })
+  .strict();
+
 export const EncryptedIntegrationCredentialSchema = z
   .object({
     version: z.literal(1),
@@ -38,6 +49,9 @@ export const IntegrationCredentialReferenceSchema = z
 
 export type IntegrationOAuthCredential = z.infer<
   typeof IntegrationOAuthCredentialSchema
+>;
+export type IntegrationApiKeyCredential = z.infer<
+  typeof IntegrationApiKeyCredentialSchema
 >;
 export type EncryptedIntegrationCredential = z.infer<
   typeof EncryptedIntegrationCredentialSchema
@@ -205,18 +219,17 @@ export function createIntegrationCredentialReference(input: {
   return validateReference(input);
 }
 
-export async function encryptIntegrationCredential(input: {
+async function encryptCredentialPayload(input: {
   reference: IntegrationCredentialReference;
-  credential: IntegrationOAuthCredential;
+  credential: unknown;
   keyring: IntegrationCredentialKeyring;
   now?: Date;
 }): Promise<EncryptedIntegrationCredential> {
   const reference = validateReference(input.reference);
-  const credential = IntegrationOAuthCredentialSchema.parse(input.credential);
   const activeKey = await input.keyring.getActiveKey();
   const crypto = cryptoApi();
   const iv = crypto.getRandomValues(new Uint8Array(12));
-  const plaintext = new TextEncoder().encode(JSON.stringify(credential));
+  const plaintext = new TextEncoder().encode(JSON.stringify(input.credential));
   const ciphertext = await crypto.subtle.encrypt(
     {
       name: "AES-GCM",
@@ -237,11 +250,11 @@ export async function encryptIntegrationCredential(input: {
   });
 }
 
-export async function decryptIntegrationCredential(input: {
+async function decryptCredentialPayload(input: {
   reference: IntegrationCredentialReference;
   credential: EncryptedIntegrationCredential;
   keyring: IntegrationCredentialKeyring;
-}): Promise<IntegrationOAuthCredential> {
+}): Promise<unknown> {
   const reference = validateReference(input.reference);
   const credential = EncryptedIntegrationCredentialSchema.parse(
     input.credential,
@@ -261,9 +274,59 @@ export async function decryptIntegrationCredential(input: {
       key,
       asArrayBuffer(decodeBase64Url(credential.ciphertext)),
     );
-    return IntegrationOAuthCredentialSchema.parse(
-      JSON.parse(new TextDecoder().decode(plaintext)),
-    );
+    return JSON.parse(new TextDecoder().decode(plaintext));
+  } catch {
+    throw new IntegrationCredentialError("CREDENTIAL_DECRYPT_FAILED");
+  }
+}
+
+export async function encryptIntegrationCredential(input: {
+  reference: IntegrationCredentialReference;
+  credential: IntegrationOAuthCredential;
+  keyring: IntegrationCredentialKeyring;
+  now?: Date;
+}): Promise<EncryptedIntegrationCredential> {
+  const credential = IntegrationOAuthCredentialSchema.parse(input.credential);
+  return encryptCredentialPayload({
+    ...input,
+    credential,
+  });
+}
+
+export async function decryptIntegrationCredential(input: {
+  reference: IntegrationCredentialReference;
+  credential: EncryptedIntegrationCredential;
+  keyring: IntegrationCredentialKeyring;
+}): Promise<IntegrationOAuthCredential> {
+  const payload = await decryptCredentialPayload(input);
+  try {
+    return IntegrationOAuthCredentialSchema.parse(payload);
+  } catch {
+    throw new IntegrationCredentialError("CREDENTIAL_DECRYPT_FAILED");
+  }
+}
+
+export async function encryptIntegrationApiKeyCredential(input: {
+  reference: IntegrationCredentialReference;
+  credential: IntegrationApiKeyCredential;
+  keyring: IntegrationCredentialKeyring;
+  now?: Date;
+}): Promise<EncryptedIntegrationCredential> {
+  const credential = IntegrationApiKeyCredentialSchema.parse(input.credential);
+  return encryptCredentialPayload({
+    ...input,
+    credential,
+  });
+}
+
+export async function decryptIntegrationApiKeyCredential(input: {
+  reference: IntegrationCredentialReference;
+  credential: EncryptedIntegrationCredential;
+  keyring: IntegrationCredentialKeyring;
+}): Promise<IntegrationApiKeyCredential> {
+  const payload = await decryptCredentialPayload(input);
+  try {
+    return IntegrationApiKeyCredentialSchema.parse(payload);
   } catch {
     throw new IntegrationCredentialError("CREDENTIAL_DECRYPT_FAILED");
   }

@@ -15,6 +15,7 @@ test("build emits every documented package entrypoint and the generated public m
     "golden-journey.js",
     "kit.js",
     "parity.js",
+    "provider-protocols.js",
     "react.js",
     "registry.js",
     "support.js",
@@ -66,6 +67,7 @@ test("the built root entry resolves every documented runtime export", async () =
   expect(typeof entry.createIntegrationDirectoryResolver).toBe("function");
   expect(typeof entry.getFunctionallySupportedIntegrationIds).toBe("function");
   expect(typeof entry.getOperationTriggerCoverageReport).toBe("function");
+  expect(typeof entry.getSimStudioProviderProtocolReport).toBe("function");
   expect(typeof entry.createProductIntegrationKit).toBe("function");
   expect(typeof entry.runIntegrationGoldenJourney).toBe("function");
 
@@ -73,6 +75,12 @@ test("the built root entry resolves every documented runtime export", async () =
     `${resolve(distDirectory, "server/index.js")}?artifact-test`
   );
   expect(typeof server.createIntegrationOAuthRuntime).toBe("function");
+  expect(typeof server.createIntegrationApiKeyRuntime).toBe("function");
+  expect(typeof server.createIntegrationApiKeyRoutes).toBe("function");
+  expect(typeof server.createApiKeyProviderSdk).toBe("function");
+  expect(typeof server.createIntegrationNoAuthRuntime).toBe("function");
+  expect(typeof server.createIntegrationNoAuthRoutes).toBe("function");
+  expect(typeof server.createUnauthenticatedProviderSdk).toBe("function");
   expect(typeof server.createIntegrationOAuthRoutes).toBe("function");
   expect(typeof server.createIntegrationProductRoutes).toBe("function");
   expect(typeof server.composeIntegrationRoutes).toBe("function");

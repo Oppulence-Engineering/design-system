@@ -17,6 +17,10 @@ import {
 } from "./connection";
 import { getSimStudioParityReport } from "./parity";
 import {
+  assertSimStudioProviderProtocolParity,
+  getSimStudioProviderProtocolReport,
+} from "./provider-protocols";
+import {
   getIntegration,
   getIntegrationCatalogue,
   getIntegrationDetail,
@@ -91,10 +95,12 @@ export {
   getProductIntegrations,
   getOperationTriggerCoverageReport,
   getSimStudioParityReport,
+  getSimStudioProviderProtocolReport,
   resolveIntegrationId,
   searchIntegrations,
   INTEGRATION_GOLDEN_JOURNEY_STEPS,
   runIntegrationGoldenJourney,
+  assertSimStudioProviderProtocolParity,
   validateFunctionalSupportContracts,
   validateOutcomeTemplates,
 };
@@ -133,6 +139,11 @@ export type {
   ProductIntegrationConnector,
 } from "./support";
 export type { IntegrationOutcomeTemplate } from "./templates";
+export type {
+  SimStudioProviderProtocol,
+  SimStudioProviderProtocolGap,
+  SimStudioProviderProtocolReport,
+} from "./provider-protocols";
 export type {
   IntegrationCommand,
   IntegrationConnectionRecordAdapter,

@@ -1,6 +1,11 @@
 import { describe, expect, test } from "bun:test";
 
 import {
+  createApiKeyProviderSdk,
+  createIntegrationApiKeyRoutes,
+  createIntegrationApiKeyRuntime,
+  createIntegrationNoAuthRoutes,
+  createIntegrationNoAuthRuntime,
   createIntegrationCredentialReference,
   createIntegrationCredentialKeyring,
   createInMemoryIntegrationOAuthStateStore,
@@ -9,9 +14,12 @@ import {
   createOAuthRouteConnector,
   createQuickBooksOAuth2Provider,
   createXeroOAuth2Provider,
+  createUnauthenticatedProviderSdk,
   createIntegrationOAuthRoutes,
   createIntegrationOAuthRuntime,
+  decryptIntegrationApiKeyCredential,
   decryptIntegrationCredential,
+  encryptIntegrationApiKeyCredential,
   encryptIntegrationCredential,
   type EncryptedIntegrationCredential,
   type IntegrationCredentialKeyring,
@@ -155,6 +163,291 @@ describe("server credential vault", () => {
         keyring,
       }),
     ).rejects.toMatchObject({ code: "CREDENTIAL_DECRYPT_FAILED" });
+  });
+
+  test("stores API keys in the same connection-bound encrypted envelope", async () => {
+    const keyring = await createKeyring();
+    const reference = createIntegrationCredentialReference({
+      connectionId: "connection-api-key",
+      integrationId: "stripe",
+      product: "conduitt",
+    });
+    const encrypted = await encryptIntegrationApiKeyCredential({
+      reference,
+      credential: { apiKey: "secret-api-key" },
+      keyring,
+    });
+    expect(JSON.stringify(encrypted)).not.toContain("secret-api-key");
+    await expect(
+      decryptIntegrationApiKeyCredential({
+        reference,
+        credential: encrypted,
+        keyring,
+      }),
+    ).resolves.toEqual({ apiKey: "secret-api-key" });
+
+    await expect(
+      decryptIntegrationApiKeyCredential({
+        reference: { ...reference, product: "eigenn" },
+        credential: encrypted,
+        keyring,
+      }),
+    ).rejects.toMatchObject({ code: "CREDENTIAL_DECRYPT_FAILED" });
+  });
+});
+
+describe("server provider SDK families", () => {
+  test("sends API keys only through the configured secure header", async () => {
+    const requests: Array<{ url: string; init?: RequestInit }> = [];
+    const provider = createApiKeyProviderSdk(
+      {
+        integrationId: "stripe",
+        apiBaseUrl: "https://provider.example.test/v1",
+        credentialHeader: "Authorization",
+        credentialPrefix: "Bearer",
+      },
+      (async (input: RequestInfo | URL, init?: RequestInit) => {
+        requests.push({ url: input.toString(), init });
+        return Response.json({ ok: true });
+      }) as typeof fetch,
+    );
+
+    await provider.request(
+      { apiKey: "secret-api-key" },
+      {
+        path: "/customers?limit=10",
+        headers: { Authorization: "attacker-supplied" },
+      },
+    );
+
+    expect(requests[0]?.url).toBe(
+      "https://provider.example.test/v1/customers?limit=10",
+    );
+    expect(new Headers(requests[0]?.init?.headers).get("Authorization")).toBe(
+      "Bearer secret-api-key",
+    );
+  });
+
+  test("rejects API-key transport configuration that could leak or rewrite requests", () => {
+    expect(() =>
+      createApiKeyProviderSdk({
+        integrationId: "stripe",
+        apiBaseUrl: "http://provider.example.test/v1",
+        credentialHeader: "Authorization",
+      }),
+    ).toThrow("provider request");
+    expect(() =>
+      createApiKeyProviderSdk({
+        integrationId: "stripe",
+        apiBaseUrl: "https://provider.example.test/v1",
+        credentialHeader: "Host",
+      }),
+    ).toThrow("provider request");
+  });
+
+  test("keeps no-auth provider requests on their configured HTTPS origin", async () => {
+    const requests: string[] = [];
+    const provider = createUnauthenticatedProviderSdk(
+      {
+        integrationId: "duckduckgo",
+        apiBaseUrl: "https://provider.example.test/api",
+      },
+      (async (input: RequestInfo | URL) => {
+        requests.push(input.toString());
+        return Response.json({ ok: true });
+      }) as typeof fetch,
+    );
+
+    await provider.request({ path: "/search?q=runway" });
+    expect(requests).toEqual([
+      "https://provider.example.test/api/search?q=runway",
+    ]);
+  });
+});
+
+describe("server API-key runtime", () => {
+  test("owns encrypted persistence and authenticated provider requests", async () => {
+    const keyring = await createKeyring();
+    const credentials = new Map<string, EncryptedIntegrationCredential>();
+    const requests: Array<{ url: string; init?: RequestInit }> = [];
+    const runtime = createIntegrationApiKeyRuntime({
+      providers: [
+        {
+          integrationId: "stripe",
+          apiBaseUrl: "https://provider.example.test/v1",
+          credentialHeader: "Authorization",
+          credentialPrefix: "Bearer",
+        },
+      ],
+      credentialVault: {
+        async read(reference) {
+          return credentials.get(recordKey(reference));
+        },
+        async save(reference, credential) {
+          credentials.set(recordKey(reference), credential);
+        },
+        async revoke(reference) {
+          credentials.delete(recordKey(reference));
+        },
+      },
+      credentialKeyring: keyring,
+      fetcher: (async (input: RequestInfo | URL, init?: RequestInit) => {
+        requests.push({ url: input.toString(), init });
+        return Response.json({ ok: true });
+      }) as typeof fetch,
+    });
+
+    const connected = await runtime.connect(
+      {
+        product: "conduitt",
+        subjectId: "organization-1",
+        integrationId: "stripe",
+        apiKey: "secret-api-key",
+      },
+      async () => {},
+    );
+    const reference = createIntegrationCredentialReference({
+      connectionId: connected.connectionId,
+      integrationId: "stripe",
+      product: "conduitt",
+    });
+    expect(JSON.stringify(credentials.get(recordKey(reference)))).not.toContain(
+      "secret-api-key",
+    );
+
+    await runtime.request({ reference, request: { path: "/customers" } });
+    expect(requests[0]?.url).toBe("https://provider.example.test/v1/customers");
+    expect(new Headers(requests[0]?.init?.headers).get("Authorization")).toBe(
+      "Bearer secret-api-key",
+    );
+
+    await runtime.revoke(reference);
+    expect(credentials.size).toBe(0);
+  });
+
+  test("mounts a bounded API-key route without reflecting the supplied secret", async () => {
+    const keyring = await createKeyring();
+    const credentials = new Map<string, EncryptedIntegrationCredential>();
+    const persistedConnectionIds: string[] = [];
+    const routes = createIntegrationApiKeyRoutes({
+      providers: [
+        {
+          integrationId: "stripe",
+          apiBaseUrl: "https://provider.example.test/v1",
+          credentialHeader: "Authorization",
+          credentialPrefix: "Bearer",
+        },
+      ],
+      credentialVault: {
+        async read(reference) {
+          return credentials.get(recordKey(reference));
+        },
+        async save(reference, credential) {
+          credentials.set(recordKey(reference), credential);
+        },
+        async revoke(reference) {
+          credentials.delete(recordKey(reference));
+        },
+      },
+      credentialKeyring: keyring,
+      async resolveSubject() {
+        return { product: "eigenn", subjectId: "team-1" };
+      },
+      async authorizeConnect(subject, integrationId) {
+        expect(subject).toEqual({ product: "eigenn", subjectId: "team-1" });
+        expect(integrationId).toBe("stripe");
+      },
+      async onConnected(input) {
+        persistedConnectionIds.push(input.connectionId);
+      },
+    });
+
+    const response = await routes.handle(
+      new Request("https://app.example.test/integrations/stripe/api-key", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ apiKey: "secret-api-key" }),
+      }),
+    );
+    expect(response?.status).toBe(200);
+    const body = await response?.text();
+    expect(body).toContain("connected");
+    expect(body).not.toContain("secret-api-key");
+    expect(persistedConnectionIds).toHaveLength(1);
+    expect(credentials.size).toBe(1);
+  });
+});
+
+describe("server no-auth runtime", () => {
+  test("owns the authorized no-auth connection and its shared request transport", async () => {
+    const persistedConnectionIds: string[] = [];
+    const requests: string[] = [];
+    const runtime = createIntegrationNoAuthRuntime({
+      providers: [
+        {
+          integrationId: "duckduckgo",
+          apiBaseUrl: "https://provider.example.test/api",
+        },
+      ],
+      async onConnected(input) {
+        persistedConnectionIds.push(input.connectionId);
+      },
+      fetcher: (async (input: RequestInfo | URL) => {
+        requests.push(input.toString());
+        return Response.json({ ok: true });
+      }) as typeof fetch,
+    });
+
+    const connected = await runtime.connect(
+      {
+        product: "eigenn",
+        subjectId: "team-1",
+        integrationId: "duckduckgo",
+      },
+      async () => {},
+    );
+    await runtime.request({
+      integrationId: connected.integrationId,
+      request: { path: "/search?q=runway" },
+    });
+
+    expect(persistedConnectionIds).toEqual([connected.connectionId]);
+    expect(requests).toEqual([
+      "https://provider.example.test/api/search?q=runway",
+    ]);
+  });
+
+  test("mounts an authorization-gated no-auth confirmation route", async () => {
+    const connected: string[] = [];
+    const routes = createIntegrationNoAuthRoutes({
+      providers: [
+        {
+          integrationId: "duckduckgo",
+          apiBaseUrl: "https://provider.example.test/api",
+        },
+      ],
+      async resolveSubject() {
+        return { product: "conduitt", subjectId: "organization-1" };
+      },
+      async authorizeConnect(subject, integrationId) {
+        expect(subject).toEqual({
+          product: "conduitt",
+          subjectId: "organization-1",
+        });
+        expect(integrationId).toBe("duckduckgo");
+      },
+      async onConnected(input) {
+        connected.push(input.connectionId);
+      },
+    });
+
+    const response = await routes.handle(
+      new Request("https://app.example.test/integrations/duckduckgo/no-auth", {
+        method: "POST",
+      }),
+    );
+    expect(response?.status).toBe(200);
+    expect(connected).toHaveLength(1);
   });
 });
 
