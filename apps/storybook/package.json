@@ -5,6 +5,7 @@
   "dependencies": {
     "@oppulence/design-system": "workspace:*",
     "@oppulence/infinite-canvas": "workspace:*",
+    "@oppulence/integrations": "workspace:*",
     "lucide-react": "^0.469.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

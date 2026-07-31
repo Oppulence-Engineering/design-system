@@ -18,6 +18,7 @@ export * from "./drawer";
 export * from "./dropdown-menu";
 export * from "./editor";
 export * from "./error-boundary";
+export * from "./integration-directory";
 export * from "./menubar";
 export * from "./multiple-selector";
 export * from "./navigation-menu";
