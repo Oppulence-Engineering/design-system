@@ -14,6 +14,10 @@ A Turborepo containing Oppulence's design system and independently versioned sha
 - `@oppulence/import` - Financial transaction import primitives
 - `@comp/storybook` - Storybook documentation and component playground
 
+## Architecture RFCs
+
+Proposed cross-package decisions live in [docs/rfcs](./docs/rfcs/README.md).
+
 ## Getting Started
 
 Install dependencies:
