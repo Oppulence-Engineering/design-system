@@ -40,6 +40,15 @@ import {
   createStsPack,
   createTextractPack,
 } from "./aws";
+import {
+  createClickHousePack,
+  createJupyterPack,
+  createMySqlPack,
+  createPostgreSqlPack,
+  createRedisPack,
+  createSftpPack,
+  createSshPack,
+} from "./protocol";
 import { createAsanaProviderSdk } from "./asana";
 import { createBrexProviderSdk } from "./brex";
 import {
@@ -124,6 +133,7 @@ export * from "./merge";
 export * from "./microsoft-graph";
 export * from "./atlassian";
 export * from "./aws";
+export * from "./protocol";
 
 export interface BuiltInProviderSdkRegistryConfig {
   /**
@@ -204,6 +214,15 @@ export function createBuiltInProviderSdkRegistry(
         createCloudWatchPack(),
         createCloudFormationPack(),
         createCodePipelinePack(),
+        // Protocol providers: databases, cache, shell, file transfer, and the
+        // self-hosted Jupyter server.
+        createPostgreSqlPack(),
+        createMySqlPack(),
+        createClickHousePack(),
+        createRedisPack(),
+        createSshPack(),
+        createSftpPack(),
+        createJupyterPack(),
       ].flatMap((pack) => pack.create({ apiKeyRuntime: config.apiKeyRuntime })),
     );
   }

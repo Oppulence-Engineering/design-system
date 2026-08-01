@@ -129,6 +129,32 @@ export const BUILT_IN_API_KEY_PROVIDER_CONFIGURATIONS = Object.freeze([
     // only to encrypt the OAuth/API token and make it available to that SDK.
     integrationId: "brex" as const,
   },
+  // Protocol providers. Each stores a driver connection — host, user, and
+  // secret — in the composite credential envelope rather than a bearer token,
+  // so none of them exposes a generic HTTP transport.
+  { integrationId: "postgresql" as const },
+  { integrationId: "mysql" as const },
+  { integrationId: "clickhouse" as const },
+  { integrationId: "redis" as const },
+  { integrationId: "ssh" as const },
+  { integrationId: "sftp" as const },
+  { integrationId: "jupyter" as const },
+  // AWS authenticates with an access key pair, which the same envelope holds.
+  { integrationId: "s3" as const },
+  { integrationId: "amazon-dynamodb" as const },
+  { integrationId: "amazon-sqs" as const },
+  { integrationId: "amazon-rds" as const },
+  { integrationId: "aws-ses" as const },
+  { integrationId: "aws-iam" as const },
+  { integrationId: "aws-sts" as const },
+  { integrationId: "aws-identity-center" as const },
+  { integrationId: "aws-secrets-manager" as const },
+  { integrationId: "aws-textract" as const },
+  { integrationId: "aws-appconfig" as const },
+  { integrationId: "athena" as const },
+  { integrationId: "cloudwatch" as const },
+  { integrationId: "cloudformation" as const },
+  { integrationId: "codepipeline" as const },
 ] satisfies readonly ApiKeyProviderConfiguration[]);
 
 export type BuiltInIntegrationApiKeyRuntimeConfig = Omit<

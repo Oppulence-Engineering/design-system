@@ -45,16 +45,48 @@ const authMethodForSource: Record<
   oauth: "oauth2",
 };
 
+/**
+ * The source labels a provider `none` when it has no vendor OAuth or API-key
+ * app to register against. That is not the same as needing no secret: a
+ * self-hosted PostgreSQL still takes a password, and an AWS service still
+ * takes an access key pair. These providers additionally accept the package's
+ * API-key credential class, which is what encrypts that secret at rest.
+ *
+ * The source protocol stays first in the list, so protocol parity against the
+ * pinned baseline is unaffected.
+ */
+const SECRET_BEARING_NO_AUTH_PROVIDERS: ReadonlySet<string> = new Set([
+  "postgresql",
+  "mysql",
+  "clickhouse",
+  "amazon-rds",
+  "amazon-sqs",
+  "aws-secrets-manager",
+  "athena",
+  "cloudwatch",
+  "cloudformation",
+]);
+
+function authMethodsFor(
+  record: SimStudioBaselineRecord,
+): IntegrationAuthMethod[] {
+  const sourceMethod = authMethodForSource[record.sourceAuthType];
+  return sourceMethod === "none" &&
+    SECRET_BEARING_NO_AUTH_PROVIDERS.has(record.id)
+    ? [sourceMethod, "api_key"]
+    : [sourceMethod];
+}
+
 function plannedProduct(
   product: ProductIntegration["product"],
-  authMethod: IntegrationAuthMethod,
+  authMethods: readonly IntegrationAuthMethod[],
   plannedOutcome: string,
   documentationPath: string,
 ): ProductIntegration {
   return {
     product,
     availability: "planned",
-    authMethods: [authMethod],
+    authMethods: [...authMethods],
     enabledCapabilities: [],
     setup: [],
     documentationPath,
@@ -97,13 +129,13 @@ function fromSimStudio(record: SimStudioBaselineRecord): IntegrationDefinition {
     products: [
       plannedProduct(
         "eigenn",
-        authMethodForSource[record.sourceAuthType],
+        authMethodsFor(record),
         "Tracked for a finance decision or modelling outcome once an owned connector is verified.",
         documentationPath,
       ),
       plannedProduct(
         "conduitt",
-        authMethodForSource[record.sourceAuthType],
+        authMethodsFor(record),
         "Tracked for a governed revenue-execution outcome once an owned connector is verified.",
         documentationPath,
       ),
@@ -595,13 +627,13 @@ function fromOppulence(input: ExtraDefinitionInput): IntegrationDefinition {
     products: [
       plannedProduct(
         "eigenn",
-        authMethods[0],
+        authMethods,
         "Tracked for a finance decision or modelling outcome.",
         documentationPath,
       ),
       plannedProduct(
         "conduitt",
-        authMethods[0],
+        authMethods,
         "Tracked for a governed revenue-execution outcome.",
         documentationPath,
       ),

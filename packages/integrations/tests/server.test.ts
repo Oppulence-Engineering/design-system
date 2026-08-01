@@ -460,6 +460,28 @@ describe("server API-key runtime", () => {
       "youtube",
       "resend",
       "brex",
+      "postgresql",
+      "mysql",
+      "clickhouse",
+      "redis",
+      "ssh",
+      "sftp",
+      "jupyter",
+      "s3",
+      "amazon-dynamodb",
+      "amazon-sqs",
+      "amazon-rds",
+      "aws-ses",
+      "aws-iam",
+      "aws-sts",
+      "aws-identity-center",
+      "aws-secrets-manager",
+      "aws-textract",
+      "aws-appconfig",
+      "athena",
+      "cloudwatch",
+      "cloudformation",
+      "codepipeline",
     ]);
   });
 
@@ -632,8 +654,8 @@ describe("server vendor SDK adapters", () => {
     });
 
     expect(getProviderSdkCoverageReport(registry)).toMatchObject({
-      executableProviders: 57,
-      executableOperations: 1286,
+      executableProviders: 64,
+      executableOperations: 1381,
       executableTriggers: 0,
       hasCompleteExecutionParity: false,
     });

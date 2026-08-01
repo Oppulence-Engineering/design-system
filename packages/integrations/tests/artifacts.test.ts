@@ -191,6 +191,10 @@ test("the built root entry resolves every documented runtime export", async () =
     "function",
   );
   expect(typeof server.createMicrosoftGraphOAuth2Provider).toBe("function");
+  expect(typeof server.createAtlassianOAuth2Provider).toBe("function");
+  expect(typeof server.createS3Pack).toBe("function");
+  expect(typeof server.createPostgreSqlPack).toBe("function");
+  expect(typeof server.createProtocolProviderSdk).toBe("function");
   expect(typeof server.createBuiltInProviderSdkRegistry).toBe("function");
   expect(typeof server.getProviderSdkCoverageReport).toBe("function");
   expect(typeof server.createIntegrationProviderExecutionRoutes).toBe(
