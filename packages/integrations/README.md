@@ -227,7 +227,9 @@ const webhookRuntime = createIntegrationWebhookRuntime({
   onSyncRequired: enqueueIntegrationSync,
 });
 
-const webhookRoutes = createIntegrationWebhookRoutes({ runtime: webhookRuntime });
+const webhookRoutes = createIntegrationWebhookRoutes({
+  runtime: webhookRuntime,
+});
 
 // Mount one handler in Hono, Next, or another HTTP adapter. It owns:
 // GET  /integrations
@@ -410,14 +412,44 @@ products only read a non-secret company or tenant ID from their own connection
 row. Plaid runs Link issuance, public-token exchange, accounts, balances, Item
 status, and transaction sync through the official Node SDK. Merge adds a
 package-native Accounting Link connector and six normalized accounting actions
-through Merge's TypeScript SDK. The package never
-swaps a provider SDK for raw REST when an SDK exists; the browser-safe
-`getProviderExecutionStrategyReport()`
-reports the source-wide SDK, protocol, and catalogue-only implementation
-tracks. Providers without a verified SDK remain catalogue-only rather than
-receiving a raw REST adapter. It is planning evidence only;
-`getProviderSdkCoverageReport()` is the
-executable-coverage source of truth, and trigger runtime remains separate.
+through Merge's TypeScript SDK.
+
+## Provider execution lanes
+
+The package owns three server-only execution lanes behind the same operation
+route and encrypted credential boundary:
+
+1. **SDK (default):** Use a maintained official or ecosystem SDK whenever it
+   safely supports the operation.
+2. **Typed REST (exception):** When the SDK review establishes that no viable
+   SDK covers an operation, `createIntegrationTypedRestProvider()` supplies a
+   schema-validated declarative request. Its authoring surface matches
+   SimStudio's core tool config: `id`, `name`, `description`, `version`,
+   `params`, `outputs`, `request.url`, `request.method`, `request.headers`,
+   `request.body`, optional retry metadata, and
+   `transformResponse(response, params)`. It uses the OAuth, API-key, or
+   no-auth runtime to inject credentials, accepts relative provider URLs only,
+   blocks caller-supplied credential headers, bounds response reads before the
+   response transformer runs, and validates the safe output projection before
+   it reaches a product. Strict schemas are derived from `params` and `outputs`
+   by default; optional Zod input/output schemas and the response byte limit are
+   package safety extensions for stricter provider-specific validation.
+3. **Special provider:** `createIntegrationSpecialProvider()` covers protocol
+   clients, signed requests, streaming/file transfers, and database drivers.
+   Its server-only handler may use an SDK or driver, but it shares the same
+   connection reference, authorization seam, and operation route as the other
+   lanes.
+
+The registry may combine these lanes for one provider only when their operation
+IDs do not overlap. This makes an SDK the owner where one exists while allowing
+a typed REST or special adapter for an uncovered operation. Products still
+provide only durable connection state, authorization, and their domain logic;
+they never receive a provider credential.
+
+`getProviderExecutionStrategyReport()` reports the source-wide SDK-first,
+typed-REST, and special-provider plan. It is planning evidence only;
+`getProviderSdkCoverageReport()` is the executable-coverage source of truth,
+and trigger runtime remains separate.
 
 ## Golden journey harness
 

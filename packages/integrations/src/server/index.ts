@@ -141,6 +141,8 @@ import {
   getStripeProviderSdkReport,
   IntegrationProviderSdkError,
 } from "./provider-sdk";
+import { createIntegrationTypedRestProvider } from "./provider-rest";
+import { createIntegrationSpecialProvider } from "./provider-special";
 import {
   createInMemoryIntegrationCredentialRefreshLock,
   createInMemoryIntegrationOAuthStateStore,
@@ -298,6 +300,8 @@ export {
   createBuiltInProviderSdkRegistry,
   getProviderSdkCoverageReport,
   IntegrationProviderSdkError,
+  createIntegrationTypedRestProvider,
+  createIntegrationSpecialProvider,
   createIntegrationOAuthRuntime,
   createInMemoryIntegrationCredentialRefreshLock,
   createInMemoryIntegrationOAuthStateStore,
@@ -407,6 +411,7 @@ export type {
 export type {
   IntegrationProviderSdk,
   IntegrationProviderSdkRegistry,
+  IntegrationProviderExecutionLane,
   BuiltInProviderSdkRegistryConfig,
   ProviderSdkInvocation,
   ProviderSdkResult,
@@ -448,6 +453,20 @@ export type {
   StripeProviderSdkConfig,
   XeroProviderSdkConfig,
 } from "./provider-sdk";
+export type {
+  IntegrationTypedRestBody,
+  IntegrationTypedRestMethod,
+  IntegrationTypedRestOutputDefinition,
+  IntegrationTypedRestOutputType,
+  IntegrationTypedRestParameterDefinition,
+  IntegrationTypedRestParameterItemSchema,
+  IntegrationTypedRestParameterVisibility,
+  IntegrationTypedRestProviderConfig,
+  IntegrationTypedRestRetryConfig,
+  IntegrationTypedRestTool,
+  IntegrationTypedRestTransport,
+} from "./provider-rest";
+export type { IntegrationSpecialProviderConfig } from "./provider-special";
 export type {
   BeginIntegrationOAuthInput,
   BeginIntegrationOAuthResult,

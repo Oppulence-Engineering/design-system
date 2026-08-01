@@ -75,19 +75,32 @@ export interface ProviderSdkResult {
 }
 
 /**
- * A server-only, package-owned provider SDK. Consumers pass a connection
- * reference and business-safe operation input; encryption, token/key access,
- * request execution, and vendor SDK construction stay here.
+ * Package-owned execution lanes. A provider can compose SDK, declarative REST,
+ * and special-protocol adapters as long as every operation has one owner.
+ */
+export type IntegrationProviderExecutionLane = "sdk" | "typed_rest" | "special";
+
+/**
+ * A server-only, package-owned provider execution adapter. SDK adapters are
+ * the default; typed REST and special-protocol adapters use the same boundary
+ * when an SDK is unavailable or unsuitable for an operation.
  */
 export interface IntegrationProviderSdk {
   readonly integrationId: string;
   readonly operationIds: readonly string[];
+  /** Omitted by existing adapters and treated as the SDK-first default. */
+  readonly executionLane?: IntegrationProviderExecutionLane;
   execute(input: ProviderSdkInvocation): Promise<ProviderSdkResult>;
 }
 
 /** Lookup and execution boundary for package-owned provider SDK adapters. */
 export interface IntegrationProviderSdkRegistry {
   get(integrationId: string): IntegrationProviderSdk | undefined;
+  /** Returns the lane for an operation, or the sole lane for a provider. */
+  getExecutionLane(
+    integrationId: string,
+    operationId?: string,
+  ): IntegrationProviderExecutionLane | undefined;
   execute(input: ProviderSdkInvocation): Promise<ProviderSdkResult>;
 }
 
@@ -96,7 +109,9 @@ export class IntegrationProviderSdkError extends Error {
     | "INTEGRATION_PROVIDER_SDK_INVOCATION_INVALID"
     | "INTEGRATION_PROVIDER_SDK_CONFIGURATION_INVALID"
     | "INTEGRATION_PROVIDER_SDK_OPERATION_UNAVAILABLE"
-    | "INTEGRATION_PROVIDER_SDK_CONNECTION_MISMATCH";
+    | "INTEGRATION_PROVIDER_SDK_CONNECTION_MISMATCH"
+    | "INTEGRATION_PROVIDER_EXECUTION_REQUEST_FAILED"
+    | "INTEGRATION_PROVIDER_EXECUTION_RESPONSE_INVALID";
 
   constructor(code: IntegrationProviderSdkError["code"]) {
     super("The integration provider SDK request could not be completed.");
@@ -113,30 +128,98 @@ export class IntegrationProviderSdkError extends Error {
 export function createIntegrationProviderSdkRegistry(
   providers: readonly IntegrationProviderSdk[],
 ): IntegrationProviderSdkRegistry {
-  const byIntegrationId = new Map<string, IntegrationProviderSdk>();
+  const byIntegrationId = new Map<string, IntegrationProviderSdk[]>();
+  const byOperationId = new Map<string, IntegrationProviderSdk>();
   for (const provider of providers) {
+    const executionLane = provider.executionLane ?? "sdk";
     if (
       !provider.integrationId ||
-      byIntegrationId.has(provider.integrationId) ||
       new Set(provider.operationIds).size !== provider.operationIds.length ||
       provider.operationIds.some(
         (operationId) => !operationId.startsWith(`${provider.integrationId}:`),
-      )
+      ) ||
+      !["sdk", "typed_rest", "special"].includes(executionLane)
     ) {
       throw new IntegrationProviderSdkError(
         "INTEGRATION_PROVIDER_SDK_CONFIGURATION_INVALID",
       );
     }
-    byIntegrationId.set(provider.integrationId, provider);
+    for (const operationId of provider.operationIds) {
+      if (byOperationId.has(operationId)) {
+        throw new IntegrationProviderSdkError(
+          "INTEGRATION_PROVIDER_SDK_CONFIGURATION_INVALID",
+        );
+      }
+      byOperationId.set(operationId, provider);
+    }
+    const providersForIntegration = byIntegrationId.get(provider.integrationId);
+    if (providersForIntegration) {
+      providersForIntegration.push(provider);
+    } else {
+      byIntegrationId.set(provider.integrationId, [provider]);
+    }
+  }
+
+  function providerFor(
+    integrationId: string,
+    operationId: string,
+  ): IntegrationProviderSdk | undefined {
+    const provider = byOperationId.get(operationId);
+    return provider?.integrationId === integrationId ? provider : undefined;
+  }
+
+  function aggregateProvider(
+    integrationId: string,
+  ): IntegrationProviderSdk | undefined {
+    const providersForIntegration = byIntegrationId.get(integrationId);
+    if (!providersForIntegration?.length) {
+      return undefined;
+    }
+    if (providersForIntegration.length === 1) {
+      return providersForIntegration[0];
+    }
+    const operationIds = providersForIntegration.flatMap(
+      (provider) => provider.operationIds,
+    );
+    const lanes = new Set(
+      providersForIntegration.map(
+        (provider) => provider.executionLane ?? "sdk",
+      ),
+    );
+    return {
+      integrationId,
+      operationIds,
+      ...(lanes.size === 1
+        ? {
+            executionLane: providersForIntegration[0]?.executionLane ?? "sdk",
+          }
+        : {}),
+      async execute(input) {
+        const provider = providerFor(input.integrationId, input.operationId);
+        if (!provider) {
+          throw new IntegrationProviderSdkError(
+            "INTEGRATION_PROVIDER_SDK_OPERATION_UNAVAILABLE",
+          );
+        }
+        return provider.execute(input);
+      },
+    };
   }
 
   return {
     get(integrationId) {
-      return byIntegrationId.get(integrationId);
+      return aggregateProvider(integrationId);
+    },
+    getExecutionLane(integrationId, operationId) {
+      if (operationId) {
+        const provider = providerFor(integrationId, operationId);
+        return provider?.executionLane ?? (provider ? "sdk" : undefined);
+      }
+      return aggregateProvider(integrationId)?.executionLane;
     },
     async execute(input) {
-      const provider = byIntegrationId.get(input.integrationId);
-      if (!provider || !provider.operationIds.includes(input.operationId)) {
+      const provider = providerFor(input.integrationId, input.operationId);
+      if (!provider) {
         throw new IntegrationProviderSdkError(
           "INTEGRATION_PROVIDER_SDK_OPERATION_UNAVAILABLE",
         );

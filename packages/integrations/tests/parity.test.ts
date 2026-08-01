@@ -54,7 +54,7 @@ describe("Sim Studio parity baseline", () => {
     assertSimStudioProviderProtocolParity();
   });
 
-  test("assigns every source provider to an explicit SDK, protocol, or catalogue-only execution track", () => {
+  test("assigns every source provider to an explicit SDK, typed REST, or special execution track", () => {
     const strategies = getProviderExecutionStrategies();
     const report = getProviderExecutionStrategyReport();
 
@@ -78,12 +78,12 @@ describe("Sim Studio parity baseline", () => {
           operations: 261,
           triggers: 52,
         },
-        sdk_unverified_catalogue_only: {
+        typed_rest_candidate: {
           providers: 123,
           operations: 2044,
           triggers: 205,
         },
-        protocol_client: { providers: 7, operations: 95, triggers: 0 },
+        special_provider: { providers: 7, operations: 95, triggers: 0 },
         no_runtime_actions: { providers: 18, operations: 0, triggers: 11 },
       },
     });

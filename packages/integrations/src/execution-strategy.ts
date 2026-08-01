@@ -5,8 +5,8 @@ export type ProviderExecutionStrategyKind =
   | "installed_vendor_sdk"
   | "vendor_sdk_candidate"
   | "maintained_sdk_candidate"
-  | "sdk_unverified_catalogue_only"
-  | "protocol_client"
+  | "typed_rest_candidate"
+  | "special_provider"
   | "no_runtime_actions";
 
 export interface ProviderExecutionStrategy {
@@ -35,17 +35,17 @@ export interface ProviderExecutionStrategyReport {
 interface StrategyOverride {
   kind: Exclude<
     ProviderExecutionStrategyKind,
-    "sdk_unverified_catalogue_only" | "no_runtime_actions"
+    "typed_rest_candidate" | "special_provider" | "no_runtime_actions"
   >;
   packageName?: string;
 }
 
 /**
- * SDK-only adoption map. Entries are deliberately limited to maintained,
- * vendor-published SDKs or actively maintained ecosystem SDKs. A provider must remain
- * on this map whenever such an SDK exists. Providers without a verified SDK
- * remain catalogue-only; the package does not schedule raw REST adapters as a
- * substitute for an available or missing SDK.
+ * SDK-first adoption map. Entries are deliberately limited to maintained,
+ * vendor-published SDKs or actively maintained ecosystem SDKs. A provider
+ * must remain on this map whenever such an SDK exists. Only after that review
+ * concludes no viable SDK can cover an operation may it use the package-owned
+ * typed REST executor.
  */
 const STRATEGY_OVERRIDES: Readonly<Record<string, StrategyOverride>> = {
   airtable: { kind: "installed_vendor_sdk", packageName: "airtable" },
@@ -277,7 +277,7 @@ const STRATEGY_OVERRIDES: Readonly<Record<string, StrategyOverride>> = {
   },
 };
 
-const PROTOCOL_CLIENTS: Readonly<Record<string, string>> = {
+const SPECIAL_PROVIDER_CLIENTS: Readonly<Record<string, string>> = {
   clickhouse: "@clickhouse/client",
   jupyter: "Jupyter server protocol",
   mysql: "mysql2",
@@ -291,7 +291,7 @@ const PROTOCOL_CLIENTS: Readonly<Record<string, string>> = {
 /**
  * Returns every source provider, including zero-action catalogue entries. This
  * ensures the implementation plan cannot silently lose an integration while
- * SDK work progresses in waves.
+ * SDK-first, typed REST, and special-protocol work progresses in waves.
  */
 export function getProviderExecutionStrategies(): readonly ProviderExecutionStrategy[] {
   return SIMSTUDIO_BASELINE.integrations.map((integration) => {
@@ -314,11 +314,11 @@ export function getProviderExecutionStrategies(): readonly ProviderExecutionStra
         triggers,
       };
     }
-    const protocolPackage = PROTOCOL_CLIENTS[integration.id];
+    const protocolPackage = SPECIAL_PROVIDER_CLIENTS[integration.id];
     if (protocolPackage) {
       return {
         integrationId: integration.id,
-        kind: "protocol_client",
+        kind: "special_provider",
         packageName: protocolPackage,
         operations,
         triggers,
@@ -326,7 +326,7 @@ export function getProviderExecutionStrategies(): readonly ProviderExecutionStra
     }
     return {
       integrationId: integration.id,
-      kind: "sdk_unverified_catalogue_only",
+      kind: "typed_rest_candidate",
       operations,
       triggers,
     };
@@ -342,8 +342,8 @@ export function getProviderExecutionStrategyReport(): ProviderExecutionStrategyR
     installed_vendor_sdk: { providers: 0, operations: 0, triggers: 0 },
     vendor_sdk_candidate: { providers: 0, operations: 0, triggers: 0 },
     maintained_sdk_candidate: { providers: 0, operations: 0, triggers: 0 },
-    sdk_unverified_catalogue_only: { providers: 0, operations: 0, triggers: 0 },
-    protocol_client: { providers: 0, operations: 0, triggers: 0 },
+    typed_rest_candidate: { providers: 0, operations: 0, triggers: 0 },
+    special_provider: { providers: 0, operations: 0, triggers: 0 },
     no_runtime_actions: { providers: 0, operations: 0, triggers: 0 },
   };
   let operations = 0;

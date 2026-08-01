@@ -314,7 +314,7 @@ function executionRequest(
 }
 
 export interface IntegrationProviderExecutionRoutesConfig {
-  /** Package-owned vendor SDK adapters; consumers do not supply credentials. */
+  /** Package-owned SDK, typed REST, and special-protocol adapters; consumers do not supply credentials. */
   providerRegistry: IntegrationProviderSdkRegistry;
   /** Resolves the product tenant/actor for every operation execution. */
   resolveSubject(request: Request): Promise<IntegrationOAuthSubject>;
@@ -336,10 +336,10 @@ export interface IntegrationProviderExecutionRoutesConfig {
 }
 
 /**
- * Mounts package-owned vendor SDK execution at
+ * Mounts package-owned provider execution at
  * `/:integrationId/connections/:connectionId/operations/:operationId`.
  * The only product work is present-tense authorization, DB ownership, and
- * business policy; the package owns credential decryption and vendor calls.
+ * business policy; the package owns credential decryption and provider calls.
  */
 export function createIntegrationProviderExecutionRoutes(
   config: IntegrationProviderExecutionRoutesConfig,
