@@ -12,6 +12,7 @@ import {
   createCloudflarePack,
   createClickHousePack,
   createClerkPack,
+  createDatadogPack,
   createCloudWatchPack,
   createCodePipelinePack,
   createConfluencePack,
@@ -42,7 +43,9 @@ import {
   createSqsPack,
   createStsPack,
   createTextractPack,
+  createTrelloPack,
   createVercelPack,
+  createXPack,
   getProviderPackCoverageReport,
   getProviderSdkCoverageReport,
   type IntegrationProviderPack,
@@ -54,8 +57,8 @@ import {
  * did. The target is the pinned source: 232 providers, 3,890 actions, and 363
  * triggers.
  */
-const EXECUTABLE_PROVIDERS = 68;
-const EXECUTABLE_ACTIONS = 1499;
+const EXECUTABLE_PROVIDERS = 71;
+const EXECUTABLE_ACTIONS = 1560;
 
 const oauthRuntime = {
   async withCredential<T>(
@@ -106,6 +109,8 @@ const PACKS: readonly {
     createConfluencePack(),
     createJiraServiceManagementPack(),
     createSalesforcePack(),
+    createTrelloPack(),
+    createXPack(),
   ].map((pack) => ({ pack, context: { oauthRuntime } })),
   ...[
     createCloudflarePack(),
@@ -135,6 +140,7 @@ const PACKS: readonly {
     createClerkPack(),
     createOktaPack(),
     createSupabasePack(),
+    createDatadogPack(),
   ].map((pack) => ({ pack, context: { apiKeyRuntime } })),
 ];
 
@@ -167,9 +173,9 @@ describe("provider parity coverage gate", () => {
       PACKS.map((entry) => entry.pack),
     );
 
-    // 39 providers ship as packs; the other 29 executable providers predate
+    // 42 providers ship as packs; the other 29 executable providers predate
     // the pack contract and are registered directly.
-    expect(report.providers).toBe(39);
+    expect(report.providers).toBe(42);
     expect(report.deferredOperations).toBe(0);
     // Every supported action is owned by exactly one lane.
     expect(report.operations).toBe(
@@ -225,8 +231,8 @@ describe("provider parity coverage gate", () => {
       actionsRemaining: sourceActions - EXECUTABLE_ACTIONS,
       triggersRemaining: 363 - 60,
     }).toEqual({
-      providersRemaining: 164,
-      actionsRemaining: 2391,
+      providersRemaining: 161,
+      actionsRemaining: 2330,
       triggersRemaining: 303,
     });
   });

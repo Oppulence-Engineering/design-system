@@ -3,3 +3,6 @@ export * from "./salesforce";
 export * from "./clerk";
 export * from "./okta";
 export * from "./supabase";
+export * from "./trello";
+export * from "./x";
+export * from "./datadog";

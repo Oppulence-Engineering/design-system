@@ -10,6 +10,9 @@ import {
   createSalesforceOAuth2Provider,
   createSalesforcePack,
   createSupabasePack,
+  createTrelloPack,
+  createXPack,
+  createDatadogPack,
   type IntegrationProviderPack,
 } from "../src/server";
 
@@ -108,6 +111,9 @@ describe("vendor SDK provider batch", () => {
       [createClerkPack(), { apiKeyRuntime }],
       [createOktaPack(), { apiKeyRuntime }],
       [createSupabasePack(), { apiKeyRuntime }],
+      [createTrelloPack(), { oauthRuntime }],
+      [createXPack(), { oauthRuntime }],
+      [createDatadogPack(), { apiKeyRuntime }],
     ];
 
     for (const [pack, context] of packs) {
@@ -121,7 +127,7 @@ describe("vendor SDK provider batch", () => {
 
     expect(
       packs.reduce((total, [pack]) => total + pack.coverage.length, 0),
-    ).toBe(118);
+    ).toBe(179);
   });
 
   test("builds a bounded SOQL read with validated identifiers", async () => {
@@ -366,6 +372,104 @@ describe("vendor SDK provider batch", () => {
       }),
     ).rejects.toMatchObject({
       code: "INTEGRATION_PROVIDER_SDK_INVOCATION_INVALID",
+    });
+  });
+
+  test("rejects a Trello identifier that is not an object ID", async () => {
+    const recorder = sdkRecorder();
+    const provider = createTrelloPack({
+      clientFactory: recorder.clientFactory,
+    }).create({ oauthRuntime })[0];
+    const run = (cardId: string) =>
+      provider.execute({
+        integrationId: "trello",
+        operationId: "trello:get-card",
+        reference: reference("trello"),
+        input: { cardId },
+      });
+
+    await run("5f2b8c1e4a7d9b0012345678");
+    expect(recorder.calls[0]).toEqual({
+      path: "cards.getCard",
+      args: [{ id: "5f2b8c1e4a7d9b0012345678" }],
+    });
+
+    for (const invalid of ["not-an-id", "../boards/1", "12345"]) {
+      await expect(run(invalid)).rejects.toMatchObject({
+        code: "INTEGRATION_PROVIDER_SDK_INVOCATION_INVALID",
+      });
+    }
+    expect(recorder.calls).toHaveLength(1);
+  });
+
+  test("routes an X toggle action by an explicit direction", async () => {
+    const recorder = sdkRecorder();
+    const provider = createXPack({
+      clientFactory: recorder.clientFactory,
+    }).create({ oauthRuntime })[0];
+    const run = (input: Record<string, unknown>) =>
+      provider.execute({
+        integrationId: "x",
+        operationId: "x:like-unlike",
+        reference: reference("x"),
+        input: { userId: "1", tweetId: "2", ...input },
+      });
+
+    await run({});
+    await run({ undo: true });
+
+    // Omitting the flag must like, never unlike.
+    expect(recorder.calls.map((call) => call.path)).toEqual([
+      "v2.like",
+      "v2.unlike",
+    ]);
+  });
+
+  test("rejects an X identifier that is not a numeric snowflake", async () => {
+    const recorder = sdkRecorder();
+    const provider = createXPack({
+      clientFactory: recorder.clientFactory,
+    }).create({ oauthRuntime })[0];
+
+    await expect(
+      provider.execute({
+        integrationId: "x",
+        operationId: "x:delete-tweet",
+        reference: reference("x"),
+        input: { tweetId: "1; DROP" },
+      }),
+    ).rejects.toMatchObject({
+      code: "INTEGRATION_PROVIDER_SDK_INVOCATION_INVALID",
+    });
+    expect(recorder.calls).toEqual([]);
+  });
+
+  test("mutes a Datadog monitor by silencing every scope", async () => {
+    const recorder = sdkRecorder();
+    const provider = createDatadogPack({
+      clientFactory: recorder.clientFactory,
+    }).create({ apiKeyRuntime })[0];
+
+    await provider.execute({
+      integrationId: "datadog",
+      operationId: "datadog:mute-monitor",
+      reference: reference("datadog"),
+      input: { monitorId: 42 },
+    });
+    await provider.execute({
+      integrationId: "datadog",
+      operationId: "datadog:mute-monitor",
+      reference: reference("datadog"),
+      input: { monitorId: 42, unmute: true },
+    });
+
+    expect(recorder.calls[0]?.args[0]).toEqual({
+      monitorId: 42,
+      body: { options: { silenced: { "*": null } } },
+    });
+    expect(recorder.calls[1]?.args[0]).toEqual({
+      monitorId: 42,
+      body: { options: { silenced: {} } },
     });
   });
 

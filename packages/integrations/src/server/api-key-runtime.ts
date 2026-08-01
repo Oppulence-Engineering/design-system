@@ -160,6 +160,7 @@ export const BUILT_IN_API_KEY_PROVIDER_CONFIGURATIONS = Object.freeze([
   { integrationId: "clerk" as const },
   { integrationId: "okta" as const },
   { integrationId: "supabase" as const },
+  { integrationId: "datadog" as const },
 ] satisfies readonly ApiKeyProviderConfiguration[]);
 
 export type BuiltInIntegrationApiKeyRuntimeConfig = Omit<

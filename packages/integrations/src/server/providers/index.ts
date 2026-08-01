@@ -51,9 +51,12 @@ import {
 } from "./protocol";
 import {
   createClerkPack,
+  createDatadogPack,
   createOktaPack,
   createSalesforcePack,
   createSupabasePack,
+  createTrelloPack,
+  createXPack,
 } from "./vendor";
 import { createAsanaProviderSdk } from "./asana";
 import { createBrexProviderSdk } from "./brex";
@@ -233,6 +236,7 @@ export function createBuiltInProviderSdkRegistry(
         createClerkPack(),
         createOktaPack(),
         createSupabasePack(),
+        createDatadogPack(),
       ].flatMap((pack) => pack.create({ apiKeyRuntime: config.apiKeyRuntime })),
     );
   }
@@ -270,6 +274,8 @@ export function createBuiltInProviderSdkRegistry(
         oauthRuntime: config.oauthRuntime,
       }),
       ...createSalesforcePack().create({ oauthRuntime: config.oauthRuntime }),
+      ...createTrelloPack().create({ oauthRuntime: config.oauthRuntime }),
+      ...createXPack().create({ oauthRuntime: config.oauthRuntime }),
       createAsanaProviderSdk({ oauthRuntime: config.oauthRuntime }),
       createDropboxProviderSdk({ oauthRuntime: config.oauthRuntime }),
     );

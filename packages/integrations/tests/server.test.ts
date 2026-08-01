@@ -485,6 +485,7 @@ describe("server API-key runtime", () => {
       "clerk",
       "okta",
       "supabase",
+      "datadog",
     ]);
   });
 
@@ -657,8 +658,8 @@ describe("server vendor SDK adapters", () => {
     });
 
     expect(getProviderSdkCoverageReport(registry)).toMatchObject({
-      executableProviders: 68,
-      executableOperations: 1499,
+      executableProviders: 71,
+      executableOperations: 1560,
       executableTriggers: 0,
       hasCompleteExecutionParity: false,
     });
