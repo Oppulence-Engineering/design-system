@@ -1,6 +1,10 @@
 import { describe, expect, test } from "bun:test";
 
-import { SIMSTUDIO_BASELINE } from "../src/catalog";
+import { INTEGRATION_CATALOGUE, SIMSTUDIO_BASELINE } from "../src/catalog";
+import {
+  EXECUTABLE_INTEGRATION_IDS,
+  EXECUTABLE_INTEGRATION_ID_SET,
+} from "../src/executable";
 import {
   BUILT_IN_PROVIDER_PACKS,
   assertProviderPackCoverage,
@@ -105,6 +109,50 @@ describe("provider parity coverage gate", () => {
     });
     expect(report.unimplementedProviders).toBe(232 - EXECUTABLE_PROVIDERS);
     expect(report.unimplementedOperations).toBe(3890 - EXECUTABLE_ACTIONS);
+  });
+
+  test("the browser-safe executable list matches what the registry ships", () => {
+    // The catalogue is browser-safe and cannot import the registry, so it
+    // derives directory availability from this list instead. If the two drift,
+    // a product either advertises a connector that cannot run or hides one
+    // that can — and the directory silently renders the wrong action.
+    const registry = createBuiltInProviderSdkRegistry({
+      apiKeyRuntime,
+      oauthRuntime,
+      noAuthRuntime,
+    });
+    const shipped = SIMSTUDIO_BASELINE.integrations
+      .filter((integration) => registry.get(integration.id))
+      .map((integration) => integration.id)
+      .sort();
+
+    expect([...EXECUTABLE_INTEGRATION_IDS]).toEqual(shipped);
+    expect(EXECUTABLE_INTEGRATION_IDS).toHaveLength(EXECUTABLE_PROVIDERS);
+  });
+
+  test("every executable integration is offerable in the directory", () => {
+    // Availability is what decides whether the directory renders a connect
+    // action, so an executable integration left at "planned" is invisible to
+    // every product however complete its pack is.
+    const stranded = INTEGRATION_CATALOGUE.filter(
+      (definition) =>
+        EXECUTABLE_INTEGRATION_ID_SET.has(definition.id) &&
+        definition.products.every(
+          (product) => product.availability === "planned",
+        ),
+    ).map((definition) => definition.id);
+    expect(stranded).toEqual([]);
+
+    // And the converse: nothing the package cannot execute may be advertised
+    // as connectable.
+    const overclaimed = INTEGRATION_CATALOGUE.filter(
+      (definition) =>
+        !EXECUTABLE_INTEGRATION_ID_SET.has(definition.id) &&
+        definition.products.some((product) =>
+          ["shipped", "beta"].includes(product.availability),
+        ),
+    ).map((definition) => definition.id);
+    expect(overclaimed).toEqual([]);
   });
 
   test("every pack satisfies the delivery contract it declares", () => {

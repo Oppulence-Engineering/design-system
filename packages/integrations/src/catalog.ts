@@ -8,6 +8,7 @@ import {
   IntegrationDefinitionSchema,
   type ProductIntegration,
 } from "./contracts";
+import { EXECUTABLE_INTEGRATION_ID_SET } from "./executable";
 
 interface SimStudioBaselineRecord {
   id: string;
@@ -81,17 +82,29 @@ function authMethodsFor(
     : [sourceMethod];
 }
 
-function plannedProduct(
+/**
+ * An integration the package can execute is offered to a product as `beta`;
+ * everything else stays `planned`. Without this the directory reports every
+ * integration as planned and renders no connect action, however many providers
+ * the registry actually ships.
+ *
+ * `beta` rather than `shipped`: these are executable and credential-backed, but
+ * promotion to shipped is a product's call once it has verified one live.
+ */
+function catalogueProduct(
+  integrationId: string,
   product: ProductIntegration["product"],
   authMethods: readonly IntegrationAuthMethod[],
   plannedOutcome: string,
   documentationPath: string,
+  capabilities: readonly IntegrationCapability[],
 ): ProductIntegration {
+  const executable = EXECUTABLE_INTEGRATION_ID_SET.has(integrationId);
   return {
     product,
-    availability: "planned",
+    availability: executable ? "beta" : "planned",
     authMethods: [...authMethods],
-    enabledCapabilities: [],
+    enabledCapabilities: executable ? [...capabilities] : [],
     setup: [],
     documentationPath,
     minimumPermission: "connect",
@@ -131,17 +144,21 @@ function fromSimStudio(record: SimStudioBaselineRecord): IntegrationDefinition {
       delivery: "unknown",
     })),
     products: [
-      plannedProduct(
+      catalogueProduct(
+        record.id,
         "eigenn",
         authMethodsFor(record),
         "Tracked for a finance decision or modelling outcome once an owned connector is verified.",
         documentationPath,
+        capabilities,
       ),
-      plannedProduct(
+      catalogueProduct(
+        record.id,
         "conduitt",
         authMethodsFor(record),
         "Tracked for a governed revenue-execution outcome once an owned connector is verified.",
         documentationPath,
+        capabilities,
       ),
     ],
     sourceParity: [
@@ -629,17 +646,21 @@ function fromOppulence(input: ExtraDefinitionInput): IntegrationDefinition {
       delivery: "unknown",
     })),
     products: [
-      plannedProduct(
+      catalogueProduct(
+        input.id,
         "eigenn",
         authMethods,
         "Tracked for a finance decision or modelling outcome.",
         documentationPath,
+        input.capabilities,
       ),
-      plannedProduct(
+      catalogueProduct(
+        input.id,
         "conduitt",
         authMethods,
         "Tracked for a governed revenue-execution outcome.",
         documentationPath,
+        input.capabilities,
       ),
     ],
     sourceParity: [{ source: "oppulence" }],

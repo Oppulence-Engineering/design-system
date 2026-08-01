@@ -13,6 +13,7 @@ import {
 import {
   buildIntegrationDirectory,
   createIntegrationDirectoryResolver,
+  filterIntegrationDirectory,
   getConnectionAttentionCount,
 } from "./connection";
 import { getSimStudioParityReport } from "./parity";
@@ -90,6 +91,7 @@ export {
   createIntegrationConnectionResolver,
   createIntegrationDirectoryResolver,
   createProductIntegrationKit,
+  filterIntegrationDirectory,
   getFunctionalSupportContract,
   getConnectionAttentionCount,
   getIntegration,
@@ -126,8 +128,14 @@ export type {
   IntegrationConnectionResolver,
   IntegrationDirectory,
   IntegrationDirectoryEntry,
+  IntegrationDirectoryFacets,
+  IntegrationDirectoryFilter,
   IntegrationDirectoryLoader,
 } from "./connection";
+export {
+  EXECUTABLE_INTEGRATION_IDS,
+  EXECUTABLE_INTEGRATION_ID_SET,
+} from "./executable";
 export type {
   ActionResult,
   ConnectRequest,

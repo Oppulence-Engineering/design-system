@@ -4,7 +4,13 @@ import * as React from "react";
 import { useMergeLink } from "@mergeapi/react-merge-link";
 import { usePlaidLink } from "react-plaid-link";
 
-import type { IntegrationDirectoryLoader } from "./connection";
+import { filterIntegrationDirectory } from "./connection";
+import type {
+  IntegrationDirectoryEntry,
+  IntegrationDirectoryFacets,
+  IntegrationDirectoryFilter,
+  IntegrationDirectoryLoader,
+} from "./connection";
 import {
   createIntegrationConnectionLinkClient,
   type CreateIntegrationConnectionLinkClientConfig,
@@ -391,5 +397,129 @@ export function MergeConnectionLinkButton({
     >
       {children ?? linkButtonLabel(phase, "Merge")}
     </button>
+  );
+}
+
+// --------------------------------------------------------- directory display
+
+export interface IntegrationDirectorySearch {
+  entries: readonly IntegrationDirectoryEntry[];
+  facets: IntegrationDirectoryFacets;
+  isLoading: boolean;
+  error: Error | undefined;
+  /** Total before filtering, so a UI can say "12 of 255". */
+  total: number;
+}
+
+/**
+ * Filters the loaded directory. The filtering itself lives in `connection` so
+ * it stays testable without a DOM; this only binds it to the loaded state.
+ */
+export function useIntegrationDirectorySearch(
+  filter: IntegrationDirectoryFilter = {},
+): IntegrationDirectorySearch {
+  const { directory, error, isLoading } = useIntegrationDirectory();
+  const { query, category, availability } = filter;
+
+  return React.useMemo(() => {
+    const all = directory?.entries ?? [];
+    const { entries, facets } = filterIntegrationDirectory(all, {
+      query,
+      category,
+      availability,
+    });
+    return { entries, facets, total: all.length, isLoading, error };
+  }, [availability, category, directory, error, isLoading, query]);
+}
+
+export interface IntegrationDirectoryListProps extends IntegrationDirectoryFilter {
+  /** Replaces the default row. Receives each entry that survives the filter. */
+  renderEntry?: (entry: IntegrationDirectoryEntry) => React.ReactNode;
+  /** Rendered instead of the list while the first load is in flight. */
+  renderLoading?: () => React.ReactNode;
+  /** Rendered when the loader failed. */
+  renderError?: (error: Error) => React.ReactNode;
+  /** Rendered when the filter matched nothing. */
+  renderEmpty?: () => React.ReactNode;
+  /** Invoked when a connectable entry's action is activated. */
+  onSelect?: (entry: IntegrationDirectoryEntry) => void;
+}
+
+/**
+ * Renders the directory as a semantic list. Styling is left to the product:
+ * every element carries data attributes rather than class names, and the row
+ * can be replaced wholesale with `renderEntry`.
+ */
+export function IntegrationDirectoryList({
+  renderEntry,
+  renderLoading,
+  renderError,
+  renderEmpty,
+  onSelect,
+  ...filter
+}: IntegrationDirectoryListProps): React.ReactElement | null {
+  const { entries, error, isLoading } = useIntegrationDirectorySearch(filter);
+
+  if (error) {
+    return <>{renderError ? renderError(error) : null}</>;
+  }
+  // Keep showing the previous results while a refresh is in flight; only the
+  // very first load has nothing to render.
+  if (isLoading && !entries.length) {
+    return <>{renderLoading ? renderLoading() : null}</>;
+  }
+  if (!entries.length) {
+    return <>{renderEmpty ? renderEmpty() : null}</>;
+  }
+
+  return (
+    <ul data-integration-directory="list">
+      {entries.map((entry) => (
+        <li
+          key={entry.integration.id}
+          data-integration-id={entry.integration.id}
+          data-integration-category={entry.integration.category}
+          data-integration-availability={entry.availability}
+        >
+          {renderEntry ? (
+            renderEntry(entry)
+          ) : (
+            <IntegrationDirectoryRow entry={entry} onSelect={onSelect} />
+          )}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+export interface IntegrationDirectoryRowProps {
+  entry: IntegrationDirectoryEntry;
+  onSelect?: (entry: IntegrationDirectoryEntry) => void;
+}
+
+/** The default row: name, summary, state, and the entry's primary action. */
+export function IntegrationDirectoryRow({
+  entry,
+  onSelect,
+}: IntegrationDirectoryRowProps): React.ReactElement {
+  const { integration, availability, primaryAction, connections } = entry;
+  return (
+    <div data-integration-directory="row">
+      <span data-integration-field="name">{integration.name}</span>
+      <span data-integration-field="summary">{integration.summary}</span>
+      <span data-integration-field="availability">{availability}</span>
+      {connections.length > 0 ? (
+        <span data-integration-field="connections">{connections.length}</span>
+      ) : null}
+      {primaryAction ? (
+        <button
+          type="button"
+          data-integration-action={primaryAction}
+          onClick={() => onSelect?.(entry)}
+        >
+          {primaryAction}
+        </button>
+      ) : null}
+    </div>
   );
 }
