@@ -112,6 +112,9 @@
     "lint": "prettier --check \"{src,tests,scripts}/**/*.{ts,tsx}\"",
     "prepublishOnly": "bun run clean && bun run build",
     "providers:coverage": "bun scripts/provider-coverage.ts",
+    "providers:generate": "bun scripts/openapi-generate.ts",
+    "providers:sync": "bun scripts/sync-gate.ts",
+    "providers:wire": "bun scripts/wire-provider.ts",
     "providers:openapi": "bun scripts/openapi-plan.ts",
     "providers:plan": "bun scripts/provider-plan.ts",
     "refresh:simstudio": "bun scripts/refresh-simstudio-baseline.ts",
@@ -212,7 +215,8 @@
     "esbuild": "0.25.12",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "yaml": "^2.9.0"
   },
   "peerDependencies": {
     "react": ">=19",

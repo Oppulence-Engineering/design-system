@@ -349,6 +349,28 @@ const CASES: ReadonlyArray<{
     path: "/v2/escalation_paths",
   },
   {
+    // Rootly serves JSON:API, so a write carries a data envelope and the
+    // vendor's own content type rather than application/json.
+    operationId: "rootly:create-incident",
+    input: { data: { type: "incidents" } },
+    method: "POST",
+    path: "/v1/incidents",
+  },
+  {
+    // An action sub-path, not a PUT on the incident.
+    operationId: "rootly:acknowledge-alert",
+    input: { id: "alert-1" },
+    method: "POST",
+    path: "/v1/alerts/alert-1/acknowledge",
+  },
+  {
+    // Rootly spells the unassign as a DELETE on an action path.
+    operationId: "rootly:unassign-incident-role",
+    input: { id: "inc-1", data: { type: "incident_role_assignments" } },
+    method: "DELETE",
+    path: "/v1/incidents/inc-1/unassign_role_from_user",
+  },
+  {
     operationId: "wikipedia:get-page-summary",
     input: { title: "Rust" },
     method: "GET",

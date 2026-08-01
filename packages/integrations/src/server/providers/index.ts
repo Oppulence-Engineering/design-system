@@ -225,6 +225,7 @@ export * from "./quickbooks";
 export * from "./reddit";
 export * from "./redis";
 export * from "./resend";
+export * from "./rootly";
 export * from "./s3";
 export * from "./salesforce";
 export * from "./sendgrid";

@@ -413,6 +413,12 @@ export const BUILT_IN_API_KEY_PROVIDER_CONFIGURATIONS = Object.freeze([
     credentialPrefix: "Bearer",
   },
   {
+    integrationId: "rootly" as const,
+    apiBaseUrl: "https://api.rootly.com",
+    credentialHeader: "Authorization",
+    credentialPrefix: "Bearer",
+  },
+  {
     integrationId: "mongodb" as const,
     credentialFields: [{ name: "uri", required: true }],
   },

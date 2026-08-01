@@ -99,6 +99,7 @@ export const EXECUTABLE_INTEGRATION_IDS: readonly string[] = [
   "reddit",
   "redis",
   "resend",
+  "rootly",
   "s3",
   "salesforce",
   "sendgrid",

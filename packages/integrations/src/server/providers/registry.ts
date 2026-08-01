@@ -62,6 +62,7 @@ import { createPostHogPack } from "./posthog";
 import { createQdrantPack } from "./qdrant";
 import { createRedditPack } from "./reddit";
 import { createRedisPack } from "./redis";
+import { createRootlyPack } from "./rootly";
 import { createS3Pack } from "./s3";
 import { createSalesforcePack } from "./salesforce";
 import { createSendGridPack } from "./sendgrid";
@@ -154,6 +155,7 @@ export const BUILT_IN_PROVIDER_PACKS: readonly IntegrationProviderPack[] = [
   createRdsPack(),
   createRedditPack(),
   createRedisPack(),
+  createRootlyPack(),
   createS3Pack(),
   createSalesforcePack(),
   createSecretsManagerPack(),

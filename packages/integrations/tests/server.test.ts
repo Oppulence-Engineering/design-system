@@ -631,6 +631,7 @@ describe("server API-key runtime", () => {
       "incident-io",
       "posthog",
       "tailscale",
+      "rootly",
       "mongodb",
       "neo4j",
     ]);
@@ -805,8 +806,8 @@ describe("server vendor SDK adapters", () => {
     });
 
     expect(getProviderSdkCoverageReport(registry)).toMatchObject({
-      executableProviders: 111,
-      executableOperations: 2168,
+      executableProviders: 112,
+      executableOperations: 2207,
       executableTriggers: 0,
       hasCompleteExecutionParity: false,
     });
