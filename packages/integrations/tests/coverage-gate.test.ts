@@ -12,9 +12,11 @@ import {
   createCloudflarePack,
   createClickHousePack,
   createAlgoliaPack,
+  createAzureDevOpsPack,
   createBoxPack,
   createClerkPack,
   createDatadogPack,
+  createDocuSignPack,
   createElasticsearchPack,
   createGoogleAppSheetPack,
   createGoogleBigQueryPack,
@@ -61,6 +63,7 @@ import {
   createTrelloPack,
   createVercelPack,
   createXPack,
+  createZendeskPack,
   getProviderPackCoverageReport,
   getProviderSdkCoverageReport,
   type IntegrationProviderPack,
@@ -72,8 +75,8 @@ import {
  * did. The target is the pinned source: 232 providers, 3,890 actions, and 363
  * triggers.
  */
-const EXECUTABLE_PROVIDERS = 86;
-const EXECUTABLE_ACTIONS = 1737;
+const EXECUTABLE_PROVIDERS = 89;
+const EXECUTABLE_ACTIONS = 1787;
 
 const oauthRuntime = {
   async withCredential<T>(
@@ -130,6 +133,7 @@ const PACKS: readonly {
     createBoxPack(),
     createGoogleVaultPack(),
     createGoogleBigQueryPack(),
+    createDocuSignPack(),
   ].map((pack) => ({ pack, context: { oauthRuntime } })),
   ...[
     createCloudflarePack(),
@@ -171,6 +175,8 @@ const PACKS: readonly {
     createGoogleMapsPack(),
     createTwilioVoicePack(),
     createGoogleAppSheetPack(),
+    createZendeskPack(),
+    createAzureDevOpsPack(),
   ].map((pack) => ({ pack, context: { apiKeyRuntime } })),
 ];
 
@@ -203,9 +209,9 @@ describe("provider parity coverage gate", () => {
       PACKS.map((entry) => entry.pack),
     );
 
-    // 57 providers ship as packs; the other 29 executable providers predate
+    // 60 providers ship as packs; the other 29 executable providers predate
     // the pack contract and are registered directly.
-    expect(report.providers).toBe(57);
+    expect(report.providers).toBe(60);
     // Only Google Maps defers, for APIs on hosts neither lane can reach.
     expect(report.deferredOperations).toBe(5);
     // Every supported action is owned by exactly one lane.
@@ -262,8 +268,8 @@ describe("provider parity coverage gate", () => {
       actionsRemaining: sourceActions - EXECUTABLE_ACTIONS,
       triggersRemaining: 363 - 60,
     }).toEqual({
-      providersRemaining: 146,
-      actionsRemaining: 2153,
+      providersRemaining: 143,
+      actionsRemaining: 2103,
       triggersRemaining: 303,
     });
   });

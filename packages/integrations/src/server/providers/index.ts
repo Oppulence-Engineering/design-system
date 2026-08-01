@@ -57,11 +57,14 @@ import {
   createClerkPack,
   createDatadogPack,
   createElasticsearchPack,
+  createAzureDevOpsPack,
+  createDocuSignPack,
   createGoogleAppSheetPack,
   createGoogleBigQueryPack,
   createGoogleMapsPack,
   createGoogleTranslatePack,
   createTwilioVoicePack,
+  createZendeskPack,
   createGoogleVaultPack,
   createPineconePack,
   createQdrantPack,
@@ -263,6 +266,8 @@ export function createBuiltInProviderSdkRegistry(
         createGoogleMapsPack(),
         createTwilioVoicePack(),
         createGoogleAppSheetPack(),
+        createZendeskPack(),
+        createAzureDevOpsPack(),
       ].flatMap((pack) => pack.create({ apiKeyRuntime: config.apiKeyRuntime })),
     );
   }
@@ -308,6 +313,7 @@ export function createBuiltInProviderSdkRegistry(
       ...createGoogleBigQueryPack().create({
         oauthRuntime: config.oauthRuntime,
       }),
+      ...createDocuSignPack().create({ oauthRuntime: config.oauthRuntime }),
       createAsanaProviderSdk({ oauthRuntime: config.oauthRuntime }),
       createDropboxProviderSdk({ oauthRuntime: config.oauthRuntime }),
     );

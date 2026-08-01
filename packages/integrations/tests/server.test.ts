@@ -494,6 +494,8 @@ describe("server API-key runtime", () => {
       "google-translate",
       "google-maps",
       "twilio-voice",
+      "zendesk",
+      "azure-devops",
       "google-appsheet",
       "mongodb",
       "neo4j",
@@ -669,8 +671,8 @@ describe("server vendor SDK adapters", () => {
     });
 
     expect(getProviderSdkCoverageReport(registry)).toMatchObject({
-      executableProviders: 86,
-      executableOperations: 1737,
+      executableProviders: 89,
+      executableOperations: 1787,
       executableTriggers: 0,
       hasCompleteExecutionParity: false,
     });

@@ -169,6 +169,8 @@ export const BUILT_IN_API_KEY_PROVIDER_CONFIGURATIONS = Object.freeze([
   { integrationId: "google-translate" as const },
   { integrationId: "google-maps" as const },
   { integrationId: "twilio-voice" as const },
+  { integrationId: "zendesk" as const },
+  { integrationId: "azure-devops" as const },
   {
     // AppSheet posts every action to one table endpoint and authenticates
     // with an application access key header.

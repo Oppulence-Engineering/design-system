@@ -21,6 +21,9 @@ import {
   createQdrantPack,
   createElasticsearchPack,
   createGoogleMapsPack,
+  createZendeskPack,
+  createDocuSignPack,
+  createAzureDevOpsPack,
   type IntegrationProviderPack,
 } from "../src/server";
 
@@ -130,6 +133,9 @@ describe("vendor SDK provider batch", () => {
       [createQdrantPack(), { apiKeyRuntime }],
       [createElasticsearchPack(), { apiKeyRuntime }],
       [createGoogleMapsPack(), { apiKeyRuntime }],
+      [createZendeskPack(), { apiKeyRuntime }],
+      [createAzureDevOpsPack(), { apiKeyRuntime }],
+      [createDocuSignPack(), { oauthRuntime }],
     ];
 
     for (const [pack, context] of packs) {
@@ -150,7 +156,7 @@ describe("vendor SDK provider batch", () => {
 
     expect(
       packs.reduce((total, [pack]) => total + pack.coverage.length, 0),
-    ).toBe(306);
+    ).toBe(356);
   });
 
   test("builds a bounded SOQL read with validated identifiers", async () => {
@@ -702,6 +708,90 @@ describe("vendor SDK provider batch", () => {
     for (const entry of deferred) {
       expect(entry.reason).toContain("own Google Maps Platform host");
     }
+  });
+
+  test("rejects a non-numeric Zendesk identifier", async () => {
+    const recorder = sdkRecorder();
+    const provider = createZendeskPack({
+      clientFactory: recorder.clientFactory,
+    }).create({ apiKeyRuntime })[0];
+
+    await provider.execute({
+      integrationId: "zendesk",
+      operationId: "zendesk:get-ticket",
+      reference: reference("zendesk"),
+      input: { ticketId: 42 },
+    });
+    expect(recorder.calls[0]).toEqual({ path: "tickets.show", args: [42] });
+
+    await expect(
+      provider.execute({
+        integrationId: "zendesk",
+        operationId: "zendesk:get-ticket",
+        reference: reference("zendesk"),
+        input: { ticketId: "42 OR 1=1" },
+      }),
+    ).rejects.toMatchObject({
+      code: "INTEGRATION_PROVIDER_SDK_INVOCATION_INVALID",
+    });
+  });
+
+  test("builds an Azure DevOps work-item write as a JSON Patch document", async () => {
+    const calls: Array<{ area: string; args: unknown[] }> = [];
+    const api = new Proxy({} as Record<string, unknown>, {
+      get(_t, method: string) {
+        // The area API is awaited, so it must not look like a thenable.
+        if (method === "then") return undefined;
+        return (...args: unknown[]) => {
+          calls.push({ area: method, args });
+          return Promise.resolve({});
+        };
+      },
+    });
+    const provider = createAzureDevOpsPack({
+      clientFactory: () =>
+        ({
+          getWorkItemTrackingApi: async () => api,
+          project: "Platform",
+        }) as never,
+    }).create({ apiKeyRuntime })[0];
+
+    await provider.execute({
+      integrationId: "azure-devops",
+      operationId: "azure-devops:create-work-item",
+      reference: reference("azure-devops"),
+      input: { workItemType: "Bug", fields: { "System.Title": "Crash" } },
+    });
+
+    expect(calls[0]?.area).toBe("createWorkItem");
+    expect(calls[0]?.args[1]).toEqual([
+      { op: "add", path: "/fields/System.Title", value: "Crash" },
+    ]);
+    // The project falls back to the one on the connection.
+    expect(calls[0]?.args[2]).toBe("Platform");
+  });
+
+  test("requires a GUID envelope ID before calling DocuSign", async () => {
+    const provider = createDocuSignPack({
+      clientFactory: () =>
+        ({
+          envelopesApi: {
+            getEnvelope: async () => ({ status: "sent" }),
+          },
+          accountId: "acct",
+        }) as never,
+    }).create({ oauthRuntime })[0];
+
+    await expect(
+      provider.execute({
+        integrationId: "docusign",
+        operationId: "docusign:get-envelope",
+        reference: reference("docusign"),
+        input: { envelopeId: "not-a-guid" },
+      }),
+    ).rejects.toMatchObject({
+      code: "INTEGRATION_PROVIDER_SDK_INVOCATION_INVALID",
+    });
   });
 
   test("registers Salesforce OAuth with the instance URL as callback metadata", () => {
