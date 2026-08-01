@@ -14,7 +14,18 @@ import {
   createAlgoliaPack,
   createAzureDevOpsPack,
   createBoxPack,
+  createArxivPack,
+  createBrandfetchPack,
   createCalComPack,
+  createCalendlyPack,
+  createExaPack,
+  createHunterIoPack,
+  createJinaPack,
+  createPerplexityPack,
+  createTavilyPack,
+  createTelegramPack,
+  createTypeformPack,
+  createWikipediaPack,
   createClerkPack,
   createDatadogPack,
   createDocuSignPack,
@@ -78,8 +89,8 @@ import {
  * did. The target is the pinned source: 232 providers, 3,890 actions, and 363
  * triggers.
  */
-const EXECUTABLE_PROVIDERS = 92;
-const EXECUTABLE_ACTIONS = 1847;
+const EXECUTABLE_PROVIDERS = 103;
+const EXECUTABLE_ACTIONS = 1909;
 
 const oauthRuntime = {
   async withCredential<T>(
@@ -92,6 +103,12 @@ const oauthRuntime = {
   ): Promise<T> {
     return operation({ accessToken: "t", scope: [], tokenType: "Bearer" });
   },
+  async request() {
+    return Response.json({});
+  },
+};
+
+const noAuthRuntime = {
   async request() {
     return Response.json({});
   },
@@ -183,13 +200,30 @@ const PACKS: readonly {
     createZendeskPack(),
     createAzureDevOpsPack(),
     createTemporalPack(),
+    createPerplexityPack(),
+    createJinaPack(),
+    createTavilyPack(),
+    createExaPack(),
+    createBrandfetchPack(),
+    createHunterIoPack(),
+    createTelegramPack(),
+    createCalendlyPack(),
+    createTypeformPack(),
   ].map((pack) => ({ pack, context: { apiKeyRuntime } })),
+  ...[createWikipediaPack(), createArxivPack()].map((pack) => ({
+    pack,
+    context: { noAuthRuntime },
+  })),
 ];
 
 describe("provider parity coverage gate", () => {
   test("the built-in registry executes the recorded provider and action counts", () => {
     const report = getProviderSdkCoverageReport(
-      createBuiltInProviderSdkRegistry({ apiKeyRuntime, oauthRuntime }),
+      createBuiltInProviderSdkRegistry({
+        apiKeyRuntime,
+        oauthRuntime,
+        noAuthRuntime,
+      }),
     );
 
     expect(report).toMatchObject({
@@ -215,9 +249,9 @@ describe("provider parity coverage gate", () => {
       PACKS.map((entry) => entry.pack),
     );
 
-    // 63 providers ship as packs; the other 29 executable providers predate
+    // 74 providers ship as packs; the other 29 executable providers predate
     // the pack contract and are registered directly.
-    expect(report.providers).toBe(63);
+    expect(report.providers).toBe(74);
     // Only Google Maps defers, for APIs on hosts neither lane can reach.
     expect(report.deferredOperations).toBe(5);
     // Every supported action is owned by exactly one lane.
@@ -229,7 +263,7 @@ describe("provider parity coverage gate", () => {
     // Typed REST is the exception, not the default: 6 gap actions, the 22
     // Jira Service Management Forms and Assets actions, AppSheet's 4, and
     // the 10 Cal.com actions its own SDK does not implement.
-    expect(report.byLane.typed_rest.operations).toBe(42);
+    expect(report.byLane.typed_rest.operations).toBe(104);
     // The special lane carries the seven protocol providers.
     expect(report.byLane.special.operations).toBe(108);
   });
@@ -239,7 +273,7 @@ describe("provider parity coverage gate", () => {
       entry.pack.coverage.filter((action) => action.lane === "typed_rest"),
     );
 
-    expect(restActions).toHaveLength(42);
+    expect(restActions).toHaveLength(104);
     for (const action of restActions) {
       expect(action.sdkReview?.trim().length ?? 0).toBeGreaterThan(0);
     }
@@ -275,8 +309,8 @@ describe("provider parity coverage gate", () => {
       actionsRemaining: sourceActions - EXECUTABLE_ACTIONS,
       triggersRemaining: 363 - 60,
     }).toEqual({
-      providersRemaining: 140,
-      actionsRemaining: 2043,
+      providersRemaining: 129,
+      actionsRemaining: 1981,
       triggersRemaining: 303,
     });
   });

@@ -497,6 +497,15 @@ describe("server API-key runtime", () => {
       "zendesk",
       "azure-devops",
       "temporal",
+      "perplexity",
+      "jina",
+      "tavily",
+      "exa",
+      "brandfetch",
+      "hunter-io",
+      "telegram",
+      "calendly",
+      "typeform",
       "google-appsheet",
       "mongodb",
       "neo4j",
@@ -672,8 +681,8 @@ describe("server vendor SDK adapters", () => {
     });
 
     expect(getProviderSdkCoverageReport(registry)).toMatchObject({
-      executableProviders: 92,
-      executableOperations: 1847,
+      executableProviders: 101,
+      executableOperations: 1902,
       executableTriggers: 0,
       hasCompleteExecutionParity: false,
     });

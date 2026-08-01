@@ -172,6 +172,60 @@ export const BUILT_IN_API_KEY_PROVIDER_CONFIGURATIONS = Object.freeze([
   { integrationId: "zendesk" as const },
   { integrationId: "azure-devops" as const },
   { integrationId: "temporal" as const },
+  // Typed REST providers. Each names the one host its relative paths resolve
+  // against, which is what keeps an action from choosing its own destination.
+  {
+    integrationId: "perplexity" as const,
+    apiBaseUrl: "https://api.perplexity.ai",
+    credentialHeader: "Authorization",
+    credentialPrefix: "Bearer",
+  },
+  {
+    integrationId: "jina" as const,
+    apiBaseUrl: "https://r.jina.ai",
+    credentialHeader: "Authorization",
+    credentialPrefix: "Bearer",
+  },
+  {
+    integrationId: "tavily" as const,
+    apiBaseUrl: "https://api.tavily.com",
+    credentialHeader: "Authorization",
+    credentialPrefix: "Bearer",
+  },
+  {
+    integrationId: "exa" as const,
+    apiBaseUrl: "https://api.exa.ai",
+    credentialHeader: "x-api-key",
+  },
+  {
+    integrationId: "brandfetch" as const,
+    apiBaseUrl: "https://api.brandfetch.io",
+    credentialHeader: "Authorization",
+    credentialPrefix: "Bearer",
+  },
+  {
+    integrationId: "hunter-io" as const,
+    apiBaseUrl: "https://api.hunter.io",
+    credentialHeader: "X-API-KEY",
+  },
+  {
+    integrationId: "telegram" as const,
+    apiBaseUrl: "https://api.telegram.org",
+    credentialHeader: "Authorization",
+    credentialPrefix: "Bearer",
+  },
+  {
+    integrationId: "calendly" as const,
+    apiBaseUrl: "https://api.calendly.com",
+    credentialHeader: "Authorization",
+    credentialPrefix: "Bearer",
+  },
+  {
+    integrationId: "typeform" as const,
+    apiBaseUrl: "https://api.typeform.com",
+    credentialHeader: "Authorization",
+    credentialPrefix: "Bearer",
+  },
   {
     // AppSheet posts every action to one table endpoint and authenticates
     // with an application access key header.

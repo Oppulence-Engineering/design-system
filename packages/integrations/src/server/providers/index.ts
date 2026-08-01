@@ -4,6 +4,7 @@ import type { IntegrationProviderSdkRegistry } from "../provider-sdk";
 import type { IntegrationApiKeyRuntime } from "../api-key-runtime";
 import type { IntegrationOAuthRuntime } from "../runtime";
 import type { IntegrationConnectionLinkRuntime } from "../connection-link";
+import type { IntegrationNoAuthRuntime } from "../no-auth-runtime";
 import {
   createAirtableMetadataProviderSdk,
   createAirtableProviderSdk,
@@ -79,6 +80,19 @@ import {
   createTrelloPack,
   createXPack,
 } from "./vendor";
+import {
+  createArxivPack,
+  createBrandfetchPack,
+  createCalendlyPack,
+  createExaPack,
+  createHunterIoPack,
+  createJinaPack,
+  createPerplexityPack,
+  createTavilyPack,
+  createTelegramPack,
+  createTypeformPack,
+  createWikipediaPack,
+} from "./rest";
 import { createAsanaProviderSdk } from "./asana";
 import { createBrexProviderSdk } from "./brex";
 import {
@@ -165,6 +179,7 @@ export * from "./atlassian";
 export * from "./aws";
 export * from "./protocol";
 export * from "./vendor";
+export * from "./rest";
 
 export interface BuiltInProviderSdkRegistryConfig {
   /**
@@ -177,6 +192,11 @@ export interface BuiltInProviderSdkRegistryConfig {
   gitlab?: Omit<GitLabProviderSdkConfig, "apiKeyRuntime">;
   /** Required for package-owned OAuth adapters such as Slack and HubSpot. */
   oauthRuntime?: Pick<IntegrationOAuthRuntime, "withCredential" | "request">;
+  /**
+   * Required for the public, unauthenticated providers — Wikipedia and arXiv
+   * have no credential at all, so they cannot use the API-key transport.
+   */
+  noAuthRuntime?: Pick<IntegrationNoAuthRuntime, "request">;
   /** Required for package-owned browser-Link adapters such as Plaid and Merge. */
   connectionLinkRuntime?: Pick<
     IntegrationConnectionLinkRuntime,
@@ -272,6 +292,16 @@ export function createBuiltInProviderSdkRegistry(
         createZendeskPack(),
         createAzureDevOpsPack(),
         createTemporalPack(),
+        // Typed REST providers on the API-key transport.
+        createPerplexityPack(),
+        createJinaPack(),
+        createTavilyPack(),
+        createExaPack(),
+        createBrandfetchPack(),
+        createHunterIoPack(),
+        createTelegramPack(),
+        createCalendlyPack(),
+        createTypeformPack(),
       ].flatMap((pack) => pack.create({ apiKeyRuntime: config.apiKeyRuntime })),
     );
   }
@@ -339,6 +369,13 @@ export function createBuiltInProviderSdkRegistry(
         }),
       );
     }
+  }
+  if (config.noAuthRuntime) {
+    providers.push(
+      ...[createWikipediaPack(), createArxivPack()].flatMap((pack) =>
+        pack.create({ noAuthRuntime: config.noAuthRuntime }),
+      ),
+    );
   }
   if (config.connectionLinkRuntime && config.plaid) {
     providers.push(
