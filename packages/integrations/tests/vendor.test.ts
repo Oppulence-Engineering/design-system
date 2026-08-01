@@ -20,6 +20,7 @@ import {
   createPineconePack,
   createQdrantPack,
   createElasticsearchPack,
+  createGoogleMapsPack,
   type IntegrationProviderPack,
 } from "../src/server";
 
@@ -128,20 +129,28 @@ describe("vendor SDK provider batch", () => {
       [createPineconePack(), { apiKeyRuntime }],
       [createQdrantPack(), { apiKeyRuntime }],
       [createElasticsearchPack(), { apiKeyRuntime }],
+      [createGoogleMapsPack(), { apiKeyRuntime }],
     ];
 
     for (const [pack, context] of packs) {
       expect(() => assertProviderPackCoverage(pack, context)).not.toThrow();
+      // Every action this batch supports runs on an SDK; the only deferrals
+      // are the five Google Maps APIs neither lane can reach.
       expect(
-        pack.coverage.every(
-          (entry) => entry.disposition === "supported" && entry.lane === "sdk",
-        ),
+        pack.coverage
+          .filter((entry) => entry.disposition === "supported")
+          .every((entry) => entry.lane === "sdk"),
       ).toBe(true);
     }
+    expect(
+      packs.flatMap(([pack]) =>
+        pack.coverage.filter((entry) => entry.disposition === "deferred"),
+      ),
+    ).toHaveLength(5);
 
     expect(
       packs.reduce((total, [pack]) => total + pack.coverage.length, 0),
-    ).toBe(290);
+    ).toBe(306);
   });
 
   test("builds a bounded SOQL read with validated identifiers", async () => {
@@ -629,6 +638,70 @@ describe("vendor SDK provider batch", () => {
       "index.namespace.query",
     ]);
     expect(recorder.calls[1]?.args).toEqual(["tenant-1"]);
+  });
+
+  test("injects the Maps key into every request rather than each mapping", async () => {
+    const calls: Array<{ method: string; params: unknown }> = [];
+    const provider = createGoogleMapsPack({
+      clientFactory: () =>
+        new Proxy({} as Record<string, unknown>, {
+          get:
+            (_t, method: string) =>
+            (request: { params?: Record<string, unknown> }) => {
+              calls.push({ method, params: request.params });
+              return Promise.resolve({ data: {} });
+            },
+        }),
+    }).create({ apiKeyRuntime })[0];
+
+    await provider.execute({
+      integrationId: "google-maps",
+      operationId: "google-maps:geocode-address",
+      reference: reference("google-maps"),
+      input: { address: "1 Infinite Loop" },
+    });
+
+    expect(calls[0]).toEqual({
+      method: "geocode",
+      params: { address: "1 Infinite Loop" },
+    });
+  });
+
+  test("rejects an out-of-range coordinate", async () => {
+    const provider = createGoogleMapsPack({
+      clientFactory: () =>
+        new Proxy({} as Record<string, unknown>, {
+          get: () => () => Promise.resolve({ data: {} }),
+        }),
+    }).create({ apiKeyRuntime })[0];
+
+    await expect(
+      provider.execute({
+        integrationId: "google-maps",
+        operationId: "google-maps:reverse-geocode",
+        reference: reference("google-maps"),
+        input: { lat: 200, lng: 0 },
+      }),
+    ).rejects.toMatchObject({
+      code: "INTEGRATION_PROVIDER_SDK_INVOCATION_INVALID",
+    });
+  });
+
+  test("records why the five uncovered Maps APIs stay deferred", () => {
+    const deferred = createGoogleMapsPack().coverage.filter(
+      (entry) => entry.disposition === "deferred",
+    );
+
+    expect(deferred.map((entry) => entry.sourceOperationId)).toEqual([
+      "google-maps:speed-limits",
+      "google-maps:validate-address",
+      "google-maps:air-quality",
+      "google-maps:pollen-forecast",
+      "google-maps:solar-potential",
+    ]);
+    for (const entry of deferred) {
+      expect(entry.reason).toContain("own Google Maps Platform host");
+    }
   });
 
   test("registers Salesforce OAuth with the instance URL as callback metadata", () => {

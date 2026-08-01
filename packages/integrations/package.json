@@ -143,6 +143,7 @@
     "@elastic/elasticsearch": "9.4.3",
     "@elevenlabs/elevenlabs-js": "2.60.0",
     "@gitbeaker/rest": "43.8.0",
+    "@googlemaps/google-maps-services-js": "3.4.2",
     "@hubspot/api-client": "13.4.0",
     "@linear/sdk": "88.3.0",
     "@mailchimp/mailchimp_marketing": "^3.0.80",
@@ -187,6 +188,7 @@
     "ssh2-sftp-client": "12.1.1",
     "stripe": "22.3.2",
     "trello.js": "2.1.6",
+    "twilio": "6.0.2",
     "twitter-api-v2": "1.29.0",
     "xero-node": "19.0.0",
     "zod": "^4.3.6"

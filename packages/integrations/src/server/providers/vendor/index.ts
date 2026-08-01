@@ -10,3 +10,4 @@ export * from "./reddit";
 export * from "./box";
 export * from "./datastores";
 export * from "./google";
+export * from "./maps-comms";

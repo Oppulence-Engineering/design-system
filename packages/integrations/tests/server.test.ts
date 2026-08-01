@@ -492,6 +492,9 @@ describe("server API-key runtime", () => {
       "qdrant",
       "elasticsearch",
       "google-translate",
+      "google-maps",
+      "twilio-voice",
+      "google-appsheet",
       "mongodb",
       "neo4j",
     ]);
@@ -666,8 +669,8 @@ describe("server vendor SDK adapters", () => {
     });
 
     expect(getProviderSdkCoverageReport(registry)).toMatchObject({
-      executableProviders: 83,
-      executableOperations: 1719,
+      executableProviders: 86,
+      executableOperations: 1737,
       executableTriggers: 0,
       hasCompleteExecutionParity: false,
     });

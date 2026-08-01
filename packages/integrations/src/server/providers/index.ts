@@ -57,8 +57,11 @@ import {
   createClerkPack,
   createDatadogPack,
   createElasticsearchPack,
+  createGoogleAppSheetPack,
   createGoogleBigQueryPack,
+  createGoogleMapsPack,
   createGoogleTranslatePack,
+  createTwilioVoicePack,
   createGoogleVaultPack,
   createPineconePack,
   createQdrantPack,
@@ -257,6 +260,9 @@ export function createBuiltInProviderSdkRegistry(
         createGoogleTranslatePack(),
         createMongoDbPack(),
         createNeo4jPack(),
+        createGoogleMapsPack(),
+        createTwilioVoicePack(),
+        createGoogleAppSheetPack(),
       ].flatMap((pack) => pack.create({ apiKeyRuntime: config.apiKeyRuntime })),
     );
   }

@@ -16,7 +16,9 @@ import {
   createClerkPack,
   createDatadogPack,
   createElasticsearchPack,
+  createGoogleAppSheetPack,
   createGoogleBigQueryPack,
+  createGoogleMapsPack,
   createGoogleTranslatePack,
   createGoogleVaultPack,
   createCloudWatchPack,
@@ -54,6 +56,7 @@ import {
   createSqsPack,
   createStsPack,
   createTextractPack,
+  createTwilioVoicePack,
   createUpstashPack,
   createTrelloPack,
   createVercelPack,
@@ -69,8 +72,8 @@ import {
  * did. The target is the pinned source: 232 providers, 3,890 actions, and 363
  * triggers.
  */
-const EXECUTABLE_PROVIDERS = 83;
-const EXECUTABLE_ACTIONS = 1719;
+const EXECUTABLE_PROVIDERS = 86;
+const EXECUTABLE_ACTIONS = 1737;
 
 const oauthRuntime = {
   async withCredential<T>(
@@ -165,6 +168,9 @@ const PACKS: readonly {
     createGoogleTranslatePack(),
     createMongoDbPack(),
     createNeo4jPack(),
+    createGoogleMapsPack(),
+    createTwilioVoicePack(),
+    createGoogleAppSheetPack(),
   ].map((pack) => ({ pack, context: { apiKeyRuntime } })),
 ];
 
@@ -197,19 +203,20 @@ describe("provider parity coverage gate", () => {
       PACKS.map((entry) => entry.pack),
     );
 
-    // 54 providers ship as packs; the other 29 executable providers predate
+    // 57 providers ship as packs; the other 29 executable providers predate
     // the pack contract and are registered directly.
-    expect(report.providers).toBe(54);
-    expect(report.deferredOperations).toBe(0);
+    expect(report.providers).toBe(57);
+    // Only Google Maps defers, for APIs on hosts neither lane can reach.
+    expect(report.deferredOperations).toBe(5);
     // Every supported action is owned by exactly one lane.
     expect(report.operations).toBe(
       report.byLane.sdk.operations +
         report.byLane.typed_rest.operations +
         report.byLane.special.operations,
     );
-    // Typed REST is the exception, not the default: 6 gap actions plus the 22
-    // Jira Service Management Forms and Assets actions.
-    expect(report.byLane.typed_rest.operations).toBe(28);
+    // Typed REST is the exception, not the default: 6 gap actions, the 22
+    // Jira Service Management Forms and Assets actions, and AppSheet's 4.
+    expect(report.byLane.typed_rest.operations).toBe(32);
     // The special lane carries the seven protocol providers.
     expect(report.byLane.special.operations).toBe(108);
   });
@@ -219,7 +226,7 @@ describe("provider parity coverage gate", () => {
       entry.pack.coverage.filter((action) => action.lane === "typed_rest"),
     );
 
-    expect(restActions).toHaveLength(28);
+    expect(restActions).toHaveLength(32);
     for (const action of restActions) {
       expect(action.sdkReview?.trim().length ?? 0).toBeGreaterThan(0);
     }
@@ -255,8 +262,8 @@ describe("provider parity coverage gate", () => {
       actionsRemaining: sourceActions - EXECUTABLE_ACTIONS,
       triggersRemaining: 363 - 60,
     }).toEqual({
-      providersRemaining: 149,
-      actionsRemaining: 2171,
+      providersRemaining: 146,
+      actionsRemaining: 2153,
       triggersRemaining: 303,
     });
   });
