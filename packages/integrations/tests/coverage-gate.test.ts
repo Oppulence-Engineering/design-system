@@ -16,8 +16,8 @@ import {
  * did. The target is the pinned source: 232 providers, 3,890 actions, and 363
  * triggers.
  */
-const EXECUTABLE_PROVIDERS = 110;
-const EXECUTABLE_ACTIONS = 2045;
+const EXECUTABLE_PROVIDERS = 111;
+const EXECUTABLE_ACTIONS = 2090;
 
 const oauthRuntime = {
   async withCredential<T>(
@@ -116,9 +116,9 @@ describe("provider parity coverage gate", () => {
   test("declared pack coverage matches what the registry executes", () => {
     const report = getProviderPackCoverageReport(BUILT_IN_PROVIDER_PACKS);
 
-    // 81 providers ship as packs; the other 29 executable providers predate
+    // 82 providers ship as packs; the other 29 executable providers predate
     // the pack contract and are registered directly.
-    expect(report.providers).toBe(81);
+    expect(report.providers).toBe(82);
     // Seven deferrals are the same shape: an action whose endpoint lives on a
     // host this lane cannot reach, because a provider resolves all of its
     // actions against one host. Google Maps has five such APIs, PagerDuty's
@@ -133,9 +133,9 @@ describe("provider parity coverage gate", () => {
     );
     // Typed REST is the exception, not the default: 6 gap actions, the 22
     // Jira Service Management Forms and Assets actions, AppSheet's 4, the
-    // 10 Cal.com actions its own SDK does not implement, ClickUp's 37, and
-    // Tailscale's 24.
-    expect(report.byLane.typed_rest.operations).toBe(240);
+    // 10 Cal.com actions its own SDK does not implement, ClickUp's 37,
+    // Tailscale's 24, and Attio's 45.
+    expect(report.byLane.typed_rest.operations).toBe(285);
     // The special lane carries the seven protocol providers.
     expect(report.byLane.special.operations).toBe(108);
   });
@@ -145,7 +145,7 @@ describe("provider parity coverage gate", () => {
       pack.coverage.filter((action) => action.lane === "typed_rest"),
     );
 
-    expect(restActions).toHaveLength(240);
+    expect(restActions).toHaveLength(285);
     for (const action of restActions) {
       expect(action.sdkReview?.trim().length ?? 0).toBeGreaterThan(0);
     }
@@ -181,8 +181,8 @@ describe("provider parity coverage gate", () => {
       actionsRemaining: sourceActions - EXECUTABLE_ACTIONS,
       triggersRemaining: 363 - 60,
     }).toEqual({
-      providersRemaining: 122,
-      actionsRemaining: 1845,
+      providersRemaining: 121,
+      actionsRemaining: 1800,
       triggersRemaining: 303,
     });
   });

@@ -229,6 +229,52 @@ const CASES: ReadonlyArray<{
     path: "/api/v2/tailnet/-/acl",
   },
   {
+    // Listing records is a POST to a query sub-path, not a GET on the
+    // collection — the easiest Attio route to get wrong.
+    operationId: "attio:list-records",
+    input: { object: "people" },
+    method: "POST",
+    path: "/v2/objects/people/records/query",
+  },
+  {
+    operationId: "attio:get-record",
+    input: { object: "people", recordId: "rec-1" },
+    method: "GET",
+    path: "/v2/objects/people/records/rec-1",
+  },
+  {
+    // The upsert is a PUT on the collection, and the matching attribute is
+    // what stops it creating a duplicate.
+    operationId: "attio:assert-record-upsert",
+    input: {
+      object: "people",
+      matchingAttribute: "email_addresses",
+      values: {},
+    },
+    method: "PUT",
+    path: "/v2/objects/people/records?matching_attribute=email_addresses",
+  },
+  {
+    // Members live under workspace_members, not members.
+    operationId: "attio:list-members",
+    input: {},
+    method: "GET",
+    path: "/v2/workspace_members",
+  },
+  {
+    // Attributes hang off either an object or a list under the same sub-path.
+    operationId: "attio:list-attributes",
+    input: { target: "lists", identifier: "sales" },
+    method: "GET",
+    path: "/v2/lists/sales/attributes",
+  },
+  {
+    operationId: "attio:query-list-entries",
+    input: { list: "sales" },
+    method: "POST",
+    path: "/v2/lists/sales/entries/query",
+  },
+  {
     operationId: "wikipedia:get-page-summary",
     input: { title: "Rust" },
     method: "GET",

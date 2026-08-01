@@ -6,6 +6,7 @@ import { createRdsPack } from "./amazon-rds";
 import { createSqsPack } from "./amazon-sqs";
 import { createArxivPack } from "./arxiv";
 import { createAthenaPack } from "./athena";
+import { createAttioPack } from "./attio";
 import { createAppConfigPack } from "./aws-appconfig";
 import { createIamPack } from "./aws-iam";
 import { createIdentityCenterPack } from "./aws-identity-center";
@@ -98,6 +99,7 @@ export const BUILT_IN_PROVIDER_PACKS: readonly IntegrationProviderPack[] = [
   createAppConfigPack(),
   createArxivPack(),
   createAthenaPack(),
+  createAttioPack(),
   createAzureAdPack(),
   createAzureDevOpsPack(),
   createBoxPack(),

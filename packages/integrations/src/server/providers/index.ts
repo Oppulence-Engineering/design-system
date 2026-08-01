@@ -142,6 +142,7 @@ export * from "./amazon-sqs";
 export * from "./arxiv";
 export * from "./asana";
 export * from "./athena";
+export * from "./attio";
 export * from "./aws-appconfig";
 export * from "./aws-iam";
 export * from "./aws-identity-center";
