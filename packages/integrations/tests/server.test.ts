@@ -590,6 +590,9 @@ describe("server vendor SDK adapters", () => {
         async withCredential(_reference, operation) {
           return operation({ apiKey: "key" });
         },
+        async request() {
+          return Response.json({});
+        },
       },
       oauthRuntime: {
         async withCredential(_reference, operation) {
@@ -599,12 +602,15 @@ describe("server vendor SDK adapters", () => {
             tokenType: "Bearer",
           });
         },
+        async request() {
+          return Response.json({});
+        },
       },
     });
 
     expect(getProviderSdkCoverageReport(registry)).toMatchObject({
       executableProviders: 32,
-      executableOperations: 881,
+      executableOperations: 887,
       executableTriggers: 0,
       hasCompleteExecutionParity: false,
     });

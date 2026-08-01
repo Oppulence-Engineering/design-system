@@ -1,8 +1,11 @@
 import { Vercel } from "@vercel/sdk";
+import { z } from "zod";
 import { SIMSTUDIO_BASELINE } from "../../catalog";
 import type { IntegrationApiKeyRuntime } from "../api-key-runtime";
 import { IntegrationProviderSdkError } from "../provider-sdk";
 import type { IntegrationProviderSdk } from "../provider-sdk";
+import { createIntegrationTypedRestProvider } from "../provider-rest";
+import type { IntegrationProviderPack } from "../provider-pack";
 import {
   ProviderSdkInvocationSchema,
   definedFields,
@@ -41,11 +44,16 @@ const VERCEL_OPERATION_IDS = Object.freeze(
   ).map((operation) => operation.id),
 );
 
-// @vercel/sdk v1.28.14 does not expose this endpoint. Keep it catalogue-only
-// until the official SDK supports it instead of bypassing the SDK with REST.
+// @vercel/sdk v1.28.14 does not expose this endpoint, so it is the SDK-first
+// exception for this provider and runs on the typed REST lane.
+const VERCEL_REST_OPERATION_ID = "vercel:update-edge-config-items";
+
+const VERCEL_SDK_REVIEW =
+  "@vercel/sdk@1.28.14 models Edge Config stores and reads but has no method for the PATCH items endpoint.";
+
 const VERCEL_SDK_OPERATION_IDS = Object.freeze(
   VERCEL_OPERATION_IDS.filter(
-    (operationId) => operationId !== "vercel:update-edge-config-items",
+    (operationId) => operationId !== VERCEL_REST_OPERATION_ID,
   ),
 );
 
@@ -887,5 +895,131 @@ export function getVercelProviderSdkReport(): {
   return {
     operations: VERCEL_SDK_OPERATION_IDS.length,
     operationIds: VERCEL_SDK_OPERATION_IDS,
+  };
+}
+
+export interface VercelEdgeConfigItemsProviderSdkConfig {
+  apiKeyRuntime: Pick<IntegrationApiKeyRuntime, "request">;
+}
+
+/** Mirrors the SDK adapter's team scoping as query parameters. */
+function vercelScopeQuery(input: { teamId?: string; slug?: string }): string {
+  const query = new URLSearchParams();
+  if (input.teamId) query.set("teamId", input.teamId);
+  if (input.slug) query.set("slug", input.slug);
+  const serialized = query.toString();
+  return serialized ? `?${serialized}` : "";
+}
+
+/**
+ * Writes Edge Config items, which @vercel/sdk does not model. Vercel's
+ * API-key profile resolves this relative path against
+ * `https://api.vercel.com`.
+ */
+export function createVercelEdgeConfigItemsProviderSdk(
+  config: VercelEdgeConfigItemsProviderSdkConfig,
+): IntegrationProviderSdk {
+  return createIntegrationTypedRestProvider({
+    integrationId: "vercel",
+    transport: { kind: "api_key", runtime: config.apiKeyRuntime },
+    tools: [
+      {
+        id: VERCEL_REST_OPERATION_ID,
+        name: "Update Edge Config Items",
+        description:
+          "Create, update, upsert, or delete items in an Edge Config store",
+        version: "1.0.0",
+        params: {
+          edgeConfigId: {
+            type: "string",
+            required: true,
+            visibility: "user-or-llm",
+          },
+          items: { type: "array", required: true, visibility: "user-or-llm" },
+          teamId: { type: "string", visibility: "user-only" },
+          slug: { type: "string", visibility: "user-only" },
+        },
+        request: {
+          method: "PATCH",
+          url: (input) =>
+            `/v1/edge-config/${encodeURIComponent(input.edgeConfigId)}/items${vercelScopeQuery(input)}`,
+          headers: () => ({ accept: "application/json" }),
+          body: (input) => ({ items: input.items }),
+        },
+        inputSchema: z
+          .object({
+            edgeConfigId: z.string().min(1),
+            // Vercel accepts at most 100 operations per request.
+            items: z
+              .array(
+                z.union([
+                  z
+                    .object({
+                      operation: z.enum(["create", "update", "upsert"]),
+                      key: z.string().min(1),
+                      value: z.unknown(),
+                      description: z.string().optional(),
+                    })
+                    .strict(),
+                  z
+                    .object({
+                      operation: z.literal("delete"),
+                      key: z.string().min(1),
+                    })
+                    .strict(),
+                ]),
+              )
+              .min(1)
+              .max(100),
+            teamId: z.string().min(1).optional(),
+            slug: z.string().min(1).optional(),
+          })
+          .strict(),
+        outputSchema: z.object({ status: z.string() }).loose(),
+      },
+    ],
+  });
+}
+
+/**
+ * Vercel's complete delivery unit: the official SDK for every action it
+ * models, plus the typed REST lane for the Edge Config items write.
+ */
+export function createVercelPack(): IntegrationProviderPack {
+  return {
+    integrationId: "vercel",
+    coverage: VERCEL_OPERATION_IDS.map((sourceOperationId) =>
+      sourceOperationId === VERCEL_REST_OPERATION_ID
+        ? {
+            sourceOperationId,
+            lane: "typed_rest" as const,
+            disposition: "supported" as const,
+            sdkReview: VERCEL_SDK_REVIEW,
+          }
+        : {
+            sourceOperationId,
+            lane: "sdk" as const,
+            disposition: "supported" as const,
+          },
+    ),
+    triggerCoverage: (
+      SIMSTUDIO_BASELINE.integrations.find(
+        (integration) => integration.id === "vercel",
+      )?.triggers ?? []
+    ).map((trigger) => ({
+      sourceTriggerId: trigger.id,
+      disposition: "deferred" as const,
+      reason:
+        "Vercel webhooks are registered per team with a shared signing secret; scheduled with the trigger family work.",
+    })),
+    create(context) {
+      if (!context.apiKeyRuntime) return [];
+      return [
+        createVercelProviderSdk({ apiKeyRuntime: context.apiKeyRuntime }),
+        createVercelEdgeConfigItemsProviderSdk({
+          apiKeyRuntime: context.apiKeyRuntime,
+        }),
+      ];
+    },
   };
 }

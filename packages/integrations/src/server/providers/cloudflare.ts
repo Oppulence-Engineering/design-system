@@ -1,8 +1,11 @@
 import Cloudflare from "cloudflare";
+import { z } from "zod";
 import { SIMSTUDIO_BASELINE } from "../../catalog";
 import type { IntegrationApiKeyRuntime } from "../api-key-runtime";
 import { IntegrationProviderSdkError } from "../provider-sdk";
 import type { IntegrationProviderSdk } from "../provider-sdk";
+import { createIntegrationTypedRestProvider } from "../provider-rest";
+import type { IntegrationProviderPack } from "../provider-pack";
 import {
   ProviderSdkInvocationSchema,
   definedFields,
@@ -36,11 +39,16 @@ const CLOUDFLARE_OPERATION_IDS = Object.freeze(
 );
 
 // cloudflare@7.0.0 exposes individual zone-setting reads but not the source
-// action's complete zone-settings collection endpoint. Keep that action
-// catalogue-only rather than adding a raw REST escape hatch.
+// action's complete zone-settings collection endpoint, so that one action is
+// the SDK-first exception and runs on the typed REST lane.
+const CLOUDFLARE_REST_OPERATION_ID = "cloudflare:get-zone-settings";
+
+const CLOUDFLARE_SDK_REVIEW =
+  "cloudflare@7.0.0 exposes per-setting zone reads (zones.settings.get) but no collection endpoint returning every zone setting in one response.";
+
 const CLOUDFLARE_SDK_OPERATION_IDS = Object.freeze(
   CLOUDFLARE_OPERATION_IDS.filter(
-    (operationId) => operationId !== "cloudflare:get-zone-settings",
+    (operationId) => operationId !== CLOUDFLARE_REST_OPERATION_ID,
   ),
 );
 
@@ -282,5 +290,95 @@ export function getCloudflareProviderSdkReport(): {
   return {
     operations: CLOUDFLARE_SDK_OPERATION_IDS.length,
     operationIds: CLOUDFLARE_SDK_OPERATION_IDS,
+  };
+}
+
+export interface CloudflareZoneSettingsProviderSdkConfig {
+  apiKeyRuntime: Pick<IntegrationApiKeyRuntime, "request">;
+}
+
+/**
+ * Reads the whole zone-settings collection, which the official SDK models only
+ * one setting at a time. Cloudflare's API-key profile resolves this relative
+ * path against `https://api.cloudflare.com/client/v4`.
+ */
+export function createCloudflareZoneSettingsProviderSdk(
+  config: CloudflareZoneSettingsProviderSdkConfig,
+): IntegrationProviderSdk {
+  return createIntegrationTypedRestProvider({
+    integrationId: "cloudflare",
+    transport: { kind: "api_key", runtime: config.apiKeyRuntime },
+    tools: [
+      {
+        id: CLOUDFLARE_REST_OPERATION_ID,
+        name: "Get Zone Settings",
+        description:
+          "Gets all settings for a zone including SSL mode, caching level, and security settings.",
+        version: "1.0.0",
+        params: {
+          zoneId: { type: "string", required: true, visibility: "user-or-llm" },
+        },
+        request: {
+          method: "GET",
+          url: (input) => `/zones/${encodeURIComponent(input.zoneId)}/settings`,
+          headers: () => ({ accept: "application/json" }),
+          retry: { enabled: true },
+        },
+        inputSchema: z.object({ zoneId: z.string().min(1) }).strict(),
+        // A zone returns well over a hundred settings.
+        maxResponseBytes: 512 * 1024,
+        outputSchema: z
+          .object({
+            success: z.boolean(),
+            result: z.array(
+              z
+                .object({
+                  id: z.string(),
+                  value: z.unknown().optional(),
+                  editable: z.boolean().optional(),
+                  modified_on: z.string().nullable().optional(),
+                })
+                .loose(),
+            ),
+            errors: z.array(z.unknown()).optional(),
+            messages: z.array(z.unknown()).optional(),
+          })
+          .strict(),
+      },
+    ],
+  });
+}
+
+/**
+ * Cloudflare's complete delivery unit: the official SDK for every action it
+ * models, plus the typed REST lane for the zone-settings collection read.
+ */
+export function createCloudflarePack(): IntegrationProviderPack {
+  return {
+    integrationId: "cloudflare",
+    coverage: CLOUDFLARE_OPERATION_IDS.map((sourceOperationId) =>
+      sourceOperationId === CLOUDFLARE_REST_OPERATION_ID
+        ? {
+            sourceOperationId,
+            lane: "typed_rest" as const,
+            disposition: "supported" as const,
+            sdkReview: CLOUDFLARE_SDK_REVIEW,
+          }
+        : {
+            sourceOperationId,
+            lane: "sdk" as const,
+            disposition: "supported" as const,
+          },
+    ),
+    triggerCoverage: [],
+    create(context) {
+      if (!context.apiKeyRuntime) return [];
+      return [
+        createCloudflareProviderSdk({ apiKeyRuntime: context.apiKeyRuntime }),
+        createCloudflareZoneSettingsProviderSdk({
+          apiKeyRuntime: context.apiKeyRuntime,
+        }),
+      ];
+    },
   };
 }

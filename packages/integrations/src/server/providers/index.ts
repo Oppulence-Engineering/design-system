@@ -4,10 +4,16 @@ import type { IntegrationProviderSdkRegistry } from "../provider-sdk";
 import type { IntegrationApiKeyRuntime } from "../api-key-runtime";
 import type { IntegrationOAuthRuntime } from "../runtime";
 import type { IntegrationConnectionLinkRuntime } from "../connection-link";
-import { createAirtableProviderSdk } from "./airtable";
+import {
+  createAirtableMetadataProviderSdk,
+  createAirtableProviderSdk,
+} from "./airtable";
 import { createAsanaProviderSdk } from "./asana";
 import { createBrexProviderSdk } from "./brex";
-import { createCloudflareProviderSdk } from "./cloudflare";
+import {
+  createCloudflareProviderSdk,
+  createCloudflareZoneSettingsProviderSdk,
+} from "./cloudflare";
 import { createDropboxProviderSdk } from "./dropbox";
 import { createElevenLabsProviderSdk } from "./elevenlabs";
 import { createFirecrawlProviderSdk } from "./firecrawl";
@@ -40,7 +46,10 @@ import { createResendProviderSdk } from "./resend";
 import { createSlackProviderSdk } from "./slack";
 import { createSquareProviderSdk } from "./square";
 import { createStripeProviderSdk } from "./stripe";
-import { createVercelProviderSdk } from "./vercel";
+import {
+  createVercelEdgeConfigItemsProviderSdk,
+  createVercelProviderSdk,
+} from "./vercel";
 import { XeroProviderSdkConfig, createXeroProviderSdk } from "./xero";
 import { createYouTubeProviderSdk } from "./youtube";
 
@@ -82,12 +91,16 @@ export * from "./plaid";
 export * from "./merge";
 
 export interface BuiltInProviderSdkRegistryConfig {
-  /** Required for package-owned API-key adapters such as Stripe and GitHub. */
-  apiKeyRuntime?: Pick<IntegrationApiKeyRuntime, "withCredential">;
+  /**
+   * Required for package-owned API-key adapters such as Stripe and GitHub.
+   * `request` additionally backs the typed REST lane, which covers the actions
+   * a vendor SDK does not model.
+   */
+  apiKeyRuntime?: Pick<IntegrationApiKeyRuntime, "withCredential" | "request">;
   /** Optional package configuration for a trusted self-managed GitLab host. */
   gitlab?: Omit<GitLabProviderSdkConfig, "apiKeyRuntime">;
   /** Required for package-owned OAuth adapters such as Slack and HubSpot. */
-  oauthRuntime?: Pick<IntegrationOAuthRuntime, "withCredential">;
+  oauthRuntime?: Pick<IntegrationOAuthRuntime, "withCredential" | "request">;
   /** Required for package-owned browser-Link adapters such as Plaid and Merge. */
   connectionLinkRuntime?: Pick<
     IntegrationConnectionLinkRuntime,
@@ -121,12 +134,18 @@ export function createBuiltInProviderSdkRegistry(
         ...config.gitlab,
       }),
       createCloudflareProviderSdk({ apiKeyRuntime: config.apiKeyRuntime }),
+      createCloudflareZoneSettingsProviderSdk({
+        apiKeyRuntime: config.apiKeyRuntime,
+      }),
       createElevenLabsProviderSdk({ apiKeyRuntime: config.apiKeyRuntime }),
       createFirecrawlProviderSdk({ apiKeyRuntime: config.apiKeyRuntime }),
       createMailgunProviderSdk({ apiKeyRuntime: config.apiKeyRuntime }),
       createIntercomProviderSdk({ apiKeyRuntime: config.apiKeyRuntime }),
       createMailchimpProviderSdk({ apiKeyRuntime: config.apiKeyRuntime }),
       createVercelProviderSdk({ apiKeyRuntime: config.apiKeyRuntime }),
+      createVercelEdgeConfigItemsProviderSdk({
+        apiKeyRuntime: config.apiKeyRuntime,
+      }),
       createSquareProviderSdk({ apiKeyRuntime: config.apiKeyRuntime }),
       createGoogleBooksProviderSdk({ apiKeyRuntime: config.apiKeyRuntime }),
       createYouTubeProviderSdk({ apiKeyRuntime: config.apiKeyRuntime }),
@@ -151,6 +170,7 @@ export function createBuiltInProviderSdkRegistry(
       createGoogleGroupsProviderSdk({ oauthRuntime: config.oauthRuntime }),
       createGoogleSlidesProviderSdk({ oauthRuntime: config.oauthRuntime }),
       createAirtableProviderSdk({ oauthRuntime: config.oauthRuntime }),
+      createAirtableMetadataProviderSdk({ oauthRuntime: config.oauthRuntime }),
       createAsanaProviderSdk({ oauthRuntime: config.oauthRuntime }),
       createDropboxProviderSdk({ oauthRuntime: config.oauthRuntime }),
     );
