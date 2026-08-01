@@ -64,6 +64,11 @@ import {
   UnauthenticatedProviderError,
 } from "./unauthenticated";
 import {
+  createIntegrationProviderSdkRegistry,
+  getProviderSdkCoverageReport,
+  IntegrationProviderSdkError,
+} from "./provider-sdk";
+import {
   createSlackProviderSdk,
   createHubSpotProviderSdk,
   createGitHubProviderSdk,
@@ -135,12 +140,9 @@ import {
   getXeroProviderSdkReport,
   getPlaidProviderSdkReport,
   getMergeProviderSdkReport,
-  createIntegrationProviderSdkRegistry,
   createBuiltInProviderSdkRegistry,
-  getProviderSdkCoverageReport,
   getStripeProviderSdkReport,
-  IntegrationProviderSdkError,
-} from "./provider-sdk";
+} from "./providers";
 import { createIntegrationTypedRestProvider } from "./provider-rest";
 import { createIntegrationSpecialProvider } from "./provider-special";
 import {
@@ -424,10 +426,12 @@ export type {
   IntegrationProviderSdk,
   IntegrationProviderSdkRegistry,
   IntegrationProviderExecutionLane,
-  BuiltInProviderSdkRegistryConfig,
   ProviderSdkInvocation,
   ProviderSdkResult,
   ProviderSdkCoverageReport,
+} from "./provider-sdk";
+export type {
+  BuiltInProviderSdkRegistryConfig,
   SlackProviderSdkConfig,
   HubSpotProviderSdkConfig,
   GitHubProviderSdkConfig,
@@ -464,7 +468,7 @@ export type {
   QuickBooksProviderSdkConfig,
   StripeProviderSdkConfig,
   XeroProviderSdkConfig,
-} from "./provider-sdk";
+} from "./providers";
 export type {
   IntegrationTypedRestBody,
   IntegrationTypedRestMethod,
