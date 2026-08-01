@@ -166,6 +166,9 @@ export const BUILT_IN_API_KEY_PROVIDER_CONFIGURATIONS = Object.freeze([
   { integrationId: "pinecone" as const },
   { integrationId: "qdrant" as const },
   { integrationId: "elasticsearch" as const },
+  { integrationId: "google-translate" as const },
+  { integrationId: "mongodb" as const },
+  { integrationId: "neo4j" as const },
 ] satisfies readonly ApiKeyProviderConfiguration[]);
 
 export type BuiltInIntegrationApiKeyRuntimeConfig = Omit<

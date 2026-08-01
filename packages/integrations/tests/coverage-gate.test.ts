@@ -16,12 +16,17 @@ import {
   createClerkPack,
   createDatadogPack,
   createElasticsearchPack,
+  createGoogleBigQueryPack,
+  createGoogleTranslatePack,
+  createGoogleVaultPack,
   createCloudWatchPack,
   createCodePipelinePack,
   createConfluencePack,
   createDynamoDbPack,
   createJupyterPack,
+  createMongoDbPack,
   createMySqlPack,
+  createNeo4jPack,
   createPineconePack,
   createPostgreSqlPack,
   createIamPack,
@@ -64,8 +69,8 @@ import {
  * did. The target is the pinned source: 232 providers, 3,890 actions, and 363
  * triggers.
  */
-const EXECUTABLE_PROVIDERS = 78;
-const EXECUTABLE_ACTIONS = 1671;
+const EXECUTABLE_PROVIDERS = 83;
+const EXECUTABLE_ACTIONS = 1719;
 
 const oauthRuntime = {
   async withCredential<T>(
@@ -120,6 +125,8 @@ const PACKS: readonly {
     createXPack(),
     createRedditPack(),
     createBoxPack(),
+    createGoogleVaultPack(),
+    createGoogleBigQueryPack(),
   ].map((pack) => ({ pack, context: { oauthRuntime } })),
   ...[
     createCloudflarePack(),
@@ -155,6 +162,9 @@ const PACKS: readonly {
     createPineconePack(),
     createQdrantPack(),
     createElasticsearchPack(),
+    createGoogleTranslatePack(),
+    createMongoDbPack(),
+    createNeo4jPack(),
   ].map((pack) => ({ pack, context: { apiKeyRuntime } })),
 ];
 
@@ -187,9 +197,9 @@ describe("provider parity coverage gate", () => {
       PACKS.map((entry) => entry.pack),
     );
 
-    // 49 providers ship as packs; the other 29 executable providers predate
+    // 54 providers ship as packs; the other 29 executable providers predate
     // the pack contract and are registered directly.
-    expect(report.providers).toBe(49);
+    expect(report.providers).toBe(54);
     expect(report.deferredOperations).toBe(0);
     // Every supported action is owned by exactly one lane.
     expect(report.operations).toBe(
@@ -201,7 +211,7 @@ describe("provider parity coverage gate", () => {
     // Jira Service Management Forms and Assets actions.
     expect(report.byLane.typed_rest.operations).toBe(28);
     // The special lane carries the seven protocol providers.
-    expect(report.byLane.special.operations).toBe(95);
+    expect(report.byLane.special.operations).toBe(108);
   });
 
   test("every typed REST action records the SDK review that allows it", () => {
@@ -245,8 +255,8 @@ describe("provider parity coverage gate", () => {
       actionsRemaining: sourceActions - EXECUTABLE_ACTIONS,
       triggersRemaining: 363 - 60,
     }).toEqual({
-      providersRemaining: 154,
-      actionsRemaining: 2219,
+      providersRemaining: 149,
+      actionsRemaining: 2171,
       triggersRemaining: 303,
     });
   });

@@ -148,13 +148,10 @@ const STRATEGY_OVERRIDES: Readonly<Record<string, StrategyOverride>> = {
   github: { kind: "installed_vendor_sdk", packageName: "@octokit/rest" },
   gitlab: { kind: "installed_vendor_sdk", packageName: "@gitbeaker/rest" },
   gmail: { kind: "installed_vendor_sdk", packageName: "googleapis" },
-  "google-appsheet": {
-    kind: "vendor_sdk_candidate",
-    packageName: "googleapis",
-  },
+
   "google-bigquery": {
     kind: "vendor_sdk_candidate",
-    packageName: "@google-cloud/bigquery",
+    packageName: "googleapis",
   },
   "google-books": { kind: "installed_vendor_sdk", packageName: "googleapis" },
   "google-calendar": {
@@ -188,7 +185,7 @@ const STRATEGY_OVERRIDES: Readonly<Record<string, StrategyOverride>> = {
   "google-tasks": { kind: "installed_vendor_sdk", packageName: "googleapis" },
   "google-translate": {
     kind: "vendor_sdk_candidate",
-    packageName: "@google-cloud/translate",
+    packageName: "googleapis",
   },
   "google-vault": { kind: "vendor_sdk_candidate", packageName: "googleapis" },
   hubspot: {
@@ -222,8 +219,7 @@ const STRATEGY_OVERRIDES: Readonly<Record<string, StrategyOverride>> = {
     kind: "vendor_sdk_candidate",
     packageName: "@microsoft/microsoft-graph-client",
   },
-  mongodb: { kind: "vendor_sdk_candidate", packageName: "mongodb" },
-  neo4j: { kind: "vendor_sdk_candidate", packageName: "neo4j-driver" },
+
   notion: { kind: "vendor_sdk_candidate", packageName: "@notionhq/client" },
   okta: {
     kind: "vendor_sdk_candidate",
@@ -288,6 +284,9 @@ const STRATEGY_OVERRIDES: Readonly<Record<string, StrategyOverride>> = {
 
 const SPECIAL_PROVIDER_CLIENTS: Readonly<Record<string, string>> = {
   clickhouse: "@clickhouse/client",
+  // Drivers with a connection lifecycle, not HTTP clients.
+  mongodb: "mongodb",
+  neo4j: "neo4j-driver",
   jupyter: "Jupyter server protocol",
   mysql: "mysql2",
   postgresql: "pg",

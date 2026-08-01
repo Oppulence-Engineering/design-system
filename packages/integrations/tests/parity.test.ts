@@ -69,8 +69,8 @@ describe("Sim Studio parity baseline", () => {
       byKind: {
         installed_vendor_sdk: { providers: 32, operations: 887, triggers: 63 },
         vendor_sdk_candidate: {
-          providers: 44,
-          operations: 583,
+          providers: 41,
+          operations: 566,
           triggers: 27,
         },
         maintained_sdk_candidate: {
@@ -79,11 +79,11 @@ describe("Sim Studio parity baseline", () => {
           triggers: 57,
         },
         typed_rest_candidate: {
-          providers: 122,
-          operations: 2038,
+          providers: 123,
+          operations: 2042,
           triggers: 205,
         },
-        special_provider: { providers: 7, operations: 95, triggers: 0 },
+        special_provider: { providers: 9, operations: 108, triggers: 0 },
         no_runtime_actions: { providers: 18, operations: 0, triggers: 11 },
       },
     });

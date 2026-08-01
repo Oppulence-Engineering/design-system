@@ -42,6 +42,8 @@ import {
 } from "./aws";
 import {
   createClickHousePack,
+  createMongoDbPack,
+  createNeo4jPack,
   createJupyterPack,
   createMySqlPack,
   createPostgreSqlPack,
@@ -55,6 +57,9 @@ import {
   createClerkPack,
   createDatadogPack,
   createElasticsearchPack,
+  createGoogleBigQueryPack,
+  createGoogleTranslatePack,
+  createGoogleVaultPack,
   createPineconePack,
   createQdrantPack,
   createRedditPack,
@@ -249,6 +254,9 @@ export function createBuiltInProviderSdkRegistry(
         createPineconePack(),
         createQdrantPack(),
         createElasticsearchPack(),
+        createGoogleTranslatePack(),
+        createMongoDbPack(),
+        createNeo4jPack(),
       ].flatMap((pack) => pack.create({ apiKeyRuntime: config.apiKeyRuntime })),
     );
   }
@@ -290,6 +298,10 @@ export function createBuiltInProviderSdkRegistry(
       ...createXPack().create({ oauthRuntime: config.oauthRuntime }),
       ...createRedditPack().create({ oauthRuntime: config.oauthRuntime }),
       ...createBoxPack().create({ oauthRuntime: config.oauthRuntime }),
+      ...createGoogleVaultPack().create({ oauthRuntime: config.oauthRuntime }),
+      ...createGoogleBigQueryPack().create({
+        oauthRuntime: config.oauthRuntime,
+      }),
       createAsanaProviderSdk({ oauthRuntime: config.oauthRuntime }),
       createDropboxProviderSdk({ oauthRuntime: config.oauthRuntime }),
     );

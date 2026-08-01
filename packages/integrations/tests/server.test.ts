@@ -491,6 +491,9 @@ describe("server API-key runtime", () => {
       "pinecone",
       "qdrant",
       "elasticsearch",
+      "google-translate",
+      "mongodb",
+      "neo4j",
     ]);
   });
 
@@ -663,8 +666,8 @@ describe("server vendor SDK adapters", () => {
     });
 
     expect(getProviderSdkCoverageReport(registry)).toMatchObject({
-      executableProviders: 78,
-      executableOperations: 1671,
+      executableProviders: 83,
+      executableOperations: 1719,
       executableTriggers: 0,
       hasCompleteExecutionParity: false,
     });

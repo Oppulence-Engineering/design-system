@@ -5,3 +5,4 @@ export * from "./clickhouse";
 export * from "./redis";
 export * from "./ssh";
 export * from "./jupyter";
+export * from "./graph-document";

@@ -9,6 +9,8 @@ import {
   createClickHousePack,
   createIntegrationCredentialReference,
   createJupyterPack,
+  createMongoDbPack,
+  createNeo4jPack,
   createMySqlPack,
   createPostgreSqlPack,
   createRedisPack,
@@ -57,6 +59,8 @@ const PACKS: readonly IntegrationProviderPack[] = [
   createSshPack(),
   createSftpPack(),
   createJupyterPack(),
+  createMongoDbPack(),
+  createNeo4jPack(),
 ];
 
 describe("protocol provider family", () => {
@@ -74,7 +78,7 @@ describe("protocol provider family", () => {
     }
 
     expect(PACKS.reduce((total, pack) => total + pack.coverage.length, 0)).toBe(
-      95,
+      108,
     );
   });
 
@@ -427,6 +431,84 @@ describe("protocol provider family", () => {
     expect(statements[1]?.text).toBe(
       "ALTER TABLE `events` DELETE WHERE `id` = ?",
     );
+  });
+
+  test("refuses a MongoDB update or delete with an empty filter", async () => {
+    const pack = createMongoDbPack({
+      connect: async () => ({
+        client: {
+          collection: () => ({
+            find: () => ({ toArray: async () => [] }),
+            insertMany: async () => ({}),
+            updateMany: async () => ({}),
+            deleteMany: async () => ({}),
+            aggregate: () => ({ toArray: async () => [] }),
+          }),
+          listCollections: async () => [],
+        },
+        close: async () => undefined,
+      }),
+    });
+    const provider = pack.create({ apiKeyRuntime })[0];
+
+    for (const operationId of [
+      "mongodb:update-documents",
+      "mongodb:delete-documents",
+    ]) {
+      await expect(
+        provider.execute({
+          integrationId: "mongodb",
+          operationId,
+          reference: reference("mongodb"),
+          input: { collection: "invoices", filter: {}, update: { $set: {} } },
+        }),
+      ).rejects.toMatchObject({
+        code: "INTEGRATION_PROVIDER_SDK_INVOCATION_INVALID",
+      });
+    }
+  });
+
+  test("binds Cypher property values and validates the label", async () => {
+    const statements: Array<{ cypher: string; parameters: unknown }> = [];
+    const pack = createNeo4jPack({
+      connect: async () => ({
+        client: {
+          async run(cypher, parameters) {
+            statements.push({ cypher, parameters });
+            return { records: [] };
+          },
+        },
+        close: async () => undefined,
+      }),
+    });
+    const provider = pack.create({ apiKeyRuntime })[0];
+
+    await provider.execute({
+      integrationId: "neo4j",
+      operationId: "neo4j:query-match",
+      reference: reference("neo4j"),
+      input: { label: "Invoice", properties: { status: "open" }, limit: 25 },
+    });
+
+    expect(statements[0]?.cypher).toBe(
+      "MATCH (n:Invoice {status: $match_status}) RETURN n LIMIT $limit",
+    );
+    expect(statements[0]?.parameters).toEqual({
+      match_status: "open",
+      limit: 25,
+    });
+
+    // A label cannot bind, so an injection attempt must be rejected.
+    await expect(
+      provider.execute({
+        integrationId: "neo4j",
+        operationId: "neo4j:query-match",
+        reference: reference("neo4j"),
+        input: { label: "Invoice) DETACH DELETE n //" },
+      }),
+    ).rejects.toMatchObject({
+      code: "INTEGRATION_PROVIDER_SDK_INVOCATION_INVALID",
+    });
   });
 
   test("defers protocol triggers with a recorded reason", () => {
