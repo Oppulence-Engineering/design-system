@@ -15,27 +15,30 @@ import {
   MergeConnectionLinkCredentialSchema,
   IntegrationOAuthCredentialSchema,
   PlaidConnectionLinkCredentialSchema,
-} from "./credentials";
+} from "./transport/credentials";
 import {
   createIntegrationConnectionLinkRuntime,
   IntegrationConnectionLinkError,
-} from "./connection-link";
+} from "./transport/connection-link";
 import {
   createIntegrationWebhookRoutes,
   createIntegrationWebhookRuntime,
   IntegrationWebhookError,
-} from "./webhook";
+} from "./http/webhook";
 import {
   createIntegrationApiKeyRuntime,
   createBuiltInIntegrationApiKeyRuntime,
   BUILT_IN_API_KEY_PROVIDER_CONFIGURATIONS,
   IntegrationApiKeyRuntimeError,
-} from "./api-key-runtime";
+} from "./runtime/api-key";
 import {
   createIntegrationNoAuthRuntime,
   IntegrationNoAuthRuntimeError,
-} from "./no-auth-runtime";
-import { createApiKeyProviderSdk, ApiKeyProviderError } from "./api-key";
+} from "./runtime/no-auth";
+import {
+  createApiKeyProviderSdk,
+  ApiKeyProviderError,
+} from "./transport/api-key";
 import {
   createOAuth2ProviderSdk,
   createAirtableOAuth2Provider,
@@ -61,16 +64,16 @@ import {
   createAtlassianOAuth2Provider,
   createSalesforceOAuth2Provider,
   OAuth2ProviderError,
-} from "./oauth2";
+} from "./transport/oauth2";
 import {
   createUnauthenticatedProviderSdk,
   UnauthenticatedProviderError,
-} from "./unauthenticated";
+} from "./transport/unauthenticated";
 import {
   createIntegrationProviderSdkRegistry,
   getProviderSdkCoverageReport,
   IntegrationProviderSdkError,
-} from "./provider-sdk";
+} from "./core/provider-sdk";
 import {
   createSlackProviderSdk,
   createHubSpotProviderSdk,
@@ -328,15 +331,15 @@ import {
   createBuiltInProviderSdkRegistry,
   getStripeProviderSdkReport,
 } from "./providers";
-import { createIntegrationTypedRestProvider } from "./provider-rest";
-import { createIntegrationSpecialProvider } from "./provider-special";
+import { createIntegrationTypedRestProvider } from "./core/provider-rest";
+import { createIntegrationSpecialProvider } from "./core/provider-special";
 import {
   assertProviderPackCoverage,
   getProviderPackAdapterIssues,
   getProviderPackContractIssues,
   getProviderPackCoverageReport,
   ProviderPackContractError,
-} from "./provider-pack";
+} from "./core/provider-pack";
 import {
   createInMemoryIntegrationTriggerStore,
   createIntegrationTriggerRoutes,
@@ -349,7 +352,7 @@ import {
   createIntegrationOAuthRuntime,
   IntegrationRuntimeError,
   PendingIntegrationOAuthAuthorizationSchema,
-} from "./runtime";
+} from "./runtime/oauth";
 import {
   composeIntegrationRoutes,
   createApiKeyRouteConnector,
@@ -361,7 +364,7 @@ import {
   createIntegrationProviderExecutionRoutes,
   createNoAuthRouteConnector,
   createOAuthRouteConnector,
-} from "./routes";
+} from "./http/routes";
 
 if (typeof window !== "undefined") {
   throw new Error(
@@ -723,7 +726,7 @@ export type {
   MergeConnectionLinkCredential,
   IntegrationOAuthCredential,
   PlaidConnectionLinkCredential,
-} from "./credentials";
+} from "./transport/credentials";
 export type {
   CompleteConnectionLinkInput,
   CompleteConnectionLinkResult,
@@ -737,7 +740,7 @@ export type {
   MergeLinkSdk,
   PlaidConnectionLinkConfig,
   PlaidLinkSdk,
-} from "./connection-link";
+} from "./transport/connection-link";
 export type {
   IntegrationWebhookConnection,
   IntegrationWebhookProvider,
@@ -749,7 +752,7 @@ export type {
   PlaidIntegrationWebhookConfig,
   PlaidWebhookSdk,
   ProcessIntegrationWebhookResult,
-} from "./webhook";
+} from "./http/webhook";
 export type {
   ConnectIntegrationApiKeyInput,
   ConnectIntegrationApiKeyResult,
@@ -759,7 +762,7 @@ export type {
   IntegrationApiKeyRuntimeConfig,
   BuiltInIntegrationApiKeyRuntimeConfig,
   IntegrationApiKeySubject,
-} from "./api-key-runtime";
+} from "./runtime/api-key";
 export type {
   ConnectIntegrationNoAuthInput,
   ConnectIntegrationNoAuthResult,
@@ -768,12 +771,12 @@ export type {
   IntegrationNoAuthRuntime,
   IntegrationNoAuthRuntimeConfig,
   IntegrationNoAuthSubject,
-} from "./no-auth-runtime";
+} from "./runtime/no-auth";
 export type {
   ApiKeyProviderConfiguration,
   ApiKeyProviderRequest,
   ApiKeyProviderSdk,
-} from "./api-key";
+} from "./transport/api-key";
 export type {
   OAuth2ApiRequest,
   OAuth2AuthorizationInput,
@@ -796,12 +799,12 @@ export type {
   GoogleGroupsOAuth2ProviderInput,
   LinearOAuth2ProviderInput,
   SlackOAuth2ProviderInput,
-} from "./oauth2";
+} from "./transport/oauth2";
 export type {
   UnauthenticatedProviderConfiguration,
   UnauthenticatedProviderRequest,
   UnauthenticatedProviderSdk,
-} from "./unauthenticated";
+} from "./transport/unauthenticated";
 export type {
   IntegrationProviderSdk,
   IntegrationProviderSdkRegistry,
@@ -809,7 +812,7 @@ export type {
   ProviderSdkInvocation,
   ProviderSdkResult,
   ProviderSdkCoverageReport,
-} from "./provider-sdk";
+} from "./core/provider-sdk";
 export type {
   BuiltInProviderSdkRegistryConfig,
   SlackProviderSdkConfig,
@@ -861,8 +864,8 @@ export type {
   IntegrationTypedRestRetryConfig,
   IntegrationTypedRestTool,
   IntegrationTypedRestTransport,
-} from "./provider-rest";
-export type { IntegrationSpecialProviderConfig } from "./provider-special";
+} from "./core/provider-rest";
+export type { IntegrationSpecialProviderConfig } from "./core/provider-special";
 export type {
   MicrosoftGraphClient,
   MicrosoftGraphClientFactory,
@@ -932,7 +935,7 @@ export type {
   MicrosoftGraphOAuth2ProviderInput,
   AtlassianOAuth2ProviderInput,
   SalesforceOAuth2ProviderInput,
-} from "./oauth2";
+} from "./transport/oauth2";
 export type {
   IntegrationPollTriggerSource,
   IntegrationSubscriptionTriggerSource,
@@ -963,7 +966,7 @@ export type {
   RestRuntimes,
   RestTransportKind,
 } from "./providers";
-export type { ExecutableTriggerSource } from "./provider-sdk";
+export type { ExecutableTriggerSource } from "./core/provider-sdk";
 export type {
   IntegrationProviderPack,
   ProviderPackContext,
@@ -972,7 +975,7 @@ export type {
   ProviderPackDisposition,
   ProviderPackOperationCoverage,
   ProviderPackTriggerCoverage,
-} from "./provider-pack";
+} from "./core/provider-pack";
 export type {
   BeginIntegrationOAuthInput,
   BeginIntegrationOAuthResult,
@@ -986,7 +989,7 @@ export type {
   IntegrationOAuthSubject,
   IntegrationProviderRequest,
   PendingIntegrationOAuthAuthorization,
-} from "./runtime";
+} from "./runtime/oauth";
 export type {
   IntegrationApiKeyRoutesConfig,
   IntegrationNoAuthRoutesConfig,
@@ -996,4 +999,4 @@ export type {
   IntegrationProviderExecutionRoutesConfig,
   IntegrationRouteHandler,
   OAuthRouteConnectorActions,
-} from "./routes";
+} from "./http/routes";

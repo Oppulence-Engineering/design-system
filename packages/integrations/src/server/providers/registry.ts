@@ -1,95 +1,83 @@
-import type { IntegrationProviderPack } from "../provider-pack";
+import type { IntegrationProviderPack } from "../core/provider-pack";
 import { createAirtablePack } from "./airtable";
-import {
-  createConfluencePack,
-  createJiraPack,
-  createJiraServiceManagementPack,
-} from "./atlassian";
-import {
-  createAppConfigPack,
-  createAthenaPack,
-  createCloudFormationPack,
-  createCloudWatchPack,
-  createCodePipelinePack,
-  createDynamoDbPack,
-  createIamPack,
-  createIdentityCenterPack,
-  createRdsPack,
-  createS3Pack,
-  createSecretsManagerPack,
-  createSesPack,
-  createSqsPack,
-  createStsPack,
-  createTextractPack,
-} from "./aws";
+import { createAlgoliaPack } from "./algolia";
+import { createDynamoDbPack } from "./amazon-dynamodb";
+import { createRdsPack } from "./amazon-rds";
+import { createSqsPack } from "./amazon-sqs";
+import { createArxivPack } from "./arxiv";
+import { createAthenaPack } from "./athena";
+import { createAppConfigPack } from "./aws-appconfig";
+import { createIamPack } from "./aws-iam";
+import { createIdentityCenterPack } from "./aws-identity-center";
+import { createSecretsManagerPack } from "./aws-secrets-manager";
+import { createSesPack } from "./aws-ses";
+import { createStsPack } from "./aws-sts";
+import { createTextractPack } from "./aws-textract";
+import { createAzureAdPack } from "./azure-ad";
+import { createAzureDevOpsPack } from "./azure-devops";
+import { createBoxPack } from "./box";
+import { createBrandfetchPack } from "./brandfetch";
+import { createCalComPack } from "./cal-com";
+import { createCalendlyPack } from "./calendly";
+import { createClerkPack } from "./clerk";
+import { createClickHousePack } from "./clickhouse";
 import { createCloudflarePack } from "./cloudflare";
-import {
-  createAzureAdPack,
-  createMicrosoftExcelPack,
-  createMicrosoftPlannerPack,
-  createMicrosoftTeamsPack,
-  createOneDrivePack,
-  createOutlookPack,
-  createSharePointPack,
-} from "./microsoft-graph";
-import {
-  createClickHousePack,
-  createJupyterPack,
-  createMongoDbPack,
-  createMySqlPack,
-  createNeo4jPack,
-  createPostgreSqlPack,
-  createRedisPack,
-  createSftpPack,
-  createSshPack,
-} from "./protocol";
-import {
-  createArxivPack,
-  createBrandfetchPack,
-  createCalendlyPack,
-  createDiscordPack,
-  createExaPack,
-  createHunterIoPack,
-  createJinaPack,
-  createLinkedInPack,
-  createPagerDutyPack,
-  createPerplexityPack,
-  createSendGridPack,
-  createTavilyPack,
-  createTelegramPack,
-  createTypeformPack,
-  createWebflowPack,
-  createWikipediaPack,
-} from "./rest";
-import {
-  createAlgoliaPack,
-  createAzureDevOpsPack,
-  createBoxPack,
-  createCalComPack,
-  createClerkPack,
-  createDatadogPack,
-  createDocuSignPack,
-  createElasticsearchPack,
-  createGoogleAppSheetPack,
-  createGoogleBigQueryPack,
-  createGoogleMapsPack,
-  createGoogleTranslatePack,
-  createGoogleVaultPack,
-  createOktaPack,
-  createPineconePack,
-  createQdrantPack,
-  createRedditPack,
-  createSalesforcePack,
-  createShopifyPack,
-  createSupabasePack,
-  createTemporalPack,
-  createTrelloPack,
-  createTwilioVoicePack,
-  createUpstashPack,
-  createXPack,
-  createZendeskPack,
-} from "./vendor";
+import { createCloudFormationPack } from "./cloudformation";
+import { createCloudWatchPack } from "./cloudwatch";
+import { createCodePipelinePack } from "./codepipeline";
+import { createConfluencePack } from "./confluence";
+import { createDatadogPack } from "./datadog";
+import { createDiscordPack } from "./discord";
+import { createDocuSignPack } from "./docusign";
+import { createElasticsearchPack } from "./elasticsearch";
+import { createExaPack } from "./exa";
+import { createGoogleAppSheetPack } from "./google-appsheet";
+import { createGoogleBigQueryPack } from "./google-bigquery";
+import { createGoogleMapsPack } from "./google-maps";
+import { createGoogleTranslatePack } from "./google-translate";
+import { createGoogleVaultPack } from "./google-vault";
+import { createHunterIoPack } from "./hunter-io";
+import { createJinaPack } from "./jina";
+import { createJiraPack } from "./jira";
+import { createJiraServiceManagementPack } from "./jira-service-management";
+import { createJupyterPack } from "./jupyter";
+import { createLinkedInPack } from "./linkedin";
+import { createMicrosoftExcelPack } from "./microsoft-excel";
+import { createMicrosoftPlannerPack } from "./microsoft-planner";
+import { createMicrosoftTeamsPack } from "./microsoft-teams";
+import { createMongoDbPack } from "./mongodb";
+import { createMySqlPack } from "./mysql";
+import { createNeo4jPack } from "./neo4j";
+import { createOktaPack } from "./okta";
+import { createOneDrivePack } from "./onedrive";
+import { createOutlookPack } from "./outlook";
+import { createPagerDutyPack } from "./pagerduty";
+import { createPerplexityPack } from "./perplexity";
+import { createPineconePack } from "./pinecone";
+import { createPostgreSqlPack } from "./postgresql";
+import { createQdrantPack } from "./qdrant";
+import { createRedditPack } from "./reddit";
+import { createRedisPack } from "./redis";
+import { createS3Pack } from "./s3";
+import { createSalesforcePack } from "./salesforce";
+import { createSendGridPack } from "./sendgrid";
+import { createSftpPack } from "./sftp";
+import { createSharePointPack } from "./sharepoint";
+import { createShopifyPack } from "./shopify";
+import { createSshPack } from "./ssh";
+import { createSupabasePack } from "./supabase";
+import { createTavilyPack } from "./tavily";
+import { createTelegramPack } from "./telegram";
+import { createTemporalPack } from "./temporal";
+import { createTrelloPack } from "./trello";
+import { createTwilioVoicePack } from "./twilio-voice";
+import { createTypeformPack } from "./typeform";
+import { createUpstashPack } from "./upstash";
 import { createVercelPack } from "./vercel";
+import { createWebflowPack } from "./webflow";
+import { createWikipediaPack } from "./wikipedia";
+import { createXPack } from "./x";
+import { createZendeskPack } from "./zendesk";
 
 /**
  * Every provider pack the package ships, in one list.
