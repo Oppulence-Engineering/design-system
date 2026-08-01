@@ -2,87 +2,9 @@ import { describe, expect, test } from "bun:test";
 
 import { SIMSTUDIO_BASELINE } from "../src/catalog";
 import {
+  BUILT_IN_PROVIDER_PACKS,
   assertProviderPackCoverage,
-  createAppConfigPack,
-  createAirtablePack,
-  createAthenaPack,
-  createAzureAdPack,
   createBuiltInProviderSdkRegistry,
-  createCloudFormationPack,
-  createCloudflarePack,
-  createClickHousePack,
-  createAlgoliaPack,
-  createAzureDevOpsPack,
-  createBoxPack,
-  createArxivPack,
-  createBrandfetchPack,
-  createCalComPack,
-  createCalendlyPack,
-  createDiscordPack,
-  createExaPack,
-  createHunterIoPack,
-  createLinkedInPack,
-  createPagerDutyPack,
-  createSendGridPack,
-  createWebflowPack,
-  createJinaPack,
-  createPerplexityPack,
-  createTavilyPack,
-  createTelegramPack,
-  createTypeformPack,
-  createWikipediaPack,
-  createClerkPack,
-  createDatadogPack,
-  createDocuSignPack,
-  createElasticsearchPack,
-  createGoogleAppSheetPack,
-  createGoogleBigQueryPack,
-  createGoogleMapsPack,
-  createGoogleTranslatePack,
-  createGoogleVaultPack,
-  createCloudWatchPack,
-  createCodePipelinePack,
-  createConfluencePack,
-  createDynamoDbPack,
-  createJupyterPack,
-  createMongoDbPack,
-  createMySqlPack,
-  createNeo4jPack,
-  createPineconePack,
-  createPostgreSqlPack,
-  createIamPack,
-  createIdentityCenterPack,
-  createJiraPack,
-  createJiraServiceManagementPack,
-  createMicrosoftExcelPack,
-  createMicrosoftPlannerPack,
-  createMicrosoftTeamsPack,
-  createOneDrivePack,
-  createOutlookPack,
-  createOktaPack,
-  createQdrantPack,
-  createRdsPack,
-  createRedditPack,
-  createRedisPack,
-  createS3Pack,
-  createSecretsManagerPack,
-  createSesPack,
-  createSftpPack,
-  createSshPack,
-  createSupabasePack,
-  createSalesforcePack,
-  createSharePointPack,
-  createShopifyPack,
-  createSqsPack,
-  createStsPack,
-  createTemporalPack,
-  createTextractPack,
-  createTwilioVoicePack,
-  createUpstashPack,
-  createTrelloPack,
-  createVercelPack,
-  createXPack,
-  createZendeskPack,
   getProviderPackCoverageReport,
   getProviderSdkCoverageReport,
   type IntegrationProviderPack,
@@ -135,99 +57,6 @@ const apiKeyRuntime = {
 };
 
 /** Every provider delivered as a pack, with the runtime each one needs. */
-const PACKS: readonly {
-  pack: IntegrationProviderPack;
-  context: Parameters<IntegrationProviderPack["create"]>[0];
-}[] = [
-  ...[
-    createAirtablePack(),
-    createAzureAdPack(),
-    createOutlookPack(),
-    createOneDrivePack(),
-    createSharePointPack(),
-    createMicrosoftPlannerPack(),
-    createMicrosoftTeamsPack(),
-    createMicrosoftExcelPack(),
-    createJiraPack(),
-    createConfluencePack(),
-    createJiraServiceManagementPack(),
-    createSalesforcePack(),
-    createTrelloPack(),
-    createXPack(),
-    createRedditPack(),
-    createBoxPack(),
-    createGoogleVaultPack(),
-    createGoogleBigQueryPack(),
-    createDocuSignPack(),
-    createShopifyPack(),
-    createCalComPack(),
-  ].map((pack) => ({ pack, context: { oauthRuntime } })),
-  ...[
-    createCloudflarePack(),
-    createVercelPack(),
-    createS3Pack(),
-    createDynamoDbPack(),
-    createSqsPack(),
-    createRdsPack(),
-    createSesPack(),
-    createIamPack(),
-    createStsPack(),
-    createIdentityCenterPack(),
-    createSecretsManagerPack(),
-    createTextractPack(),
-    createAppConfigPack(),
-    createAthenaPack(),
-    createCloudWatchPack(),
-    createCloudFormationPack(),
-    createCodePipelinePack(),
-    createPostgreSqlPack(),
-    createMySqlPack(),
-    createClickHousePack(),
-    createRedisPack(),
-    createSshPack(),
-    createSftpPack(),
-    createJupyterPack(),
-    createClerkPack(),
-    createOktaPack(),
-    createSupabasePack(),
-    createDatadogPack(),
-    createAlgoliaPack(),
-    createUpstashPack(),
-    createPineconePack(),
-    createQdrantPack(),
-    createElasticsearchPack(),
-    createGoogleTranslatePack(),
-    createMongoDbPack(),
-    createNeo4jPack(),
-    createGoogleMapsPack(),
-    createTwilioVoicePack(),
-    createGoogleAppSheetPack(),
-    createZendeskPack(),
-    createAzureDevOpsPack(),
-    createTemporalPack(),
-    createPerplexityPack(),
-    createJinaPack(),
-    createTavilyPack(),
-    createExaPack(),
-    createBrandfetchPack(),
-    createHunterIoPack(),
-    createTelegramPack(),
-    createCalendlyPack(),
-    createTypeformPack(),
-    createDiscordPack(),
-    createSendGridPack(),
-    createPagerDutyPack(),
-  ].map((pack) => ({ pack, context: { apiKeyRuntime } })),
-  ...[createWikipediaPack(), createArxivPack()].map((pack) => ({
-    pack,
-    context: { noAuthRuntime },
-  })),
-  ...[createLinkedInPack(), createWebflowPack()].map((pack) => ({
-    pack,
-    context: { oauthRuntime },
-  })),
-];
-
 describe("provider parity coverage gate", () => {
   test("the built-in registry executes the recorded provider and action counts", () => {
     const report = getProviderSdkCoverageReport(
@@ -251,15 +80,13 @@ describe("provider parity coverage gate", () => {
   });
 
   test("every pack satisfies the delivery contract it declares", () => {
-    for (const { pack, context } of PACKS) {
-      expect(() => assertProviderPackCoverage(pack, context)).not.toThrow();
+    for (const pack of BUILT_IN_PROVIDER_PACKS) {
+      expect(() => assertProviderPackCoverage(pack)).not.toThrow();
     }
   });
 
   test("declared pack coverage matches what the registry executes", () => {
-    const report = getProviderPackCoverageReport(
-      PACKS.map((entry) => entry.pack),
-    );
+    const report = getProviderPackCoverageReport(BUILT_IN_PROVIDER_PACKS);
 
     // 79 providers ship as packs; the other 29 executable providers predate
     // the pack contract and are registered directly.
@@ -283,8 +110,8 @@ describe("provider parity coverage gate", () => {
   });
 
   test("every typed REST action records the SDK review that allows it", () => {
-    const restActions = PACKS.flatMap((entry) =>
-      entry.pack.coverage.filter((action) => action.lane === "typed_rest"),
+    const restActions = BUILT_IN_PROVIDER_PACKS.flatMap((pack) =>
+      pack.coverage.filter((action) => action.lane === "typed_rest"),
     );
 
     expect(restActions).toHaveLength(180);
@@ -294,13 +121,13 @@ describe("provider parity coverage gate", () => {
   });
 
   test("supported triggers cover the Atlassian and Microsoft families", () => {
-    const supported = PACKS.flatMap((entry) =>
-      entry.pack.triggerCoverage.filter(
+    const supported = BUILT_IN_PROVIDER_PACKS.flatMap((pack) =>
+      pack.triggerCoverage.filter(
         (trigger) => trigger.disposition === "supported",
       ),
     );
-    const deferred = PACKS.flatMap((entry) =>
-      entry.pack.triggerCoverage.filter(
+    const deferred = BUILT_IN_PROVIDER_PACKS.flatMap((pack) =>
+      pack.triggerCoverage.filter(
         (trigger) => trigger.disposition === "deferred",
       ),
     );

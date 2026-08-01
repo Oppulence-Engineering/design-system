@@ -111,6 +111,8 @@
     "format": "prettier --write \"{src,tests,scripts}/**/*.{ts,tsx}\"",
     "lint": "prettier --check \"{src,tests,scripts}/**/*.{ts,tsx}\"",
     "prepublishOnly": "bun run clean && bun run build",
+    "providers:coverage": "bun scripts/provider-coverage.ts",
+    "providers:plan": "bun scripts/provider-plan.ts",
     "refresh:simstudio": "bun scripts/refresh-simstudio-baseline.ts",
     "test": "bun test tests --path-ignore-patterns='**/artifacts.test.ts'",
     "typecheck": "tsc --noEmit",

@@ -98,6 +98,7 @@ import {
   createLinkedInPack,
   createWebflowPack,
 } from "./rest";
+import { BUILT_IN_PROVIDER_PACKS } from "./registry";
 import { createAsanaProviderSdk } from "./asana";
 import { createBrexProviderSdk } from "./brex";
 import {
@@ -185,6 +186,7 @@ export * from "./aws";
 export * from "./protocol";
 export * from "./vendor";
 export * from "./rest";
+export { BUILT_IN_PROVIDER_PACKS } from "./registry";
 
 export interface BuiltInProviderSdkRegistryConfig {
   /**
@@ -225,7 +227,9 @@ export interface BuiltInProviderSdkRegistryConfig {
 export function createBuiltInProviderSdkRegistry(
   config: BuiltInProviderSdkRegistryConfig,
 ): IntegrationProviderSdkRegistry {
-  const providers: IntegrationProviderSdk[] = [];
+  const providers: IntegrationProviderSdk[] = [
+    ...BUILT_IN_PROVIDER_PACKS.flatMap((pack) => pack.create(config)),
+  ];
   if (config.apiKeyRuntime) {
     providers.push(
       createStripeProviderSdk({ apiKeyRuntime: config.apiKeyRuntime }),
@@ -234,19 +238,11 @@ export function createBuiltInProviderSdkRegistry(
         apiKeyRuntime: config.apiKeyRuntime,
         ...config.gitlab,
       }),
-      createCloudflareProviderSdk({ apiKeyRuntime: config.apiKeyRuntime }),
-      createCloudflareZoneSettingsProviderSdk({
-        apiKeyRuntime: config.apiKeyRuntime,
-      }),
       createElevenLabsProviderSdk({ apiKeyRuntime: config.apiKeyRuntime }),
       createFirecrawlProviderSdk({ apiKeyRuntime: config.apiKeyRuntime }),
       createMailgunProviderSdk({ apiKeyRuntime: config.apiKeyRuntime }),
       createIntercomProviderSdk({ apiKeyRuntime: config.apiKeyRuntime }),
       createMailchimpProviderSdk({ apiKeyRuntime: config.apiKeyRuntime }),
-      createVercelProviderSdk({ apiKeyRuntime: config.apiKeyRuntime }),
-      createVercelEdgeConfigItemsProviderSdk({
-        apiKeyRuntime: config.apiKeyRuntime,
-      }),
       createSquareProviderSdk({ apiKeyRuntime: config.apiKeyRuntime }),
       createGoogleBooksProviderSdk({ apiKeyRuntime: config.apiKeyRuntime }),
       createYouTubeProviderSdk({ apiKeyRuntime: config.apiKeyRuntime }),
@@ -254,70 +250,10 @@ export function createBuiltInProviderSdkRegistry(
       createBrexProviderSdk({ apiKeyRuntime: config.apiKeyRuntime }),
       // AWS providers are delivered as packs; each builds its own adapter
       // from the shared executor and the composite key credential.
-      ...[
-        createS3Pack(),
-        createDynamoDbPack(),
-        createSqsPack(),
-        createRdsPack(),
-        createSesPack(),
-        createIamPack(),
-        createStsPack(),
-        createIdentityCenterPack(),
-        createSecretsManagerPack(),
-        createTextractPack(),
-        createAppConfigPack(),
-        createAthenaPack(),
-        createCloudWatchPack(),
-        createCloudFormationPack(),
-        createCodePipelinePack(),
-        // Protocol providers: databases, cache, shell, file transfer, and the
-        // self-hosted Jupyter server.
-        createPostgreSqlPack(),
-        createMySqlPack(),
-        createClickHousePack(),
-        createRedisPack(),
-        createSshPack(),
-        createSftpPack(),
-        createJupyterPack(),
-        createClerkPack(),
-        createOktaPack(),
-        createSupabasePack(),
-        createDatadogPack(),
-        createAlgoliaPack(),
-        createUpstashPack(),
-        createPineconePack(),
-        createQdrantPack(),
-        createElasticsearchPack(),
-        createGoogleTranslatePack(),
-        createMongoDbPack(),
-        createNeo4jPack(),
-        createGoogleMapsPack(),
-        createTwilioVoicePack(),
-        createGoogleAppSheetPack(),
-        createZendeskPack(),
-        createAzureDevOpsPack(),
-        createTemporalPack(),
-        // Typed REST providers on the API-key transport.
-        createPerplexityPack(),
-        createJinaPack(),
-        createTavilyPack(),
-        createExaPack(),
-        createBrandfetchPack(),
-        createHunterIoPack(),
-        createTelegramPack(),
-        createCalendlyPack(),
-        createTypeformPack(),
-        createDiscordPack(),
-        createSendGridPack(),
-        createPagerDutyPack(),
-      ].flatMap((pack) => pack.create({ apiKeyRuntime: config.apiKeyRuntime })),
     );
   }
   if (config.oauthRuntime) {
     providers.push(
-      ...[createLinkedInPack(), createWebflowPack()].flatMap((pack) =>
-        pack.create({ oauthRuntime: config.oauthRuntime }),
-      ),
       createSlackProviderSdk({ oauthRuntime: config.oauthRuntime }),
       createHubSpotProviderSdk({ oauthRuntime: config.oauthRuntime }),
       createLinearProviderSdk({ oauthRuntime: config.oauthRuntime }),
@@ -332,35 +268,6 @@ export function createBuiltInProviderSdkRegistry(
       createGoogleMeetProviderSdk({ oauthRuntime: config.oauthRuntime }),
       createGoogleGroupsProviderSdk({ oauthRuntime: config.oauthRuntime }),
       createGoogleSlidesProviderSdk({ oauthRuntime: config.oauthRuntime }),
-      createAirtableProviderSdk({ oauthRuntime: config.oauthRuntime }),
-      createAirtableMetadataProviderSdk({ oauthRuntime: config.oauthRuntime }),
-      createAzureAdProviderSdk({ oauthRuntime: config.oauthRuntime }),
-      createOutlookProviderSdk({ oauthRuntime: config.oauthRuntime }),
-      createOneDriveProviderSdk({ oauthRuntime: config.oauthRuntime }),
-      createSharePointProviderSdk({ oauthRuntime: config.oauthRuntime }),
-      createMicrosoftPlannerProviderSdk({ oauthRuntime: config.oauthRuntime }),
-      createMicrosoftTeamsProviderSdk({ oauthRuntime: config.oauthRuntime }),
-      createMicrosoftExcelProviderSdk({ oauthRuntime: config.oauthRuntime }),
-      createJiraProviderSdk({ oauthRuntime: config.oauthRuntime }),
-      createConfluenceProviderSdk({ oauthRuntime: config.oauthRuntime }),
-      createJiraServiceManagementProviderSdk({
-        oauthRuntime: config.oauthRuntime,
-      }),
-      createJiraServiceManagementRestProviderSdk({
-        oauthRuntime: config.oauthRuntime,
-      }),
-      ...createSalesforcePack().create({ oauthRuntime: config.oauthRuntime }),
-      ...createTrelloPack().create({ oauthRuntime: config.oauthRuntime }),
-      ...createXPack().create({ oauthRuntime: config.oauthRuntime }),
-      ...createRedditPack().create({ oauthRuntime: config.oauthRuntime }),
-      ...createBoxPack().create({ oauthRuntime: config.oauthRuntime }),
-      ...createGoogleVaultPack().create({ oauthRuntime: config.oauthRuntime }),
-      ...createGoogleBigQueryPack().create({
-        oauthRuntime: config.oauthRuntime,
-      }),
-      ...createDocuSignPack().create({ oauthRuntime: config.oauthRuntime }),
-      ...createShopifyPack().create({ oauthRuntime: config.oauthRuntime }),
-      ...createCalComPack().create({ oauthRuntime: config.oauthRuntime }),
       createAsanaProviderSdk({ oauthRuntime: config.oauthRuntime }),
       createDropboxProviderSdk({ oauthRuntime: config.oauthRuntime }),
     );
@@ -380,13 +287,6 @@ export function createBuiltInProviderSdkRegistry(
         }),
       );
     }
-  }
-  if (config.noAuthRuntime) {
-    providers.push(
-      ...[createWikipediaPack(), createArxivPack()].flatMap((pack) =>
-        pack.create({ noAuthRuntime: config.noAuthRuntime }),
-      ),
-    );
   }
   if (config.connectionLinkRuntime && config.plaid) {
     providers.push(

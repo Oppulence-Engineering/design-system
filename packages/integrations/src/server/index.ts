@@ -324,6 +324,7 @@ import {
   getXeroProviderSdkReport,
   getPlaidProviderSdkReport,
   getMergeProviderSdkReport,
+  BUILT_IN_PROVIDER_PACKS,
   createBuiltInProviderSdkRegistry,
   getStripeProviderSdkReport,
 } from "./providers";
@@ -680,6 +681,7 @@ export {
   getPlaidProviderSdkReport,
   getMergeProviderSdkReport,
   createIntegrationProviderSdkRegistry,
+  BUILT_IN_PROVIDER_PACKS,
   createBuiltInProviderSdkRegistry,
   getProviderSdkCoverageReport,
   IntegrationProviderSdkError,
