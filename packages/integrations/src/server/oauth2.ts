@@ -1168,3 +1168,70 @@ export function createMicrosoftGraphOAuth2Provider(
     scopes: input.scopes ?? [...MICROSOFT_BASE_SCOPES, ...defaults],
   };
 }
+
+/**
+ * Atlassian 3LO issues one token per authorized site and routes API calls
+ * through the shared gateway, where the site is selected by a non-secret cloud
+ * ID. Jira, Confluence, and Jira Service Management therefore share one
+ * authority and differ only in scopes.
+ */
+const ATLASSIAN_BASE_SCOPES = ["offline_access", "read:me"] as const;
+
+const ATLASSIAN_DEFAULT_SCOPES: Readonly<Record<string, readonly string[]>> = {
+  jira: [
+    "read:jira-work",
+    "write:jira-work",
+    "read:jira-user",
+    "manage:jira-webhook",
+  ],
+  confluence: [
+    "read:confluence-content.all",
+    "write:confluence-content",
+    "read:confluence-space.summary",
+    "write:confluence-space",
+    "read:confluence-user",
+    "search:confluence",
+  ],
+  "jira-service-management": [
+    "read:servicedesk-request",
+    "write:servicedesk-request",
+    "manage:servicedesk-customer",
+    "read:jira-work",
+    "read:jira-user",
+  ],
+};
+
+export interface AtlassianOAuth2ProviderInput {
+  integrationId: keyof typeof ATLASSIAN_DEFAULT_SCOPES;
+  clientId: string;
+  clientSecret: string;
+  redirectUri: string;
+  /** Override the complete requested scope set for a restricted app. */
+  scopes?: readonly string[];
+}
+
+/** OAuth registration shared by the package-owned Atlassian adapters. */
+export function createAtlassianOAuth2Provider(
+  input: AtlassianOAuth2ProviderInput,
+): OAuth2ProviderConfiguration {
+  const defaults = ATLASSIAN_DEFAULT_SCOPES[input.integrationId];
+  if (!defaults) {
+    throw new Error(`No Atlassian scope profile for ${input.integrationId}.`);
+  }
+  return {
+    integrationId:
+      input.integrationId as OAuth2ProviderConfiguration["integrationId"],
+    authorizationEndpoint: "https://auth.atlassian.com/authorize",
+    tokenEndpoint: "https://auth.atlassian.com/oauth/token",
+    apiBaseUrl: "https://api.atlassian.com",
+    clientId: input.clientId,
+    clientSecret: input.clientSecret,
+    redirectUri: input.redirectUri,
+    scopes: input.scopes ?? [...ATLASSIAN_BASE_SCOPES, ...defaults],
+    // Atlassian requires the API audience and an explicit consent prompt.
+    authorizationParameters: {
+      audience: "api.atlassian.com",
+      prompt: "consent",
+    },
+  };
+}

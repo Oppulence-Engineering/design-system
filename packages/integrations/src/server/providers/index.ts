@@ -17,6 +17,12 @@ import {
   createOutlookProviderSdk,
   createSharePointProviderSdk,
 } from "./microsoft-graph";
+import {
+  createConfluenceProviderSdk,
+  createJiraProviderSdk,
+  createJiraServiceManagementProviderSdk,
+  createJiraServiceManagementRestProviderSdk,
+} from "./atlassian";
 import { createAsanaProviderSdk } from "./asana";
 import { createBrexProviderSdk } from "./brex";
 import {
@@ -99,6 +105,7 @@ export * from "./xero";
 export * from "./plaid";
 export * from "./merge";
 export * from "./microsoft-graph";
+export * from "./atlassian";
 
 export interface BuiltInProviderSdkRegistryConfig {
   /**
@@ -188,6 +195,14 @@ export function createBuiltInProviderSdkRegistry(
       createMicrosoftPlannerProviderSdk({ oauthRuntime: config.oauthRuntime }),
       createMicrosoftTeamsProviderSdk({ oauthRuntime: config.oauthRuntime }),
       createMicrosoftExcelProviderSdk({ oauthRuntime: config.oauthRuntime }),
+      createJiraProviderSdk({ oauthRuntime: config.oauthRuntime }),
+      createConfluenceProviderSdk({ oauthRuntime: config.oauthRuntime }),
+      createJiraServiceManagementProviderSdk({
+        oauthRuntime: config.oauthRuntime,
+      }),
+      createJiraServiceManagementRestProviderSdk({
+        oauthRuntime: config.oauthRuntime,
+      }),
       createAsanaProviderSdk({ oauthRuntime: config.oauthRuntime }),
       createDropboxProviderSdk({ oauthRuntime: config.oauthRuntime }),
     );
