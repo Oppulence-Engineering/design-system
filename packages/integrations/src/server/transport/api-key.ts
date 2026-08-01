@@ -5,6 +5,12 @@ import {
   type IntegrationApiKeyCredential,
 } from "./credentials";
 
+export interface CredentialFieldSpec {
+  name: string;
+  /** A request cannot be built without it. */
+  required?: boolean;
+}
+
 export interface ApiKeyProviderConfiguration {
   integrationId: IntegrationId;
   /**
@@ -31,6 +37,13 @@ export interface ApiKeyProviderConfiguration {
    * place, and sending it twice widens where it can leak.
    */
   credentialPathPrefix?: string;
+  /**
+   * Extra secrets this provider needs beyond the key — an AWS secret access
+   * key, a Datadog application key, a Zendesk subdomain. A provider that
+   * declares none may carry none, so a stray field cannot ride along in an
+   * encrypted envelope unnoticed.
+   */
+  credentialFields?: readonly CredentialFieldSpec[];
   /** Defaults to 15 seconds. It bounds provider response headers. */
   requestTimeoutMs?: number;
 }
@@ -45,7 +58,8 @@ export interface ApiKeyProviderRequest {
 export interface ApiKeyProviderSdk {
   configuration: ApiKeyProviderConfiguration;
   request(
-    credential: Pick<IntegrationApiKeyCredential, "apiKey">,
+    credential: Pick<IntegrationApiKeyCredential, "apiKey"> &
+      Partial<Pick<IntegrationApiKeyCredential, "fields">>,
     request: ApiKeyProviderRequest,
   ): Promise<Response>;
 }
@@ -65,6 +79,7 @@ export class ApiKeyProviderError extends Error {
 }
 
 const SAFE_HEADER_NAME = /^[A-Za-z0-9-]{1,64}$/u;
+const SAFE_FIELD_NAME = /^[A-Za-z][A-Za-z0-9_]{0,63}$/u;
 
 /**
  * A credential allowed to appear in a request path. Deliberately narrower than
@@ -142,6 +157,31 @@ async function withTimeout<T>(
   }
 }
 
+/**
+ * Holds a decrypted credential to what its provider declared. Without this the
+ * `fields` map is a free-form bag: a provider that needs no extra secret could
+ * still be handed several, and one that needs an application key would only
+ * discover it was missing when a request failed.
+ */
+export function assertCredentialFields(
+  configuration: Pick<ApiKeyProviderConfiguration, "credentialFields">,
+  credential: Pick<IntegrationApiKeyCredential, "fields">,
+): void {
+  const declared = configuration.credentialFields ?? [];
+  const allowed = new Set(declared.map((field) => field.name));
+  const present = Object.keys(credential.fields ?? {});
+  for (const name of present) {
+    if (!allowed.has(name)) {
+      throw new ApiKeyProviderError("API_KEY_PROVIDER_CONFIGURATION_INVALID");
+    }
+  }
+  for (const field of declared) {
+    if (field.required && !credential.fields?.[field.name]) {
+      throw new ApiKeyProviderError("API_KEY_PROVIDER_CONFIGURATION_INVALID");
+    }
+  }
+}
+
 function credentialValue(
   credential: Pick<IntegrationApiKeyCredential, "apiKey">,
   prefix: string | undefined,
@@ -201,7 +241,14 @@ export function createApiKeyProviderSdk(
         configuration.credentialPrefix.split("{credential}").length > 2)) ||
     // A static prefix only means anything for the header form.
     (configuration.credentialPrefix !== undefined &&
-      (!hasTransport || Boolean(pathPrefix)))
+      (!hasTransport || Boolean(pathPrefix))) ||
+    (configuration.credentialFields !== undefined &&
+      (configuration.credentialFields.length > 8 ||
+        configuration.credentialFields.some(
+          (field) => !SAFE_FIELD_NAME.test(field.name),
+        ) ||
+        new Set(configuration.credentialFields.map((field) => field.name))
+          .size !== configuration.credentialFields.length))
   ) {
     throw new ApiKeyProviderError("API_KEY_PROVIDER_CONFIGURATION_INVALID");
   }
@@ -227,6 +274,7 @@ export function createApiKeyProviderSdk(
         throw new ApiKeyProviderError("API_KEY_PROVIDER_TRANSPORT_UNAVAILABLE");
       }
       const credential = IntegrationApiKeyCredentialSchema.parse(rawCredential);
+      assertCredentialFields(configuration, credential);
       let path = request.path;
       if (pathPrefix) {
         // The key becomes part of the URL, so it must be a single safe segment.

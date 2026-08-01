@@ -16,6 +16,7 @@ import {
   type IntegrationCredentialVault,
 } from "../transport/credentials";
 import {
+  assertCredentialFields,
   createApiKeyProviderSdk,
   type ApiKeyProviderConfiguration,
   type ApiKeyProviderRequest,
@@ -140,38 +141,174 @@ export const BUILT_IN_API_KEY_PROVIDER_CONFIGURATIONS = Object.freeze([
   { integrationId: "sftp" as const },
   { integrationId: "jupyter" as const },
   // AWS authenticates with an access key pair, which the same envelope holds.
-  { integrationId: "s3" as const },
-  { integrationId: "amazon-dynamodb" as const },
-  { integrationId: "amazon-sqs" as const },
-  { integrationId: "amazon-rds" as const },
-  { integrationId: "aws-ses" as const },
-  { integrationId: "aws-iam" as const },
-  { integrationId: "aws-sts" as const },
-  { integrationId: "aws-identity-center" as const },
-  { integrationId: "aws-secrets-manager" as const },
-  { integrationId: "aws-textract" as const },
-  { integrationId: "aws-appconfig" as const },
-  { integrationId: "athena" as const },
-  { integrationId: "cloudwatch" as const },
-  { integrationId: "cloudformation" as const },
-  { integrationId: "codepipeline" as const },
+  {
+    integrationId: "s3" as const,
+    credentialFields: [
+      { name: "secretAccessKey", required: true },
+      { name: "sessionToken" },
+    ],
+  },
+  {
+    integrationId: "amazon-dynamodb" as const,
+    credentialFields: [
+      { name: "secretAccessKey", required: true },
+      { name: "sessionToken" },
+    ],
+  },
+  {
+    integrationId: "amazon-sqs" as const,
+    credentialFields: [
+      { name: "secretAccessKey", required: true },
+      { name: "sessionToken" },
+    ],
+  },
+  {
+    integrationId: "amazon-rds" as const,
+    credentialFields: [
+      { name: "secretAccessKey", required: true },
+      { name: "sessionToken" },
+    ],
+  },
+  {
+    integrationId: "aws-ses" as const,
+    credentialFields: [
+      { name: "secretAccessKey", required: true },
+      { name: "sessionToken" },
+    ],
+  },
+  {
+    integrationId: "aws-iam" as const,
+    credentialFields: [
+      { name: "secretAccessKey", required: true },
+      { name: "sessionToken" },
+    ],
+  },
+  {
+    integrationId: "aws-sts" as const,
+    credentialFields: [
+      { name: "secretAccessKey", required: true },
+      { name: "sessionToken" },
+    ],
+  },
+  {
+    integrationId: "aws-identity-center" as const,
+    credentialFields: [
+      { name: "secretAccessKey", required: true },
+      { name: "sessionToken" },
+    ],
+  },
+  {
+    integrationId: "aws-secrets-manager" as const,
+    credentialFields: [
+      { name: "secretAccessKey", required: true },
+      { name: "sessionToken" },
+    ],
+  },
+  {
+    integrationId: "aws-textract" as const,
+    credentialFields: [
+      { name: "secretAccessKey", required: true },
+      { name: "sessionToken" },
+    ],
+  },
+  {
+    integrationId: "aws-appconfig" as const,
+    credentialFields: [
+      { name: "secretAccessKey", required: true },
+      { name: "sessionToken" },
+    ],
+  },
+  {
+    integrationId: "athena" as const,
+    credentialFields: [
+      { name: "secretAccessKey", required: true },
+      { name: "sessionToken" },
+    ],
+  },
+  {
+    integrationId: "cloudwatch" as const,
+    credentialFields: [
+      { name: "secretAccessKey", required: true },
+      { name: "sessionToken" },
+    ],
+  },
+  {
+    integrationId: "cloudformation" as const,
+    credentialFields: [
+      { name: "secretAccessKey", required: true },
+      { name: "sessionToken" },
+    ],
+  },
+  {
+    integrationId: "codepipeline" as const,
+    credentialFields: [
+      { name: "secretAccessKey", required: true },
+      { name: "sessionToken" },
+    ],
+  },
   // Vendor SDKs that authenticate with a secret key plus a per-tenant host,
   // both held in the same encrypted envelope.
   { integrationId: "clerk" as const },
-  { integrationId: "okta" as const },
-  { integrationId: "supabase" as const },
-  { integrationId: "datadog" as const },
-  { integrationId: "algolia" as const },
-  { integrationId: "upstash" as const },
+  {
+    integrationId: "okta" as const,
+    credentialFields: [{ name: "orgUrl", required: true }],
+  },
+  {
+    integrationId: "supabase" as const,
+    credentialFields: [{ name: "projectUrl", required: true }],
+  },
+  {
+    integrationId: "datadog" as const,
+    credentialFields: [
+      { name: "applicationKey", required: true },
+      { name: "site" },
+    ],
+  },
+  {
+    integrationId: "algolia" as const,
+    credentialFields: [{ name: "applicationId", required: true }],
+  },
+  {
+    integrationId: "upstash" as const,
+    credentialFields: [{ name: "restUrl", required: true }],
+  },
   { integrationId: "pinecone" as const },
-  { integrationId: "qdrant" as const },
-  { integrationId: "elasticsearch" as const },
+  {
+    integrationId: "qdrant" as const,
+    credentialFields: [{ name: "url", required: true }],
+  },
+  {
+    integrationId: "elasticsearch" as const,
+    credentialFields: [{ name: "cloudId" }, { name: "node" }],
+  },
   { integrationId: "google-translate" as const },
   { integrationId: "google-maps" as const },
-  { integrationId: "twilio-voice" as const },
-  { integrationId: "zendesk" as const },
-  { integrationId: "azure-devops" as const },
-  { integrationId: "temporal" as const },
+  {
+    integrationId: "twilio-voice" as const,
+    credentialFields: [{ name: "accountSid", required: true }],
+  },
+  {
+    integrationId: "zendesk" as const,
+    credentialFields: [
+      { name: "subdomain", required: true },
+      { name: "email", required: true },
+    ],
+  },
+  {
+    integrationId: "azure-devops" as const,
+    credentialFields: [
+      { name: "organizationUrl", required: true },
+      { name: "project" },
+    ],
+  },
+  {
+    integrationId: "temporal" as const,
+    credentialFields: [
+      { name: "namespace" },
+      { name: "address" },
+      { name: "tls" },
+    ],
+  },
   // Typed REST providers. Each names the one host its relative paths resolve
   // against, which is what keeps an action from choosing its own destination.
   {
@@ -254,8 +391,14 @@ export const BUILT_IN_API_KEY_PROVIDER_CONFIGURATIONS = Object.freeze([
     apiBaseUrl: "https://api.appsheet.com",
     credentialHeader: "ApplicationAccessKey",
   },
-  { integrationId: "mongodb" as const },
-  { integrationId: "neo4j" as const },
+  {
+    integrationId: "mongodb" as const,
+    credentialFields: [{ name: "uri", required: true }],
+  },
+  {
+    integrationId: "neo4j" as const,
+    credentialFields: [{ name: "password", required: true }],
+  },
 ] satisfies readonly ApiKeyProviderConfiguration[]);
 
 export type BuiltInIntegrationApiKeyRuntimeConfig = Omit<
@@ -478,6 +621,19 @@ export function createIntegrationApiKeyRuntime(
         credential: encrypted,
         keyring: config.credentialKeyring,
       });
+      // This is where a vendor pack receives its secrets, so it is where the
+      // credential is held to the fields its provider declared. A missing
+      // application key fails here rather than as an opaque provider error.
+      const provider = providers.get(reference.data.integrationId);
+      if (provider) {
+        try {
+          assertCredentialFields(provider.configuration, credential);
+        } catch {
+          throw new IntegrationApiKeyRuntimeError(
+            "INTEGRATION_API_KEY_CREDENTIAL_UNAVAILABLE",
+          );
+        }
+      }
       return operation(credential);
     },
 

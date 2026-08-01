@@ -368,6 +368,67 @@ describe("server provider SDK families", () => {
     }
   });
 
+  test("holds a credential to the extra fields its provider declared", async () => {
+    const provider = createApiKeyProviderSdk(
+      {
+        integrationId: "datadog",
+        apiBaseUrl: "https://api.datadoghq.com",
+        credentialHeader: "DD-API-KEY",
+        credentialFields: [
+          { name: "applicationKey", required: true },
+          { name: "site" },
+        ],
+      },
+      (async () => Response.json({ ok: true })) as unknown as typeof fetch,
+    );
+
+    // A declared, required field that is absent fails before a request is
+    // built, rather than as an opaque provider error later.
+    await expect(
+      provider.request({ apiKey: "k", fields: {} }, { path: "/v1/probe" }),
+    ).rejects.toMatchObject({
+      code: "API_KEY_PROVIDER_CONFIGURATION_INVALID",
+    });
+
+    // A field the provider never declared cannot ride along.
+    await expect(
+      provider.request(
+        { apiKey: "k", fields: { applicationKey: "a", smuggled: "b" } },
+        { path: "/v1/probe" },
+      ),
+    ).rejects.toMatchObject({
+      code: "API_KEY_PROVIDER_CONFIGURATION_INVALID",
+    });
+
+    await expect(
+      provider.request(
+        { apiKey: "k", fields: { applicationKey: "a" } },
+        { path: "/v1/probe" },
+      ),
+    ).resolves.toBeInstanceOf(Response);
+  });
+
+  test("a provider declaring no extra fields may carry none", async () => {
+    const provider = createApiKeyProviderSdk(
+      {
+        integrationId: "stripe",
+        apiBaseUrl: "https://api.stripe.com",
+        credentialHeader: "Authorization",
+        credentialPrefix: "Bearer",
+      },
+      (async () => Response.json({ ok: true })) as unknown as typeof fetch,
+    );
+
+    await expect(
+      provider.request(
+        { apiKey: "k", fields: { extra: "x" } },
+        { path: "/v1/x" },
+      ),
+    ).rejects.toMatchObject({
+      code: "API_KEY_PROVIDER_CONFIGURATION_INVALID",
+    });
+  });
+
   test("rejects a profile that puts the credential in two places at once", () => {
     expect(() =>
       createApiKeyProviderSdk({
