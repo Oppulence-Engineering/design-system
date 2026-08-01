@@ -221,6 +221,24 @@ export const BUILT_IN_API_KEY_PROVIDER_CONFIGURATIONS = Object.freeze([
     credentialPrefix: "Bearer",
   },
   {
+    integrationId: "discord" as const,
+    apiBaseUrl: "https://discord.com/api/v10",
+    credentialHeader: "Authorization",
+    credentialPrefix: "Bot",
+  },
+  {
+    integrationId: "sendgrid" as const,
+    apiBaseUrl: "https://api.sendgrid.com",
+    credentialHeader: "Authorization",
+    credentialPrefix: "Bearer",
+  },
+  {
+    integrationId: "pagerduty" as const,
+    apiBaseUrl: "https://api.pagerduty.com",
+    credentialHeader: "Authorization",
+    credentialPrefix: "Token token=",
+  },
+  {
     integrationId: "typeform" as const,
     apiBaseUrl: "https://api.typeform.com",
     credentialHeader: "Authorization",

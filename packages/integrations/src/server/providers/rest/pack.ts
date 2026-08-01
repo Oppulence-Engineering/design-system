@@ -93,6 +93,13 @@ export interface RestPackConfig {
   actions: readonly RestAction<any>[];
   /** Default headers merged into every request. */
   headers?: Readonly<Record<string, string>>;
+  /**
+   * Reasons for actions this pack knowingly does not map, keyed by action ID
+   * suffix. An action absent from both `actions` and here is still reported as
+   * deferred, but with the generic reason — this is how a pack distinguishes a
+   * considered omission from an oversight.
+   */
+  deferrals?: Readonly<Record<string, string>>;
 }
 
 export interface RestRuntimes {
@@ -204,7 +211,10 @@ export function createRestPack(
         : {
             sourceOperationId: operation.id,
             disposition: "deferred" as const,
-            reason: "No request is mapped for this action.",
+            reason:
+              config.deferrals?.[
+                operation.id.slice(operation.id.indexOf(":") + 1)
+              ] ?? "No request is mapped for this action.",
           },
     ),
     triggerCoverage: baseline.triggers.map((trigger) => ({

@@ -505,6 +505,9 @@ describe("server API-key runtime", () => {
       "hunter-io",
       "telegram",
       "calendly",
+      "discord",
+      "sendgrid",
+      "pagerduty",
       "typeform",
       "google-appsheet",
       "mongodb",
@@ -681,8 +684,8 @@ describe("server vendor SDK adapters", () => {
     });
 
     expect(getProviderSdkCoverageReport(registry)).toMatchObject({
-      executableProviders: 101,
-      executableOperations: 1902,
+      executableProviders: 106,
+      executableOperations: 1978,
       executableTriggers: 0,
       hasCompleteExecutionParity: false,
     });

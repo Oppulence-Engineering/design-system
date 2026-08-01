@@ -92,6 +92,11 @@ import {
   createTelegramPack,
   createTypeformPack,
   createWikipediaPack,
+  createDiscordPack,
+  createSendGridPack,
+  createPagerDutyPack,
+  createLinkedInPack,
+  createWebflowPack,
 } from "./rest";
 import { createAsanaProviderSdk } from "./asana";
 import { createBrexProviderSdk } from "./brex";
@@ -302,11 +307,17 @@ export function createBuiltInProviderSdkRegistry(
         createTelegramPack(),
         createCalendlyPack(),
         createTypeformPack(),
+        createDiscordPack(),
+        createSendGridPack(),
+        createPagerDutyPack(),
       ].flatMap((pack) => pack.create({ apiKeyRuntime: config.apiKeyRuntime })),
     );
   }
   if (config.oauthRuntime) {
     providers.push(
+      ...[createLinkedInPack(), createWebflowPack()].flatMap((pack) =>
+        pack.create({ oauthRuntime: config.oauthRuntime }),
+      ),
       createSlackProviderSdk({ oauthRuntime: config.oauthRuntime }),
       createHubSpotProviderSdk({ oauthRuntime: config.oauthRuntime }),
       createLinearProviderSdk({ oauthRuntime: config.oauthRuntime }),
