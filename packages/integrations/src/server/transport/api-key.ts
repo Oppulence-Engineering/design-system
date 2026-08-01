@@ -15,7 +15,11 @@ export interface ApiKeyProviderConfiguration {
   apiBaseUrl?: string;
   /** The credential is supplied in this server-side HTTP header. */
   credentialHeader?: string;
-  /** Optional static prefix, for example `Bearer`. */
+  /**
+   * Optional scheme placed before the key, for example `Bearer`, joined with a
+   * space. A prefix naming `{credential}` instead controls its own separator,
+   * which is how schemes like `Token token=<key>` are spelled.
+   */
   credentialPrefix?: string;
   /**
    * Placed before every request path, with `{credential}` substituted for the
@@ -142,7 +146,15 @@ function credentialValue(
   credential: Pick<IntegrationApiKeyCredential, "apiKey">,
   prefix: string | undefined,
 ): string {
-  return prefix ? `${prefix} ${credential.apiKey}` : credential.apiKey;
+  if (!prefix) {
+    return credential.apiKey;
+  }
+  // A prefix naming its placeholder controls its own separator. PagerDuty wants
+  // `Token token=<key>` with no space, which a space-joined prefix cannot spell.
+  if (prefix.includes("{credential}")) {
+    return prefix.replace("{credential}", credential.apiKey);
+  }
+  return `${prefix} ${credential.apiKey}`;
 }
 
 /**
@@ -185,7 +197,8 @@ export function createApiKeyProviderSdk(
     (configuration.credentialPrefix !== undefined &&
       (!configuration.credentialPrefix ||
         configuration.credentialPrefix.length > 160 ||
-        /[\r\n]/u.test(configuration.credentialPrefix))) ||
+        /[\r\n]/u.test(configuration.credentialPrefix) ||
+        configuration.credentialPrefix.split("{credential}").length > 2)) ||
     // A static prefix only means anything for the header form.
     (configuration.credentialPrefix !== undefined &&
       (!hasTransport || Boolean(pathPrefix)))

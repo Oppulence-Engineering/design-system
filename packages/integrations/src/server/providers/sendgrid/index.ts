@@ -183,6 +183,8 @@ const SENDGRID_ACTIONS: readonly RestAction<any>[] = [
     input: z
       .object({ listId: ListId, deleteContacts: z.boolean().optional() })
       .strict(),
+    // 204 on its own; 200 with a job id when it also deletes the contacts.
+    emptyResponse: "optional",
   },
   {
     action: "add-contacts-to-list",

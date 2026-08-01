@@ -79,8 +79,13 @@ export interface RestAction<TInput extends RestInput = RestInput> {
   readonly output?: z.ZodType<unknown>;
   readonly headers?: (input: TInput) => Record<string, string>;
   readonly maxResponseBytes?: number;
-  /** Set when a response carries no body, such as a 204 delete. */
-  readonly emptyResponse?: boolean;
+  /**
+   * `true` when a response never carries a body, such as a 204 delete.
+   * `"optional"` when the provider answers either way — SendGrid's list delete
+   * is 204 normally and 200 with a job id when it also deletes contacts — so
+   * the empty case cannot be treated as a malformed document.
+   */
+  readonly emptyResponse?: boolean | "optional";
 }
 
 export type RestTransportKind = "api_key" | "oauth2" | "none";
@@ -116,9 +121,15 @@ function toolFor(
   action: RestAction<any>,
   defaults: Readonly<Record<string, string>>,
 ): IntegrationTypedRestTool<any, unknown> {
-  const outputSchema = action.emptyResponse
-    ? (z.object({ ok: z.literal(true) }).strict() as z.ZodType<unknown>)
-    : (action.output ?? (RestDocumentSchema as z.ZodType<unknown>));
+  const emptyOutput = z.object({ ok: z.literal(true) }).strict();
+  const documentOutput = action.output ?? RestDocumentSchema;
+  const outputSchema = (
+    action.emptyResponse === true
+      ? emptyOutput
+      : action.emptyResponse === "optional"
+        ? z.union([documentOutput, emptyOutput])
+        : documentOutput
+  ) as z.ZodType<unknown>;
   return {
     id: `${integrationId}:${action.action}`,
     name: action.name,
@@ -141,8 +152,16 @@ function toolFor(
     },
     inputSchema: action.input,
     outputSchema,
-    ...(action.emptyResponse
+    ...(action.emptyResponse === true
       ? { transformResponse: async () => ({ ok: true as const }) }
+      : {}),
+    ...(action.emptyResponse === "optional"
+      ? {
+          transformResponse: async (response: Response) => {
+            const body = (await response.text()).trim();
+            return body ? (JSON.parse(body) as unknown) : { ok: true as const };
+          },
+        }
       : {}),
     maxResponseBytes: action.maxResponseBytes ?? 512 * 1024,
   };

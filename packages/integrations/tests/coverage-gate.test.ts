@@ -58,6 +58,34 @@ const apiKeyRuntime = {
 
 /** Every provider delivered as a pack, with the runtime each one needs. */
 describe("provider parity coverage gate", () => {
+  test("a pack declaring supported triggers ships a source factory for them", async () => {
+    // Trigger sources need deployment secrets the package does not hold, so
+    // they are wired by the product rather than assembled here. That makes a
+    // declaration cheap: without this check a pack could claim triggers that
+    // nothing in the package can ever deliver.
+    const exported = new Set(Object.keys(await import("../src/server")));
+    const FACTORIES: Readonly<Record<string, string>> = {
+      clerk: "createClerkWebhookTriggerSources",
+      jira: "createAtlassianWebhookTriggerSources",
+      confluence: "createAtlassianWebhookTriggerSources",
+      "jira-service-management": "createAtlassianWebhookTriggerSources",
+      outlook: "createOutlookPollTriggerSource",
+      "microsoft-teams": "createMicrosoftTeamsChatSubscriptionSource",
+    };
+    const unbacked: string[] = [];
+    for (const pack of BUILT_IN_PROVIDER_PACKS) {
+      const supported = pack.triggerCoverage.filter(
+        (trigger) => trigger.disposition === "supported",
+      );
+      if (!supported.length) continue;
+      const factory = FACTORIES[pack.integrationId];
+      if (!factory || !exported.has(factory)) {
+        unbacked.push(pack.integrationId);
+      }
+    }
+    expect(unbacked).toEqual([]);
+  });
+
   test("the built-in registry executes the recorded provider and action counts", () => {
     const report = getProviderSdkCoverageReport(
       createBuiltInProviderSdkRegistry({

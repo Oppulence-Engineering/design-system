@@ -33,9 +33,10 @@ const PAGERDUTY_ACTIONS: readonly RestAction<any>[] = [
     method: "GET",
     url: (i) =>
       `/incidents${restQuery({
-        statuses: i.statuses,
+        // PagerDuty takes repeated query values with a [] suffix.
+        "statuses[]": i.statuses,
         "service_ids[]": i.serviceIds,
-        urgencies: i.urgencies,
+        "urgencies[]": i.urgencies,
         since: i.since,
         until: i.until,
         limit: i.limit,

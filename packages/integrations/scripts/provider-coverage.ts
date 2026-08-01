@@ -70,9 +70,11 @@ const rows: readonly (readonly [string, string | number])[] = [
     `${sdk.executableOperations} / ${totals.actions} (${Math.round((sdk.executableOperations / totals.actions) * 100)}%)`,
   ],
   [
-    // Counted from pack declarations: the probe registry mounts no trigger
-    // sources, so the registry's own trigger count would read zero.
-    "  triggers",
+    // Declared, not executable. A trigger source needs deployment secrets the
+    // package does not hold — a webhook signing key, an OAuth runtime — so a
+    // product wires the exported factories itself. The registry's own trigger
+    // count reads zero until it does.
+    "  triggers (declared, product-wired)",
     `${supportedTriggers} / ${totals.triggers} (${Math.round((supportedTriggers / totals.triggers) * 100)}%)`,
   ],
 ];

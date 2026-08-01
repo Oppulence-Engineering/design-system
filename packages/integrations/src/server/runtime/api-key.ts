@@ -238,7 +238,8 @@ export const BUILT_IN_API_KEY_PROVIDER_CONFIGURATIONS = Object.freeze([
     integrationId: "pagerduty" as const,
     apiBaseUrl: "https://api.pagerduty.com",
     credentialHeader: "Authorization",
-    credentialPrefix: "Token token=",
+    // PagerDuty's scheme takes no space between the key and the "=".
+    credentialPrefix: "Token token={credential}",
   },
   {
     integrationId: "typeform" as const,

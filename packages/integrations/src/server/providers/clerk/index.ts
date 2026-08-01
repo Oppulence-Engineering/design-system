@@ -258,7 +258,7 @@ const CLERK_OPERATIONS: Readonly<Record<string, VendorOperation>> = {
     params: (input) => [requiredInputString(input, "templateId", "id")],
   },
   "clerk:create-actor-token": {
-    path: ["actorTokens", "createActorToken"],
+    path: ["actorTokens", "create"],
     params: (input) => [
       definedFields({
         userId: userId(input),
@@ -268,7 +268,7 @@ const CLERK_OPERATIONS: Readonly<Record<string, VendorOperation>> = {
     ],
   },
   "clerk:revoke-actor-token": {
-    path: ["actorTokens", "revokeActorToken"],
+    path: ["actorTokens", "revoke"],
     params: (input) => [requiredInputString(input, "actorTokenId", "id")],
   },
 };

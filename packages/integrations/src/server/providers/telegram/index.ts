@@ -151,6 +151,7 @@ const TELEGRAM_ACTIONS: readonly RestAction<any>[] = [
         question: z.string().min(1).max(300),
         // Telegram accepts between 2 and 10 options.
         options: z.array(z.string().min(1).max(100)).min(2).max(10),
+        // Bot API 7.3 replaced the plain-string option list with objects.
         isAnonymous: z.boolean().optional(),
         allowsMultipleAnswers: z.boolean().optional(),
         ...sendControls,
@@ -159,7 +160,7 @@ const TELEGRAM_ACTIONS: readonly RestAction<any>[] = [
     body: (i) => ({
       ...sendBody(i),
       question: i.question,
-      options: i.options,
+      options: i.options.map((text: string) => ({ text })),
       ...(i.isAnonymous === undefined ? {} : { is_anonymous: i.isAnonymous }),
       ...(i.allowsMultipleAnswers ? { allows_multiple_answers: true } : {}),
     }),
