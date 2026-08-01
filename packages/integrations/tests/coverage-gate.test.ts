@@ -11,6 +11,7 @@ import {
   createCloudFormationPack,
   createCloudflarePack,
   createClickHousePack,
+  createBoxPack,
   createClerkPack,
   createDatadogPack,
   createCloudWatchPack,
@@ -31,6 +32,7 @@ import {
   createOutlookPack,
   createOktaPack,
   createRdsPack,
+  createRedditPack,
   createRedisPack,
   createS3Pack,
   createSecretsManagerPack,
@@ -57,8 +59,8 @@ import {
  * did. The target is the pinned source: 232 providers, 3,890 actions, and 363
  * triggers.
  */
-const EXECUTABLE_PROVIDERS = 71;
-const EXECUTABLE_ACTIONS = 1560;
+const EXECUTABLE_PROVIDERS = 73;
+const EXECUTABLE_ACTIONS = 1612;
 
 const oauthRuntime = {
   async withCredential<T>(
@@ -111,6 +113,8 @@ const PACKS: readonly {
     createSalesforcePack(),
     createTrelloPack(),
     createXPack(),
+    createRedditPack(),
+    createBoxPack(),
   ].map((pack) => ({ pack, context: { oauthRuntime } })),
   ...[
     createCloudflarePack(),
@@ -173,9 +177,9 @@ describe("provider parity coverage gate", () => {
       PACKS.map((entry) => entry.pack),
     );
 
-    // 42 providers ship as packs; the other 29 executable providers predate
+    // 44 providers ship as packs; the other 29 executable providers predate
     // the pack contract and are registered directly.
-    expect(report.providers).toBe(42);
+    expect(report.providers).toBe(44);
     expect(report.deferredOperations).toBe(0);
     // Every supported action is owned by exactly one lane.
     expect(report.operations).toBe(
@@ -231,8 +235,8 @@ describe("provider parity coverage gate", () => {
       actionsRemaining: sourceActions - EXECUTABLE_ACTIONS,
       triggersRemaining: 363 - 60,
     }).toEqual({
-      providersRemaining: 161,
-      actionsRemaining: 2330,
+      providersRemaining: 159,
+      actionsRemaining: 2278,
       triggersRemaining: 303,
     });
   });

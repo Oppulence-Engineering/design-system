@@ -13,6 +13,8 @@ import {
   createTrelloPack,
   createXPack,
   createDatadogPack,
+  createRedditPack,
+  createBoxPack,
   type IntegrationProviderPack,
 } from "../src/server";
 
@@ -114,6 +116,8 @@ describe("vendor SDK provider batch", () => {
       [createTrelloPack(), { oauthRuntime }],
       [createXPack(), { oauthRuntime }],
       [createDatadogPack(), { apiKeyRuntime }],
+      [createRedditPack(), { oauthRuntime }],
+      [createBoxPack(), { oauthRuntime }],
     ];
 
     for (const [pack, context] of packs) {
@@ -127,7 +131,7 @@ describe("vendor SDK provider batch", () => {
 
     expect(
       packs.reduce((total, [pack]) => total + pack.coverage.length, 0),
-    ).toBe(179);
+    ).toBe(231);
   });
 
   test("builds a bounded SOQL read with validated identifiers", async () => {
@@ -470,6 +474,86 @@ describe("vendor SDK provider batch", () => {
     expect(recorder.calls[1]?.args[0]).toEqual({
       monitorId: 42,
       body: { options: { silenced: {} } },
+    });
+  });
+
+  test("reaches a Reddit action through the content object it belongs to", async () => {
+    const recorder = sdkRecorder();
+    const provider = createRedditPack({
+      clientFactory: recorder.clientFactory,
+    }).create({ oauthRuntime })[0];
+
+    await provider.execute({
+      integrationId: "reddit",
+      operationId: "reddit:save",
+      reference: reference("reddit"),
+      input: { postId: "t3_abc123" },
+    });
+
+    // snoowrap is object-oriented: the action is a method on the submission,
+    // not on the client, and the type prefix is stripped from the ID.
+    expect(recorder.calls.map((call) => call.path)).toEqual([
+      "getSubmission",
+      "getSubmission.save",
+    ]);
+    expect(recorder.calls[0]?.args).toEqual(["abc123"]);
+  });
+
+  test("routes a Reddit vote by direction and rejects a malformed thing ID", async () => {
+    const recorder = sdkRecorder();
+    const provider = createRedditPack({
+      clientFactory: recorder.clientFactory,
+    }).create({ oauthRuntime })[0];
+    const vote = (input: Record<string, unknown>) =>
+      provider.execute({
+        integrationId: "reddit",
+        operationId: "reddit:vote",
+        reference: reference("reddit"),
+        input: { postId: "t3_abc123", ...input },
+      });
+
+    await vote({});
+    await vote({ direction: "down" });
+    await vote({ direction: "none" });
+
+    expect(
+      recorder.calls
+        .map((call) => call.path)
+        .filter((path) => path !== "getSubmission"),
+    ).toEqual([
+      "getSubmission.upvote",
+      "getSubmission.downvote",
+      "getSubmission.unvote",
+    ]);
+
+    await expect(
+      provider.execute({
+        integrationId: "reddit",
+        operationId: "reddit:save",
+        reference: reference("reddit"),
+        input: { postId: "../../admin" },
+      }),
+    ).rejects.toMatchObject({
+      code: "INTEGRATION_PROVIDER_SDK_INVOCATION_INVALID",
+    });
+  });
+
+  test("treats an absent Box parent as the account root", async () => {
+    const recorder = sdkRecorder();
+    const provider = createBoxPack({
+      clientFactory: recorder.clientFactory,
+    }).create({ oauthRuntime })[0];
+
+    await provider.execute({
+      integrationId: "box",
+      operationId: "box:create-folder",
+      reference: reference("box"),
+      input: { name: "Reports" },
+    });
+
+    expect(recorder.calls[0]).toEqual({
+      path: "folders.createFolder",
+      args: [{ name: "Reports", parent: { id: "0" } }],
     });
   });
 

@@ -50,8 +50,10 @@ import {
   createSshPack,
 } from "./protocol";
 import {
+  createBoxPack,
   createClerkPack,
   createDatadogPack,
+  createRedditPack,
   createOktaPack,
   createSalesforcePack,
   createSupabasePack,
@@ -276,6 +278,8 @@ export function createBuiltInProviderSdkRegistry(
       ...createSalesforcePack().create({ oauthRuntime: config.oauthRuntime }),
       ...createTrelloPack().create({ oauthRuntime: config.oauthRuntime }),
       ...createXPack().create({ oauthRuntime: config.oauthRuntime }),
+      ...createRedditPack().create({ oauthRuntime: config.oauthRuntime }),
+      ...createBoxPack().create({ oauthRuntime: config.oauthRuntime }),
       createAsanaProviderSdk({ oauthRuntime: config.oauthRuntime }),
       createDropboxProviderSdk({ oauthRuntime: config.oauthRuntime }),
     );
