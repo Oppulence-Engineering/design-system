@@ -39,6 +39,7 @@ import { createGoogleMapsPack } from "./google-maps";
 import { createGoogleTranslatePack } from "./google-translate";
 import { createGoogleVaultPack } from "./google-vault";
 import { createHunterIoPack } from "./hunter-io";
+import { createIncidentIoPack } from "./incident-io";
 import { createJinaPack } from "./jina";
 import { createJiraPack } from "./jira";
 import { createJiraServiceManagementPack } from "./jira-service-management";
@@ -129,6 +130,7 @@ export const BUILT_IN_PROVIDER_PACKS: readonly IntegrationProviderPack[] = [
   createHunterIoPack(),
   createIamPack(),
   createIdentityCenterPack(),
+  createIncidentIoPack(),
   createJinaPack(),
   createJiraPack(),
   createJiraServiceManagementPack(),

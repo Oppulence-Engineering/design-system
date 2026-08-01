@@ -71,6 +71,7 @@ export const EXECUTABLE_INTEGRATION_IDS: readonly string[] = [
   "google-vault",
   "hubspot",
   "hunter-io",
+  "incident-io",
   "intercom",
   "jina",
   "jira",

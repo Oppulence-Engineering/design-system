@@ -194,6 +194,7 @@ export * from "./google-translate";
 export * from "./google-vault";
 export * from "./hubspot";
 export * from "./hunter-io";
+export * from "./incident-io";
 export * from "./intercom";
 export * from "./jina";
 export * from "./jira";

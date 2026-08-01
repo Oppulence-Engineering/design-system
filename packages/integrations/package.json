@@ -112,6 +112,7 @@
     "lint": "prettier --check \"{src,tests,scripts}/**/*.{ts,tsx}\"",
     "prepublishOnly": "bun run clean && bun run build",
     "providers:coverage": "bun scripts/provider-coverage.ts",
+    "providers:openapi": "bun scripts/openapi-plan.ts",
     "providers:plan": "bun scripts/provider-plan.ts",
     "refresh:simstudio": "bun scripts/refresh-simstudio-baseline.ts",
     "test": "bun test tests --path-ignore-patterns='**/artifacts.test.ts'",

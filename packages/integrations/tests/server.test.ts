@@ -628,6 +628,7 @@ describe("server API-key runtime", () => {
       "pagerduty",
       "typeform",
       "google-appsheet",
+      "incident-io",
       "posthog",
       "tailscale",
       "mongodb",
@@ -804,8 +805,8 @@ describe("server vendor SDK adapters", () => {
     });
 
     expect(getProviderSdkCoverageReport(registry)).toMatchObject({
-      executableProviders: 110,
-      executableOperations: 2126,
+      executableProviders: 111,
+      executableOperations: 2168,
       executableTriggers: 0,
       hasCompleteExecutionParity: false,
     });

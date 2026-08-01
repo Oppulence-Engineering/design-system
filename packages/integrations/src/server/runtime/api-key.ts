@@ -392,6 +392,13 @@ export const BUILT_IN_API_KEY_PROVIDER_CONFIGURATIONS = Object.freeze([
     credentialHeader: "ApplicationAccessKey",
   },
   {
+    // Host and scheme are the spec's own: api.incident.io, bearer API key.
+    integrationId: "incident-io" as const,
+    apiBaseUrl: "https://api.incident.io",
+    credentialHeader: "Authorization",
+    credentialPrefix: "Bearer",
+  },
+  {
     // PostHog Cloud is regional and this profile names one host, so this is
     // the US deployment. EU Cloud and self-hosted need their own profile.
     integrationId: "posthog" as const,

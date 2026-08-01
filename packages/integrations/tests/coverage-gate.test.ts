@@ -20,8 +20,8 @@ import {
  * did. The target is the pinned source: 232 providers, 3,890 actions, and 363
  * triggers.
  */
-const EXECUTABLE_PROVIDERS = 112;
-const EXECUTABLE_ACTIONS = 2133;
+const EXECUTABLE_PROVIDERS = 113;
+const EXECUTABLE_ACTIONS = 2175;
 
 const oauthRuntime = {
   async withCredential<T>(
@@ -164,21 +164,26 @@ describe("provider parity coverage gate", () => {
   test("declared pack coverage matches what the registry executes", () => {
     const report = getProviderPackCoverageReport(BUILT_IN_PROVIDER_PACKS);
 
-    // 83 providers ship as packs; the other 29 executable providers predate
+    // 84 providers ship as packs; the other 29 executable providers predate
     // the pack contract and are registered directly.
-    expect(report.providers).toBe(83);
-    // Ten of the thirteen deferrals are the same shape: an action whose
-    // endpoint lives on a host this lane cannot reach, because a provider
-    // resolves all of its actions against one host. Google Maps has five such
-    // APIs, PagerDuty's Events v2 is a sixth, Jina's search host a seventh,
-    // and PostHog's capture, batch, and flag-evaluation routes are served by
-    // its ingestion host under a different credential.
+    expect(report.providers).toBe(84);
+    // Ten deferrals are the same shape: an action whose endpoint lives on a
+    // host this lane cannot reach, because a provider resolves all of its
+    // actions against one host. Google Maps has five such APIs, PagerDuty's
+    // Events v2 is a sixth, Jina's search host a seventh, and PostHog's
+    // capture, batch, and flag-evaluation routes are served by its ingestion
+    // host under a different credential.
     //
-    // The other three are not host problems. ClickUp's attachment upload is
-    // multipart rather than JSON. PostHog's feature-flag and survey deletes
-    // are soft deletes whose supported verb is unverified, and a wrong verb
-    // there would report as executable while silently not deleting.
-    expect(report.deferredOperations).toBe(13);
+    // Three are shape problems. ClickUp's attachment upload is multipart
+    // rather than JSON. PostHog's feature-flag and survey deletes are soft
+    // deletes whose supported verb is unverified, and a wrong verb there
+    // would report as executable while silently not deleting.
+    //
+    // The last four are incident.io actions its own published Swagger
+    // document does not describe: three /escalations routes that do not
+    // appear at all, and a list path for escalation_paths that the document
+    // omits while declaring create, show, update, and destroy.
+    expect(report.deferredOperations).toBe(17);
     // Every supported action is owned by exactly one lane.
     expect(report.operations).toBe(
       report.byLane.sdk.operations +
@@ -188,8 +193,8 @@ describe("provider parity coverage gate", () => {
     // Typed REST is the exception, not the default: 6 gap actions, the 22
     // Jira Service Management Forms and Assets actions, AppSheet's 4, the
     // 10 Cal.com actions its own SDK does not implement, ClickUp's 37,
-    // Tailscale's 24, Attio's 45, and PostHog's 43.
-    expect(report.byLane.typed_rest.operations).toBe(328);
+    // Tailscale's 24, Attio's 45, PostHog's 43, and incident.io's 42.
+    expect(report.byLane.typed_rest.operations).toBe(370);
     // The special lane carries the seven protocol providers.
     expect(report.byLane.special.operations).toBe(108);
   });
@@ -199,7 +204,7 @@ describe("provider parity coverage gate", () => {
       pack.coverage.filter((action) => action.lane === "typed_rest"),
     );
 
-    expect(restActions).toHaveLength(328);
+    expect(restActions).toHaveLength(370);
     for (const action of restActions) {
       expect(action.sdkReview?.trim().length ?? 0).toBeGreaterThan(0);
     }
@@ -235,8 +240,8 @@ describe("provider parity coverage gate", () => {
       actionsRemaining: sourceActions - EXECUTABLE_ACTIONS,
       triggersRemaining: 363 - 60,
     }).toEqual({
-      providersRemaining: 120,
-      actionsRemaining: 1757,
+      providersRemaining: 119,
+      actionsRemaining: 1715,
       triggersRemaining: 303,
     });
   });

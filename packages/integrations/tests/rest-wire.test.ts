@@ -311,6 +311,44 @@ const CASES: ReadonlyArray<{
     path: "/api/organizations/org-1/",
   },
   {
+    // incident.io's document mixes v1 and v2; v2 is the current incidents API.
+    operationId: "incident-io:list-incidents",
+    input: {},
+    method: "GET",
+    path: "/v2/incidents",
+  },
+  {
+    // The edit is an action sub-path, not a PUT on the incident.
+    operationId: "incident-io:update-incident",
+    input: {
+      incidentId: "01ABC",
+      incident: { name: "x" },
+      notifyIncidentChannel: false,
+    },
+    method: "POST",
+    path: "/v2/incidents/01ABC/actions/edit",
+  },
+  {
+    // schedule_id is the one query parameter the spec marks required.
+    operationId: "incident-io:list-schedule-entries",
+    input: { scheduleId: "01SCH" },
+    method: "GET",
+    path: "/v2/schedule_entries?schedule_id=01SCH",
+  },
+  {
+    // Severities ship no v2 path in the document, so v1 is the current one.
+    operationId: "incident-io:list-severities",
+    input: {},
+    method: "GET",
+    path: "/v1/severities",
+  },
+  {
+    operationId: "incident-io:create-escalation-path",
+    input: { name: "Primary", path: [] },
+    method: "POST",
+    path: "/v2/escalation_paths",
+  },
+  {
     operationId: "wikipedia:get-page-summary",
     input: { title: "Rust" },
     method: "GET",
