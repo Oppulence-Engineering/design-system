@@ -129,6 +129,8 @@ interface ExtraDefinitionInput {
   summary: string;
   capabilities: IntegrationCapability[];
   authMethods: IntegrationAuthMethod[];
+  operations?: Array<{ id: string; label: string; description: string }>;
+  triggers?: Array<{ id: string; label: string; description: string }>;
 }
 
 const EXTRA_INTEGRATIONS: readonly ExtraDefinitionInput[] = [
@@ -149,6 +151,40 @@ const EXTRA_INTEGRATIONS: readonly ExtraDefinitionInput[] = [
       "source_provenance",
     ],
     authMethods: ["oauth2"],
+    operations: [
+      {
+        id: "quickbooks:list-accounts",
+        label: "List Accounts",
+        description:
+          "List chart-of-accounts entries from the connected company.",
+      },
+      {
+        id: "quickbooks:list-customers",
+        label: "List Customers",
+        description: "List customers from the connected company.",
+      },
+      {
+        id: "quickbooks:list-invoices",
+        label: "List Invoices",
+        description: "List invoices from the connected company.",
+      },
+      {
+        id: "quickbooks:list-payments",
+        label: "List Payments",
+        description: "List payments from the connected company.",
+      },
+      {
+        id: "quickbooks:get-company-info",
+        label: "Get Company Information",
+        description:
+          "Read the connected company profile and accounting context.",
+      },
+      {
+        id: "quickbooks:create-invoice",
+        label: "Create Invoice",
+        description: "Create an invoice in the connected QuickBooks company.",
+      },
+    ],
   },
   {
     id: "xero",
@@ -165,6 +201,40 @@ const EXTRA_INTEGRATIONS: readonly ExtraDefinitionInput[] = [
       "source_provenance",
     ],
     authMethods: ["oauth2"],
+    operations: [
+      {
+        id: "xero:list-organizations",
+        label: "List Organizations",
+        description:
+          "List organizations available to the connected Xero tenant.",
+      },
+      {
+        id: "xero:list-accounts",
+        label: "List Accounts",
+        description:
+          "List chart-of-accounts entries from the selected Xero tenant.",
+      },
+      {
+        id: "xero:list-contacts",
+        label: "List Contacts",
+        description: "List contacts from the selected Xero tenant.",
+      },
+      {
+        id: "xero:list-invoices",
+        label: "List Invoices",
+        description: "List invoices from the selected Xero tenant.",
+      },
+      {
+        id: "xero:list-bank-transactions",
+        label: "List Bank Transactions",
+        description: "List bank transactions from the selected Xero tenant.",
+      },
+      {
+        id: "xero:create-invoices",
+        label: "Create Invoices",
+        description: "Create invoices in the selected Xero tenant.",
+      },
+    ],
   },
   {
     id: "fortnox",
@@ -253,6 +323,85 @@ const EXTRA_INTEGRATIONS: readonly ExtraDefinitionInput[] = [
       "source_provenance",
     ],
     authMethods: ["connection_link"],
+    operations: [
+      {
+        id: "plaid:get-accounts",
+        label: "Get Accounts",
+        description: "Retrieve linked financial accounts and cached balances.",
+      },
+      {
+        id: "plaid:get-balances",
+        label: "Get Balances",
+        description: "Retrieve current balances for linked financial accounts.",
+      },
+      {
+        id: "plaid:sync-transactions",
+        label: "Sync Transactions",
+        description:
+          "Read incremental transaction changes from the linked Item.",
+      },
+      {
+        id: "plaid:get-item",
+        label: "Get Item",
+        description: "Read connected Item status and institution metadata.",
+      },
+    ],
+  },
+  {
+    id: "merge",
+    aliases: ["merge-dev"],
+    name: "Merge",
+    category: "accounting",
+    summary:
+      "Unified accounting connections through Merge Link, including linked account context and normalized finance data.",
+    capabilities: [
+      "ledger_actuals",
+      "chart_of_accounts",
+      "invoice_import",
+      "payment_import",
+      "customer_import",
+      "journal_import",
+      "source_provenance",
+    ],
+    authMethods: ["connection_link"],
+    operations: [
+      {
+        id: "merge:list-accounts",
+        label: "List Accounts",
+        description:
+          "List normalized accounting accounts for the linked Merge account.",
+      },
+      {
+        id: "merge:list-invoices",
+        label: "List Invoices",
+        description:
+          "List normalized accounting invoices for the linked Merge account.",
+      },
+      {
+        id: "merge:list-transactions",
+        label: "List Transactions",
+        description:
+          "List normalized accounting transactions for the linked Merge account.",
+      },
+      {
+        id: "merge:list-company-info",
+        label: "List Company Information",
+        description:
+          "List normalized company information for the linked Merge account.",
+      },
+      {
+        id: "merge:list-balance-sheets",
+        label: "List Balance Sheets",
+        description:
+          "List normalized balance sheets for the linked Merge account.",
+      },
+      {
+        id: "merge:resync",
+        label: "Resync",
+        description:
+          "Request a new accounting sync for the linked Merge account.",
+      },
+    ],
   },
   {
     id: "teller",
@@ -429,11 +578,20 @@ const EXTRA_INTEGRATIONS: readonly ExtraDefinitionInput[] = [
 
 function fromOppulence(input: ExtraDefinitionInput): IntegrationDefinition {
   const documentationPath = `/integrations/${input.id}`;
-  const { authMethods, ...definition } = input;
+  const { authMethods, operations = [], triggers = [], ...definition } = input;
   return IntegrationDefinitionSchema.parse({
     ...definition,
-    operations: [],
-    triggers: [],
+    operations: operations.map((operation) => ({
+      ...operation,
+      requiredCapabilities: [],
+      inputSensitivity: "internal",
+      outputSensitivity: "internal",
+    })),
+    triggers: triggers.map((trigger) => ({
+      ...trigger,
+      requiredCapabilities: ["event_trigger"],
+      delivery: "unknown",
+    })),
     products: [
       plannedProduct(
         "eigenn",

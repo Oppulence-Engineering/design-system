@@ -21,6 +21,10 @@ import {
   getSimStudioProviderProtocolReport,
 } from "./provider-protocols";
 import {
+  getProviderExecutionStrategies,
+  getProviderExecutionStrategyReport,
+} from "./execution-strategy";
+import {
   getIntegration,
   getIntegrationCatalogue,
   getIntegrationDetail,
@@ -96,6 +100,8 @@ export {
   getOperationTriggerCoverageReport,
   getSimStudioParityReport,
   getSimStudioProviderProtocolReport,
+  getProviderExecutionStrategies,
+  getProviderExecutionStrategyReport,
   resolveIntegrationId,
   searchIntegrations,
   INTEGRATION_GOLDEN_JOURNEY_STEPS,
@@ -144,6 +150,11 @@ export type {
   SimStudioProviderProtocolGap,
   SimStudioProviderProtocolReport,
 } from "./provider-protocols";
+export type {
+  ProviderExecutionStrategy,
+  ProviderExecutionStrategyKind,
+  ProviderExecutionStrategyReport,
+} from "./execution-strategy";
 export type {
   IntegrationCommand,
   IntegrationConnectionRecordAdapter,

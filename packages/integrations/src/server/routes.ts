@@ -16,6 +16,11 @@ import {
 import type { IntegrationOAuthSubject } from "./runtime";
 import type { IntegrationApiKeySubject } from "./api-key-runtime";
 import {
+  IntegrationProviderSdkError,
+  type IntegrationProviderSdkRegistry,
+} from "./provider-sdk";
+import { createIntegrationCredentialReference } from "./credentials";
+import {
   createIntegrationApiKeyRuntime,
   IntegrationApiKeyRuntimeError,
   type IntegrationApiKeyRuntimeConfig,
@@ -31,6 +36,11 @@ import {
   IntegrationRuntimeError,
   type IntegrationOAuthRuntimeConfig,
 } from "./runtime";
+import {
+  IntegrationConnectionLinkError,
+  type IntegrationConnectionLinkRuntime,
+  type IntegrationConnectionLinkSubject,
+} from "./connection-link";
 
 export interface IntegrationOAuthRoutesConfig extends IntegrationOAuthRuntimeConfig {
   /** Resolves the product's authenticated tenant/actor context for OAuth start. */
@@ -76,6 +86,33 @@ export interface IntegrationNoAuthRoutesConfig extends IntegrationNoAuthRuntimeC
   basePath?: string;
 }
 
+export interface IntegrationConnectionLinkRoutesConfig {
+  /** Package-owned Plaid and Merge Link runtime with encrypted credential storage. */
+  runtime: Pick<
+    IntegrationConnectionLinkRuntime,
+    | "createPlaidLinkToken"
+    | "completePlaidLink"
+    | "createMergeLinkToken"
+    | "completeMergeLink"
+  >;
+  /** Resolves the current product actor before each Link lifecycle call. */
+  resolveSubject(request: Request): Promise<IntegrationConnectionLinkSubject>;
+  /** Required authorization before issuing a browser Link token. */
+  authorizeStart(
+    subject: IntegrationConnectionLinkSubject,
+    integrationId: "plaid" | "merge",
+    request: Request,
+  ): Promise<void>;
+  /** Required authorization immediately before a Link public token is exchanged. */
+  authorizeComplete(
+    subject: IntegrationConnectionLinkSubject,
+    integrationId: "plaid" | "merge",
+    request: Request,
+  ): Promise<void>;
+  basePath?: string;
+  maxJsonBodyBytes?: number;
+}
+
 class IntegrationRouteRequestError extends Error {
   readonly code:
     | "INTEGRATION_REQUEST_INVALID"
@@ -107,7 +144,17 @@ function jsonError(error: unknown): Response {
                 ? [400, error.code]
                 : error instanceof IntegrationNoAuthRuntimeError
                   ? [400, error.code]
-                  : [400, "INTEGRATION_REQUEST_INVALID"];
+                  : error instanceof IntegrationProviderSdkError
+                    ? [
+                        error.code ===
+                        "INTEGRATION_PROVIDER_SDK_OPERATION_UNAVAILABLE"
+                          ? 404
+                          : 400,
+                        error.code,
+                      ]
+                    : error instanceof IntegrationConnectionLinkError
+                      ? [400, error.code]
+                      : [400, "INTEGRATION_REQUEST_INVALID"];
   return Response.json(
     { error: { code, message: "Integration request failed." } },
     { status },
@@ -195,6 +242,162 @@ async function requestJsonObject(
     throw new IntegrationRouteRequestError("INTEGRATION_REQUEST_INVALID");
   }
   return value as Record<string, unknown>;
+}
+
+const SECRET_SHAPED_OPERATION_INPUT_KEY =
+  /(?:access[_-]?token|api[_-]?key|authorization|bearer|credential|oauth|password|refresh[_-]?token|secret)/iu;
+
+function hasSecretShapedOperationInput(value: unknown, depth = 0): boolean {
+  if (depth > 12 || !value || typeof value !== "object") {
+    return false;
+  }
+  if (Array.isArray(value)) {
+    return value.some((entry) =>
+      hasSecretShapedOperationInput(entry, depth + 1),
+    );
+  }
+  return Object.entries(value as Record<string, unknown>).some(
+    ([key, child]) =>
+      SECRET_SHAPED_OPERATION_INPUT_KEY.test(key) ||
+      hasSecretShapedOperationInput(child, depth + 1),
+  );
+}
+
+function redactSecretShapedOutput(value: unknown, depth = 0): unknown {
+  if (depth > 12 || !value || typeof value !== "object") {
+    return value;
+  }
+  if (Array.isArray(value)) {
+    return value.map((entry) => redactSecretShapedOutput(entry, depth + 1));
+  }
+  return Object.fromEntries(
+    Object.entries(value as Record<string, unknown>).map(([key, child]) => [
+      key,
+      SECRET_SHAPED_OPERATION_INPUT_KEY.test(key)
+        ? "[REDACTED]"
+        : redactSecretShapedOutput(child, depth + 1),
+    ]),
+  );
+}
+
+function executionRequest(
+  body: Record<string, unknown>,
+  request: Request,
+): { input: Readonly<Record<string, unknown>>; idempotencyKey?: string } {
+  if (
+    Object.keys(body).some(
+      (key) => key !== "input" && key !== "idempotencyKey",
+    ) ||
+    !body.input ||
+    typeof body.input !== "object" ||
+    Array.isArray(body.input) ||
+    hasSecretShapedOperationInput(body.input)
+  ) {
+    throw new IntegrationRouteRequestError("INTEGRATION_REQUEST_INVALID");
+  }
+  const bodyIdempotencyKey = body.idempotencyKey;
+  const headerIdempotencyKey = request.headers.get("idempotency-key");
+  const idempotencyKey =
+    typeof bodyIdempotencyKey === "string"
+      ? bodyIdempotencyKey
+      : (headerIdempotencyKey ?? undefined);
+  if (
+    idempotencyKey !== undefined &&
+    (!idempotencyKey.trim() || idempotencyKey.length > 255)
+  ) {
+    throw new IntegrationRouteRequestError("INTEGRATION_REQUEST_INVALID");
+  }
+  return {
+    input: body.input as Readonly<Record<string, unknown>>,
+    idempotencyKey,
+  };
+}
+
+export interface IntegrationProviderExecutionRoutesConfig {
+  /** Package-owned vendor SDK adapters; consumers do not supply credentials. */
+  providerRegistry: IntegrationProviderSdkRegistry;
+  /** Resolves the product tenant/actor for every operation execution. */
+  resolveSubject(request: Request): Promise<IntegrationOAuthSubject>;
+  /**
+   * Product-owned database and business-policy seam. It must verify that the
+   * durable connection belongs to this subject and may deny unsafe actions.
+   */
+  authorizeExecution(
+    subject: IntegrationOAuthSubject,
+    execution: {
+      integrationId: string;
+      connectionId: string;
+      operationId: string;
+    },
+    request: Request,
+  ): Promise<void>;
+  basePath?: string;
+  maxJsonBodyBytes?: number;
+}
+
+/**
+ * Mounts package-owned vendor SDK execution at
+ * `/:integrationId/connections/:connectionId/operations/:operationId`.
+ * The only product work is present-tense authorization, DB ownership, and
+ * business policy; the package owns credential decryption and vendor calls.
+ */
+export function createIntegrationProviderExecutionRoutes(
+  config: IntegrationProviderExecutionRoutesConfig,
+) {
+  const basePath = normalizeBasePath(config.basePath ?? "/integrations");
+  const maximumBodyBytes = maxJsonBodyBytes(config.maxJsonBodyBytes);
+  const escapedBasePath = basePath.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
+  const executePattern = new RegExp(
+    `^${escapedBasePath}/([^/]+)/connections/([^/]+)/operations/([^/]+)$`,
+    "u",
+  );
+
+  return {
+    async handle(request: Request): Promise<Response | undefined> {
+      const match = executePattern.exec(new URL(request.url).pathname);
+      if (!match || request.method !== "POST") {
+        return undefined;
+      }
+      try {
+        const integrationId = decodeURIComponent(match[1] ?? "");
+        const connectionId = decodeURIComponent(match[2] ?? "");
+        const operationId = decodeURIComponent(match[3] ?? "");
+        const provider = config.providerRegistry.get(integrationId);
+        if (!provider || !provider.operationIds.includes(operationId)) {
+          throw new IntegrationProviderSdkError(
+            "INTEGRATION_PROVIDER_SDK_OPERATION_UNAVAILABLE",
+          );
+        }
+        const payload = executionRequest(
+          await requestJsonObject(request, maximumBodyBytes),
+          request,
+        );
+        const subject = await config.resolveSubject(request);
+        await config.authorizeExecution(
+          subject,
+          { integrationId, connectionId, operationId },
+          request,
+        );
+        const result = await config.providerRegistry.execute({
+          integrationId,
+          operationId,
+          reference: createIntegrationCredentialReference({
+            integrationId,
+            connectionId,
+            product: subject.product,
+          }),
+          input: payload.input,
+          idempotencyKey: payload.idempotencyKey,
+        });
+        return Response.json({
+          operationId: result.operationId,
+          output: redactSecretShapedOutput(result.output),
+        });
+      } catch (error) {
+        return jsonError(error);
+      }
+    },
+  };
 }
 
 export interface IntegrationProductRoutesConfig<TContext> {
@@ -374,6 +577,112 @@ export function createIntegrationOAuthRoutes(
           return new Response(null, {
             status: 302,
             headers: { Location: result.returnPath },
+          });
+        } catch (error) {
+          return jsonError(error);
+        }
+      }
+
+      return undefined;
+    },
+  };
+}
+
+/**
+ * Fetch-standard browser-Link routes for Plaid and Merge. The package creates
+ * the ephemeral Link token, exchanges the returned public token server-side,
+ * encrypts the resulting credential, and returns only a connection ID.
+ */
+export function createIntegrationConnectionLinkRoutes(
+  config: IntegrationConnectionLinkRoutesConfig,
+) {
+  const basePath = normalizeBasePath(config.basePath ?? "/integrations");
+  const maximumBodyBytes = maxJsonBodyBytes(config.maxJsonBodyBytes);
+  const escapedBasePath = basePath.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
+  const tokenPattern = new RegExp(
+    `^${escapedBasePath}/(plaid|merge)/link/token$`,
+    "u",
+  );
+  const completePattern = new RegExp(
+    `^${escapedBasePath}/(plaid|merge)/link/complete$`,
+    "u",
+  );
+
+  return {
+    async handle(request: Request): Promise<Response | undefined> {
+      const pathname = new URL(request.url).pathname;
+      const tokenMatch = tokenPattern.exec(pathname);
+      if (tokenMatch && request.method === "POST") {
+        try {
+          const body = await requestJsonObject(request, maximumBodyBytes);
+          if (Object.keys(body).length > 0) {
+            throw new IntegrationRouteRequestError(
+              "INTEGRATION_REQUEST_INVALID",
+            );
+          }
+          const integrationId = tokenMatch[1] as "plaid" | "merge";
+          const subject = await config.resolveSubject(request);
+          await config.authorizeStart(subject, integrationId, request);
+          const result =
+            integrationId === "plaid"
+              ? await config.runtime.createPlaidLinkToken(subject)
+              : await config.runtime.createMergeLinkToken(subject);
+          return Response.json({
+            integrationId: result.integrationId,
+            linkToken: result.linkToken,
+            expiresAt: result.expiresAt,
+            magicLinkUrl: result.magicLinkUrl,
+          });
+        } catch (error) {
+          return jsonError(error);
+        }
+      }
+
+      const completeMatch = completePattern.exec(pathname);
+      if (completeMatch && request.method === "POST") {
+        try {
+          const body = await requestJsonObject(request, maximumBodyBytes);
+          if (
+            Object.keys(body).some((key) => key !== "publicToken") ||
+            typeof body.publicToken !== "string"
+          ) {
+            throw new IntegrationRouteRequestError(
+              "INTEGRATION_REQUEST_INVALID",
+            );
+          }
+          const integrationId = completeMatch[1] as "plaid" | "merge";
+          const subject = await config.resolveSubject(request);
+          const result =
+            integrationId === "plaid"
+              ? await config.runtime.completePlaidLink(
+                  {
+                    ...subject,
+                    publicToken: body.publicToken,
+                  },
+                  (authorizationSubject, authorizedIntegrationId) =>
+                    config.authorizeComplete(
+                      authorizationSubject,
+                      authorizedIntegrationId,
+                      request,
+                    ),
+                )
+              : await config.runtime.completeMergeLink(
+                  {
+                    ...subject,
+                    publicToken: body.publicToken,
+                  },
+                  (authorizationSubject, authorizedIntegrationId) =>
+                    config.authorizeComplete(
+                      authorizationSubject,
+                      authorizedIntegrationId,
+                      request,
+                    ),
+                );
+          return Response.json({
+            connectionId: result.connectionId,
+            integrationId: result.integrationId,
+            state: "connected",
+            safeNextStep: "The provider connection was completed securely.",
           });
         } catch (error) {
           return jsonError(error);

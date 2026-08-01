@@ -13,6 +13,8 @@ export interface OAuth2ProviderConfiguration {
   clientSecret?: string;
   redirectUri: string;
   scopes: readonly string[];
+  /** OAuth providers such as Slack require comma-delimited scopes. */
+  scopeDelimiter?: " " | ",";
   authorizationParameters?: Readonly<Record<string, string>>;
   /** Maps a safe output field to a provider callback query parameter. */
   callbackMetadata?: Readonly<Record<string, string>>;
@@ -66,7 +68,7 @@ function scopes(value: unknown): string[] {
   return Array.isArray(value)
     ? value.filter((scope): scope is string => typeof scope === "string")
     : typeof value === "string"
-      ? value.split(" ").filter(Boolean)
+      ? value.split(/[\s,]+/u).filter(Boolean)
       : [];
 }
 
@@ -91,7 +93,7 @@ function parseTokenResponse(
     expiresAt: expiresIn
       ? new Date(Date.now() + expiresIn * 1_000).toISOString()
       : undefined,
-    scope: scopes(response.scope),
+    scope: scopes(response.scope ?? response.scopes),
     tokenType:
       typeof response.token_type === "string" ? response.token_type : "Bearer",
   });
@@ -253,6 +255,579 @@ export interface OAuth2ProviderSdk {
   ): Promise<Response>;
 }
 
+const SLACK_DEFAULT_SCOPES = [
+  "channels:read",
+  "channels:history",
+  "channels:manage",
+  "groups:read",
+  "groups:history",
+  "groups:write",
+  "chat:write",
+  "chat:write.public",
+  "im:write",
+  "im:read",
+  "users:read",
+  "files:write",
+  "files:read",
+  "canvases:read",
+  "canvases:write",
+  "reactions:write",
+  "reactions:read",
+] as const;
+
+export interface SlackOAuth2ProviderInput {
+  clientId: string;
+  clientSecret: string;
+  redirectUri: string;
+  /**
+   * Defaults to the public Slack scopes required by the package's regular
+   * messaging, files, reactions, views, and canvas operations. Add approval-
+   * gated scopes (for example assistant:write) only after Slack grants them.
+   */
+  scopes?: readonly string[];
+}
+
+const HUBSPOT_DEFAULT_SCOPES = [
+  "crm.objects.contacts.read",
+  "crm.objects.contacts.write",
+  "crm.objects.companies.read",
+  "crm.objects.companies.write",
+  "crm.objects.deals.read",
+  "crm.objects.deals.write",
+  "crm.objects.owners.read",
+  "crm.objects.users.read",
+  "crm.objects.marketing_events.read",
+  "crm.objects.line_items.read",
+  "crm.objects.line_items.write",
+  "crm.objects.quotes.read",
+  "crm.objects.appointments.read",
+  "crm.objects.appointments.write",
+  "crm.objects.carts.read",
+  "sales-email-read",
+  "crm.lists.read",
+  "crm.lists.write",
+  "tickets",
+  "oauth",
+] as const;
+
+export interface HubSpotOAuth2ProviderInput {
+  clientId: string;
+  clientSecret: string;
+  redirectUri: string;
+  /** Override the complete requested scope set for a restricted HubSpot app. */
+  scopes?: readonly string[];
+}
+
+/**
+ * HubSpot's current OAuth V3 flow. Access and refresh tokens never leave the
+ * integration runtime; products supply only their HubSpot app registration.
+ */
+export function createHubSpotOAuth2Provider(
+  input: HubSpotOAuth2ProviderInput,
+): OAuth2ProviderConfiguration {
+  return {
+    integrationId: "hubspot",
+    authorizationEndpoint: "https://app.hubspot.com/oauth/authorize",
+    tokenEndpoint: "https://api.hubapi.com/oauth/v3/token",
+    apiBaseUrl: "https://api.hubapi.com",
+    clientId: input.clientId,
+    clientSecret: input.clientSecret,
+    redirectUri: input.redirectUri,
+    scopes: input.scopes ?? HUBSPOT_DEFAULT_SCOPES,
+    clientAuthentication: "body",
+  };
+}
+
+/**
+ * Slack's V2 OAuth flow uses comma-delimited bot scopes and exchanges at
+ * oauth.v2.access. The product supplies app registration values only.
+ */
+export function createSlackOAuth2Provider(
+  input: SlackOAuth2ProviderInput,
+): OAuth2ProviderConfiguration {
+  return {
+    integrationId: "slack",
+    authorizationEndpoint: "https://slack.com/oauth/v2/authorize",
+    tokenEndpoint: "https://slack.com/api/oauth.v2.access",
+    apiBaseUrl: "https://slack.com/api",
+    clientId: input.clientId,
+    clientSecret: input.clientSecret,
+    redirectUri: input.redirectUri,
+    scopes: input.scopes ?? SLACK_DEFAULT_SCOPES,
+    scopeDelimiter: ",",
+    clientAuthentication: "body",
+  };
+}
+
+const LINEAR_DEFAULT_SCOPES = [
+  "read",
+  "write",
+  "customer:read",
+  "customer:write",
+] as const;
+
+const AIRTABLE_DEFAULT_SCOPES = [
+  "data.records:read",
+  "data.records:write",
+  "schema.bases:read",
+] as const;
+
+export interface AirtableOAuth2ProviderInput {
+  clientId: string;
+  clientSecret: string;
+  redirectUri: string;
+  /** Override the complete requested scope set for a restricted Airtable app. */
+  scopes?: readonly string[];
+}
+
+/** Airtable OAuth registration for the package-owned Airtable SDK adapter. */
+export function createAirtableOAuth2Provider(
+  input: AirtableOAuth2ProviderInput,
+): OAuth2ProviderConfiguration {
+  return {
+    integrationId: "airtable",
+    authorizationEndpoint: "https://airtable.com/oauth2/v1/authorize",
+    tokenEndpoint: "https://airtable.com/oauth2/v1/token",
+    apiBaseUrl: "https://api.airtable.com/v0",
+    clientId: input.clientId,
+    clientSecret: input.clientSecret,
+    redirectUri: input.redirectUri,
+    scopes: input.scopes ?? AIRTABLE_DEFAULT_SCOPES,
+  };
+}
+
+const ASANA_DEFAULT_SCOPES = [
+  "projects:read",
+  "projects:write",
+  "tasks:read",
+  "tasks:write",
+  "tasks:delete",
+  "workspaces:read",
+] as const;
+
+export interface AsanaOAuth2ProviderInput {
+  clientId: string;
+  clientSecret: string;
+  redirectUri: string;
+  /** Override the complete requested scope set for a restricted Asana app. */
+  scopes?: readonly string[];
+}
+
+/** Asana OAuth registration for the package-owned official Node SDK adapter. */
+export function createAsanaOAuth2Provider(
+  input: AsanaOAuth2ProviderInput,
+): OAuth2ProviderConfiguration {
+  return {
+    integrationId: "asana",
+    authorizationEndpoint: "https://app.asana.com/-/oauth_authorize",
+    tokenEndpoint: "https://app.asana.com/-/oauth_token",
+    apiBaseUrl: "https://app.asana.com/api/1.0",
+    clientId: input.clientId,
+    clientSecret: input.clientSecret,
+    redirectUri: input.redirectUri,
+    scopes: input.scopes ?? ASANA_DEFAULT_SCOPES,
+    clientAuthentication: "body",
+  };
+}
+
+const DROPBOX_DEFAULT_SCOPES = [
+  "files.content.read",
+  "files.content.write",
+  "sharing.read",
+  "sharing.write",
+] as const;
+
+export interface DropboxOAuth2ProviderInput {
+  clientId: string;
+  clientSecret: string;
+  redirectUri: string;
+  /** Override the complete requested scope set for a restricted Dropbox app. */
+  scopes?: readonly string[];
+}
+
+/** Dropbox OAuth registration for the package-owned official JavaScript SDK. */
+export function createDropboxOAuth2Provider(
+  input: DropboxOAuth2ProviderInput,
+): OAuth2ProviderConfiguration {
+  return {
+    integrationId: "dropbox",
+    authorizationEndpoint: "https://www.dropbox.com/oauth2/authorize",
+    tokenEndpoint: "https://api.dropboxapi.com/oauth2/token",
+    apiBaseUrl: "https://api.dropboxapi.com/2",
+    clientId: input.clientId,
+    clientSecret: input.clientSecret,
+    redirectUri: input.redirectUri,
+    scopes: input.scopes ?? DROPBOX_DEFAULT_SCOPES,
+    clientAuthentication: "basic",
+    authorizationParameters: { token_access_type: "offline" },
+  };
+}
+
+export interface LinearOAuth2ProviderInput {
+  clientId: string;
+  clientSecret: string;
+  redirectUri: string;
+  /** Override the complete requested scope set for a restricted Linear app. */
+  scopes?: readonly string[];
+}
+
+const GOOGLE_CALENDAR_DEFAULT_SCOPES = [
+  "https://www.googleapis.com/auth/calendar",
+] as const;
+
+export interface GoogleCalendarOAuth2ProviderInput {
+  clientId: string;
+  clientSecret: string;
+  redirectUri: string;
+  /** Override the complete requested scope set for a restricted Google app. */
+  scopes?: readonly string[];
+}
+
+/**
+ * Google's OAuth 2.0 registration for the package-owned Calendar adapter.
+ * `access_type=offline` requests a refresh token so token refresh remains
+ * inside the encrypted integration runtime rather than product code.
+ */
+export function createGoogleCalendarOAuth2Provider(
+  input: GoogleCalendarOAuth2ProviderInput,
+): OAuth2ProviderConfiguration {
+  return {
+    integrationId: "google-calendar",
+    authorizationEndpoint: "https://accounts.google.com/o/oauth2/v2/auth",
+    tokenEndpoint: "https://oauth2.googleapis.com/token",
+    apiBaseUrl: "https://www.googleapis.com",
+    clientId: input.clientId,
+    clientSecret: input.clientSecret,
+    redirectUri: input.redirectUri,
+    scopes: input.scopes ?? GOOGLE_CALENDAR_DEFAULT_SCOPES,
+    authorizationParameters: { access_type: "offline", prompt: "consent" },
+    clientAuthentication: "body",
+  };
+}
+
+const GOOGLE_DRIVE_DEFAULT_SCOPES = [
+  "https://www.googleapis.com/auth/drive",
+] as const;
+
+export interface GoogleDriveOAuth2ProviderInput {
+  clientId: string;
+  clientSecret: string;
+  redirectUri: string;
+  /** Override the complete requested scope set for a restricted Google app. */
+  scopes?: readonly string[];
+}
+
+/** Google's OAuth registration for package-owned Drive SDK execution. */
+export function createGoogleDriveOAuth2Provider(
+  input: GoogleDriveOAuth2ProviderInput,
+): OAuth2ProviderConfiguration {
+  return {
+    integrationId: "google-drive",
+    authorizationEndpoint: "https://accounts.google.com/o/oauth2/v2/auth",
+    tokenEndpoint: "https://oauth2.googleapis.com/token",
+    apiBaseUrl: "https://www.googleapis.com",
+    clientId: input.clientId,
+    clientSecret: input.clientSecret,
+    redirectUri: input.redirectUri,
+    scopes: input.scopes ?? GOOGLE_DRIVE_DEFAULT_SCOPES,
+    authorizationParameters: { access_type: "offline", prompt: "consent" },
+    clientAuthentication: "body",
+  };
+}
+
+const GOOGLE_SHEETS_DEFAULT_SCOPES = [
+  "https://www.googleapis.com/auth/spreadsheets",
+  "https://www.googleapis.com/auth/drive.file",
+] as const;
+
+export interface GoogleSheetsOAuth2ProviderInput {
+  clientId: string;
+  clientSecret: string;
+  redirectUri: string;
+  /** Override the complete requested scope set for a restricted Google app. */
+  scopes?: readonly string[];
+}
+
+/** Google's OAuth registration for package-owned Sheets SDK execution. */
+export function createGoogleSheetsOAuth2Provider(
+  input: GoogleSheetsOAuth2ProviderInput,
+): OAuth2ProviderConfiguration {
+  return {
+    integrationId: "google-sheets",
+    authorizationEndpoint: "https://accounts.google.com/o/oauth2/v2/auth",
+    tokenEndpoint: "https://oauth2.googleapis.com/token",
+    apiBaseUrl: "https://www.googleapis.com",
+    clientId: input.clientId,
+    clientSecret: input.clientSecret,
+    redirectUri: input.redirectUri,
+    scopes: input.scopes ?? GOOGLE_SHEETS_DEFAULT_SCOPES,
+    authorizationParameters: { access_type: "offline", prompt: "consent" },
+    clientAuthentication: "body",
+  };
+}
+
+const GOOGLE_DOCS_DEFAULT_SCOPES = [
+  "https://www.googleapis.com/auth/documents",
+  "https://www.googleapis.com/auth/drive.file",
+] as const;
+
+export interface GoogleDocsOAuth2ProviderInput {
+  clientId: string;
+  clientSecret: string;
+  redirectUri: string;
+  scopes?: readonly string[];
+}
+
+/** Google's OAuth registration for package-owned Docs and Drive execution. */
+export function createGoogleDocsOAuth2Provider(
+  input: GoogleDocsOAuth2ProviderInput,
+): OAuth2ProviderConfiguration {
+  return {
+    integrationId: "google-docs",
+    authorizationEndpoint: "https://accounts.google.com/o/oauth2/v2/auth",
+    tokenEndpoint: "https://oauth2.googleapis.com/token",
+    apiBaseUrl: "https://www.googleapis.com",
+    clientId: input.clientId,
+    clientSecret: input.clientSecret,
+    redirectUri: input.redirectUri,
+    scopes: input.scopes ?? GOOGLE_DOCS_DEFAULT_SCOPES,
+    authorizationParameters: { access_type: "offline", prompt: "consent" },
+    clientAuthentication: "body",
+  };
+}
+
+const GOOGLE_SLIDES_DEFAULT_SCOPES = [
+  "https://www.googleapis.com/auth/presentations",
+  "https://www.googleapis.com/auth/drive.file",
+] as const;
+
+export interface GoogleSlidesOAuth2ProviderInput {
+  clientId: string;
+  clientSecret: string;
+  redirectUri: string;
+  scopes?: readonly string[];
+}
+
+/** Google's OAuth registration for package-owned Slides and Drive execution. */
+export function createGoogleSlidesOAuth2Provider(
+  input: GoogleSlidesOAuth2ProviderInput,
+): OAuth2ProviderConfiguration {
+  return {
+    integrationId: "google-slides",
+    authorizationEndpoint: "https://accounts.google.com/o/oauth2/v2/auth",
+    tokenEndpoint: "https://oauth2.googleapis.com/token",
+    apiBaseUrl: "https://www.googleapis.com",
+    clientId: input.clientId,
+    clientSecret: input.clientSecret,
+    redirectUri: input.redirectUri,
+    scopes: input.scopes ?? GOOGLE_SLIDES_DEFAULT_SCOPES,
+    authorizationParameters: { access_type: "offline", prompt: "consent" },
+    clientAuthentication: "body",
+  };
+}
+
+const GMAIL_DEFAULT_SCOPES = [
+  "https://www.googleapis.com/auth/gmail.modify",
+  "https://www.googleapis.com/auth/gmail.send",
+] as const;
+
+export interface GmailOAuth2ProviderInput {
+  clientId: string;
+  clientSecret: string;
+  redirectUri: string;
+  scopes?: readonly string[];
+}
+
+/** Google's OAuth registration for package-owned Gmail execution. */
+export function createGmailOAuth2Provider(
+  input: GmailOAuth2ProviderInput,
+): OAuth2ProviderConfiguration {
+  return {
+    integrationId: "gmail",
+    authorizationEndpoint: "https://accounts.google.com/o/oauth2/v2/auth",
+    tokenEndpoint: "https://oauth2.googleapis.com/token",
+    apiBaseUrl: "https://gmail.googleapis.com/gmail/v1",
+    clientId: input.clientId,
+    clientSecret: input.clientSecret,
+    redirectUri: input.redirectUri,
+    scopes: input.scopes ?? GMAIL_DEFAULT_SCOPES,
+    authorizationParameters: { access_type: "offline", prompt: "consent" },
+    clientAuthentication: "body",
+  };
+}
+
+const GOOGLE_FORMS_DEFAULT_SCOPES = [
+  "https://www.googleapis.com/auth/forms.body",
+  "https://www.googleapis.com/auth/forms.responses.readonly",
+] as const;
+
+export interface GoogleFormsOAuth2ProviderInput {
+  clientId: string;
+  clientSecret: string;
+  redirectUri: string;
+  scopes?: readonly string[];
+}
+
+/** Google's OAuth registration for package-owned Forms SDK execution. */
+export function createGoogleFormsOAuth2Provider(
+  input: GoogleFormsOAuth2ProviderInput,
+): OAuth2ProviderConfiguration {
+  return {
+    integrationId: "google-forms",
+    authorizationEndpoint: "https://accounts.google.com/o/oauth2/v2/auth",
+    tokenEndpoint: "https://oauth2.googleapis.com/token",
+    apiBaseUrl: "https://www.googleapis.com",
+    clientId: input.clientId,
+    clientSecret: input.clientSecret,
+    redirectUri: input.redirectUri,
+    scopes: input.scopes ?? GOOGLE_FORMS_DEFAULT_SCOPES,
+    authorizationParameters: { access_type: "offline", prompt: "consent" },
+    clientAuthentication: "body",
+  };
+}
+
+const GOOGLE_TASKS_DEFAULT_SCOPES = [
+  "https://www.googleapis.com/auth/tasks",
+] as const;
+
+export interface GoogleTasksOAuth2ProviderInput {
+  clientId: string;
+  clientSecret: string;
+  redirectUri: string;
+  scopes?: readonly string[];
+}
+
+/** Google's OAuth registration for package-owned Tasks SDK execution. */
+export function createGoogleTasksOAuth2Provider(
+  input: GoogleTasksOAuth2ProviderInput,
+): OAuth2ProviderConfiguration {
+  return {
+    integrationId: "google-tasks",
+    authorizationEndpoint: "https://accounts.google.com/o/oauth2/v2/auth",
+    tokenEndpoint: "https://oauth2.googleapis.com/token",
+    apiBaseUrl: "https://www.googleapis.com",
+    clientId: input.clientId,
+    clientSecret: input.clientSecret,
+    redirectUri: input.redirectUri,
+    scopes: input.scopes ?? GOOGLE_TASKS_DEFAULT_SCOPES,
+    authorizationParameters: { access_type: "offline", prompt: "consent" },
+    clientAuthentication: "body",
+  };
+}
+
+const GOOGLE_CONTACTS_DEFAULT_SCOPES = [
+  "https://www.googleapis.com/auth/contacts",
+] as const;
+
+export interface GoogleContactsOAuth2ProviderInput {
+  clientId: string;
+  clientSecret: string;
+  redirectUri: string;
+  scopes?: readonly string[];
+}
+
+/** Google's OAuth registration for package-owned People API execution. */
+export function createGoogleContactsOAuth2Provider(
+  input: GoogleContactsOAuth2ProviderInput,
+): OAuth2ProviderConfiguration {
+  return {
+    integrationId: "google-contacts",
+    authorizationEndpoint: "https://accounts.google.com/o/oauth2/v2/auth",
+    tokenEndpoint: "https://oauth2.googleapis.com/token",
+    apiBaseUrl: "https://people.googleapis.com",
+    clientId: input.clientId,
+    clientSecret: input.clientSecret,
+    redirectUri: input.redirectUri,
+    scopes: input.scopes ?? GOOGLE_CONTACTS_DEFAULT_SCOPES,
+    authorizationParameters: { access_type: "offline", prompt: "consent" },
+    clientAuthentication: "body",
+  };
+}
+
+const GOOGLE_MEET_DEFAULT_SCOPES = [
+  "https://www.googleapis.com/auth/meetings.space.created",
+  "https://www.googleapis.com/auth/meetings.space.readonly",
+] as const;
+
+export interface GoogleMeetOAuth2ProviderInput {
+  clientId: string;
+  clientSecret: string;
+  redirectUri: string;
+  scopes?: readonly string[];
+}
+
+/** Google's OAuth registration for package-owned Meet SDK execution. */
+export function createGoogleMeetOAuth2Provider(
+  input: GoogleMeetOAuth2ProviderInput,
+): OAuth2ProviderConfiguration {
+  return {
+    integrationId: "google-meet",
+    authorizationEndpoint: "https://accounts.google.com/o/oauth2/v2/auth",
+    tokenEndpoint: "https://oauth2.googleapis.com/token",
+    apiBaseUrl: "https://meet.googleapis.com",
+    clientId: input.clientId,
+    clientSecret: input.clientSecret,
+    redirectUri: input.redirectUri,
+    scopes: input.scopes ?? GOOGLE_MEET_DEFAULT_SCOPES,
+    authorizationParameters: { access_type: "offline", prompt: "consent" },
+    clientAuthentication: "body",
+  };
+}
+
+const GOOGLE_GROUPS_DEFAULT_SCOPES = [
+  "https://www.googleapis.com/auth/admin.directory.group",
+  "https://www.googleapis.com/auth/admin.directory.group.member",
+  "https://www.googleapis.com/auth/apps.groups.settings",
+] as const;
+
+export interface GoogleGroupsOAuth2ProviderInput {
+  clientId: string;
+  clientSecret: string;
+  redirectUri: string;
+  scopes?: readonly string[];
+}
+
+/** Google's OAuth registration for package-owned Workspace Groups execution. */
+export function createGoogleGroupsOAuth2Provider(
+  input: GoogleGroupsOAuth2ProviderInput,
+): OAuth2ProviderConfiguration {
+  return {
+    integrationId: "google-groups",
+    authorizationEndpoint: "https://accounts.google.com/o/oauth2/v2/auth",
+    tokenEndpoint: "https://oauth2.googleapis.com/token",
+    apiBaseUrl: "https://admin.googleapis.com",
+    clientId: input.clientId,
+    clientSecret: input.clientSecret,
+    redirectUri: input.redirectUri,
+    scopes: input.scopes ?? GOOGLE_GROUPS_DEFAULT_SCOPES,
+    authorizationParameters: { access_type: "offline", prompt: "consent" },
+    clientAuthentication: "body",
+  };
+}
+
+/**
+ * Linear's OAuth flow uses comma-delimited scopes and refresh tokens. The
+ * default covers the package-owned Linear SDK actions, including its customer
+ * operations; callers may provide a narrower scope set when they expose only
+ * a subset of those operations.
+ */
+export function createLinearOAuth2Provider(
+  input: LinearOAuth2ProviderInput,
+): OAuth2ProviderConfiguration {
+  return {
+    integrationId: "linear",
+    authorizationEndpoint: "https://linear.app/oauth/authorize",
+    tokenEndpoint: "https://api.linear.app/oauth/token",
+    apiBaseUrl: "https://api.linear.app",
+    clientId: input.clientId,
+    clientSecret: input.clientSecret,
+    redirectUri: input.redirectUri,
+    scopes: input.scopes ?? LINEAR_DEFAULT_SCOPES,
+    scopeDelimiter: ",",
+    clientAuthentication: "body",
+  };
+}
+
 const UNSAFE_CALLBACK_PARAMETERS = new Set([
   "access_token",
   "code",
@@ -300,6 +875,13 @@ export function createOAuth2ProviderSdk(
     requestTimeoutMs > 120_000
   ) {
     throw new Error("OAuth2 provider requestTimeoutMs must be 100–120000ms.");
+  }
+  if (
+    configuration.scopeDelimiter !== undefined &&
+    configuration.scopeDelimiter !== " " &&
+    configuration.scopeDelimiter !== ","
+  ) {
+    throw new Error("OAuth2 provider scopeDelimiter must be a space or comma.");
   }
   if (
     !Number.isSafeInteger(maxTokenResponseBytes) ||
@@ -374,7 +956,10 @@ export function createOAuth2ProviderSdk(
         url.searchParams.set("response_type", "code");
         url.searchParams.set("client_id", configuration.clientId);
         url.searchParams.set("redirect_uri", configuration.redirectUri);
-        url.searchParams.set("scope", configuration.scopes.join(" "));
+        url.searchParams.set(
+          "scope",
+          configuration.scopes.join(configuration.scopeDelimiter ?? " "),
+        );
         url.searchParams.set("state", input.state);
         url.searchParams.set("code_challenge", input.codeChallenge);
         url.searchParams.set("code_challenge_method", "S256");
@@ -469,7 +1054,13 @@ export function createQuickBooksOAuth2Provider(
       environment === "sandbox"
         ? "https://sandbox-quickbooks.api.intuit.com"
         : "https://quickbooks.api.intuit.com",
-    scopes: ["com.intuit.quickbooks.accounting", "openid", "profile", "email"],
+    scopes: [
+      "com.intuit.quickbooks.accounting",
+      "openid",
+      "profile",
+      "email",
+      "offline_access",
+    ],
     callbackMetadata: {
       ...configuration.callbackMetadata,
       companyId: "realmId",

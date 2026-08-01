@@ -7,9 +7,14 @@ import {
 
 export interface ApiKeyProviderConfiguration {
   integrationId: IntegrationId;
-  apiBaseUrl: string;
+  /**
+   * Omit both transport fields for SDK-only providers. Their key is still
+   * encrypted and available to a package-owned vendor client, but callers
+   * cannot make arbitrary HTTP requests through this generic transport.
+   */
+  apiBaseUrl?: string;
   /** The credential is supplied in this server-side HTTP header. */
-  credentialHeader: string;
+  credentialHeader?: string;
   /** Optional static prefix, for example `Bearer`. */
   credentialPrefix?: string;
   /** Defaults to 15 seconds. It bounds provider response headers. */
@@ -34,6 +39,7 @@ export interface ApiKeyProviderSdk {
 export class ApiKeyProviderError extends Error {
   readonly code:
     | "API_KEY_PROVIDER_CONFIGURATION_INVALID"
+    | "API_KEY_PROVIDER_TRANSPORT_UNAVAILABLE"
     | "API_KEY_PROVIDER_INVALID_PATH"
     | "API_KEY_PROVIDER_REQUEST_FAILED";
 
@@ -132,21 +138,31 @@ export function createApiKeyProviderSdk(
   fetcher: typeof fetch = fetch,
 ): ApiKeyProviderSdk {
   const requestTimeoutMs = configuration.requestTimeoutMs ?? 15_000;
-  const headerName = configuration.credentialHeader.toLocaleLowerCase("en-US");
+  const hasTransport =
+    configuration.apiBaseUrl !== undefined ||
+    configuration.credentialHeader !== undefined;
+  const headerName = configuration.credentialHeader?.toLocaleLowerCase("en-US");
   if (
     !Number.isSafeInteger(requestTimeoutMs) ||
     requestTimeoutMs < 100 ||
     requestTimeoutMs > 120_000 ||
-    !SAFE_HEADER_NAME.test(configuration.credentialHeader) ||
-    UNSAFE_CREDENTIAL_HEADERS.has(headerName) ||
+    (hasTransport &&
+      (!configuration.apiBaseUrl ||
+        !configuration.credentialHeader ||
+        !SAFE_HEADER_NAME.test(configuration.credentialHeader) ||
+        !headerName ||
+        UNSAFE_CREDENTIAL_HEADERS.has(headerName))) ||
     (configuration.credentialPrefix !== undefined &&
       (!configuration.credentialPrefix ||
         configuration.credentialPrefix.length > 160 ||
-        /[\r\n]/u.test(configuration.credentialPrefix)))
+        /[\r\n]/u.test(configuration.credentialPrefix))) ||
+    (configuration.credentialPrefix !== undefined && !hasTransport)
   ) {
     throw new ApiKeyProviderError("API_KEY_PROVIDER_CONFIGURATION_INVALID");
   }
-  validateSecureUrl(configuration.apiBaseUrl);
+  if (configuration.apiBaseUrl) {
+    validateSecureUrl(configuration.apiBaseUrl);
+  }
   if (
     !getIntegration(configuration.integrationId)?.products.some((product) =>
       product.authMethods.includes("api_key"),
@@ -159,6 +175,9 @@ export function createApiKeyProviderSdk(
     configuration,
 
     async request(rawCredential, request) {
+      if (!configuration.apiBaseUrl || !configuration.credentialHeader) {
+        throw new ApiKeyProviderError("API_KEY_PROVIDER_TRANSPORT_UNAVAILABLE");
+      }
       const credential = IntegrationApiKeyCredentialSchema.parse(rawCredential);
       const url = providerApiUrl(configuration.apiBaseUrl, request.path);
       const headers = new Headers(request.headers);

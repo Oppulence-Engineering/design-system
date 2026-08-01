@@ -28,6 +28,35 @@ export const IntegrationApiKeyCredentialSchema = z
   })
   .strict();
 
+/**
+ * Server-only credentials returned by Plaid Link after the browser completes
+ * consent. The public token is deliberately never persisted.
+ */
+export const PlaidConnectionLinkCredentialSchema = z
+  .object({
+    kind: z.literal("plaid"),
+    accessToken: z.string().min(1).max(16_384),
+    itemId: z.string().min(1).max(512).optional(),
+  })
+  .strict();
+
+/**
+ * Server-only credentials returned by Merge Link. The account token identifies
+ * one linked customer account and must remain encrypted at rest.
+ */
+export const MergeConnectionLinkCredentialSchema = z
+  .object({
+    kind: z.literal("merge"),
+    accountToken: z.string().min(1).max(16_384),
+    integrationName: z.string().min(1).max(512).optional(),
+  })
+  .strict();
+
+export const IntegrationConnectionLinkCredentialSchema = z.discriminatedUnion(
+  "kind",
+  [PlaidConnectionLinkCredentialSchema, MergeConnectionLinkCredentialSchema],
+);
+
 export const EncryptedIntegrationCredentialSchema = z
   .object({
     version: z.literal(1),
@@ -52,6 +81,15 @@ export type IntegrationOAuthCredential = z.infer<
 >;
 export type IntegrationApiKeyCredential = z.infer<
   typeof IntegrationApiKeyCredentialSchema
+>;
+export type PlaidConnectionLinkCredential = z.infer<
+  typeof PlaidConnectionLinkCredentialSchema
+>;
+export type MergeConnectionLinkCredential = z.infer<
+  typeof MergeConnectionLinkCredentialSchema
+>;
+export type IntegrationConnectionLinkCredential = z.infer<
+  typeof IntegrationConnectionLinkCredentialSchema
 >;
 export type EncryptedIntegrationCredential = z.infer<
   typeof EncryptedIntegrationCredentialSchema
@@ -327,6 +365,36 @@ export async function decryptIntegrationApiKeyCredential(input: {
   const payload = await decryptCredentialPayload(input);
   try {
     return IntegrationApiKeyCredentialSchema.parse(payload);
+  } catch {
+    throw new IntegrationCredentialError("CREDENTIAL_DECRYPT_FAILED");
+  }
+}
+
+/** Encrypts a Link-returned credential without exposing it to product code. */
+export async function encryptIntegrationConnectionLinkCredential(input: {
+  reference: IntegrationCredentialReference;
+  credential: IntegrationConnectionLinkCredential;
+  keyring: IntegrationCredentialKeyring;
+  now?: Date;
+}): Promise<EncryptedIntegrationCredential> {
+  const credential = IntegrationConnectionLinkCredentialSchema.parse(
+    input.credential,
+  );
+  return encryptCredentialPayload({
+    ...input,
+    credential,
+  });
+}
+
+/** Decrypts a Link credential only inside package-owned server runtimes. */
+export async function decryptIntegrationConnectionLinkCredential(input: {
+  reference: IntegrationCredentialReference;
+  credential: EncryptedIntegrationCredential;
+  keyring: IntegrationCredentialKeyring;
+}): Promise<IntegrationConnectionLinkCredential> {
+  const payload = await decryptCredentialPayload(input);
+  try {
+    return IntegrationConnectionLinkCredentialSchema.parse(payload);
   } catch {
     throw new IntegrationCredentialError("CREDENTIAL_DECRYPT_FAILED");
   }

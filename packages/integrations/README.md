@@ -7,8 +7,9 @@ provider-kit orchestration, and public catalogue manifests.
 
 The root entry does not contain credentials, OAuth callbacks, provider SDKs,
 databases, workers, routers, or authorization decisions. Use the separate
-server-only `@oppulence/integrations/server` entry for reusable OAuth2 provider
-clients, encrypted credential envelopes, token refresh, and mountable routes.
+server-only `@oppulence/integrations/server` entry for reusable OAuth2 and
+browser-Link provider clients, encrypted credential envelopes, token refresh,
+and mountable routes.
 
 ## Product resolver
 
@@ -132,6 +133,10 @@ can instead provide the same small keyring interface backed by KMS.
 ```ts
 import {
   composeIntegrationRoutes,
+  createIntegrationConnectionLinkRoutes,
+  createIntegrationConnectionLinkRuntime,
+  createIntegrationWebhookRoutes,
+  createIntegrationWebhookRuntime,
   createIntegrationOAuthRoutes,
   createIntegrationCredentialKeyring,
   createIntegrationProductRoutes,
@@ -179,6 +184,51 @@ const productRoutes = createIntegrationProductRoutes({
   resolveContext: resolveAuthenticatedProductContext,
 });
 
+const connectionLinkRuntime = createIntegrationConnectionLinkRuntime({
+  credentialVault: productIntegrationCredentialVault,
+  credentialKeyring,
+  plaid: {
+    clientId: env.PLAID_CLIENT_ID,
+    secret: env.PLAID_SECRET,
+    environment: env.PLAID_ENVIRONMENT,
+  },
+  merge: {
+    apiKey: env.MERGE_API_KEY,
+    // Product DB lookup only; the package owns Link token issuance and the
+    // encrypted account token returned by Merge Link.
+    resolveEndUser: lookupAuthorizedMergeEndUser,
+  },
+  onConnected: createProductConnectionAndScheduleInitialSync,
+});
+
+const connectionLinkRoutes = createIntegrationConnectionLinkRoutes({
+  runtime: connectionLinkRuntime,
+  resolveSubject: resolveAuthenticatedSubject,
+  authorizeStart: authorizeIntegrationConnect,
+  authorizeComplete: authorizeIntegrationConnect,
+});
+
+const webhookRuntime = createIntegrationWebhookRuntime({
+  plaid: {
+    clientId: env.PLAID_CLIENT_ID,
+    secret: env.PLAID_SECRET,
+    environment: env.PLAID_ENVIRONMENT,
+    // Product DB lookup only; package code verifies the signed request and
+    // never exposes a Plaid access token to this callback.
+    resolveConnection: lookupPlaidConnectionByItemId,
+  },
+  merge: {
+    signatureKey: env.MERGE_WEBHOOK_SIGNATURE_KEY,
+    // Product DB lookup only; Merge account tokens are never forwarded here.
+    resolveConnection: lookupMergeConnectionByLinkedAccountId,
+  },
+  // Persist/enqueue by idempotencyKey. The package supplies connection scope
+  // and a safe provider event name, never the provider payload or credentials.
+  onSyncRequired: enqueueIntegrationSync,
+});
+
+const webhookRoutes = createIntegrationWebhookRoutes({ runtime: webhookRuntime });
+
 // Mount one handler in Hono, Next, or another HTTP adapter. It owns:
 // GET  /integrations
 // POST /integrations/:id/connect
@@ -186,7 +236,15 @@ const productRoutes = createIntegrationProductRoutes({
 // GET  /integrations/connections/:id/health
 // GET|POST /integrations/:id/oauth/start
 // GET  /integrations/:id/oauth/callback
-const routes = composeIntegrationRoutes(productRoutes, oauthRoutes);
+// POST /integrations/:id/link/token
+// POST /integrations/:id/link/complete
+// POST /integrations/:id/webhooks
+const routes = composeIntegrationRoutes(
+  productRoutes,
+  oauthRoutes,
+  connectionLinkRoutes,
+  webhookRoutes,
+);
 const response = await routes.handle(request);
 ```
 
@@ -203,15 +261,50 @@ const connector = createOAuthRouteConnector({
 ```
 
 The server runtime deliberately does not turn provider-specific business data
-into product records. Plaid Link, file imports, API keys, webhooks, and any
-provider-specific source normalization still use product or future
-provider-module adapters. Make `onConnected` idempotent: if it rejects, the
-runtime revokes the newly stored credential envelope before returning a safe
-failure. The state-store adapter must atomically purge expired records, enforce
-the supplied per-subject pending-state cap (five by default), and consume a
-state exactly once. `createInMemoryIntegrationOAuthStateStore()` is provided
-only for tests/development; deploy a durable DB/Redis implementation in a
-product. `maximumPendingAuthorizationsPerSubject` is configurable from 1 to 20.
+into product records. Plaid and Merge Link now have package-owned token and
+completion routes: `POST /integrations/:id/link/token` and
+`POST /integrations/:id/link/complete`. The browser receives only an ephemeral
+Link token; its returned public token is exchanged server-side and the Plaid
+access token or Merge account token is encrypted before the product callback
+runs. It also mounts signature-verified webhook receivers at
+`POST /integrations/plaid/webhooks` and `POST /integrations/merge/webhooks`.
+Those receivers emit a redacted, idempotent sync signal; products only map a
+safe provider ID to a connection and persist the scheduled business sync.
+File imports and source normalization remain product business logic. Make
+`onConnected` idempotent: if it rejects, the runtime revokes the newly stored
+credential envelope before returning a safe failure. The
+state-store adapter must atomically purge expired records, enforce the supplied
+per-subject pending-state cap (five by default), and consume a state exactly
+once. `createInMemoryIntegrationOAuthStateStore()` is provided only for
+tests/development; deploy a durable DB/Redis implementation in a product.
+`maximumPendingAuthorizationsPerSubject` is configurable from 1 to 20.
+
+### Browser Link controls
+
+The React entrypoint owns the provider browser SDKs as well as the two server
+calls. Products render a button and receive only a safe connected projection:
+
+```tsx
+import {
+  MergeConnectionLinkButton,
+  PlaidConnectionLinkButton,
+} from "@oppulence/integrations/react";
+
+<PlaidConnectionLinkButton
+  buttonProps={{ className: "button button-primary" }}
+  onConnected={({ connectionId }) => refreshIntegrationDirectory(connectionId)}
+/>
+
+<MergeConnectionLinkButton
+  buttonProps={{ className: "button button-primary" }}
+  onConnected={({ connectionId }) => refreshIntegrationDirectory(connectionId)}
+/>
+```
+
+Use `createIntegrationConnectionLinkClient({ fetcher })` when the product has
+an authenticated fetch wrapper that adds CSRF protection or request tracing.
+The components never receive or retain Plaid access tokens or Merge account
+tokens.
 
 Provider authorization, token, and API endpoints require HTTPS. A redirect URI
 may use HTTP only for a loopback development host; package-owned OAuth and PKCE
@@ -222,6 +315,109 @@ by default. Credential operations are serialized per connection: a disconnect
 waits for a running refresh and then removes the refreshed envelope.
 Deployments with multiple replicas pass a DB/Redis-backed
 `credentialRefreshLock` with the same serialization guarantee.
+
+## Package-owned provider execution
+
+Products do not construct vendor SDK clients or receive decrypted credentials.
+After supplying their encrypted API-key and OAuth runtimes, they mount one
+authorized execution route. The package validates the operation, rejects
+credential-shaped input, reads the connection-bound credential, constructs the
+vendor client, and redacts credential-shaped output. Products retain only
+connection ownership, database lookups, authorization, and their business
+action policy.
+
+```ts
+import {
+  createBuiltInProviderSdkRegistry,
+  createIntegrationProviderExecutionRoutes,
+} from "@oppulence/integrations/server";
+
+const providerRegistry = createBuiltInProviderSdkRegistry({
+  apiKeyRuntime,
+  oauthRuntime,
+  connectionLinkRuntime,
+  plaid: {
+    clientId: env.PLAID_CLIENT_ID,
+    secret: env.PLAID_SECRET,
+    environment: env.PLAID_ENVIRONMENT,
+  },
+  merge: { apiKey: env.MERGE_API_KEY },
+  quickbooks: {
+    clientId: env.QUICKBOOKS_CLIENT_ID,
+    clientSecret: env.QUICKBOOKS_CLIENT_SECRET,
+    // Reads only the non-secret realm ID saved from the OAuth callback.
+    companyId: lookupQuickBooksCompanyId,
+  },
+  xero: {
+    clientId: env.XERO_CLIENT_ID,
+    clientSecret: env.XERO_CLIENT_SECRET,
+    // Reads only the selected non-secret tenant ID from the connection row.
+    tenantId: lookupXeroTenantId,
+  },
+});
+
+const executionRoutes = createIntegrationProviderExecutionRoutes({
+  providerRegistry,
+  resolveSubject: resolveAuthenticatedSubject,
+  authorizeExecution: authorizeProductIntegrationAction,
+});
+```
+
+For shipped API-key SDKs, create the runtime with
+`createBuiltInIntegrationApiKeyRuntime({ credentialVault, credentialKeyring,
+onConnected })`. It supplies the package-owned profiles for Stripe, GitHub,
+GitLab, Cloudflare, ElevenLabs, Firecrawl, Intercom, Mailgun, Mailchimp, Vercel,
+Square, Google Books, YouTube, Resend, and Brex. Mailchimp remains
+SDK-only because its regional API hostname is derived from the encrypted key;
+the generic HTTP transport deliberately rejects arbitrary requests for it.
+
+The shipped adapters currently execute every pinned source action exposed by a
+supported provider SDK for Stripe, Slack, HubSpot, GitHub, GitLab, Airtable,
+Asana, Dropbox, Brex, Cloudflare, ElevenLabs, Firecrawl, Intercom, Mailgun,
+Linear, Mailchimp, Vercel, Square, Google Calendar,
+Google Drive, Google Sheets, Google Docs, Google Slides, Gmail, Google Forms, Google Tasks, Google Contacts, Google Books, YouTube, Resend, Google Meet, and Google Groups. Square uses its official Node.js
+SDK for all 34 pinned actions. Google Calendar, Drive, Sheets, Docs, Forms,
+Tasks, Contacts, Books, YouTube, Meet, and Groups use Google's `googleapis` client for 138 pinned actions and include package-owned
+OAuth presets with encrypted refresh-token handling. Google Slides contributes another 52 pinned actions; its batch edits accept the official Google Slides `Request` object in `input.request`. Gmail contributes 13 more and constructs standards-compliant MIME messages itself; attachments are bounded Base64 payloads (`filename`, `data`, and optional `mimeType`) so decrypted credentials and provider-specific client code stay in the package. Vercel runs 55 actions
+through its official generated SDK; its Edge Config item mutation remains
+catalogue-only until the vendor adds it to that SDK. GitLab runs all 65 pinned
+actions through the maintained GitBeaker client; its host is deployment
+configuration, not action input, so a personal access token cannot be
+redirected to an attacker-controlled origin. Intercom runs all 31 pinned
+actions through its official client. Cloudflare runs 12 actions through its
+official client; the source action to list every zone setting remains
+catalogue-only because the SDK only exposes individual setting reads. ElevenLabs
+runs all 10 pinned actions through its official SDK; generated audio is a
+bounded Base64 `audioFile` payload, leaving durable storage and URL policy to
+the consuming product. Firecrawl runs all 13 pinned actions through its
+official TypeScript SDK, including asynchronous job status and cancellation;
+the package returns its vendor job identifiers instead of polling with raw
+HTTP. Airtable runs six source record actions through its official SDK; its
+metadata discovery and upsert actions remain catalogue-only because that SDK
+does not expose public methods for them. Asana runs all 14 pinned task,
+project, workspace, section, story, and follower actions through Asana's
+official generated Node SDK; its OAuth preset requests only the matching
+project, task, and workspace scopes. Dropbox runs all 13 pinned file, folder,
+sharing, search, and revision actions through its official JavaScript SDK;
+transferred file payloads are bounded portable Base64 data and OAuth requests
+offline refresh tokens. Mailgun runs all eight pinned actions
+through its official SDK; its regional endpoint is package configuration, not
+an action input. Resend runs all 16 pinned actions through its official Node
+SDK. Brex runs all 34 pinned actions through its maintained typed SDK.
+QuickBooks (six ledger actions) and Xero (six accounting actions) use
+package-owned Node SDK adapters after their OAuth connection is complete;
+products only read a non-secret company or tenant ID from their own connection
+row. Plaid runs Link issuance, public-token exchange, accounts, balances, Item
+status, and transaction sync through the official Node SDK. Merge adds a
+package-native Accounting Link connector and six normalized accounting actions
+through Merge's TypeScript SDK. The package never
+swaps a provider SDK for raw REST when an SDK exists; the browser-safe
+`getProviderExecutionStrategyReport()`
+reports the source-wide SDK, protocol, and catalogue-only implementation
+tracks. Providers without a verified SDK remain catalogue-only rather than
+receiving a raw REST adapter. It is planning evidence only;
+`getProviderSdkCoverageReport()` is the
+executable-coverage source of truth, and trigger runtime remains separate.
 
 ## Golden journey harness
 

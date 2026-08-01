@@ -30,8 +30,22 @@ function importSpecifiers(source: string): string[] {
 }
 
 describe("browser-safe package boundary", () => {
-  test("keeps zod as the only core runtime dependency", () => {
-    expect(packageJson.dependencies).toEqual({ zod: "^4.3.6" });
+  test("keeps vendor SDK dependencies server-only", () => {
+    expect(packageJson.dependencies).toMatchObject({ zod: "^4.3.6" });
+    expect(Object.keys(packageJson.dependencies ?? {})).toEqual(
+      expect.arrayContaining([
+        "@hubspot/api-client",
+        "@linear/sdk",
+        "@mailchimp/mailchimp_marketing",
+        "@octokit/rest",
+        "@slack/web-api",
+        "@vercel/sdk",
+        "googleapis",
+        "plaid",
+        "square",
+        "stripe",
+      ]),
+    );
   });
 
   test("keeps server runtime modules out of browser-safe entrypoints", () => {

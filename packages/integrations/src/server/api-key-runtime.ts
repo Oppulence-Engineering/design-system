@@ -40,6 +40,102 @@ export interface IntegrationApiKeyRuntimeConfig {
   }): Promise<void>;
 }
 
+/**
+ * Public API-key profiles for package-owned SDK adapters. Products should use
+ * `createBuiltInIntegrationApiKeyRuntime` unless they are adding a custom
+ * adapter or need the generic HTTP transport for another provider.
+ */
+export const BUILT_IN_API_KEY_PROVIDER_CONFIGURATIONS = Object.freeze([
+  {
+    integrationId: "stripe" as const,
+    apiBaseUrl: "https://api.stripe.com",
+    credentialHeader: "Authorization",
+    credentialPrefix: "Bearer",
+  },
+  {
+    integrationId: "github" as const,
+    apiBaseUrl: "https://api.github.com",
+    credentialHeader: "Authorization",
+    credentialPrefix: "Bearer",
+  },
+  {
+    integrationId: "gitlab" as const,
+    apiBaseUrl: "https://gitlab.com/api/v4",
+    credentialHeader: "PRIVATE-TOKEN",
+  },
+  {
+    integrationId: "cloudflare" as const,
+    apiBaseUrl: "https://api.cloudflare.com/client/v4",
+    credentialHeader: "Authorization",
+    credentialPrefix: "Bearer",
+  },
+  {
+    integrationId: "elevenlabs" as const,
+    apiBaseUrl: "https://api.elevenlabs.io/v1",
+    credentialHeader: "xi-api-key",
+  },
+  {
+    integrationId: "firecrawl" as const,
+    apiBaseUrl: "https://api.firecrawl.dev/v2",
+    credentialHeader: "Authorization",
+    credentialPrefix: "Bearer",
+  },
+  {
+    integrationId: "intercom" as const,
+    apiBaseUrl: "https://api.intercom.io",
+    credentialHeader: "Authorization",
+    credentialPrefix: "Bearer",
+  },
+  {
+    // Mailgun's client performs its own API-key basic authentication; do not
+    // expose a generic HTTP profile that could send the key incorrectly.
+    integrationId: "mailgun" as const,
+  },
+  {
+    // Mailchimp derives the regional API host from the key suffix. Its
+    // package-owned SDK is the only safe transport for this profile.
+    integrationId: "mailchimp" as const,
+  },
+  {
+    integrationId: "vercel" as const,
+    apiBaseUrl: "https://api.vercel.com",
+    credentialHeader: "Authorization",
+    credentialPrefix: "Bearer",
+  },
+  {
+    integrationId: "square" as const,
+    apiBaseUrl: "https://connect.squareup.com",
+    credentialHeader: "Authorization",
+    credentialPrefix: "Bearer",
+  },
+  {
+    integrationId: "google-books" as const,
+    apiBaseUrl: "https://www.googleapis.com/books/v1",
+    credentialHeader: "X-Goog-Api-Key",
+  },
+  {
+    integrationId: "youtube" as const,
+    apiBaseUrl: "https://www.googleapis.com/youtube/v3",
+    credentialHeader: "X-Goog-Api-Key",
+  },
+  {
+    integrationId: "resend" as const,
+    apiBaseUrl: "https://api.resend.com",
+    credentialHeader: "Authorization",
+    credentialPrefix: "Bearer",
+  },
+  {
+    // Brex's typed SDK owns authentication and transport. This profile exists
+    // only to encrypt the OAuth/API token and make it available to that SDK.
+    integrationId: "brex" as const,
+  },
+] satisfies readonly ApiKeyProviderConfiguration[]);
+
+export type BuiltInIntegrationApiKeyRuntimeConfig = Omit<
+  IntegrationApiKeyRuntimeConfig,
+  "providers"
+>;
+
 export interface ConnectIntegrationApiKeyInput extends IntegrationApiKeySubject {
   integrationId: string;
   apiKey: string;
@@ -70,6 +166,17 @@ export interface IntegrationApiKeyRuntime {
     authorize: IntegrationApiKeyAuthorizer,
   ): Promise<ConnectIntegrationApiKeyResult>;
   request(input: IntegrationApiKeyProviderRequest): Promise<Response>;
+  /**
+   * Executes a package-owned provider SDK call with a decrypted API key.
+   *
+   * This is intentionally server-only. It allows an SDK adapter supplied by
+   * this package to initialise a vendor client without making products read,
+   * persist, or pass through the underlying secret.
+   */
+  withCredential<T>(
+    reference: IntegrationCredentialReference,
+    operation: (credential: { readonly apiKey: string }) => Promise<T>,
+  ): Promise<T>;
   revoke(reference: IntegrationCredentialReference): Promise<void>;
 }
 
@@ -217,6 +324,33 @@ export function createIntegrationApiKeyRuntime(
       return provider.request(credential, input.request);
     },
 
+    async withCredential(rawReference, operation) {
+      const reference =
+        IntegrationCredentialReferenceSchema.safeParse(rawReference);
+      if (!reference.success) {
+        throw new IntegrationApiKeyRuntimeError(
+          "INTEGRATION_API_KEY_CREDENTIAL_UNAVAILABLE",
+        );
+      }
+      if (!providers.has(reference.data.integrationId)) {
+        throw new IntegrationApiKeyRuntimeError(
+          "INTEGRATION_API_KEY_PROVIDER_UNAVAILABLE",
+        );
+      }
+      const encrypted = await config.credentialVault.read(reference.data);
+      if (!encrypted) {
+        throw new IntegrationApiKeyRuntimeError(
+          "INTEGRATION_API_KEY_CREDENTIAL_UNAVAILABLE",
+        );
+      }
+      const credential = await decryptIntegrationApiKeyCredential({
+        reference: reference.data,
+        credential: encrypted,
+        keyring: config.credentialKeyring,
+      });
+      return operation(credential);
+    },
+
     async revoke(rawReference) {
       const reference =
         IntegrationCredentialReferenceSchema.safeParse(rawReference);
@@ -228,4 +362,18 @@ export function createIntegrationApiKeyRuntime(
       await config.credentialVault.revoke(reference.data);
     },
   };
+}
+
+/**
+ * Creates encrypted API-key storage for every currently shipped API-key SDK.
+ * Consumers provide database/vault and authorization policy only; public
+ * provider transport and credential conventions remain package-owned.
+ */
+export function createBuiltInIntegrationApiKeyRuntime(
+  config: BuiltInIntegrationApiKeyRuntimeConfig,
+): IntegrationApiKeyRuntime {
+  return createIntegrationApiKeyRuntime({
+    ...config,
+    providers: BUILT_IN_API_KEY_PROVIDER_CONFIGURATIONS,
+  });
 }

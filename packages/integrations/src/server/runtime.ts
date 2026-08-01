@@ -554,6 +554,21 @@ export function createIntegrationOAuthRuntime(
       return response;
     },
 
+    /**
+     * Initialises a package-owned vendor SDK with a refreshed OAuth credential
+     * without pushing that credential through an Eigenn or Conduitt boundary.
+     * The callback is server-only and must never persist or return the token.
+     */
+    async withCredential<T>(
+      rawReference: IntegrationCredentialReference,
+      operation: (credential: IntegrationOAuthCredential) => Promise<T>,
+    ): Promise<T> {
+      const reference =
+        IntegrationCredentialReferenceSchema.parse(rawReference);
+      resolveProvider(reference.integrationId);
+      return operation(await getFreshCredential(reference));
+    },
+
     async revokeCredential(
       reference: IntegrationCredentialReference,
     ): Promise<void> {
