@@ -8,3 +8,4 @@ export * from "./x";
 export * from "./datadog";
 export * from "./reddit";
 export * from "./box";
+export * from "./datastores";

@@ -11,15 +11,18 @@ import {
   createCloudFormationPack,
   createCloudflarePack,
   createClickHousePack,
+  createAlgoliaPack,
   createBoxPack,
   createClerkPack,
   createDatadogPack,
+  createElasticsearchPack,
   createCloudWatchPack,
   createCodePipelinePack,
   createConfluencePack,
   createDynamoDbPack,
   createJupyterPack,
   createMySqlPack,
+  createPineconePack,
   createPostgreSqlPack,
   createIamPack,
   createIdentityCenterPack,
@@ -31,6 +34,7 @@ import {
   createOneDrivePack,
   createOutlookPack,
   createOktaPack,
+  createQdrantPack,
   createRdsPack,
   createRedditPack,
   createRedisPack,
@@ -45,6 +49,7 @@ import {
   createSqsPack,
   createStsPack,
   createTextractPack,
+  createUpstashPack,
   createTrelloPack,
   createVercelPack,
   createXPack,
@@ -59,8 +64,8 @@ import {
  * did. The target is the pinned source: 232 providers, 3,890 actions, and 363
  * triggers.
  */
-const EXECUTABLE_PROVIDERS = 73;
-const EXECUTABLE_ACTIONS = 1612;
+const EXECUTABLE_PROVIDERS = 78;
+const EXECUTABLE_ACTIONS = 1671;
 
 const oauthRuntime = {
   async withCredential<T>(
@@ -145,6 +150,11 @@ const PACKS: readonly {
     createOktaPack(),
     createSupabasePack(),
     createDatadogPack(),
+    createAlgoliaPack(),
+    createUpstashPack(),
+    createPineconePack(),
+    createQdrantPack(),
+    createElasticsearchPack(),
   ].map((pack) => ({ pack, context: { apiKeyRuntime } })),
 ];
 
@@ -177,9 +187,9 @@ describe("provider parity coverage gate", () => {
       PACKS.map((entry) => entry.pack),
     );
 
-    // 44 providers ship as packs; the other 29 executable providers predate
+    // 49 providers ship as packs; the other 29 executable providers predate
     // the pack contract and are registered directly.
-    expect(report.providers).toBe(44);
+    expect(report.providers).toBe(49);
     expect(report.deferredOperations).toBe(0);
     // Every supported action is owned by exactly one lane.
     expect(report.operations).toBe(
@@ -235,8 +245,8 @@ describe("provider parity coverage gate", () => {
       actionsRemaining: sourceActions - EXECUTABLE_ACTIONS,
       triggersRemaining: 363 - 60,
     }).toEqual({
-      providersRemaining: 159,
-      actionsRemaining: 2278,
+      providersRemaining: 154,
+      actionsRemaining: 2219,
       triggersRemaining: 303,
     });
   });

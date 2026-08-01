@@ -486,6 +486,11 @@ describe("server API-key runtime", () => {
       "okta",
       "supabase",
       "datadog",
+      "algolia",
+      "upstash",
+      "pinecone",
+      "qdrant",
+      "elasticsearch",
     ]);
   });
 
@@ -658,8 +663,8 @@ describe("server vendor SDK adapters", () => {
     });
 
     expect(getProviderSdkCoverageReport(registry)).toMatchObject({
-      executableProviders: 73,
-      executableOperations: 1612,
+      executableProviders: 78,
+      executableOperations: 1671,
       executableTriggers: 0,
       hasCompleteExecutionParity: false,
     });

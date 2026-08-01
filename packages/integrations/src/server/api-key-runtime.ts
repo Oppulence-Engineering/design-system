@@ -161,6 +161,11 @@ export const BUILT_IN_API_KEY_PROVIDER_CONFIGURATIONS = Object.freeze([
   { integrationId: "okta" as const },
   { integrationId: "supabase" as const },
   { integrationId: "datadog" as const },
+  { integrationId: "algolia" as const },
+  { integrationId: "upstash" as const },
+  { integrationId: "pinecone" as const },
+  { integrationId: "qdrant" as const },
+  { integrationId: "elasticsearch" as const },
 ] satisfies readonly ApiKeyProviderConfiguration[]);
 
 export type BuiltInIntegrationApiKeyRuntimeConfig = Omit<

@@ -15,6 +15,11 @@ import {
   createDatadogPack,
   createRedditPack,
   createBoxPack,
+  createAlgoliaPack,
+  createUpstashPack,
+  createPineconePack,
+  createQdrantPack,
+  createElasticsearchPack,
   type IntegrationProviderPack,
 } from "../src/server";
 
@@ -118,6 +123,11 @@ describe("vendor SDK provider batch", () => {
       [createDatadogPack(), { apiKeyRuntime }],
       [createRedditPack(), { oauthRuntime }],
       [createBoxPack(), { oauthRuntime }],
+      [createAlgoliaPack(), { apiKeyRuntime }],
+      [createUpstashPack(), { apiKeyRuntime }],
+      [createPineconePack(), { apiKeyRuntime }],
+      [createQdrantPack(), { apiKeyRuntime }],
+      [createElasticsearchPack(), { apiKeyRuntime }],
     ];
 
     for (const [pack, context] of packs) {
@@ -131,7 +141,7 @@ describe("vendor SDK provider batch", () => {
 
     expect(
       packs.reduce((total, [pack]) => total + pack.coverage.length, 0),
-    ).toBe(231);
+    ).toBe(290);
   });
 
   test("builds a bounded SOQL read with validated identifiers", async () => {
@@ -555,6 +565,70 @@ describe("vendor SDK provider batch", () => {
       path: "folders.createFolder",
       args: [{ name: "Reports", parent: { id: "0" } }],
     });
+  });
+
+  test("allows only data-plane verbs through the Upstash escape hatch", async () => {
+    const recorder = sdkRecorder();
+    const provider = createUpstashPack({
+      clientFactory: recorder.clientFactory,
+    }).create({ apiKeyRuntime })[0];
+    const run = (command: string) =>
+      provider.execute({
+        integrationId: "upstash",
+        operationId: "upstash:command",
+        reference: reference("upstash"),
+        input: { command, args: ["k"] },
+      });
+
+    await run("get");
+    expect(recorder.calls[0]).toEqual({ path: "exec", args: [["GET", "k"]] });
+
+    // The same restriction the Redis protocol provider applies.
+    for (const command of ["FLUSHALL", "CONFIG", "EVAL", "KEYS"]) {
+      await expect(run(command)).rejects.toMatchObject({
+        code: "INTEGRATION_PROVIDER_SDK_INVOCATION_INVALID",
+      });
+    }
+  });
+
+  test("rejects an index name that is not a plain resource identifier", async () => {
+    const recorder = sdkRecorder();
+    const provider = createAlgoliaPack({
+      clientFactory: recorder.clientFactory,
+    }).create({ apiKeyRuntime })[0];
+
+    await expect(
+      provider.execute({
+        integrationId: "algolia",
+        operationId: "algolia:search",
+        reference: reference("algolia"),
+        input: { index: "products/../settings", query: "shoes" },
+      }),
+    ).rejects.toMatchObject({
+      code: "INTEGRATION_PROVIDER_SDK_INVOCATION_INVALID",
+    });
+    expect(recorder.calls).toEqual([]);
+  });
+
+  test("scopes a Pinecone query to its namespace when one is given", async () => {
+    const recorder = sdkRecorder();
+    const provider = createPineconePack({
+      clientFactory: recorder.clientFactory,
+    }).create({ apiKeyRuntime })[0];
+
+    await provider.execute({
+      integrationId: "pinecone",
+      operationId: "pinecone:search-with-vector",
+      reference: reference("pinecone"),
+      input: { index: "docs", namespace: "tenant-1", vector: [0.1, 0.2] },
+    });
+
+    expect(recorder.calls.map((call) => call.path)).toEqual([
+      "index",
+      "index.namespace",
+      "index.namespace.query",
+    ]);
+    expect(recorder.calls[1]?.args).toEqual(["tenant-1"]);
   });
 
   test("registers Salesforce OAuth with the instance URL as callback metadata", () => {

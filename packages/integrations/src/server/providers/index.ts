@@ -50,10 +50,15 @@ import {
   createSshPack,
 } from "./protocol";
 import {
+  createAlgoliaPack,
   createBoxPack,
   createClerkPack,
   createDatadogPack,
+  createElasticsearchPack,
+  createPineconePack,
+  createQdrantPack,
   createRedditPack,
+  createUpstashPack,
   createOktaPack,
   createSalesforcePack,
   createSupabasePack,
@@ -239,6 +244,11 @@ export function createBuiltInProviderSdkRegistry(
         createOktaPack(),
         createSupabasePack(),
         createDatadogPack(),
+        createAlgoliaPack(),
+        createUpstashPack(),
+        createPineconePack(),
+        createQdrantPack(),
+        createElasticsearchPack(),
       ].flatMap((pack) => pack.create({ apiKeyRuntime: config.apiKeyRuntime })),
     );
   }
