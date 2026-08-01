@@ -22,13 +22,13 @@ import type {
 import { Button } from "../atoms/button";
 import { Badge } from "../atoms/badge";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "./dialog";
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+} from "./sheet";
 import {
   InputGroup,
   InputGroupAddon,
@@ -429,16 +429,18 @@ export function IntegrationDetailPanel({
     Boolean(entry.primaryAction && onAction) &&
     (entry.connections.length === 0 || !onConnectionAction);
   return (
-    <Dialog onOpenChange={onOpenChange} open={open}>
-      <DialogContent showCloseButton={false}>
-        <DialogHeader>
-          <div className="flex items-start justify-between gap-3">
-            <DialogTitle>{entry.integration.name}</DialogTitle>
+    <Sheet onOpenChange={onOpenChange} open={open}>
+      <SheetContent showCloseButton={false} side="right">
+        <SheetHeader>
+          <div className="flex items-start justify-between gap-3 pr-2">
+            <SheetTitle>{entry.integration.name}</SheetTitle>
             <IntegrationStatusBadge state={state} />
           </div>
-          <DialogDescription>{entry.integration.summary}</DialogDescription>
-        </DialogHeader>
-        <div className="max-h-[60vh] space-y-6 overflow-y-auto px-4 pb-2">
+          <SheetDescription>{entry.integration.summary}</SheetDescription>
+        </SheetHeader>
+        {/* The sheet is full height, so the body takes the slack and scrolls
+            on its own rather than being capped to a fraction of the viewport. */}
+        <div className="flex-1 space-y-6 overflow-y-auto pb-2">
           <section className="space-y-2">
             <p className="text-sm font-medium">Capabilities</p>
             <ul className="text-muted-foreground grid gap-1 text-sm sm:grid-cols-2">
@@ -473,7 +475,7 @@ export function IntegrationDetailPanel({
             </section>
           )}
         </div>
-        <DialogFooter>
+        <SheetFooter>
           {showEntryAction && entry.primaryAction && onAction && (
             <Button onClick={() => onAction(entry, entry.primaryAction!)}>
               {actionLabel(entry.primaryAction)}
@@ -482,9 +484,9 @@ export function IntegrationDetailPanel({
           <Button onClick={() => onOpenChange(false)} variant="outline">
             Close
           </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
   );
 }
 
