@@ -672,8 +672,8 @@ describe("server vendor SDK adapters", () => {
     });
 
     expect(getProviderSdkCoverageReport(registry)).toMatchObject({
-      executableProviders: 91,
-      executableOperations: 1828,
+      executableProviders: 92,
+      executableOperations: 1847,
       executableTriggers: 0,
       hasCompleteExecutionParity: false,
     });

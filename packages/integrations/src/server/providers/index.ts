@@ -58,6 +58,7 @@ import {
   createDatadogPack,
   createElasticsearchPack,
   createAzureDevOpsPack,
+  createCalComPack,
   createDocuSignPack,
   createGoogleAppSheetPack,
   createGoogleBigQueryPack,
@@ -318,6 +319,7 @@ export function createBuiltInProviderSdkRegistry(
       }),
       ...createDocuSignPack().create({ oauthRuntime: config.oauthRuntime }),
       ...createShopifyPack().create({ oauthRuntime: config.oauthRuntime }),
+      ...createCalComPack().create({ oauthRuntime: config.oauthRuntime }),
       createAsanaProviderSdk({ oauthRuntime: config.oauthRuntime }),
       createDropboxProviderSdk({ oauthRuntime: config.oauthRuntime }),
     );

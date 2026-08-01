@@ -24,6 +24,7 @@ import {
   createZendeskPack,
   createDocuSignPack,
   createAzureDevOpsPack,
+  createCalComPack,
   createShopifyPack,
   createTemporalPack,
   type IntegrationProviderPack,
@@ -140,6 +141,7 @@ describe("vendor SDK provider batch", () => {
       [createDocuSignPack(), { oauthRuntime }],
       [createShopifyPack(), { oauthRuntime }],
       [createTemporalPack(), { apiKeyRuntime }],
+      [createCalComPack(), { oauthRuntime }],
     ];
 
     for (const [pack, context] of packs) {
@@ -149,7 +151,11 @@ describe("vendor SDK provider batch", () => {
       expect(
         pack.coverage
           .filter((entry) => entry.disposition === "supported")
-          .every((entry) => entry.lane === "sdk"),
+          .every((entry) =>
+            pack.integrationId === "cal-com"
+              ? entry.lane === "sdk" || entry.lane === "typed_rest"
+              : entry.lane === "sdk",
+          ),
       ).toBe(true);
     }
     expect(
@@ -160,7 +166,7 @@ describe("vendor SDK provider batch", () => {
 
     expect(
       packs.reduce((total, [pack]) => total + pack.coverage.length, 0),
-    ).toBe(397);
+    ).toBe(416);
   });
 
   test("builds a bounded SOQL read with validated identifiers", async () => {
@@ -891,6 +897,22 @@ describe("vendor SDK provider batch", () => {
       workflowId: "order-42",
       terminated: true,
     });
+  });
+
+  test("splits Cal.com across lanes because its own SDK is incomplete", () => {
+    const pack = createCalComPack();
+    const sdk = pack.coverage.filter((entry) => entry.lane === "sdk");
+    const rest = pack.coverage.filter((entry) => entry.lane === "typed_rest");
+
+    expect(sdk).toHaveLength(9);
+    expect(rest).toHaveLength(10);
+    // Every booking action is on REST: the SDK's bookings namespace is empty.
+    expect(
+      rest.filter((entry) => entry.sourceOperationId.includes("booking")),
+    ).toHaveLength(7);
+    for (const entry of rest) {
+      expect(entry.sdkReview).toContain("@calcom/sdk@1.0.1");
+    }
   });
 
   test("registers Salesforce OAuth with the instance URL as callback metadata", () => {
