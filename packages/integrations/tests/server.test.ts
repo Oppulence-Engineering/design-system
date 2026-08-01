@@ -496,6 +496,7 @@ describe("server API-key runtime", () => {
       "twilio-voice",
       "zendesk",
       "azure-devops",
+      "temporal",
       "google-appsheet",
       "mongodb",
       "neo4j",
@@ -671,8 +672,8 @@ describe("server vendor SDK adapters", () => {
     });
 
     expect(getProviderSdkCoverageReport(registry)).toMatchObject({
-      executableProviders: 89,
-      executableOperations: 1787,
+      executableProviders: 91,
+      executableOperations: 1828,
       executableTriggers: 0,
       hasCompleteExecutionParity: false,
     });

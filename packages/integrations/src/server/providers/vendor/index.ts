@@ -12,3 +12,5 @@ export * from "./datastores";
 export * from "./google";
 export * from "./maps-comms";
 export * from "./service-desk";
+export * from "./temporal";
+export * from "./shopify";

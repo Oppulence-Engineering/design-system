@@ -55,8 +55,10 @@ import {
   createSupabasePack,
   createSalesforcePack,
   createSharePointPack,
+  createShopifyPack,
   createSqsPack,
   createStsPack,
+  createTemporalPack,
   createTextractPack,
   createTwilioVoicePack,
   createUpstashPack,
@@ -75,8 +77,8 @@ import {
  * did. The target is the pinned source: 232 providers, 3,890 actions, and 363
  * triggers.
  */
-const EXECUTABLE_PROVIDERS = 89;
-const EXECUTABLE_ACTIONS = 1787;
+const EXECUTABLE_PROVIDERS = 91;
+const EXECUTABLE_ACTIONS = 1828;
 
 const oauthRuntime = {
   async withCredential<T>(
@@ -134,6 +136,7 @@ const PACKS: readonly {
     createGoogleVaultPack(),
     createGoogleBigQueryPack(),
     createDocuSignPack(),
+    createShopifyPack(),
   ].map((pack) => ({ pack, context: { oauthRuntime } })),
   ...[
     createCloudflarePack(),
@@ -177,6 +180,7 @@ const PACKS: readonly {
     createGoogleAppSheetPack(),
     createZendeskPack(),
     createAzureDevOpsPack(),
+    createTemporalPack(),
   ].map((pack) => ({ pack, context: { apiKeyRuntime } })),
 ];
 
@@ -209,9 +213,9 @@ describe("provider parity coverage gate", () => {
       PACKS.map((entry) => entry.pack),
     );
 
-    // 60 providers ship as packs; the other 29 executable providers predate
+    // 62 providers ship as packs; the other 29 executable providers predate
     // the pack contract and are registered directly.
-    expect(report.providers).toBe(60);
+    expect(report.providers).toBe(62);
     // Only Google Maps defers, for APIs on hosts neither lane can reach.
     expect(report.deferredOperations).toBe(5);
     // Every supported action is owned by exactly one lane.
@@ -268,8 +272,8 @@ describe("provider parity coverage gate", () => {
       actionsRemaining: sourceActions - EXECUTABLE_ACTIONS,
       triggersRemaining: 363 - 60,
     }).toEqual({
-      providersRemaining: 143,
-      actionsRemaining: 2103,
+      providersRemaining: 141,
+      actionsRemaining: 2062,
       triggersRemaining: 303,
     });
   });

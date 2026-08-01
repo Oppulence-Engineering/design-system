@@ -24,6 +24,8 @@ import {
   createZendeskPack,
   createDocuSignPack,
   createAzureDevOpsPack,
+  createShopifyPack,
+  createTemporalPack,
   type IntegrationProviderPack,
 } from "../src/server";
 
@@ -136,6 +138,8 @@ describe("vendor SDK provider batch", () => {
       [createZendeskPack(), { apiKeyRuntime }],
       [createAzureDevOpsPack(), { apiKeyRuntime }],
       [createDocuSignPack(), { oauthRuntime }],
+      [createShopifyPack(), { oauthRuntime }],
+      [createTemporalPack(), { apiKeyRuntime }],
     ];
 
     for (const [pack, context] of packs) {
@@ -156,7 +160,7 @@ describe("vendor SDK provider batch", () => {
 
     expect(
       packs.reduce((total, [pack]) => total + pack.coverage.length, 0),
-    ).toBe(356);
+    ).toBe(397);
   });
 
   test("builds a bounded SOQL read with validated identifiers", async () => {
@@ -791,6 +795,101 @@ describe("vendor SDK provider batch", () => {
       }),
     ).rejects.toMatchObject({
       code: "INTEGRATION_PROVIDER_SDK_INVOCATION_INVALID",
+    });
+  });
+
+  test("binds Shopify GraphQL values as variables, never into the document", async () => {
+    const requests: Array<{ query: string; variables: unknown }> = [];
+    const provider = createShopifyPack({
+      clientFactory: () =>
+        ({
+          request: async (query: string, options: { variables?: unknown }) => {
+            requests.push({ query, variables: options?.variables });
+            return { data: {} };
+          },
+        }) as never,
+    }).create({ oauthRuntime })[0];
+
+    await provider.execute({
+      integrationId: "shopify",
+      operationId: "shopify:list-products",
+      reference: reference("shopify"),
+      input: { query: 'title:"] } malicious {"', limit: 10 },
+    });
+
+    // The injection attempt survives only as a bound variable.
+    expect(requests[0]?.variables).toEqual({
+      first: 10,
+      query: 'title:"] } malicious {"',
+    });
+    expect(requests[0]?.query).not.toContain("malicious");
+  });
+
+  test("promotes a numeric Shopify ID to a global ID and rejects other types", async () => {
+    const requests: Array<{ variables: unknown }> = [];
+    const provider = createShopifyPack({
+      clientFactory: () =>
+        ({
+          request: async (_q: string, options: { variables?: unknown }) => {
+            requests.push({ variables: options?.variables });
+            return { data: {} };
+          },
+        }) as never,
+    }).create({ oauthRuntime })[0];
+
+    await provider.execute({
+      integrationId: "shopify",
+      operationId: "shopify:get-product",
+      reference: reference("shopify"),
+      input: { productId: "123" },
+    });
+    expect(requests[0]?.variables).toEqual({
+      id: "gid://shopify/Product/123",
+    });
+
+    // A global ID for a different resource type must not be accepted.
+    await expect(
+      provider.execute({
+        integrationId: "shopify",
+        operationId: "shopify:get-product",
+        reference: reference("shopify"),
+        input: { productId: "gid://shopify/Customer/123" },
+      }),
+    ).rejects.toMatchObject({
+      code: "INTEGRATION_PROVIDER_SDK_INVOCATION_INVALID",
+    });
+  });
+
+  test("resolves a Temporal action through the handle that carries it", async () => {
+    const calls: string[] = [];
+    const handle = {
+      terminate: async (reason?: string) => {
+        calls.push(`terminate:${reason ?? ""}`);
+      },
+    };
+    const provider = createTemporalPack({
+      clientFactory: () =>
+        ({
+          workflow: {
+            getHandle: (id: string) => {
+              calls.push(`getHandle:${id}`);
+              return handle;
+            },
+          },
+        }) as never,
+    }).create({ apiKeyRuntime })[0];
+
+    const result = await provider.execute({
+      integrationId: "temporal",
+      operationId: "temporal:terminate-workflow",
+      reference: reference("temporal"),
+      input: { workflowId: "order-42", reason: "stale" },
+    });
+
+    expect(calls).toEqual(["getHandle:order-42", "terminate:stale"]);
+    expect(result.output).toEqual({
+      workflowId: "order-42",
+      terminated: true,
     });
   });
 
