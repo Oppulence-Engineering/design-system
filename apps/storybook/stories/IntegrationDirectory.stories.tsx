@@ -281,9 +281,13 @@ export const KeyboardSearch: Story = {
     await userEvent.click(search);
     await userEvent.type(search, "attention");
     await expect(canvas.getByText("1 integrations shown")).toBeVisible();
+    // Tab leaves the search box for the category pills, which are ordinary
+    // buttons rather than a select.
     await userEvent.tab();
     await expect(
-      canvas.getByRole("combobox", { name: "Filter by category" }),
+      within(
+        canvas.getByRole("group", { name: "Filter by category" }),
+      ).getByRole("button", { name: "All" }),
     ).toHaveFocus();
   },
 };
@@ -295,10 +299,10 @@ export const FiltersAndEmptyState: Story = {
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const category = canvas.getByRole("combobox", {
-      name: "Filter by category",
-    });
-    await userEvent.selectOptions(category, "crm-work");
+    const categories = within(
+      canvas.getByRole("group", { name: "Filter by category" }),
+    );
+    await userEvent.click(categories.getByRole("button", { name: "crm work" }));
     await expect(canvas.getByText("1 integrations shown")).toBeVisible();
     await expect(canvas.getByText("Salesforce")).toBeVisible();
 
