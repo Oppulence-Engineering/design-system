@@ -1099,3 +1099,72 @@ export function createXeroOAuth2Provider(
     clientAuthentication: "basic",
   };
 }
+
+/**
+ * Every Microsoft provider authenticates against the same Entra ID endpoints
+ * and calls the same Graph host; only the requested scopes differ. The tenant
+ * is deployment configuration, so a single-tenant app can restrict it rather
+ * than accepting the multi-tenant `common` authority.
+ */
+const MICROSOFT_GRAPH_API_BASE_URL = "https://graph.microsoft.com/v1.0";
+
+const MICROSOFT_BASE_SCOPES = ["openid", "profile", "offline_access"] as const;
+
+const MICROSOFT_DEFAULT_SCOPES: Readonly<Record<string, readonly string[]>> = {
+  "azure-ad": ["User.ReadWrite.All", "Group.ReadWrite.All"],
+  outlook: [
+    "Mail.ReadWrite",
+    "Mail.Send",
+    "MailboxSettings.Read",
+    "Calendars.ReadWrite",
+  ],
+  onedrive: ["Files.ReadWrite.All"],
+  sharepoint: ["Sites.ReadWrite.All", "Files.ReadWrite.All"],
+  "microsoft-planner": ["Tasks.ReadWrite", "Group.ReadWrite.All"],
+  "microsoft-teams": [
+    "Chat.ReadWrite",
+    "ChannelMessage.Send",
+    "ChannelMessage.ReadWrite",
+    "Team.ReadBasic.All",
+    "TeamMember.Read.All",
+  ],
+  "microsoft-excel": ["Files.ReadWrite.All"],
+};
+
+export interface MicrosoftGraphOAuth2ProviderInput {
+  integrationId: keyof typeof MICROSOFT_DEFAULT_SCOPES;
+  clientId: string;
+  clientSecret?: string;
+  redirectUri: string;
+  /** Directory authority: a tenant ID, `organizations`, or `common`. */
+  tenant?: string;
+  /** Override the complete requested scope set for a restricted app. */
+  scopes?: readonly string[];
+}
+
+/** OAuth registration shared by the package-owned Microsoft Graph adapters. */
+export function createMicrosoftGraphOAuth2Provider(
+  input: MicrosoftGraphOAuth2ProviderInput,
+): OAuth2ProviderConfiguration {
+  const defaults = MICROSOFT_DEFAULT_SCOPES[input.integrationId];
+  if (!defaults) {
+    throw new Error(
+      `No Microsoft Graph scope profile for ${input.integrationId}.`,
+    );
+  }
+  const tenant = input.tenant ?? "common";
+  if (!/^[A-Za-z0-9.-]{1,128}$/u.test(tenant)) {
+    throw new Error("Microsoft tenant must be a tenant ID or authority name.");
+  }
+  return {
+    integrationId:
+      input.integrationId as OAuth2ProviderConfiguration["integrationId"],
+    authorizationEndpoint: `https://login.microsoftonline.com/${tenant}/oauth2/v2.0/authorize`,
+    tokenEndpoint: `https://login.microsoftonline.com/${tenant}/oauth2/v2.0/token`,
+    apiBaseUrl: MICROSOFT_GRAPH_API_BASE_URL,
+    clientId: input.clientId,
+    ...(input.clientSecret ? { clientSecret: input.clientSecret } : {}),
+    redirectUri: input.redirectUri,
+    scopes: input.scopes ?? [...MICROSOFT_BASE_SCOPES, ...defaults],
+  };
+}

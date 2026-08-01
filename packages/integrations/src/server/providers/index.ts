@@ -8,6 +8,15 @@ import {
   createAirtableMetadataProviderSdk,
   createAirtableProviderSdk,
 } from "./airtable";
+import {
+  createAzureAdProviderSdk,
+  createMicrosoftExcelProviderSdk,
+  createMicrosoftPlannerProviderSdk,
+  createMicrosoftTeamsProviderSdk,
+  createOneDriveProviderSdk,
+  createOutlookProviderSdk,
+  createSharePointProviderSdk,
+} from "./microsoft-graph";
 import { createAsanaProviderSdk } from "./asana";
 import { createBrexProviderSdk } from "./brex";
 import {
@@ -89,6 +98,7 @@ export * from "./quickbooks";
 export * from "./xero";
 export * from "./plaid";
 export * from "./merge";
+export * from "./microsoft-graph";
 
 export interface BuiltInProviderSdkRegistryConfig {
   /**
@@ -171,6 +181,13 @@ export function createBuiltInProviderSdkRegistry(
       createGoogleSlidesProviderSdk({ oauthRuntime: config.oauthRuntime }),
       createAirtableProviderSdk({ oauthRuntime: config.oauthRuntime }),
       createAirtableMetadataProviderSdk({ oauthRuntime: config.oauthRuntime }),
+      createAzureAdProviderSdk({ oauthRuntime: config.oauthRuntime }),
+      createOutlookProviderSdk({ oauthRuntime: config.oauthRuntime }),
+      createOneDriveProviderSdk({ oauthRuntime: config.oauthRuntime }),
+      createSharePointProviderSdk({ oauthRuntime: config.oauthRuntime }),
+      createMicrosoftPlannerProviderSdk({ oauthRuntime: config.oauthRuntime }),
+      createMicrosoftTeamsProviderSdk({ oauthRuntime: config.oauthRuntime }),
+      createMicrosoftExcelProviderSdk({ oauthRuntime: config.oauthRuntime }),
       createAsanaProviderSdk({ oauthRuntime: config.oauthRuntime }),
       createDropboxProviderSdk({ oauthRuntime: config.oauthRuntime }),
     );

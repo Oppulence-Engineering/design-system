@@ -185,6 +185,12 @@ test("the built root entry resolves every documented runtime export", async () =
   expect(typeof server.createIntegrationTriggerRuntime).toBe("function");
   expect(typeof server.createIntegrationTriggerRoutes).toBe("function");
   expect(typeof server.createInMemoryIntegrationTriggerStore).toBe("function");
+  expect(typeof server.createMicrosoftGraphPack).toBe("function");
+  expect(typeof server.createOutlookProviderSdk).toBe("function");
+  expect(typeof server.createMicrosoftTeamsChatSubscriptionSource).toBe(
+    "function",
+  );
+  expect(typeof server.createMicrosoftGraphOAuth2Provider).toBe("function");
   expect(typeof server.createBuiltInProviderSdkRegistry).toBe("function");
   expect(typeof server.getProviderSdkCoverageReport).toBe("function");
   expect(typeof server.createIntegrationProviderExecutionRoutes).toBe(
