@@ -113,6 +113,7 @@
     "prepublishOnly": "bun run clean && bun run build",
     "providers:coverage": "bun scripts/provider-coverage.ts",
     "providers:generate": "bun scripts/openapi-generate.ts",
+    "providers:smoke": "bun scripts/smoke-routes.ts",
     "providers:sync": "bun scripts/sync-gate.ts",
     "providers:wire": "bun scripts/wire-provider.ts",
     "providers:openapi": "bun scripts/openapi-plan.ts",
