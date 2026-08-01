@@ -153,6 +153,12 @@ import {
   ProviderPackContractError,
 } from "./provider-pack";
 import {
+  createInMemoryIntegrationTriggerStore,
+  createIntegrationTriggerRoutes,
+  createIntegrationTriggerRuntime,
+  IntegrationTriggerError,
+} from "./triggers";
+import {
   createInMemoryIntegrationCredentialRefreshLock,
   createInMemoryIntegrationOAuthStateStore,
   createIntegrationOAuthRuntime,
@@ -316,6 +322,10 @@ export {
   getProviderPackAdapterIssues,
   getProviderPackCoverageReport,
   ProviderPackContractError,
+  createIntegrationTriggerRuntime,
+  createIntegrationTriggerRoutes,
+  createInMemoryIntegrationTriggerStore,
+  IntegrationTriggerError,
   createIntegrationOAuthRuntime,
   createInMemoryIntegrationCredentialRefreshLock,
   createInMemoryIntegrationOAuthStateStore,
@@ -483,6 +493,30 @@ export type {
   IntegrationTypedRestTransport,
 } from "./provider-rest";
 export type { IntegrationSpecialProviderConfig } from "./provider-special";
+export type {
+  IntegrationPollTriggerSource,
+  IntegrationSubscriptionTriggerSource,
+  IntegrationTriggerAuditAction,
+  IntegrationTriggerAuditRecord,
+  IntegrationTriggerCheckpoint,
+  IntegrationTriggerCheckpointKey,
+  IntegrationTriggerConnection,
+  IntegrationTriggerDelivery,
+  IntegrationTriggerDeliveryResult,
+  IntegrationTriggerEvent,
+  IntegrationTriggerEventDraft,
+  IntegrationTriggerHealth,
+  IntegrationTriggerHealthState,
+  IntegrationTriggerKind,
+  IntegrationTriggerPollResult,
+  IntegrationTriggerRoutesConfig,
+  IntegrationTriggerRuntime,
+  IntegrationTriggerRuntimeConfig,
+  IntegrationTriggerSource,
+  IntegrationTriggerStore,
+  IntegrationWebhookTriggerSource,
+} from "./triggers";
+export type { ExecutableTriggerSource } from "./provider-sdk";
 export type {
   IntegrationProviderPack,
   ProviderPackContext,

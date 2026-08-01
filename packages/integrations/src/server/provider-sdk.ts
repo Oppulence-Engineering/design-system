@@ -183,12 +183,24 @@ export interface ProviderSdkCoverageReport {
 }
 
 /**
+ * A registered trigger source, as reported by the trigger runtime. Kept
+ * structural so the coverage report does not depend on the runtime module.
+ */
+export interface ExecutableTriggerSource {
+  integrationId: string;
+  triggerId: string;
+}
+
+/**
  * Reports executable package coverage against the pinned Sim Studio source.
- * Catalogue and protocol records are deliberately excluded: an operation is
- * counted only when a package-owned SDK adapter can execute it.
+ * Catalogue records are deliberately excluded: an operation counts only when
+ * a package-owned adapter can execute it, and a trigger counts only when a
+ * registered source can observe it. Pass the trigger runtime's `listSources()`
+ * to include trigger coverage; omitting it reports zero rather than assuming.
  */
 export function getProviderSdkCoverageReport(
   registry: IntegrationProviderSdkRegistry,
+  triggerSources: readonly ExecutableTriggerSource[] = [],
 ): ProviderSdkCoverageReport {
   const sourceProviders = SIMSTUDIO_BASELINE.integrations;
   const sourceOperationIds = new Set(
@@ -213,7 +225,16 @@ export function getProviderSdkCoverageReport(
   );
   const sourceOperations = sourceOperationIds.size;
   const executableProviderCount = executableProviders.length;
-  const executableTriggers = 0;
+  const sourceTriggerIds = new Set(
+    sourceProviders.flatMap((provider) =>
+      provider.triggers.map((trigger) => trigger.id),
+    ),
+  );
+  const executableTriggers = new Set(
+    triggerSources
+      .filter((source) => sourceTriggerIds.has(source.triggerId))
+      .map((source) => source.triggerId),
+  ).size;
   return {
     sourceProviders: sourceProviders.length,
     sourceOperations,
@@ -223,7 +244,7 @@ export function getProviderSdkCoverageReport(
     executableTriggers,
     unimplementedProviders: sourceProviders.length - executableProviderCount,
     unimplementedOperations: sourceOperations - executableOperations,
-    unimplementedTriggers: sourceTriggers,
+    unimplementedTriggers: sourceTriggers - executableTriggers,
     hasCompleteExecutionParity:
       executableProviderCount === sourceProviders.length &&
       executableOperations === sourceOperations &&
