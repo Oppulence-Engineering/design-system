@@ -586,6 +586,7 @@ const CLICKUP_ACTIONS: readonly RestAction<any>[] = [
         space_id: i.spaceId,
         folder_id: i.folderId,
         list_id: i.listId,
+        task_id: i.taskId,
         // Only the flag: the workspace is already the path segment here, so
         // re-sending it as `team_id` would be redundant.
         custom_task_ids: i.customTaskIds,
