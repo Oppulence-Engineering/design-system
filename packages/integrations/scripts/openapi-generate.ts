@@ -254,7 +254,9 @@ const CRUD_VERBS = new Set([
 ]);
 
 function isCollection(path: string): boolean {
-  return !path.trimEnd().endsWith("}");
+  // Sentry writes every path with a trailing slash, so the parameter test has
+  // to ignore it or an item route reads as a collection.
+  return !path.replace(/\/+$/u, "").endsWith("}");
 }
 
 /** Harmonic mean of how much of each side the overlap accounts for. */
@@ -291,12 +293,16 @@ function score(actionSuffix: string, op: Operation): number {
   // events collection under /incidents is a different thing from one under
   // /alerts, and the last segment alone cannot tell them apart. Version
   // segments carry no meaning and would only dilute precision.
-  const real = op.path
-    .split("/")
-    .filter(
-      (segment) =>
-        segment && !segment.startsWith("{") && !/^v\d+$/u.test(segment),
-    );
+  const real = op.path.split("/").filter(
+    (segment) =>
+      segment &&
+      !segment.startsWith("{") &&
+      // Version and mount segments are structure, not resource names, and
+      // counting them only dilutes precision.
+      !/^v\d+$/u.test(segment) &&
+      !/^\d+$/u.test(segment) &&
+      segment !== "api",
+  );
   const context = [
     ...words(real.at(-1) ?? ""),
     ...words(real.at(-2) ?? ""),
@@ -311,14 +317,22 @@ function score(actionSuffix: string, op: Operation): number {
   // A segment that spells the verb is an operation, whichever verb it is:
   // /incidents/{id}/remove_subscribers is as much an action as /acknowledge.
   const actionPath = lastWords.includes(verb);
-  const wantsCollection = /^(list|search|query|create|add)/u.test(actionSuffix);
+  // A plural noun asks for a collection whatever the verb: "get files" is a
+  // list, not a read of one file, and binding it to /files/{id} would answer
+  // with a single record.
+  const tail = words(actionSuffix).at(-1) ?? "";
+  const plural = tail !== stem(tail);
+  const wantsCollection =
+    plural || /^(list|search|query|create|add)/u.test(actionSuffix);
   value +=
     actionPath || isCollection(op.path) === wantsCollection ? 0.25 : -0.3;
 
   // Prefer the newest version when a vendor ships several.
   const version = /\/v(\d+)\//u.exec(op.path);
   if (version) value += Number(version[1]) * 0.02;
-  value -= op.path.split("/").length * 0.01;
+  // A depth tiebreaker only, kept small: at 0.01 a five-segment path lost
+  // 0.07 and fell under the bar despite matching exactly.
+  value -= op.path.split("/").length * 0.002;
   return value;
 }
 
@@ -450,6 +464,16 @@ function zodFor(type: string, param?: Partial<Param>, schema?: any): string {
 
 const fileParts: string[] = [];
 const factory = `create${pascal(integrationId)}Pack`;
+
+// The transport has to match what the catalogue says the provider
+// authenticates with: the lane refuses an api_key adapter for a provider whose
+// definition only lists OAuth, which is how a mis-wired Pipedrive was caught.
+const transportKind =
+  baseline.sourceAuthType === "oauth"
+    ? "oauth2"
+    : baseline.sourceAuthType === "none"
+      ? "none"
+      : "api_key";
 
 for (const entry of mapping) {
   if (!entry.op) continue;
@@ -586,7 +610,7 @@ export function ${factory}(): IntegrationProviderPack {
   return createRestPack({
     integrationId: ${JSON.stringify(integrationId)},
     sdkReview: SPEC_NOTE,
-    transportKind: "api_key",
+    transportKind: ${JSON.stringify(transportKind)},
     actions: ACTIONS,${
       deferrals.length
         ? `

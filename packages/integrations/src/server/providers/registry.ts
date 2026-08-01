@@ -1,9 +1,13 @@
 import type { IntegrationProviderPack } from "../core/provider-pack";
+import { createAgentmailPack } from "./agentmail";
+import { createAgentphonePack } from "./agentphone";
+import { createAhrefsPack } from "./ahrefs";
 import { createAirtablePack } from "./airtable";
 import { createAlgoliaPack } from "./algolia";
 import { createDynamoDbPack } from "./amazon-dynamodb";
 import { createRdsPack } from "./amazon-rds";
 import { createSqsPack } from "./amazon-sqs";
+import { createApifyPack } from "./apify";
 import { createArxivPack } from "./arxiv";
 import { createAthenaPack } from "./athena";
 import { createAttioPack } from "./attio";
@@ -29,6 +33,8 @@ import { createCloudWatchPack } from "./cloudwatch";
 import { createCodePipelinePack } from "./codepipeline";
 import { createConfluencePack } from "./confluence";
 import { createDatadogPack } from "./datadog";
+import { createDaytonaPack } from "./daytona";
+import { createDevinPack } from "./devin";
 import { createDiscordPack } from "./discord";
 import { createDocuSignPack } from "./docusign";
 import { createElasticsearchPack } from "./elasticsearch";
@@ -38,13 +44,22 @@ import { createGoogleBigQueryPack } from "./google-bigquery";
 import { createGoogleMapsPack } from "./google-maps";
 import { createGoogleTranslatePack } from "./google-translate";
 import { createGoogleVaultPack } from "./google-vault";
+import { createGranolaPack } from "./granola";
 import { createHunterIoPack } from "./hunter-io";
 import { createIncidentIoPack } from "./incident-io";
+import { createInfisicalPack } from "./infisical";
+import { createInstantlyPack } from "./instantly";
 import { createJinaPack } from "./jina";
 import { createJiraPack } from "./jira";
 import { createJiraServiceManagementPack } from "./jira-service-management";
 import { createJupyterPack } from "./jupyter";
+import { createKalshiPack } from "./kalshi";
+import { createLaunchdarklyPack } from "./launchdarkly";
+import { createLeadmagicPack } from "./leadmagic";
+import { createLemlistPack } from "./lemlist";
 import { createLinkedInPack } from "./linkedin";
+import { createLoopsPack } from "./loops";
+import { createMem0Pack } from "./mem0";
 import { createMicrosoftExcelPack } from "./microsoft-excel";
 import { createMicrosoftPlannerPack } from "./microsoft-planner";
 import { createMicrosoftTeamsPack } from "./microsoft-teams";
@@ -59,26 +74,33 @@ import { createPerplexityPack } from "./perplexity";
 import { createPineconePack } from "./pinecone";
 import { createPostgreSqlPack } from "./postgresql";
 import { createPostHogPack } from "./posthog";
+import { createProfoundPack } from "./profound";
 import { createQdrantPack } from "./qdrant";
+import { createQuartrPack } from "./quartr";
 import { createRedditPack } from "./reddit";
 import { createRedisPack } from "./redis";
 import { createRootlyPack } from "./rootly";
 import { createS3Pack } from "./s3";
 import { createSalesforcePack } from "./salesforce";
 import { createSendGridPack } from "./sendgrid";
+import { createSentryPack } from "./sentry";
 import { createSftpPack } from "./sftp";
 import { createSharePointPack } from "./sharepoint";
 import { createShopifyPack } from "./shopify";
+import { createSixtyfourAiPack } from "./sixtyfour-ai";
 import { createSshPack } from "./ssh";
+import { createStagehandPack } from "./stagehand";
 import { createSupabasePack } from "./supabase";
 import { createTailscalePack } from "./tailscale";
 import { createTavilyPack } from "./tavily";
 import { createTelegramPack } from "./telegram";
 import { createTemporalPack } from "./temporal";
+import { createThrivePack } from "./thrive";
 import { createTrelloPack } from "./trello";
 import { createTwilioVoicePack } from "./twilio-voice";
 import { createTypeformPack } from "./typeform";
 import { createUpstashPack } from "./upstash";
+import { createUptimerobotPack } from "./uptimerobot";
 import { createVercelPack } from "./vercel";
 import { createWebflowPack } from "./webflow";
 import { createWikipediaPack } from "./wikipedia";
@@ -97,8 +119,12 @@ import { createZendeskPack } from "./zendesk";
  * a product has not configured one, so the list needs no per-entry wiring.
  */
 export const BUILT_IN_PROVIDER_PACKS: readonly IntegrationProviderPack[] = [
+  createAgentmailPack(),
+  createAgentphonePack(),
+  createAhrefsPack(),
   createAirtablePack(),
   createAlgoliaPack(),
+  createApifyPack(),
   createAppConfigPack(),
   createArxivPack(),
   createAthenaPack(),
@@ -118,6 +144,8 @@ export const BUILT_IN_PROVIDER_PACKS: readonly IntegrationProviderPack[] = [
   createCodePipelinePack(),
   createConfluencePack(),
   createDatadogPack(),
+  createDaytonaPack(),
+  createDevinPack(),
   createDiscordPack(),
   createDocuSignPack(),
   createDynamoDbPack(),
@@ -128,15 +156,24 @@ export const BUILT_IN_PROVIDER_PACKS: readonly IntegrationProviderPack[] = [
   createGoogleMapsPack(),
   createGoogleTranslatePack(),
   createGoogleVaultPack(),
+  createGranolaPack(),
   createHunterIoPack(),
   createIamPack(),
   createIdentityCenterPack(),
   createIncidentIoPack(),
+  createInfisicalPack(),
+  createInstantlyPack(),
   createJinaPack(),
   createJiraPack(),
   createJiraServiceManagementPack(),
   createJupyterPack(),
+  createKalshiPack(),
+  createLaunchdarklyPack(),
+  createLeadmagicPack(),
+  createLemlistPack(),
   createLinkedInPack(),
+  createLoopsPack(),
+  createMem0Pack(),
   createMicrosoftExcelPack(),
   createMicrosoftPlannerPack(),
   createMicrosoftTeamsPack(),
@@ -151,7 +188,9 @@ export const BUILT_IN_PROVIDER_PACKS: readonly IntegrationProviderPack[] = [
   createPineconePack(),
   createPostgreSqlPack(),
   createPostHogPack(),
+  createProfoundPack(),
   createQdrantPack(),
+  createQuartrPack(),
   createRdsPack(),
   createRedditPack(),
   createRedisPack(),
@@ -160,12 +199,15 @@ export const BUILT_IN_PROVIDER_PACKS: readonly IntegrationProviderPack[] = [
   createSalesforcePack(),
   createSecretsManagerPack(),
   createSendGridPack(),
+  createSentryPack(),
   createSesPack(),
   createSftpPack(),
   createSharePointPack(),
   createShopifyPack(),
+  createSixtyfourAiPack(),
   createSqsPack(),
   createSshPack(),
+  createStagehandPack(),
   createStsPack(),
   createSupabasePack(),
   createTailscalePack(),
@@ -173,10 +215,12 @@ export const BUILT_IN_PROVIDER_PACKS: readonly IntegrationProviderPack[] = [
   createTelegramPack(),
   createTemporalPack(),
   createTextractPack(),
+  createThrivePack(),
   createTrelloPack(),
   createTwilioVoicePack(),
   createTypeformPack(),
   createUpstashPack(),
+  createUptimerobotPack(),
   createVercelPack(),
   createWebflowPack(),
   createWikipediaPack(),
