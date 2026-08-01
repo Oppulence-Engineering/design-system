@@ -545,6 +545,11 @@ export const BUILT_IN_API_KEY_PROVIDER_CONFIGURATIONS = Object.freeze([
     credentialPrefix: "Bearer",
   },
   {
+    integrationId: "langsmith" as const,
+    apiBaseUrl: "https://api.smith.langchain.com",
+    credentialHeader: "x-api-key",
+  },
+  {
     integrationId: "mongodb" as const,
     credentialFields: [{ name: "uri", required: true }],
   },

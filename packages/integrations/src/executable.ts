@@ -87,6 +87,7 @@ export const EXECUTABLE_INTEGRATION_IDS: readonly string[] = [
   "jira-service-management",
   "jupyter",
   "kalshi",
+  "langsmith",
   "launchdarkly",
   "leadmagic",
   "lemlist",

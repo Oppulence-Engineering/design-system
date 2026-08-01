@@ -654,6 +654,7 @@ describe("server API-key runtime", () => {
       "stagehand",
       "thrive",
       "uptimerobot",
+      "langsmith",
       "mongodb",
       "neo4j",
     ]);
@@ -828,8 +829,8 @@ describe("server vendor SDK adapters", () => {
     });
 
     expect(getProviderSdkCoverageReport(registry)).toMatchObject({
-      executableProviders: 134,
-      executableOperations: 2387,
+      executableProviders: 135,
+      executableOperations: 2392,
       executableTriggers: 0,
       hasCompleteExecutionParity: false,
     });

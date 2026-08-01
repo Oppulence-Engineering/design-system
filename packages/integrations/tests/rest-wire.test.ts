@@ -503,6 +503,13 @@ const CASES: ReadonlyArray<{
     path: "/v2/actor-runs/runId-1",
   },
   {
+    // LangSmith ingests a batch on a sub-path of the runs collection.
+    operationId: "langsmith:create-runs-batch",
+    input: {},
+    method: "POST",
+    path: "/api/v1/runs/batch",
+  },
+  {
     operationId: "wikipedia:get-page-summary",
     input: { title: "Rust" },
     method: "GET",

@@ -210,6 +210,7 @@ export * from "./jira";
 export * from "./jira-service-management";
 export * from "./jupyter";
 export * from "./kalshi";
+export * from "./langsmith";
 export * from "./launchdarkly";
 export * from "./leadmagic";
 export * from "./lemlist";

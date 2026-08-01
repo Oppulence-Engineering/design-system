@@ -54,6 +54,7 @@ import { createJiraPack } from "./jira";
 import { createJiraServiceManagementPack } from "./jira-service-management";
 import { createJupyterPack } from "./jupyter";
 import { createKalshiPack } from "./kalshi";
+import { createLangsmithPack } from "./langsmith";
 import { createLaunchdarklyPack } from "./launchdarkly";
 import { createLeadmagicPack } from "./leadmagic";
 import { createLemlistPack } from "./lemlist";
@@ -168,6 +169,7 @@ export const BUILT_IN_PROVIDER_PACKS: readonly IntegrationProviderPack[] = [
   createJiraServiceManagementPack(),
   createJupyterPack(),
   createKalshiPack(),
+  createLangsmithPack(),
   createLaunchdarklyPack(),
   createLeadmagicPack(),
   createLemlistPack(),
