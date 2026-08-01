@@ -51,6 +51,40 @@ Client IDs, client secrets, API keys, service-account keys, account IDs, and
 tenant credentials are deployment data. They are never provider-suite source
 code or catalogue data.
 
+## Provider packs and the coverage gate
+
+Each provider is delivered as a **provider pack**: one module exporting a
+`create<Provider>Pack()` factory that declares every source action and trigger
+it claims, the lane that owns each, and the adapters that execute them. A pack
+is not shippable until `assertProviderPackCoverage()` passes, which enforces
+what this document previously only asserted in prose:
+
+- every source action and trigger is either supported or explicitly deferred
+  with a reason, so a pack cannot silently drop one;
+- an action may use the typed REST lane only with a recorded `sdkReview`
+  naming the SDK and version examined — SDK-first is checked, not trusted;
+- declared coverage matches the adapters actually built, so a pack cannot
+  claim an action it never wires.
+
+`tests/coverage-gate.test.ts` runs that contract across every pack and asserts
+the executable totals. Those numbers are the merge gate for parity work: they
+move only when a provider family lands, and moving them is the reviewable
+statement that it did.
+
+### Current position
+
+| | Providers | Actions | Triggers |
+| --- | ---: | ---: | ---: |
+| Pinned source | 232 | 3,890 | 363 |
+| Executable | 57 | 1,286 | 46 |
+| Remaining | 175 | 2,604 | 317 |
+
+Of the 1,286 executable actions, 1,258 run on a vendor or maintained SDK and
+28 on the typed REST lane — the six actions whose SDKs do not model them
+(Airtable metadata and upsert, Cloudflare zone settings, Vercel Edge Config
+items) plus the 22 Jira Service Management Forms and Assets actions, which
+belong to separate Atlassian products with no SDK anywhere.
+
 ## Delivery order
 
 ### Wave 0 — package and CI foundation

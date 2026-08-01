@@ -448,8 +448,64 @@ they never receive a provider credential.
 
 `getProviderExecutionStrategyReport()` reports the source-wide SDK-first,
 typed-REST, and special-provider plan. It is planning evidence only;
-`getProviderSdkCoverageReport()` is the executable-coverage source of truth,
-and trigger runtime remains separate.
+`getProviderSdkCoverageReport()` is the executable-coverage source of truth.
+
+## Provider packs
+
+A provider pack is one provider's complete delivery unit. It declares which
+source actions and triggers it claims, which lane owns each, and builds the
+adapters that execute them. Provider modules export a
+`create<Provider>Pack()` factory so each keeps its own typed deployment
+configuration behind a uniform contract.
+
+```ts
+import { assertProviderPackCoverage, createJiraPack } from "@oppulence/integrations/server";
+
+// Every pack has a contract test that calls this.
+assertProviderPackCoverage(createJiraPack(), { oauthRuntime });
+```
+
+`assertProviderPackCoverage()` is what makes the delivery rules enforceable
+rather than advisory. It rejects a pack that:
+
+- leaves a source action or trigger with no coverage record;
+- defers one without a reason;
+- reaches the typed REST lane without a recorded `sdkReview` naming the SDK
+  and version examined;
+- claims an action no adapter executes, executes one it never claimed, or
+  declares a lane its adapter does not use.
+
+Issues are collected rather than thrown on first failure, so filling in a new
+provider shows the whole remaining list at once. `tests/coverage-gate.test.ts`
+runs the contract across every pack and asserts the executable totals; those
+numbers move only when a provider family lands.
+
+## Trigger runtime
+
+`createIntegrationTriggerRuntime()` owns the trigger lifecycle a provider
+source cannot own by itself. Sources contribute verification and provider I/O
+in one of three shapes:
+
+- **webhook** — verifies the provider signature against the original request
+  bytes and resolves the owning connection;
+- **poll** — returns events plus a cursor; the runtime enforces the interval
+  and persists the cursor;
+- **subscription** — `subscribe` / `renew` / `unsubscribe`, for providers such
+  as Microsoft Graph whose subscriptions expire.
+
+The runtime owns replay suppression, bounded retries, cleanup on disconnect,
+audit records, and freshness reporting. Delivery keys are recorded before the
+product handler runs, so a concurrent redelivery cannot double-emit, and are
+released when the handler exhausts its attempts so the provider may retry.
+Events carry a safe projection; raw payloads, headers, and credentials never
+reach a product.
+
+`IntegrationTriggerStore` is the product seam for cursor and delivered-key
+persistence, mirroring `IntegrationCredentialVault`.
+`createInMemoryIntegrationTriggerStore()` exists for tests and local
+development; trigger state must survive a restart in production. Pass
+`runtime.listSources()` to `getProviderSdkCoverageReport()` to include trigger
+coverage — omitting it reports zero rather than assuming.
 
 ## Golden journey harness
 
