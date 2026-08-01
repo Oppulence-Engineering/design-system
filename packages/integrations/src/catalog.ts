@@ -56,6 +56,8 @@ const authMethodForSource: Record<
  * pinned baseline is unaffected.
  */
 const SECRET_BEARING_NO_AUTH_PROVIDERS: ReadonlySet<string> = new Set([
+  // Clerk has no OAuth app to register; its backend SDK takes a secret key.
+  "clerk",
   "postgresql",
   "mysql",
   "clickhouse",

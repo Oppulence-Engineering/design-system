@@ -11,6 +11,7 @@ import {
   createCloudFormationPack,
   createCloudflarePack,
   createClickHousePack,
+  createClerkPack,
   createCloudWatchPack,
   createCodePipelinePack,
   createConfluencePack,
@@ -27,6 +28,7 @@ import {
   createMicrosoftTeamsPack,
   createOneDrivePack,
   createOutlookPack,
+  createOktaPack,
   createRdsPack,
   createRedisPack,
   createS3Pack,
@@ -34,6 +36,8 @@ import {
   createSesPack,
   createSftpPack,
   createSshPack,
+  createSupabasePack,
+  createSalesforcePack,
   createSharePointPack,
   createSqsPack,
   createStsPack,
@@ -50,8 +54,8 @@ import {
  * did. The target is the pinned source: 232 providers, 3,890 actions, and 363
  * triggers.
  */
-const EXECUTABLE_PROVIDERS = 64;
-const EXECUTABLE_ACTIONS = 1381;
+const EXECUTABLE_PROVIDERS = 68;
+const EXECUTABLE_ACTIONS = 1499;
 
 const oauthRuntime = {
   async withCredential<T>(
@@ -101,6 +105,7 @@ const PACKS: readonly {
     createJiraPack(),
     createConfluencePack(),
     createJiraServiceManagementPack(),
+    createSalesforcePack(),
   ].map((pack) => ({ pack, context: { oauthRuntime } })),
   ...[
     createCloudflarePack(),
@@ -127,6 +132,9 @@ const PACKS: readonly {
     createSshPack(),
     createSftpPack(),
     createJupyterPack(),
+    createClerkPack(),
+    createOktaPack(),
+    createSupabasePack(),
   ].map((pack) => ({ pack, context: { apiKeyRuntime } })),
 ];
 
@@ -159,9 +167,9 @@ describe("provider parity coverage gate", () => {
       PACKS.map((entry) => entry.pack),
     );
 
-    // 35 providers ship as packs; the other 29 executable providers predate
+    // 39 providers ship as packs; the other 29 executable providers predate
     // the pack contract and are registered directly.
-    expect(report.providers).toBe(35);
+    expect(report.providers).toBe(39);
     expect(report.deferredOperations).toBe(0);
     // Every supported action is owned by exactly one lane.
     expect(report.operations).toBe(
@@ -199,7 +207,7 @@ describe("provider parity coverage gate", () => {
       ),
     );
 
-    expect(supported).toHaveLength(46);
+    expect(supported).toHaveLength(60);
     // Nothing is left unaccounted for: a deferred trigger carries a reason.
     for (const trigger of deferred) {
       expect(trigger.reason?.trim().length ?? 0).toBeGreaterThan(0);
@@ -215,11 +223,11 @@ describe("provider parity coverage gate", () => {
     expect({
       providersRemaining: 232 - EXECUTABLE_PROVIDERS,
       actionsRemaining: sourceActions - EXECUTABLE_ACTIONS,
-      triggersRemaining: 363 - 46,
+      triggersRemaining: 363 - 60,
     }).toEqual({
-      providersRemaining: 168,
-      actionsRemaining: 2509,
-      triggersRemaining: 317,
+      providersRemaining: 164,
+      actionsRemaining: 2391,
+      triggersRemaining: 303,
     });
   });
 });

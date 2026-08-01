@@ -155,6 +155,11 @@ export const BUILT_IN_API_KEY_PROVIDER_CONFIGURATIONS = Object.freeze([
   { integrationId: "cloudwatch" as const },
   { integrationId: "cloudformation" as const },
   { integrationId: "codepipeline" as const },
+  // Vendor SDKs that authenticate with a secret key plus a per-tenant host,
+  // both held in the same encrypted envelope.
+  { integrationId: "clerk" as const },
+  { integrationId: "okta" as const },
+  { integrationId: "supabase" as const },
 ] satisfies readonly ApiKeyProviderConfiguration[]);
 
 export type BuiltInIntegrationApiKeyRuntimeConfig = Omit<

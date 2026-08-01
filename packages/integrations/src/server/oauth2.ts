@@ -1235,3 +1235,46 @@ export function createAtlassianOAuth2Provider(
     },
   };
 }
+
+const SALESFORCE_DEFAULT_SCOPES = [
+  "api",
+  "refresh_token",
+  "offline_access",
+] as const;
+
+export interface SalesforceOAuth2ProviderInput {
+  clientId: string;
+  clientSecret: string;
+  redirectUri: string;
+  /**
+   * Login host. Production and sandbox differ, and a customer may use a
+   * My Domain host, so this is deployment configuration rather than a
+   * hard-coded endpoint.
+   */
+  loginHost?: string;
+  scopes?: readonly string[];
+}
+
+/**
+ * Salesforce OAuth registration for the package-owned jsforce adapter. The
+ * per-org instance URL is returned at authorization time and stored by the
+ * product on its connection row; the adapter reads it from the credential.
+ */
+export function createSalesforceOAuth2Provider(
+  input: SalesforceOAuth2ProviderInput,
+): OAuth2ProviderConfiguration {
+  const host = input.loginHost ?? "https://login.salesforce.com";
+  validateSecureUrl(host);
+  return {
+    integrationId: "salesforce",
+    authorizationEndpoint: `${host}/services/oauth2/authorize`,
+    tokenEndpoint: `${host}/services/oauth2/token`,
+    clientId: input.clientId,
+    clientSecret: input.clientSecret,
+    redirectUri: input.redirectUri,
+    scopes: input.scopes ?? [...SALESFORCE_DEFAULT_SCOPES],
+    // Salesforce returns the org's instance URL alongside the token; the
+    // product persists it as non-secret connection state.
+    callbackMetadata: { instanceUrl: "instance_url" },
+  };
+}

@@ -256,7 +256,12 @@ export function invokeSdkMethod(
 ): Promise<unknown> {
   let target: unknown = client;
   for (const segment of request.path.slice(0, -1)) {
-    if (!target || typeof target !== "object") {
+    // A resource group may itself be callable — several SDKs expose one — so
+    // a function is as valid an intermediate as a plain object.
+    if (
+      !target ||
+      (typeof target !== "object" && typeof target !== "function")
+    ) {
       throw new IntegrationProviderSdkError(
         "INTEGRATION_PROVIDER_SDK_CONFIGURATION_INVALID",
       );
@@ -264,7 +269,7 @@ export function invokeSdkMethod(
     target = (target as Record<string, unknown>)[segment];
   }
   const method =
-    target && typeof target === "object"
+    target && (typeof target === "object" || typeof target === "function")
       ? (target as Record<string, unknown>)[request.path.at(-1) ?? ""]
       : undefined;
   if (typeof method !== "function") {

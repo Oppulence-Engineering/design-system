@@ -268,7 +268,7 @@ const STRATEGY_OVERRIDES: Readonly<Record<string, StrategyOverride>> = {
     kind: "vendor_sdk_candidate",
     packageName: "@temporalio/client",
   },
-  trello: { kind: "maintained_sdk_candidate", packageName: "@trello/client" },
+  trello: { kind: "maintained_sdk_candidate", packageName: "trello.js" },
   "twilio-sms": { kind: "vendor_sdk_candidate", packageName: "twilio" },
   "twilio-voice": { kind: "vendor_sdk_candidate", packageName: "twilio" },
   upstash: {
@@ -279,8 +279,10 @@ const STRATEGY_OVERRIDES: Readonly<Record<string, StrategyOverride>> = {
   x: { kind: "maintained_sdk_candidate", packageName: "twitter-api-v2" },
   youtube: { kind: "installed_vendor_sdk", packageName: "googleapis" },
   zendesk: {
-    kind: "vendor_sdk_candidate",
-    packageName: "@zendesk/zendesk-api-client",
+    // Zendesk publishes no maintained Node SDK; node-zendesk is the actively
+    // maintained ecosystem client.
+    kind: "maintained_sdk_candidate",
+    packageName: "node-zendesk",
   },
 };
 

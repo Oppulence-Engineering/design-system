@@ -69,14 +69,14 @@ describe("Sim Studio parity baseline", () => {
       byKind: {
         installed_vendor_sdk: { providers: 32, operations: 887, triggers: 63 },
         vendor_sdk_candidate: {
-          providers: 45,
-          operations: 609,
-          triggers: 32,
+          providers: 44,
+          operations: 583,
+          triggers: 27,
         },
         maintained_sdk_candidate: {
-          providers: 8,
-          operations: 261,
-          triggers: 52,
+          providers: 9,
+          operations: 287,
+          triggers: 57,
         },
         typed_rest_candidate: {
           providers: 122,

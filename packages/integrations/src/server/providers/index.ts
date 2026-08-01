@@ -49,6 +49,12 @@ import {
   createSftpPack,
   createSshPack,
 } from "./protocol";
+import {
+  createClerkPack,
+  createOktaPack,
+  createSalesforcePack,
+  createSupabasePack,
+} from "./vendor";
 import { createAsanaProviderSdk } from "./asana";
 import { createBrexProviderSdk } from "./brex";
 import {
@@ -134,6 +140,7 @@ export * from "./microsoft-graph";
 export * from "./atlassian";
 export * from "./aws";
 export * from "./protocol";
+export * from "./vendor";
 
 export interface BuiltInProviderSdkRegistryConfig {
   /**
@@ -223,6 +230,9 @@ export function createBuiltInProviderSdkRegistry(
         createSshPack(),
         createSftpPack(),
         createJupyterPack(),
+        createClerkPack(),
+        createOktaPack(),
+        createSupabasePack(),
       ].flatMap((pack) => pack.create({ apiKeyRuntime: config.apiKeyRuntime })),
     );
   }
@@ -259,6 +269,7 @@ export function createBuiltInProviderSdkRegistry(
       createJiraServiceManagementRestProviderSdk({
         oauthRuntime: config.oauthRuntime,
       }),
+      ...createSalesforcePack().create({ oauthRuntime: config.oauthRuntime }),
       createAsanaProviderSdk({ oauthRuntime: config.oauthRuntime }),
       createDropboxProviderSdk({ oauthRuntime: config.oauthRuntime }),
     );

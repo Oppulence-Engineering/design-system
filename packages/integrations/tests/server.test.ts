@@ -482,6 +482,9 @@ describe("server API-key runtime", () => {
       "cloudwatch",
       "cloudformation",
       "codepipeline",
+      "clerk",
+      "okta",
+      "supabase",
     ]);
   });
 
@@ -654,8 +657,8 @@ describe("server vendor SDK adapters", () => {
     });
 
     expect(getProviderSdkCoverageReport(registry)).toMatchObject({
-      executableProviders: 64,
-      executableOperations: 1381,
+      executableProviders: 68,
+      executableOperations: 1499,
       executableTriggers: 0,
       hasCompleteExecutionParity: false,
     });
