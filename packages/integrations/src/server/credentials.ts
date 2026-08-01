@@ -21,10 +21,22 @@ export const IntegrationOAuthCredentialSchema = z
  * Stored only in the server-side encrypted envelope. API-key provider SDKs
  * receive this value directly from the vault; it never belongs in a browser
  * connection projection or public manifest.
+ *
+ * `fields` carries the additional secrets a provider needs alongside its
+ * primary key — AWS, for example, authenticates with an access key ID and a
+ * secret access key. It defaults to empty, so envelopes written before this
+ * field existed still decrypt, and only providers that declare
+ * `credentialFields` may write into it.
  */
 export const IntegrationApiKeyCredentialSchema = z
   .object({
     apiKey: z.string().min(1).max(16_384),
+    fields: z
+      .record(z.string().min(1).max(64), z.string().min(1).max(16_384))
+      .refine((value) => Object.keys(value).length <= 8, {
+        message: "A credential may carry at most eight additional fields.",
+      })
+      .default({}),
   })
   .strict();
 
@@ -80,6 +92,10 @@ export type IntegrationOAuthCredential = z.infer<
   typeof IntegrationOAuthCredentialSchema
 >;
 export type IntegrationApiKeyCredential = z.infer<
+  typeof IntegrationApiKeyCredentialSchema
+>;
+/** What a caller may supply; `fields` is filled in with its default. */
+export type IntegrationApiKeyCredentialInput = z.input<
   typeof IntegrationApiKeyCredentialSchema
 >;
 export type PlaidConnectionLinkCredential = z.infer<
@@ -346,7 +362,7 @@ export async function decryptIntegrationCredential(input: {
 
 export async function encryptIntegrationApiKeyCredential(input: {
   reference: IntegrationCredentialReference;
-  credential: IntegrationApiKeyCredential;
+  credential: IntegrationApiKeyCredentialInput;
   keyring: IntegrationCredentialKeyring;
   now?: Date;
 }): Promise<EncryptedIntegrationCredential> {

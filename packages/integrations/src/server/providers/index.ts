@@ -23,6 +23,23 @@ import {
   createJiraServiceManagementProviderSdk,
   createJiraServiceManagementRestProviderSdk,
 } from "./atlassian";
+import {
+  createAppConfigPack,
+  createAthenaPack,
+  createCloudFormationPack,
+  createCloudWatchPack,
+  createCodePipelinePack,
+  createDynamoDbPack,
+  createIamPack,
+  createIdentityCenterPack,
+  createRdsPack,
+  createS3Pack,
+  createSecretsManagerPack,
+  createSesPack,
+  createSqsPack,
+  createStsPack,
+  createTextractPack,
+} from "./aws";
 import { createAsanaProviderSdk } from "./asana";
 import { createBrexProviderSdk } from "./brex";
 import {
@@ -106,6 +123,7 @@ export * from "./plaid";
 export * from "./merge";
 export * from "./microsoft-graph";
 export * from "./atlassian";
+export * from "./aws";
 
 export interface BuiltInProviderSdkRegistryConfig {
   /**
@@ -168,6 +186,25 @@ export function createBuiltInProviderSdkRegistry(
       createYouTubeProviderSdk({ apiKeyRuntime: config.apiKeyRuntime }),
       createResendProviderSdk({ apiKeyRuntime: config.apiKeyRuntime }),
       createBrexProviderSdk({ apiKeyRuntime: config.apiKeyRuntime }),
+      // AWS providers are delivered as packs; each builds its own adapter
+      // from the shared executor and the composite key credential.
+      ...[
+        createS3Pack(),
+        createDynamoDbPack(),
+        createSqsPack(),
+        createRdsPack(),
+        createSesPack(),
+        createIamPack(),
+        createStsPack(),
+        createIdentityCenterPack(),
+        createSecretsManagerPack(),
+        createTextractPack(),
+        createAppConfigPack(),
+        createAthenaPack(),
+        createCloudWatchPack(),
+        createCloudFormationPack(),
+        createCodePipelinePack(),
+      ].flatMap((pack) => pack.create({ apiKeyRuntime: config.apiKeyRuntime })),
     );
   }
   if (config.oauthRuntime) {

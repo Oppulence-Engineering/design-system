@@ -54,6 +54,10 @@ const STRATEGY_OVERRIDES: Readonly<Record<string, StrategyOverride>> = {
     kind: "vendor_sdk_candidate",
     packageName: "@aws-sdk/client-dynamodb",
   },
+  "amazon-rds": {
+    kind: "vendor_sdk_candidate",
+    packageName: "@aws-sdk/client-rds-data",
+  },
   "amazon-sqs": {
     kind: "vendor_sdk_candidate",
     packageName: "@aws-sdk/client-sqs",
@@ -119,7 +123,10 @@ const STRATEGY_OVERRIDES: Readonly<Record<string, StrategyOverride>> = {
     kind: "vendor_sdk_candidate",
     packageName: "@aws-sdk/client-codepipeline",
   },
-  confluence: { kind: "maintained_sdk_candidate", packageName: "jira.js" },
+  confluence: {
+    kind: "maintained_sdk_candidate",
+    packageName: "confluence.js",
+  },
   datadog: {
     kind: "vendor_sdk_candidate",
     packageName: "@datadog/datadog-api-client",

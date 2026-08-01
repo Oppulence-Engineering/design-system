@@ -53,9 +53,12 @@ function apiKeyTransport(response: () => Response) {
     runtime: {
       async withCredential<T>(
         _reference: unknown,
-        operation: (credential: { readonly apiKey: string }) => Promise<T>,
+        operation: (credential: {
+          readonly apiKey: string;
+          readonly fields: Readonly<Record<string, string>>;
+        }) => Promise<T>,
       ): Promise<T> {
-        return operation({ apiKey: "key" });
+        return operation({ apiKey: "key", fields: {} });
       },
       async request(input: { reference: unknown; request: RecordedRequest }) {
         requests.push(input.request);

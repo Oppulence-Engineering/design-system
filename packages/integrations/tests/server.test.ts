@@ -286,7 +286,30 @@ describe("server credential vault", () => {
         credential: encrypted,
         keyring,
       }),
-    ).resolves.toEqual({ apiKey: "secret-api-key" });
+    ).resolves.toEqual({ apiKey: "secret-api-key", fields: {} });
+
+    // A provider needing more than one secret, such as AWS, carries the rest
+    // in the same envelope. An envelope written before `fields` existed still
+    // decrypts, which is why it defaults rather than being required.
+    const composite = await encryptIntegrationApiKeyCredential({
+      reference,
+      credential: {
+        apiKey: "AKIAEXAMPLE",
+        fields: { secretAccessKey: "wJalr-secret", sessionToken: "FQoGZ" },
+      },
+      keyring,
+    });
+    expect(JSON.stringify(composite)).not.toContain("wJalr-secret");
+    await expect(
+      decryptIntegrationApiKeyCredential({
+        reference,
+        credential: composite,
+        keyring,
+      }),
+    ).resolves.toEqual({
+      apiKey: "AKIAEXAMPLE",
+      fields: { secretAccessKey: "wJalr-secret", sessionToken: "FQoGZ" },
+    });
 
     await expect(
       decryptIntegrationApiKeyCredential({
@@ -588,7 +611,7 @@ describe("server vendor SDK adapters", () => {
     const registry = createBuiltInProviderSdkRegistry({
       apiKeyRuntime: {
         async withCredential(_reference, operation) {
-          return operation({ apiKey: "key" });
+          return operation({ apiKey: "key", fields: {} });
         },
         async request() {
           return Response.json({});
@@ -609,8 +632,8 @@ describe("server vendor SDK adapters", () => {
     });
 
     expect(getProviderSdkCoverageReport(registry)).toMatchObject({
-      executableProviders: 42,
-      executableOperations: 1113,
+      executableProviders: 57,
+      executableOperations: 1286,
       executableTriggers: 0,
       hasCompleteExecutionParity: false,
     });
@@ -648,7 +671,7 @@ describe("server vendor SDK adapters", () => {
     const adapter = createStripeProviderSdk({
       apiKeyRuntime: {
         async withCredential(_reference, operation) {
-          return operation({ apiKey: "secret-api-key" });
+          return operation({ apiKey: "secret-api-key", fields: {} });
         },
       },
       clientFactory: clientFactory as never,
@@ -683,7 +706,7 @@ describe("server vendor SDK adapters", () => {
     const adapter = createStripeProviderSdk({
       apiKeyRuntime: {
         async withCredential(_reference, operation) {
-          return operation({ apiKey: "must-not-be-used" });
+          return operation({ apiKey: "must-not-be-used", fields: {} });
         },
       },
       clientFactory: (() => ({})) as never,
@@ -935,7 +958,7 @@ describe("server vendor SDK adapters", () => {
     const adapter = createGitHubProviderSdk({
       apiKeyRuntime: {
         async withCredential(_reference, operation) {
-          return operation({ apiKey: "github-api-key" });
+          return operation({ apiKey: "github-api-key", fields: {} });
         },
       },
       clientFactory: ((apiKey: string) => {
@@ -1049,7 +1072,10 @@ describe("server vendor SDK adapters", () => {
     const adapter = createGitLabProviderSdk({
       apiKeyRuntime: {
         async withCredential(_reference, operation) {
-          return operation({ apiKey: "gitlab-personal-access-token" });
+          return operation({
+            apiKey: "gitlab-personal-access-token",
+            fields: {},
+          });
         },
       },
       clientFactory: clientFactory as never,
@@ -1146,7 +1172,7 @@ describe("server vendor SDK adapters", () => {
       createGitLabProviderSdk({
         apiKeyRuntime: {
           async withCredential(_reference, operation) {
-            return operation({ apiKey: "must-not-be-used" });
+            return operation({ apiKey: "must-not-be-used", fields: {} });
           },
         },
         host: "http://gitlab.example.test",
@@ -1187,7 +1213,7 @@ describe("server vendor SDK adapters", () => {
     const adapter = createCloudflareProviderSdk({
       apiKeyRuntime: {
         async withCredential(_reference, operation) {
-          return operation({ apiKey: "cloudflare-api-token" });
+          return operation({ apiKey: "cloudflare-api-token", fields: {} });
         },
       },
       clientFactory: ((apiKey: string) => {
@@ -1304,7 +1330,7 @@ describe("server vendor SDK adapters", () => {
     const adapter = createElevenLabsProviderSdk({
       apiKeyRuntime: {
         async withCredential(_reference, operation) {
-          return operation({ apiKey: "elevenlabs-api-key" });
+          return operation({ apiKey: "elevenlabs-api-key", fields: {} });
         },
       },
       clientFactory: ((apiKey: string) => {
@@ -1400,7 +1426,7 @@ describe("server vendor SDK adapters", () => {
     const adapter = createFirecrawlProviderSdk({
       apiKeyRuntime: {
         async withCredential(_reference, operation) {
-          return operation({ apiKey: "firecrawl-api-key" });
+          return operation({ apiKey: "firecrawl-api-key", fields: {} });
         },
       },
       clientFactory: ((apiKey: string) => {
@@ -1763,7 +1789,7 @@ describe("server vendor SDK adapters", () => {
     const adapter = createMailgunProviderSdk({
       apiKeyRuntime: {
         async withCredential(_reference, operation) {
-          return operation({ apiKey: "mailgun-api-key" });
+          return operation({ apiKey: "mailgun-api-key", fields: {} });
         },
       },
       apiUrl: "https://api.eu.mailgun.net",
@@ -1881,7 +1907,7 @@ describe("server vendor SDK adapters", () => {
     const adapter = createIntercomProviderSdk({
       apiKeyRuntime: {
         async withCredential(_reference, operation) {
-          return operation({ apiKey: "intercom-access-token" });
+          return operation({ apiKey: "intercom-access-token", fields: {} });
         },
       },
       clientFactory: clientFactory as never,
@@ -2151,7 +2177,7 @@ describe("server vendor SDK adapters", () => {
     const adapter = createMailchimpProviderSdk({
       apiKeyRuntime: {
         async withCredential(_reference, operation) {
-          return operation({ apiKey: "mailchimp-key-us19" });
+          return operation({ apiKey: "mailchimp-key-us19", fields: {} });
         },
       },
       clientFactory: ((apiKey: string) => {
@@ -2263,7 +2289,7 @@ describe("server vendor SDK adapters", () => {
     const adapter = createMailchimpProviderSdk({
       apiKeyRuntime: {
         async withCredential(_reference, operation) {
-          return operation({ apiKey: "must-not-be-used-us1" });
+          return operation({ apiKey: "must-not-be-used-us1", fields: {} });
         },
       },
     });
@@ -2294,7 +2320,7 @@ describe("server vendor SDK adapters", () => {
     const adapter = createVercelProviderSdk({
       apiKeyRuntime: {
         async withCredential(_reference, operation) {
-          return operation({ apiKey: "vercel-api-key" });
+          return operation({ apiKey: "vercel-api-key", fields: {} });
         },
       },
       clientFactory: ((apiKey: string) => {
@@ -2455,7 +2481,7 @@ describe("server vendor SDK adapters", () => {
     const adapter = createVercelProviderSdk({
       apiKeyRuntime: {
         async withCredential(_reference, operation) {
-          return operation({ apiKey: "must-not-be-used" });
+          return operation({ apiKey: "must-not-be-used", fields: {} });
         },
       },
     });
@@ -2488,7 +2514,7 @@ describe("server vendor SDK adapters", () => {
     const adapter = createSquareProviderSdk({
       apiKeyRuntime: {
         async withCredential(_reference, operation) {
-          return operation({ apiKey: "square-api-key" });
+          return operation({ apiKey: "square-api-key", fields: {} });
         },
       },
       clientFactory: ((apiKey: string) => {
@@ -2607,7 +2633,7 @@ describe("server vendor SDK adapters", () => {
     const adapter = createSquareProviderSdk({
       apiKeyRuntime: {
         async withCredential(_reference, operation) {
-          return operation({ apiKey: "must-not-be-used" });
+          return operation({ apiKey: "must-not-be-used", fields: {} });
         },
       },
     });
@@ -3996,7 +4022,7 @@ describe("server vendor SDK adapters", () => {
     const adapter = createGoogleBooksProviderSdk({
       apiKeyRuntime: {
         async withCredential(_reference, operation) {
-          return operation({ apiKey: "google-books-api-key" });
+          return operation({ apiKey: "google-books-api-key", fields: {} });
         },
       },
       clientFactory: ((apiKey: string) => {
@@ -4057,7 +4083,7 @@ describe("server vendor SDK adapters", () => {
     const adapter = createGoogleBooksProviderSdk({
       apiKeyRuntime: {
         async withCredential(_reference, operation) {
-          return operation({ apiKey: "must-not-be-used" });
+          return operation({ apiKey: "must-not-be-used", fields: {} });
         },
       },
     });
@@ -4090,7 +4116,7 @@ describe("server vendor SDK adapters", () => {
     const adapter = createYouTubeProviderSdk({
       apiKeyRuntime: {
         async withCredential(_reference, operation) {
-          return operation({ apiKey: "youtube-api-key" });
+          return operation({ apiKey: "youtube-api-key", fields: {} });
         },
       },
       clientFactory: ((apiKey: string) => {
@@ -4155,7 +4181,7 @@ describe("server vendor SDK adapters", () => {
     const adapter = createYouTubeProviderSdk({
       apiKeyRuntime: {
         async withCredential(_reference, operation) {
-          return operation({ apiKey: "must-not-be-used" });
+          return operation({ apiKey: "must-not-be-used", fields: {} });
         },
       },
     });
@@ -4188,7 +4214,7 @@ describe("server vendor SDK adapters", () => {
     const adapter = createResendProviderSdk({
       apiKeyRuntime: {
         async withCredential(_reference, operation) {
-          return operation({ apiKey: "resend-api-key" });
+          return operation({ apiKey: "resend-api-key", fields: {} });
         },
       },
       clientFactory: ((apiKey: string) => {
@@ -4280,7 +4306,7 @@ describe("server vendor SDK adapters", () => {
     const adapter = createResendProviderSdk({
       apiKeyRuntime: {
         async withCredential(_reference, operation) {
-          return operation({ apiKey: "must-not-be-used" });
+          return operation({ apiKey: "must-not-be-used", fields: {} });
         },
       },
     });
@@ -6059,9 +6085,12 @@ describe("server financial and aggregation SDK adapters", () => {
     const apiKeyRuntime = {
       async withCredential<T>(
         _reference: IntegrationCredentialReference,
-        operation: (credential: { readonly apiKey: string }) => Promise<T>,
+        operation: (credential: {
+          readonly apiKey: string;
+          readonly fields: Readonly<Record<string, string>>;
+        }) => Promise<T>,
       ) {
-        return operation({ apiKey: "brex-token" });
+        return operation({ apiKey: "brex-token", fields: {} });
       },
     };
     const oauthRuntime = {

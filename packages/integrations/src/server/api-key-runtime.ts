@@ -175,7 +175,10 @@ export interface IntegrationApiKeyRuntime {
    */
   withCredential<T>(
     reference: IntegrationCredentialReference,
-    operation: (credential: { readonly apiKey: string }) => Promise<T>,
+    operation: (credential: {
+      readonly apiKey: string;
+      readonly fields: Readonly<Record<string, string>>;
+    }) => Promise<T>,
   ): Promise<T>;
   revoke(reference: IntegrationCredentialReference): Promise<void>;
 }

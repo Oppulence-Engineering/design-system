@@ -31,7 +31,7 @@ export interface ApiKeyProviderRequest {
 export interface ApiKeyProviderSdk {
   configuration: ApiKeyProviderConfiguration;
   request(
-    credential: IntegrationApiKeyCredential,
+    credential: Pick<IntegrationApiKeyCredential, "apiKey">,
     request: ApiKeyProviderRequest,
   ): Promise<Response>;
 }
@@ -122,7 +122,7 @@ async function withTimeout<T>(
 }
 
 function credentialValue(
-  credential: IntegrationApiKeyCredential,
+  credential: Pick<IntegrationApiKeyCredential, "apiKey">,
   prefix: string | undefined,
 ): string {
   return prefix ? `${prefix} ${credential.apiKey}` : credential.apiKey;
