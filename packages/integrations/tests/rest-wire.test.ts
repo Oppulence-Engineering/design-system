@@ -128,6 +128,60 @@ const CASES: ReadonlyArray<{
     path: "/v2/collections/abc123/items",
   },
   {
+    operationId: "clickup:get-task",
+    input: { taskId: "9hz" },
+    method: "GET",
+    path: "/api/v2/task/9hz",
+  },
+  {
+    // Tasks are created under a list, but addressed directly afterwards.
+    operationId: "clickup:create-task",
+    input: { listId: "901", name: "Ship it" },
+    method: "POST",
+    path: "/api/v2/list/901/task",
+  },
+  {
+    // The workspace-wide filter is team-scoped and still spells folders
+    // "project_ids", which is the easiest parameter here to get wrong.
+    operationId: "clickup:search-tasks",
+    input: { teamId: "42", folderIds: ["7"] },
+    method: "GET",
+    path: "/api/v2/team/42/task?project_ids%5B%5D=7",
+  },
+  {
+    // Folderless lists hang off the space, not a folder.
+    operationId: "clickup:get-lists",
+    input: { spaceId: "2" },
+    method: "GET",
+    path: "/api/v2/space/2/list",
+  },
+  {
+    operationId: "clickup:create-list",
+    input: { folderId: "7", name: "Backlog" },
+    method: "POST",
+    path: "/api/v2/folder/7/list",
+  },
+  {
+    // Checklist items are nested under their checklist, not under the task.
+    operationId: "clickup:update-checklist-item",
+    input: { checklistId: "cl1", checklistItemId: "ci2", resolved: true },
+    method: "PUT",
+    path: "/api/v2/checklist/cl1/checklist_item/ci2",
+  },
+  {
+    operationId: "clickup:start-timer",
+    input: { teamId: "42" },
+    method: "POST",
+    path: "/api/v2/team/42/time_entries/start",
+  },
+  {
+    // The tag name is a path segment, so a name with a space must be encoded.
+    operationId: "clickup:add-tag-to-task",
+    input: { taskId: "9hz", tagName: "needs review" },
+    method: "POST",
+    path: "/api/v2/task/9hz/tag/needs%20review",
+  },
+  {
     operationId: "wikipedia:get-page-summary",
     input: { title: "Rust" },
     method: "GET",

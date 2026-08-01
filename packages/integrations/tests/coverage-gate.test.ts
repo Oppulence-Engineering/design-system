@@ -16,8 +16,8 @@ import {
  * did. The target is the pinned source: 232 providers, 3,890 actions, and 363
  * triggers.
  */
-const EXECUTABLE_PROVIDERS = 108;
-const EXECUTABLE_ACTIONS = 1984;
+const EXECUTABLE_PROVIDERS = 109;
+const EXECUTABLE_ACTIONS = 2021;
 
 const oauthRuntime = {
   async withCredential<T>(
@@ -116,14 +116,15 @@ describe("provider parity coverage gate", () => {
   test("declared pack coverage matches what the registry executes", () => {
     const report = getProviderPackCoverageReport(BUILT_IN_PROVIDER_PACKS);
 
-    // 79 providers ship as packs; the other 29 executable providers predate
+    // 80 providers ship as packs; the other 29 executable providers predate
     // the pack contract and are registered directly.
-    expect(report.providers).toBe(79);
-    // Every deferral is the same shape: an action whose endpoint lives on a
+    expect(report.providers).toBe(80);
+    // Seven deferrals are the same shape: an action whose endpoint lives on a
     // host this lane cannot reach, because a provider resolves all of its
     // actions against one host. Google Maps has five such APIs, PagerDuty's
-    // Events v2 is a sixth, and Jina's search host is the seventh.
-    expect(report.deferredOperations).toBe(7);
+    // Events v2 is a sixth, and Jina's search host is the seventh. The eighth
+    // is ClickUp's attachment upload, which is multipart rather than JSON.
+    expect(report.deferredOperations).toBe(8);
     // Every supported action is owned by exactly one lane.
     expect(report.operations).toBe(
       report.byLane.sdk.operations +
@@ -131,9 +132,9 @@ describe("provider parity coverage gate", () => {
         report.byLane.special.operations,
     );
     // Typed REST is the exception, not the default: 6 gap actions, the 22
-    // Jira Service Management Forms and Assets actions, AppSheet's 4, and
-    // the 10 Cal.com actions its own SDK does not implement.
-    expect(report.byLane.typed_rest.operations).toBe(179);
+    // Jira Service Management Forms and Assets actions, AppSheet's 4, the
+    // 10 Cal.com actions its own SDK does not implement, and ClickUp's 37.
+    expect(report.byLane.typed_rest.operations).toBe(216);
     // The special lane carries the seven protocol providers.
     expect(report.byLane.special.operations).toBe(108);
   });
@@ -143,7 +144,7 @@ describe("provider parity coverage gate", () => {
       pack.coverage.filter((action) => action.lane === "typed_rest"),
     );
 
-    expect(restActions).toHaveLength(179);
+    expect(restActions).toHaveLength(216);
     for (const action of restActions) {
       expect(action.sdkReview?.trim().length ?? 0).toBeGreaterThan(0);
     }
@@ -179,8 +180,8 @@ describe("provider parity coverage gate", () => {
       actionsRemaining: sourceActions - EXECUTABLE_ACTIONS,
       triggersRemaining: 363 - 60,
     }).toEqual({
-      providersRemaining: 124,
-      actionsRemaining: 1906,
+      providersRemaining: 123,
+      actionsRemaining: 1869,
       triggersRemaining: 303,
     });
   });

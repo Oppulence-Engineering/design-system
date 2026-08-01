@@ -21,6 +21,7 @@ import { createCalComPack } from "./cal-com";
 import { createCalendlyPack } from "./calendly";
 import { createClerkPack } from "./clerk";
 import { createClickHousePack } from "./clickhouse";
+import { createClickUpPack } from "./clickup";
 import { createCloudflarePack } from "./cloudflare";
 import { createCloudFormationPack } from "./cloudformation";
 import { createCloudWatchPack } from "./cloudwatch";
@@ -104,6 +105,7 @@ export const BUILT_IN_PROVIDER_PACKS: readonly IntegrationProviderPack[] = [
   createCalendlyPack(),
   createClerkPack(),
   createClickHousePack(),
+  createClickUpPack(),
   createCloudFormationPack(),
   createCloudWatchPack(),
   createCloudflarePack(),

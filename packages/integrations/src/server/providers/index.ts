@@ -158,6 +158,7 @@ export * from "./cal-com";
 export * from "./calendly";
 export * from "./clerk";
 export * from "./clickhouse";
+export * from "./clickup";
 export * from "./cloudflare";
 export * from "./cloudformation";
 export * from "./cloudwatch";
