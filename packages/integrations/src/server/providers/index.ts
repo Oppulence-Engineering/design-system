@@ -253,6 +253,7 @@ export * from "./trello";
 export * from "./twilio-voice";
 export * from "./typeform";
 export * from "./upstash";
+export * from "./tailscale";
 export * from "./vercel";
 export * from "./webflow";
 export * from "./wikipedia";

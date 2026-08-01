@@ -182,6 +182,53 @@ const CASES: ReadonlyArray<{
     path: "/api/v2/task/9hz/tag/needs%20review",
   },
   {
+    // Devices are listed per tailnet but addressed globally afterwards, and
+    // "-" is the documented alias for the credential's own tailnet.
+    operationId: "tailscale:list-devices",
+    input: {},
+    method: "GET",
+    path: "/api/v2/tailnet/-/devices",
+  },
+  {
+    operationId: "tailscale:get-device",
+    input: { deviceId: "n123CNTRL" },
+    method: "GET",
+    path: "/api/v2/device/n123CNTRL",
+  },
+  {
+    operationId: "tailscale:authorize-device",
+    input: { deviceId: "n123CNTRL", authorized: true },
+    method: "POST",
+    path: "/api/v2/device/n123CNTRL/authorized",
+  },
+  {
+    // The DNS routes are lowercase and unseparated: "searchpaths", not
+    // "search-paths" or "searchPaths".
+    operationId: "tailscale:get-dns-search-paths",
+    input: { tailnet: "example.com" },
+    method: "GET",
+    path: "/api/v2/tailnet/example.com/dns/searchpaths",
+  },
+  {
+    // Users are acted on by sub-path, including deletion.
+    operationId: "tailscale:delete-user",
+    input: { userId: "12345" },
+    method: "POST",
+    path: "/api/v2/users/12345/delete",
+  },
+  {
+    operationId: "tailscale:get-auth-key",
+    input: { keyId: "k123CNTRL" },
+    method: "GET",
+    path: "/api/v2/tailnet/-/keys/k123CNTRL",
+  },
+  {
+    operationId: "tailscale:set-acl",
+    input: { policy: { acls: [] } },
+    method: "POST",
+    path: "/api/v2/tailnet/-/acl",
+  },
+  {
     operationId: "wikipedia:get-page-summary",
     input: { title: "Rust" },
     method: "GET",

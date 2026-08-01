@@ -67,6 +67,7 @@ import { createSharePointPack } from "./sharepoint";
 import { createShopifyPack } from "./shopify";
 import { createSshPack } from "./ssh";
 import { createSupabasePack } from "./supabase";
+import { createTailscalePack } from "./tailscale";
 import { createTavilyPack } from "./tavily";
 import { createTelegramPack } from "./telegram";
 import { createTemporalPack } from "./temporal";
@@ -159,6 +160,7 @@ export const BUILT_IN_PROVIDER_PACKS: readonly IntegrationProviderPack[] = [
   createSshPack(),
   createStsPack(),
   createSupabasePack(),
+  createTailscalePack(),
   createTavilyPack(),
   createTelegramPack(),
   createTemporalPack(),
