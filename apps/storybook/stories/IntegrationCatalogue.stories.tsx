@@ -167,3 +167,46 @@ export const ConnectionDetailSheet: Story = {
     ).toBeVisible();
   },
 };
+
+/**
+ * Logos come from Simple Icons, which covers roughly half the catalogue and
+ * none of the B2B long tail. Anything without a mark gets a tinted monogram,
+ * so a row never renders a gap where a logo should be.
+ */
+export const LogosAndMonograms: Story = {
+  args: {
+    directory: {
+      product: "eigenn",
+      // Three with a real brand mark, three without.
+      entries: directory.entries.filter((entry) =>
+        [
+          "github",
+          "slack",
+          "stripe",
+          "attio",
+          "rocketlane",
+          "sixtyfour-ai",
+        ].includes(entry.integration.id),
+      ),
+    },
+    detailsById,
+    onAction: fn(),
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const brand = canvasElement.querySelectorAll(
+      '[data-integration-logo="brand"]',
+    );
+    const monogram = canvasElement.querySelectorAll(
+      '[data-integration-logo="monogram"]',
+    );
+    await expect(brand.length).toBe(3);
+    await expect(monogram.length).toBe(3);
+
+    // The monogram carries initials, and the mark stays decorative: the
+    // provider name beside it is what a screen reader announces.
+    await expect(canvas.getByText("RO")).toBeVisible();
+    await expect(brand[0]).toHaveAttribute("aria-hidden", "true");
+    await expect(monogram[0]).toHaveAttribute("aria-hidden", "true");
+  },
+};

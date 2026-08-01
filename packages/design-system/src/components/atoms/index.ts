@@ -31,3 +31,4 @@ export * from "./text-effect";
 export * from "./text-shimmer";
 export * from "./textarea";
 export * from "./toggle";
+export * from "./integration-logo";

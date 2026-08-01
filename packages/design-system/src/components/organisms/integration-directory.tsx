@@ -21,6 +21,7 @@ import type {
 
 import { Button } from "../atoms/button";
 import { Badge } from "../atoms/badge";
+import { IntegrationLogo } from "../atoms/integration-logo";
 import {
   Sheet,
   SheetContent,
@@ -269,11 +270,17 @@ export function IntegrationCard({
   return (
     <article className="border-border bg-card flex min-h-48 flex-col gap-4 rounded-xl border p-4 shadow-sm">
       <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0 space-y-1">
-          <h3 className="truncate font-medium">{entry.integration.name}</h3>
-          <p className="text-muted-foreground text-sm">
-            {entry.integration.summary}
-          </p>
+        <div className="flex min-w-0 gap-3">
+          <IntegrationLogo
+            integrationId={entry.integration.id}
+            name={entry.integration.name}
+          />
+          <div className="min-w-0 space-y-1">
+            <h3 className="truncate font-medium">{entry.integration.name}</h3>
+            <p className="text-muted-foreground text-sm">
+              {entry.integration.summary}
+            </p>
+          </div>
         </div>
         <IntegrationStatusBadge
           freshness={connection?.sourceFreshness}
@@ -433,7 +440,14 @@ export function IntegrationDetailPanel({
       <SheetContent showCloseButton={false} side="right">
         <SheetHeader>
           <div className="flex items-start justify-between gap-3 pr-2">
-            <SheetTitle>{entry.integration.name}</SheetTitle>
+            <div className="flex min-w-0 items-center gap-3">
+              <IntegrationLogo
+                integrationId={entry.integration.id}
+                name={entry.integration.name}
+                size="lg"
+              />
+              <SheetTitle>{entry.integration.name}</SheetTitle>
+            </div>
             <IntegrationStatusBadge state={state} />
           </div>
           <SheetDescription>{entry.integration.summary}</SheetDescription>
