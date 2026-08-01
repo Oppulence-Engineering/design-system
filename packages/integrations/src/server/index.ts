@@ -144,6 +144,13 @@ import {
 import { createIntegrationTypedRestProvider } from "./provider-rest";
 import { createIntegrationSpecialProvider } from "./provider-special";
 import {
+  assertProviderPackCoverage,
+  getProviderPackAdapterIssues,
+  getProviderPackContractIssues,
+  getProviderPackCoverageReport,
+  ProviderPackContractError,
+} from "./provider-pack";
+import {
   createInMemoryIntegrationCredentialRefreshLock,
   createInMemoryIntegrationOAuthStateStore,
   createIntegrationOAuthRuntime,
@@ -302,6 +309,11 @@ export {
   IntegrationProviderSdkError,
   createIntegrationTypedRestProvider,
   createIntegrationSpecialProvider,
+  assertProviderPackCoverage,
+  getProviderPackContractIssues,
+  getProviderPackAdapterIssues,
+  getProviderPackCoverageReport,
+  ProviderPackContractError,
   createIntegrationOAuthRuntime,
   createInMemoryIntegrationCredentialRefreshLock,
   createInMemoryIntegrationOAuthStateStore,
@@ -467,6 +479,15 @@ export type {
   IntegrationTypedRestTransport,
 } from "./provider-rest";
 export type { IntegrationSpecialProviderConfig } from "./provider-special";
+export type {
+  IntegrationProviderPack,
+  ProviderPackContext,
+  ProviderPackContractIssue,
+  ProviderPackCoverageReport,
+  ProviderPackDisposition,
+  ProviderPackOperationCoverage,
+  ProviderPackTriggerCoverage,
+} from "./provider-pack";
 export type {
   BeginIntegrationOAuthInput,
   BeginIntegrationOAuthResult,

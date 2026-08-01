@@ -179,6 +179,9 @@ test("the built root entry resolves every documented runtime export", async () =
   expect(typeof server.createIntegrationProviderSdkRegistry).toBe("function");
   expect(typeof server.createIntegrationTypedRestProvider).toBe("function");
   expect(typeof server.createIntegrationSpecialProvider).toBe("function");
+  expect(typeof server.assertProviderPackCoverage).toBe("function");
+  expect(typeof server.getProviderPackContractIssues).toBe("function");
+  expect(typeof server.getProviderPackCoverageReport).toBe("function");
   expect(typeof server.createBuiltInProviderSdkRegistry).toBe("function");
   expect(typeof server.getProviderSdkCoverageReport).toBe("function");
   expect(typeof server.createIntegrationProviderExecutionRoutes).toBe(
