@@ -392,6 +392,14 @@ export const BUILT_IN_API_KEY_PROVIDER_CONFIGURATIONS = Object.freeze([
     credentialHeader: "ApplicationAccessKey",
   },
   {
+    // PostHog Cloud is regional and this profile names one host, so this is
+    // the US deployment. EU Cloud and self-hosted need their own profile.
+    integrationId: "posthog" as const,
+    apiBaseUrl: "https://us.posthog.com",
+    credentialHeader: "Authorization",
+    credentialPrefix: "Bearer",
+  },
+  {
     integrationId: "tailscale" as const,
     apiBaseUrl: "https://api.tailscale.com",
     credentialHeader: "Authorization",

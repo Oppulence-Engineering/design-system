@@ -57,6 +57,7 @@ import { createPagerDutyPack } from "./pagerduty";
 import { createPerplexityPack } from "./perplexity";
 import { createPineconePack } from "./pinecone";
 import { createPostgreSqlPack } from "./postgresql";
+import { createPostHogPack } from "./posthog";
 import { createQdrantPack } from "./qdrant";
 import { createRedditPack } from "./reddit";
 import { createRedisPack } from "./redis";
@@ -146,6 +147,7 @@ export const BUILT_IN_PROVIDER_PACKS: readonly IntegrationProviderPack[] = [
   createPerplexityPack(),
   createPineconePack(),
   createPostgreSqlPack(),
+  createPostHogPack(),
   createQdrantPack(),
   createRdsPack(),
   createRedditPack(),

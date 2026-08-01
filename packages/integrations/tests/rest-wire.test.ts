@@ -275,6 +275,42 @@ const CASES: ReadonlyArray<{
     path: "/v2/lists/sales/entries/query",
   },
   {
+    // PostHog is Django REST Framework underneath: every project-scoped route
+    // needs the trailing slash, or the API answers a redirect.
+    operationId: "posthog:list-persons",
+    input: { projectId: 42 },
+    method: "GET",
+    path: "/api/projects/42/persons/",
+  },
+  {
+    operationId: "posthog:get-feature-flag",
+    input: { projectId: 42, flagId: 7 },
+    method: "GET",
+    path: "/api/projects/42/feature_flags/7/",
+  },
+  {
+    // HogQL runs through the generic query endpoint, not a /hogql route.
+    operationId: "posthog:run-query-hogql",
+    input: { projectId: 42, query: "select 1" },
+    method: "POST",
+    path: "/api/projects/42/query/",
+  },
+  {
+    // Recording playlists are their own resource, not a sub-path of
+    // session_recordings.
+    operationId: "posthog:list-recording-playlists",
+    input: { projectId: 42 },
+    method: "GET",
+    path: "/api/projects/42/session_recording_playlists/",
+  },
+  {
+    // Organizations are not project-scoped.
+    operationId: "posthog:get-organization",
+    input: { organizationId: "org-1" },
+    method: "GET",
+    path: "/api/organizations/org-1/",
+  },
+  {
     operationId: "wikipedia:get-page-summary",
     input: { title: "Rust" },
     method: "GET",
