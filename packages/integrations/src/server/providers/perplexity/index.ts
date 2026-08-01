@@ -53,21 +53,23 @@ const PERPLEXITY_ACTIONS: readonly RestAction<any>[] = [
   {
     action: "search",
     name: "Search",
-    description: "Runs a web search and returns cited results.",
+    description: "Runs a web search and returns ranked results with sources.",
     method: "POST",
-    url: "/chat/completions",
+    // The Search API is its own endpoint. Routing this through chat completions
+    // would answer with generated prose rather than the ranked results the
+    // action promises.
+    url: "/search",
     input: z
       .object({
         query: Query,
-        model: z.string().min(1).max(128).optional(),
+        maxResults: z.number().int().min(1).max(20).optional(),
         recency: z.enum(["hour", "day", "week", "month", "year"]).optional(),
       })
       .strict(),
     body: (i) => ({
-      model: i.model ?? "sonar",
-      messages: [{ role: "user", content: i.query }],
+      query: i.query,
+      ...(i.maxResults ? { max_results: i.maxResults } : {}),
       ...(i.recency ? { search_recency_filter: i.recency } : {}),
-      return_citations: true,
     }),
   },
 ];

@@ -140,7 +140,41 @@ Then:
 - **Export the factory** from `src/server/index.ts` (`tests/artifacts.test.ts`
   fails the build if a documented export goes missing).
 
-## 5. Update the pinned numbers
+## 5. Pin the wire shape
+
+Coverage proves an action is *claimed*. It cannot prove the request is the one
+the provider serves. Add at least one case per provider to
+`tests/rest-wire.test.ts` — the test refuses a new typed REST provider that has
+none:
+
+```ts
+{
+  operationId: "acme:send-message",
+  input: { channelId: "123", text: "hi" },
+  method: "POST",
+  path: "/channels/123/messages",
+},
+```
+
+This is what catches a mis-typed route. Two of the three bugs found auditing
+the first batch were wrong paths that every other check passed.
+
+**If the credential belongs in the path, not a header** — Telegram's Bot API is
+`/bot<token>/<method>` and rejects header auth — use `credentialPathPrefix` on
+the profile instead of `credentialHeader`:
+
+```ts
+{
+  integrationId: "telegram" as const,
+  apiBaseUrl: "https://api.telegram.org",
+  credentialPathPrefix: "/bot{credential}",
+}
+```
+
+Supply one or the other, never both. The transport rejects a profile that sets
+both, and rejects a key that would not stay a single path segment.
+
+## 6. Update the pinned numbers
 
 ```bash
 bun run providers:coverage
@@ -156,7 +190,7 @@ order-sensitive and must match `runtime/api-key.ts`).
 If a comment next to a pinned number explains it — "only Google Maps defers" —
 update the comment too, or it becomes false.
 
-## 6. Verify, then commit
+## 7. Verify, then commit
 
 ```bash
 bun run format && bun run typecheck && bun test && bun run build && bun run lint
@@ -185,3 +219,4 @@ correction, and every deferral with its reason.
 | Pack list | `src/server/providers/registry.ts` |
 | API-key host profiles | `src/server/runtime/api-key.ts` |
 | Coverage gate | `tests/coverage-gate.test.ts` |
+| Wire-shape cases | `tests/rest-wire.test.ts` |

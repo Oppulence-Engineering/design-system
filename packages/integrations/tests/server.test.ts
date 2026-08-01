@@ -322,6 +322,63 @@ describe("server credential vault", () => {
 });
 
 describe("server provider SDK families", () => {
+  test("places a path-authenticated credential in the URL and no header", async () => {
+    const requests: Array<{ url: string; init?: RequestInit }> = [];
+    const provider = createApiKeyProviderSdk(
+      {
+        integrationId: "telegram",
+        apiBaseUrl: "https://api.telegram.org",
+        credentialPathPrefix: "/bot{credential}",
+      },
+      (async (input: RequestInfo | URL, init?: RequestInit) => {
+        requests.push({ url: input.toString(), init });
+        return Response.json({ ok: true });
+      }) as typeof fetch,
+    );
+
+    await provider.request(
+      { apiKey: "12345:AAHfake-bot-token" },
+      { path: "/sendMessage", method: "POST" },
+    );
+
+    expect(requests[0]?.url).toBe(
+      "https://api.telegram.org/bot12345:AAHfake-bot-token/sendMessage",
+    );
+    expect(
+      new Headers(requests[0]?.init?.headers).get("Authorization"),
+    ).toBeNull();
+  });
+
+  test("refuses a path credential that would not stay one path segment", async () => {
+    const provider = createApiKeyProviderSdk(
+      {
+        integrationId: "telegram",
+        apiBaseUrl: "https://api.telegram.org",
+        credentialPathPrefix: "/bot{credential}",
+      },
+      (async () => Response.json({ ok: true })) as unknown as typeof fetch,
+    );
+
+    // An empty key is refused by the credential schema, the rest by the
+    // path-segment rule; either way the request is never built.
+    for (const apiKey of ["a/../admin", "a%2Fb", "a?x=1", "a#b", ""]) {
+      await expect(
+        provider.request({ apiKey }, { path: "/sendMessage" }),
+      ).rejects.toThrow();
+    }
+  });
+
+  test("rejects a profile that puts the credential in two places at once", () => {
+    expect(() =>
+      createApiKeyProviderSdk({
+        integrationId: "telegram",
+        apiBaseUrl: "https://api.telegram.org",
+        credentialHeader: "Authorization",
+        credentialPathPrefix: "/bot{credential}",
+      }),
+    ).toThrow();
+  });
+
   test("sends API keys only through the configured secure header", async () => {
     const requests: Array<{ url: string; init?: RequestInit }> = [];
     const provider = createApiKeyProviderSdk(
@@ -685,7 +742,7 @@ describe("server vendor SDK adapters", () => {
 
     expect(getProviderSdkCoverageReport(registry)).toMatchObject({
       executableProviders: 106,
-      executableOperations: 1978,
+      executableOperations: 1977,
       executableTriggers: 0,
       hasCompleteExecutionParity: false,
     });

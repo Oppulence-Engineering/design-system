@@ -40,17 +40,6 @@ const JINA_ACTIONS: readonly RestAction<any>[] = [
     }),
     maxResponseBytes: 1_048_576,
   },
-  {
-    action: "search",
-    name: "Search",
-    description: "Searches the web and returns readable result content.",
-    method: "POST",
-    url: "/",
-    input: z.object({ query: Query }).strict(),
-    body: (i) => ({ q: i.query }),
-    headers: () => ({ "content-type": "application/json" }),
-    maxResponseBytes: 1_048_576,
-  },
 ];
 
 export function createJinaPack(): IntegrationProviderPack {
@@ -61,6 +50,10 @@ export function createJinaPack(): IntegrationProviderPack {
       "Reader and Search are host-differentiated endpoints on the same key.",
     ),
     transportKind: "api_key",
+    deferrals: {
+      search:
+        "Jina serves search from s.jina.ai and reading from r.jina.ai. This lane resolves every action of a provider against one host, so the two cannot share an adapter.",
+    },
     actions: JINA_ACTIONS,
   });
 }

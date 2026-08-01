@@ -211,8 +211,10 @@ export const BUILT_IN_API_KEY_PROVIDER_CONFIGURATIONS = Object.freeze([
   {
     integrationId: "telegram" as const,
     apiBaseUrl: "https://api.telegram.org",
-    credentialHeader: "Authorization",
-    credentialPrefix: "Bearer",
+    // The Bot API authenticates by path, not by header: every method lives
+    // under /bot<token>/. A header-authenticated request is simply not a
+    // route the API serves.
+    credentialPathPrefix: "/bot{credential}",
   },
   {
     integrationId: "calendly" as const,
