@@ -42,8 +42,17 @@ export {
   unwrapResult,
   unwrapResultOr,
 } from "./tryCatch";
-// Re-export all utilities
-export * from "./utils";
+/*
+ * The path is spelled out because `./utils` is ambiguous: a `utils.ts` file and
+ * a `utils/` directory both sit here, and the resolver picks the file. This
+ * line read as "re-export all utilities" while exporting only the three helpers
+ * in utils.ts — memoize, deepMerge, omit, pick, sleep, retry, IntervalService,
+ * formatDuration, hexToBuffer, getEnvVar and the rest of the directory never
+ * reached the package entry point at all.
+ */
+export * from "./utils/index.ts";
+export type { Deferred } from "./utils.ts";
+export { assertExhaustive, promiseWithResolvers } from "./utils.ts";
 // Re-export retry utilities
 export { calculateNextRetryDelay } from "./utils/retries";
 export type { StructuredLogger } from "./utils/structuredLogger";
