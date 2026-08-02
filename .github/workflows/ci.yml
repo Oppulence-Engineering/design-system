@@ -148,8 +148,12 @@ jobs:
       - name: Install Playwright browsers
         run: bunx --bun playwright install --with-deps chromium
 
+      # Through turbo, so workspace dependencies are built first. Calling the
+      # package script directly skips them, and Storybook then cannot resolve
+      # @oppulence/integrations because its dist does not exist. That stayed
+      # hidden while the stories imported only types, which Vite erases.
       - name: Build Storybook
-        run: bun run --filter @comp/storybook build-storybook
+        run: bun run build --filter @comp/storybook
 
       - name: Run Storybook tests
         run: bun run --filter @comp/storybook test:storybook
