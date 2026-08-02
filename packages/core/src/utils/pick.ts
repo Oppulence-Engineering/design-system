@@ -69,7 +69,12 @@ export function pick<T extends Record<string, unknown>, K extends keyof T>(
   const result = {} as Pick<T, K>;
 
   for (const key of keys) {
-    if (key in obj) {
+    /*
+     * `Object.hasOwn` rather than `in`, which also finds inherited properties.
+     * Picking a key the object did not have returned a value off its prototype
+     * chain — `pickBy`, right below, has always walked own properties only.
+     */
+    if (Object.hasOwn(obj, key as string)) {
       result[key] = obj[key];
     }
   }

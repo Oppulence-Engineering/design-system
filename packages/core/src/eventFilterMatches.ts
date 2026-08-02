@@ -237,15 +237,15 @@ function contentFilterMatches(
     if (Array.isArray(actualValue)) {
       return !actualValue.includes(contentFilter.$not);
     }
-    if (
-      typeof actualValue === "number" ||
-      typeof actualValue === "boolean" ||
-      typeof actualValue === "string"
-    ) {
-      return actualValue !== contentFilter.$not;
-    }
 
-    return false;
+    /*
+     * Anything that is not the excluded value passes, including a value that is
+     * absent, null, or an object. This used to fall through to `false` for all
+     * three, so a payload missing the key failed a "not equal to x" filter —
+     * the opposite of what `$anythingBut`, the same predicate under another
+     * name, answers for the same data.
+     */
+    return actualValue !== contentFilter.$not;
   }
 
   return true;
