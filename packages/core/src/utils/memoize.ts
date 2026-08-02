@@ -27,6 +27,24 @@ export type MemoizeOptions<Args extends unknown[]> = {
 };
 
 /**
+ * Stands in for `undefined` when building the default cache key.
+ *
+ * `JSON.stringify` renders an `undefined` array element as `null` and drops an
+ * `undefined` object property entirely, so `memoized(null)` and
+ * `memoized(undefined)` shared a key — the second call returned the first
+ * call's result instead of its own. Carries a NUL so it cannot collide with a
+ * string a caller would realistically pass.
+ */
+const UNDEFINED_KEY = "\u0000undefined";
+
+/** The default cache key: every argument, with `undefined` kept distinct. */
+function defaultResolver(args: unknown[]): string {
+  return JSON.stringify(args, (_key, value) =>
+    value === undefined ? UNDEFINED_KEY : value,
+  );
+}
+
+/**
  * A memoized function with cache management methods.
  */
 // biome-ignore lint/suspicious/noExplicitAny: required for generic function type constraint
@@ -154,7 +172,7 @@ export function memoize<T extends (...args: any[]) => any>(
   const {
     maxSize = Number.POSITIVE_INFINITY,
     ttl = Number.POSITIVE_INFINITY,
-    resolver = (...args: Parameters<T>) => JSON.stringify(args),
+    resolver = (...args: Parameters<T>) => defaultResolver(args),
   } = options ?? {};
 
   const cache = new Map<string, { value: ReturnType<T>; timestamp: number }>();
@@ -181,6 +199,15 @@ export function memoize<T extends (...args: any[]) => any>(
 
     // Compute new value
     const result = fn(...args);
+
+    /*
+     * A cache allowed to hold nothing holds nothing. The eviction check below
+     * evicts before inserting, so with maxSize 0 it removed the one entry there
+     * was and then added another — the cache sat at one entry forever.
+     */
+    if (maxSize <= 0) {
+      return result;
+    }
 
     // Enforce max size (remove oldest entries)
     if (maxSize !== Number.POSITIVE_INFINITY && cache.size >= maxSize) {
@@ -266,7 +293,7 @@ export function memoizeAsync<T extends (...args: any[]) => Promise<any>>(
   const {
     maxSize = Number.POSITIVE_INFINITY,
     ttl = Number.POSITIVE_INFINITY,
-    resolver = (...args: Parameters<T>) => JSON.stringify(args),
+    resolver = (...args: Parameters<T>) => defaultResolver(args),
   } = options ?? {};
 
   const cache = new Map<string, { value: ReturnType<T>; timestamp: number }>();
@@ -290,7 +317,14 @@ export function memoizeAsync<T extends (...args: any[]) => Promise<any>>(
       if (!isExpired) {
         cache.delete(key);
         cache.set(key, cached);
-        return cached.value;
+        /*
+         * The cache holds the resolved value, so returning it bare handed back
+         * a plain value from a function whose type promises a Promise —
+         * `memoized(x).then(...)` threw on the second call and only on the
+         * second call. Callers that awaited never noticed; callers that chained
+         * broke.
+         */
+        return Promise.resolve(cached.value) as ReturnType<T>;
       }
 
       cache.delete(key);
@@ -300,6 +334,10 @@ export function memoizeAsync<T extends (...args: any[]) => Promise<any>>(
     const promise = fn(...args)
       .then((result: Awaited<ReturnType<T>>) => {
         pending.delete(key);
+
+        if (maxSize <= 0) {
+          return result as ReturnType<T>;
+        }
 
         // Enforce max size
         if (maxSize !== Number.POSITIVE_INFINITY && cache.size >= maxSize) {

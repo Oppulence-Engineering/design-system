@@ -117,7 +117,13 @@ export function debounce<T extends (...args: unknown[]) => unknown>(
   let maxWaitTimeoutId: NodeJS.Timeout | null = null;
   let lastArgs: Parameters<T> | null = null;
   let lastCallTime: number | null = null;
-  let lastInvokeTime = 0;
+  /*
+   * `null` until the first invocation, rather than 0. As 0 it read as an
+   * invocation at the epoch, so the first burst computed a time-since-invoke of
+   * decades, `maxWait` minus that clamped to 0, and the maxWait timer fired on
+   * the next tick — a debounce with `maxWait` invoked almost immediately.
+   */
+  let lastInvokeTime: number | null = null;
 
   const invoke = () => {
     lastInvokeTime = Date.now();
@@ -139,6 +145,40 @@ export function debounce<T extends (...args: unknown[]) => unknown>(
     }
   };
 
+  /*
+   * Ends the current burst `delayMs` from now, running the trailing call if one
+   * is owed. Armed on every call and again after a maxWait invocation, whether
+   * or not `trailing` is set: clearing `lastCallTime` is what lets a later call
+   * count as the start of a new burst.
+   *
+   * It used to be armed only when `trailing` was set, so with
+   * `{ leading: true, trailing: false }` the second call cancelled the timer and
+   * nothing re-armed it. `lastCallTime` then stayed set forever and the leading
+   * edge — which only fires on the first call of a burst — never fired again for
+   * the life of the function.
+   */
+  const armBurstTimer = () => {
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
+
+    timeoutId = setTimeout(() => {
+      timeoutId = null;
+      lastCallTime = null;
+
+      if (maxWaitTimeoutId) {
+        clearTimeout(maxWaitTimeoutId);
+        maxWaitTimeoutId = null;
+      }
+
+      // Guarded on lastArgs so a lone leading-edge call, whose arguments
+      // `invoke` already consumed, is not invoked a second time.
+      if (trailing && lastArgs !== null) {
+        invoke();
+      }
+    }, delayMs);
+  };
+
   const debounced = (...args: Parameters<T>) => {
     const now = Date.now();
     const isFirstCall = lastCallTime === null;
@@ -148,41 +188,30 @@ export function debounce<T extends (...args: unknown[]) => unknown>(
     // Leading edge execution
     if (leading && isFirstCall) {
       invoke();
-      // Set timeout for trailing edge reset
-      timeoutId = setTimeout(() => {
-        timeoutId = null;
-        lastCallTime = null;
-      }, delayMs);
-      return;
     }
 
-    // Clear existing timeout
-    if (timeoutId) {
-      clearTimeout(timeoutId);
-    }
-
-    // Set up trailing edge execution
-    if (trailing) {
-      timeoutId = setTimeout(() => {
-        timeoutId = null;
-        lastCallTime = null;
-        clearTimers();
-        invoke();
-      }, delayMs);
-    }
+    armBurstTimer();
 
     // Set up max wait timeout
-    if (maxWait !== undefined && !maxWaitTimeoutId) {
-      const timeSinceLastInvoke = now - lastInvokeTime;
+    if (maxWait !== undefined && !maxWaitTimeoutId && lastArgs !== null) {
+      const timeSinceLastInvoke =
+        lastInvokeTime === null ? 0 : now - lastInvokeTime;
       const remainingMaxWait = Math.max(0, maxWait - timeSinceLastInvoke);
 
       maxWaitTimeoutId = setTimeout(() => {
         maxWaitTimeoutId = null;
-        clearTimers();
+
         if (lastArgs !== null) {
           invoke();
-          // Reset the regular debounce timer
-          lastCallTime = null;
+          /*
+           * The burst continues rather than being declared over. Clearing
+           * `lastCallTime` here instead made the next call — often in the same
+           * millisecond, since maxWait fires mid-burst — look like the start of
+           * a fresh burst and fire the leading edge immediately after this
+           * invocation. `throttle` passes maxWait and leads by default, so it
+           * fired twice per window instead of the once it promises.
+           */
+          armBurstTimer();
         }
       }, remainingMaxWait);
     }
@@ -194,15 +223,27 @@ export function debounce<T extends (...args: unknown[]) => unknown>(
     lastCallTime = null;
   };
 
+  /*
+   * Both of these ask the same question — is an invocation actually scheduled?
+   * `pending` used to report any live timer, so it stayed true through the
+   * quiet period after a leading-edge call that had nothing left to run, and
+   * true forever once a non-trailing call left a cleared-but-not-nulled id
+   * behind. Captured arguments alone are not a pending call: with `trailing`
+   * off and no `maxWait`, nothing will ever consume them.
+   */
+  const hasScheduledInvocation = () =>
+    lastArgs !== null &&
+    (maxWaitTimeoutId !== null || (trailing && timeoutId !== null));
+
   debounced.flush = () => {
-    if (lastArgs !== null) {
+    if (hasScheduledInvocation()) {
       clearTimers();
       invoke();
       lastCallTime = null;
     }
   };
 
-  debounced.pending = () => timeoutId !== null || maxWaitTimeoutId !== null;
+  debounced.pending = hasScheduledInvocation;
 
   return debounced;
 }
