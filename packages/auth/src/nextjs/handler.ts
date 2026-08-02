@@ -131,6 +131,50 @@ function errorResponse(error: AuthError): Response {
   return jsonResponse(error.toJSON(), error.status);
 }
 
+/**
+ * Reads a JSON object from the request body, or fails with a 400.
+ *
+ * `request.json()` throws on an empty or malformed body, and the handlers left
+ * that to their catch blocks — which report it as something it is not. Sign-in
+ * turned a malformed body into 401 "Sign-in failed", telling a caller its
+ * credentials were wrong when its request never parsed; elsewhere it reached
+ * the dispatcher's catch and became a 500 carrying the JSON parser's own
+ * message. A body the client got wrong is a 400.
+ *
+ * A non-object body is refused for the same reason: `null` is valid JSON, and
+ * the verify-email and org-switch handlers destructure the body directly, so
+ * `null` threw a TypeError from inside them.
+ *
+ * Uses UNKNOWN_ERROR because AuthErrorCode has no code for a malformed
+ * request; adding one would change a union consumers may switch on
+ * exhaustively. The status and message carry the meaning.
+ */
+async function readJsonBody(
+  request: Request,
+): Promise<Record<string, unknown>> {
+  let body: unknown;
+
+  try {
+    body = await request.json();
+  } catch {
+    throw new AuthError(
+      "Request body must be valid JSON",
+      "UNKNOWN_ERROR",
+      400,
+    );
+  }
+
+  if (body === null || typeof body !== "object" || Array.isArray(body)) {
+    throw new AuthError(
+      "Request body must be a JSON object",
+      "UNKNOWN_ERROR",
+      400,
+    );
+  }
+
+  return body as Record<string, unknown>;
+}
+
 function redirectResponse(
   url: string,
   headers?: Record<string, string>,
@@ -213,7 +257,7 @@ async function handleSignIn(
   config: AuthHandlerConfig,
 ): Promise<Response> {
   try {
-    const body = await request.json();
+    const body = await readJsonBody(request);
     const data = signInSchema.parse(body);
 
     const { user, accessToken, refreshToken } = await authenticateWithPassword(
@@ -260,7 +304,7 @@ async function handleSignIn(
 
 async function handleSignUp(request: Request): Promise<Response> {
   try {
-    const body = await request.json();
+    const body = await readJsonBody(request);
     const data = signUpSchema.parse(body);
 
     await createUserWithPassword(data.email, data.password, {
@@ -494,8 +538,16 @@ async function handleRefresh(request: Request): Promise<Response> {
 }
 
 async function handleForgotPassword(request: Request): Promise<Response> {
+  /*
+   * Read outside the catch below, which answers "sent" to everything so that a
+   * caller cannot learn which addresses exist. A body that is not JSON reveals
+   * nothing about any account, so refusing it leaks nothing — and reporting
+   * "a reset link has been sent" to a request that never parsed only hides a
+   * client bug.
+   */
+  const body = await readJsonBody(request);
+
   try {
-    const body = await request.json();
     const data = forgotPasswordSchema.parse(body);
 
     await sendPasswordResetEmail(data.email);
@@ -517,7 +569,7 @@ async function handleForgotPassword(request: Request): Promise<Response> {
 
 async function handleResetPassword(request: Request): Promise<Response> {
   try {
-    const body = await request.json();
+    const body = await readJsonBody(request);
     const data = resetPasswordSchema.parse(body);
 
     await resetPassword(data.token, data.password);
@@ -539,7 +591,7 @@ async function handleResetPassword(request: Request): Promise<Response> {
 
 async function handleVerifyEmail(request: Request): Promise<Response> {
   try {
-    const body = await request.json();
+    const body = await readJsonBody(request);
     const { action, code } = body;
 
     const token = getSessionFromRequest(request);
@@ -602,8 +654,29 @@ async function handleOrgSwitch(
   config: AuthHandlerConfig,
 ): Promise<Response> {
   try {
-    const body = await request.json();
-    const { organizationId } = body;
+    const body = await readJsonBody(request);
+
+    /*
+     * Validated rather than destructured straight out of the body. It is
+     * passed to updateSessionOrganization and stored in the session, and
+     * nothing checked it was a string — a number, an object or an array went
+     * in unexamined.
+     */
+    const rawOrganizationId = body["organizationId"];
+    if (
+      rawOrganizationId !== undefined &&
+      rawOrganizationId !== null &&
+      typeof rawOrganizationId !== "string"
+    ) {
+      return errorResponse(
+        new AuthError(
+          "organizationId must be a string or null",
+          "UNKNOWN_ERROR",
+          400,
+        ),
+      );
+    }
+    const organizationId = rawOrganizationId ?? null;
 
     const token = getSessionFromRequest(request);
     if (!token) {
@@ -684,13 +757,13 @@ export function createAuthHandler(config: AuthHandlerConfig = {}) {
       if (request.method === "GET") {
         switch (route) {
           case "session":
-            return handleSession(request);
+            return await handleSession(request);
           case "callback":
-            return handleOAuthCallback(request, config);
+            return await handleOAuthCallback(request, config);
           default:
             // Check if it's an OAuth start (has provider param)
             if (url.searchParams.has("provider")) {
-              return handleOAuthStart(request);
+              return await handleOAuthStart(request);
             }
             return errorResponse(
               new AuthError("Route not found", "CONFIGURATION_ERROR", 404),
@@ -702,21 +775,21 @@ export function createAuthHandler(config: AuthHandlerConfig = {}) {
       if (request.method === "POST") {
         switch (route) {
           case "sign-in":
-            return handleSignIn(request, config);
+            return await handleSignIn(request, config);
           case "sign-up":
-            return handleSignUp(request);
+            return await handleSignUp(request);
           case "sign-out":
-            return handleSignOut(request, config);
+            return await handleSignOut(request, config);
           case "refresh":
-            return handleRefresh(request);
+            return await handleRefresh(request);
           case "forgot-password":
-            return handleForgotPassword(request);
+            return await handleForgotPassword(request);
           case "reset-password":
-            return handleResetPassword(request);
+            return await handleResetPassword(request);
           case "verify-email":
-            return handleVerifyEmail(request);
+            return await handleVerifyEmail(request);
           case "org/switch":
-            return handleOrgSwitch(request, config);
+            return await handleOrgSwitch(request, config);
           default:
             /*
              * Routes the client already calls that this handler has not
