@@ -138,6 +138,24 @@ export async function decodeSession(
       return null;
     }
 
+    /*
+     * The expiry fields are checked too, because every comparison against them
+     * is a `>=` and NaN loses every comparison. A payload without usable
+     * timestamps passed `now >= refreshTokenExpiresAt` and
+     * `now >= accessTokenExpiresAt - buffer` alike, so getValidSession fell
+     * through to "token is still valid" and the session never expired and never
+     * refreshed. Missing timestamps now fail closed.
+     */
+    if (
+      !Number.isFinite(payload.accessTokenExpiresAt) ||
+      !Number.isFinite(payload.refreshTokenExpiresAt)
+    ) {
+      debugLog("Session has unusable expiry timestamps", {
+        sessionId: payload.sessionId,
+      });
+      return null;
+    }
+
     return payload;
   } catch (error) {
     debugLog("Failed to decode session", { error });

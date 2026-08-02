@@ -22,12 +22,17 @@ import {
   updateSessionOrganization,
 } from "../core/session";
 import {
+  getCookieFromRequest,
   getSessionFromRequest,
   createSessionCookieHeader,
   createClearSessionCookieHeader,
   validateCSRFToken,
 } from "../core/cookies";
-import { validateOAuthState, generateOAuthState } from "../core/crypto";
+import {
+  constantTimeCompare,
+  validateOAuthState,
+  generateOAuthState,
+} from "../core/crypto";
 import { getEnvVar, debugLog, getCallbackUrl } from "../core/env";
 import { AuthError } from "../core/types";
 import type {
@@ -294,6 +299,21 @@ async function handleSignOut(
   });
 }
 
+/** Cookie holding the OAuth state, so the callback can be tied to this browser. */
+const OAUTH_STATE_COOKIE = "__oppulence_oauth_state";
+
+/** Expires the state cookie; the state is single-use. */
+const CLEAR_OAUTH_STATE_COOKIE = [
+  `${OAUTH_STATE_COOKIE}=`,
+  "Path=/",
+  "HttpOnly",
+  "SameSite=Lax",
+  "Max-Age=0",
+  "Expires=Thu, 01 Jan 1970 00:00:00 GMT",
+]
+  .filter(Boolean)
+  .join("; ");
+
 async function handleOAuthStart(request: Request): Promise<Response> {
   const url = new URL(request.url);
   const provider = url.searchParams.get("provider") as OAuthProvider | null;
@@ -309,7 +329,17 @@ async function handleOAuthStart(request: Request): Promise<Response> {
   const authUrl = getOAuthAuthorizationUrl(provider, redirectUri, state);
 
   // Set state in cookie for validation
-  const stateCookie = `__oppulence_oauth_state=${state}; Path=/; HttpOnly; SameSite=Lax; Max-Age=600`;
+  const stateCookie = [
+    `${OAUTH_STATE_COOKIE}=${encodeURIComponent(state)}`,
+    "Path=/",
+    "HttpOnly",
+    "SameSite=Lax",
+    "Max-Age=600",
+    // Matches the session cookie: over HTTPS only, outside development.
+    process.env.NODE_ENV === "production" ? "Secure" : "",
+  ]
+    .filter(Boolean)
+    .join("; ");
 
   return redirectResponse(authUrl, { "Set-Cookie": stateCookie });
 }
@@ -326,21 +356,41 @@ async function handleOAuthCallback(
   // Check for OAuth error
   if (error) {
     const redirectUrl = config.afterSignInUrl ?? "/sign-in";
-    return redirectResponse(
-      `${redirectUrl}?error=${encodeURIComponent(error)}`,
+    return withClearedOAuthState(
+      redirectResponse(`${redirectUrl}?error=${encodeURIComponent(error)}`),
     );
   }
 
-  // Validate state
-  if (!state || !validateOAuthState(state)) {
-    return errorResponse(
-      new AuthError("Invalid OAuth state", "INVALID_TOKEN", 400),
+  /*
+   * The state must match the cookie set when the flow started, which is what
+   * ties this callback to the browser that began it.
+   *
+   * handleOAuthStart has always set that cookie, but the callback never read
+   * it: `validateOAuthState` only checks that the timestamp prefix is recent,
+   * so any `<base36-timestamp>.<anything>` was accepted. That left the callback
+   * open to being driven by a third party — an attacker could run the flow with
+   * their own account and hand the resulting code and a self-made state to a
+   * victim, logging the victim's browser into the attacker's account. The
+   * random half of the state was generated and then never compared to anything.
+   */
+  const expectedState = getCookieFromRequest(request, OAUTH_STATE_COOKIE);
+
+  if (
+    !state ||
+    !expectedState ||
+    !constantTimeCompare(state, expectedState) ||
+    !validateOAuthState(state)
+  ) {
+    return withClearedOAuthState(
+      errorResponse(new AuthError("Invalid OAuth state", "INVALID_TOKEN", 400)),
     );
   }
 
   if (!code) {
-    return errorResponse(
-      new AuthError("Missing authorization code", "INVALID_CODE", 400),
+    return withClearedOAuthState(
+      errorResponse(
+        new AuthError("Missing authorization code", "INVALID_CODE", 400),
+      ),
     );
   }
 
@@ -363,14 +413,29 @@ async function handleOAuthCallback(
     await config.onSignIn?.(user, !user.emailVerified); // New if not verified
 
     const redirectUrl = config.afterSignInUrl ?? "/dashboard";
-    return redirectResponse(redirectUrl, {
-      "Set-Cookie": createSessionCookieHeader(sessionToken),
-    });
+    return withClearedOAuthState(
+      redirectResponse(redirectUrl, {
+        "Set-Cookie": createSessionCookieHeader(sessionToken),
+      }),
+    );
   } catch (error) {
     debugLog("OAuth callback error", { error });
     const redirectUrl = config.afterSignInUrl ?? "/sign-in";
-    return redirectResponse(`${redirectUrl}?error=oauth_failed`);
+    return withClearedOAuthState(
+      redirectResponse(`${redirectUrl}?error=oauth_failed`),
+    );
   }
+}
+
+/**
+ * Expires the OAuth state cookie on the way out.
+ *
+ * Appended rather than set, so it survives alongside the session cookie the
+ * success path already writes. A state is good for exactly one callback.
+ */
+function withClearedOAuthState(response: Response): Response {
+  response.headers.append("Set-Cookie", CLEAR_OAUTH_STATE_COOKIE);
+  return response;
 }
 
 async function handleRefresh(request: Request): Promise<Response> {

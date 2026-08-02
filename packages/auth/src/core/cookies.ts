@@ -100,14 +100,7 @@ export function clearSessionInNextCookies(cookies: NextCookies): void {
  * @returns Session token or null if not found
  */
 export function getSessionFromRequest(request: Request): string | null {
-  const cookieHeader = request.headers.get("cookie");
-  if (!cookieHeader) {
-    return null;
-  }
-
-  const cookieName = getCookieName();
-  const cookies = parseCookies(cookieHeader);
-  return cookies[cookieName] ?? null;
+  return getCookieFromRequest(request, getCookieName());
 }
 
 /**
@@ -243,18 +236,60 @@ export function clearSessionFromNextResponse(
 
 /**
  * Parses a cookie header string into a key-value object.
+ *
+ * The result has a null prototype, and a cookie whose value is not valid
+ * percent-encoding is dropped rather than allowed to throw.
  */
 function parseCookies(cookieHeader: string): Record<string, string> {
-  const cookies: Record<string, string> = {};
+  /*
+   * Null prototype. A plain object inherits from Object.prototype, so a lookup
+   * for a cookie the request never sent could return an inherited value —
+   * `cookies[sessionCookieName]` would hand back whatever a polluted prototype
+   * held, and callers treat that as the session token.
+   */
+  const cookies: Record<string, string> = Object.create(null);
 
   for (const part of cookieHeader.split(";")) {
     const [name, ...rest] = part.trim().split("=");
-    if (name) {
+    if (!name) {
+      continue;
+    }
+
+    try {
       cookies[name] = decodeURIComponent(rest.join("="));
+    } catch {
+      /*
+       * `decodeURIComponent` throws URIError on malformed percent-encoding, and
+       * every cookie in the header is decoded — so one junk cookie anywhere on
+       * the domain threw straight out of session lookup and CSRF validation,
+       * turning "Cookie: foo=%" into a failed request rather than an
+       * unauthenticated one. An undecodable cookie is treated as absent, which
+       * fails closed: no session, and CSRF validation returns false.
+       */
+      debugLog("Ignoring cookie with malformed encoding", { name });
     }
   }
 
   return cookies;
+}
+
+/**
+ * Reads a single cookie from a standard Request object.
+ *
+ * @param request - Standard Request object
+ * @param name - Cookie name
+ * @returns The decoded cookie value, or null if absent or undecodable
+ */
+export function getCookieFromRequest(
+  request: Request,
+  name: string,
+): string | null {
+  const cookieHeader = request.headers.get("cookie");
+  if (!cookieHeader) {
+    return null;
+  }
+
+  return parseCookies(cookieHeader)[name] ?? null;
 }
 
 /**
