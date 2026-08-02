@@ -303,11 +303,32 @@ function capitalize(str: string): string {
 // CSRF Protection
 // ============================================================================
 
+/*
+ * These two functions are a complete double-submit CSRF implementation, and
+ * NOTHING IN THIS PACKAGE CALLS EITHER OF THEM. No route issues the cookie and
+ * no route checks the header, so the auth endpoints — sign-in, sign-up,
+ * sign-out, password reset, organization switch — perform no CSRF validation.
+ *
+ * They are correct and ready; what is missing is the wiring, and switching it
+ * on is a coordinated change rather than a fix. Validation cannot be enabled
+ * before the cookie is issued and clients are sending the header, or every
+ * request from every existing client is rejected at once.
+ *
+ * Meanwhile the session cookie is SameSite=Lax, which stops a cross-site form
+ * post from carrying it. That blocks the classic attack in current browsers
+ * but does not cover same-site attackers or subdomain takeover, so treat it as
+ * mitigation, not as this feature being unnecessary.
+ *
+ * See the note at the validateCSRFToken import in nextjs/handler.ts for the
+ * order to turn it on in.
+ */
 const CSRF_COOKIE_NAME = "__oppulence_csrf";
 const CSRF_HEADER_NAME = "x-csrf-token";
 
 /**
  * Generates a CSRF token and returns the cookie header.
+ *
+ * Not called anywhere in this package — see the note above.
  */
 export function generateCSRFToken(): { token: string; cookie: string } {
   assertServer("generateCSRFToken()");
@@ -331,6 +352,10 @@ export function generateCSRFToken(): { token: string; cookie: string } {
 
 /**
  * Validates a CSRF token from request headers against the cookie.
+ *
+ * Not called anywhere in this package — see the note above. Callers wiring
+ * this up must issue the cookie first; with no cookie present it returns
+ * false, which is the safe answer but would reject everything.
  */
 export function validateCSRFToken(
   request: Request,

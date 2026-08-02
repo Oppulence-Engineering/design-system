@@ -26,6 +26,30 @@ import {
   getSessionFromRequest,
   createSessionCookieHeader,
   createClearSessionCookieHeader,
+  /*
+   * DELIBERATELY UNUSED — this handler performs no CSRF validation.
+   *
+   * The import is kept, and named here, because its absence would read as
+   * "CSRF was never considered" when the opposite is true: cookies.ts ships a
+   * complete double-submit implementation — generateCSRFToken issues a
+   * JS-readable token cookie, validateCSRFToken compares it against the
+   * x-csrf-token header in constant time — and no route calls either one. No
+   * endpoint issues the cookie, so turning validation on here would reject
+   * every request from every existing client at once. That makes it a
+   * coordinated rollout, not a repair, which is why it has not been done as
+   * part of a bug-fix pass.
+   *
+   * What stands in for it today: the session cookie is SameSite=Lax, which
+   * stops a cross-site form post from carrying it, so the classic
+   * cross-site POST is already blocked in current browsers. Lax does not
+   * cover same-site attackers, subdomain takeover, or clients that send the
+   * session another way, so this is mitigation and not a substitute.
+   *
+   * To finish it: issue the cookie alongside the session on sign-in, have the
+   * React provider read it and send the header from authFetch, then call
+   * validateCSRFToken at the top of every state-changing route below. Ship the
+   * first two before the third.
+   */
   validateCSRFToken,
 } from "../core/cookies";
 import {

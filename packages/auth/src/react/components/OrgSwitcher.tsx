@@ -33,6 +33,16 @@ export interface OrgSwitcherProps {
   onOrgChange?: (org: Organization) => void;
 
   /**
+   * Callback when switching organization fails.
+   *
+   * Without this the failure is invisible: the switch was wrapped in
+   * try/finally with no catch, so a rejected switch became an unhandled
+   * promise rejection and the user saw only the dropdown close, still in the
+   * organization they started in. Mirrors SignOutButton's onSignOutError.
+   */
+  onError?: (error: Error) => void;
+
+  /**
    * Show "Create organization" option.
    * @default true
    */
@@ -185,6 +195,7 @@ function getOrgInitials(org: Organization): string {
 
 export function OrgSwitcher({
   onOrgChange,
+  onError,
   showCreateOrg = true,
   createOrgUrl = "/organizations/new",
   showSettings = true,
@@ -205,6 +216,18 @@ export function OrgSwitcher({
     try {
       await switchOrganization(org.id);
       onOrgChange?.(org);
+    } catch (error) {
+      /*
+       * There was no catch here, only a finally. A rejected switch — an
+       * expired session, a 400 from the route, a dropped connection — escaped
+       * an async event handler as an unhandled rejection, and the user saw
+       * nothing but the dropdown closing while still in the old organization.
+       */
+      onError?.(
+        error instanceof Error
+          ? error
+          : new Error("Organization switch failed"),
+      );
     } finally {
       setIsLoading(false);
     }
