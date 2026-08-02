@@ -10,6 +10,7 @@ import {
   isPlatform,
   PLATFORM_DISPLAY_NAMES,
 } from "./index";
+import { ValidationPatterns } from "../utils/constants";
 
 describe("DeepLinkPathSchema", () => {
   it("accepts plain paths", () => {
@@ -142,5 +143,24 @@ describe("type guards", () => {
       win32: "windows",
       linux: "linux",
     });
+  });
+});
+
+describe("ValidationPatterns.DEEP_LINK_URL", () => {
+  it("agrees with DeepLinkUrlSchema", () => {
+    const urls = [
+      "eigenn://dashboard",
+      "myapp://dashboard",
+      "my-app.v2://x",
+      "dashboard",
+      "://dashboard",
+      "1app://x",
+    ];
+
+    for (const url of urls) {
+      expect(ValidationPatterns.DEEP_LINK_URL.test(url)).toBe(
+        DeepLinkUrlSchema.safeParse(url).success,
+      );
+    }
   });
 });

@@ -202,8 +202,14 @@ export const PerformanceConstants = {
  * @namespace ValidationPatterns
  */
 export const ValidationPatterns = {
-  /** Deep link URL pattern */
-  DEEP_LINK_URL: /^eigenn:\/\//,
+  /**
+   * Deep link URL pattern: a scheme, then "://".
+   *
+   * Matches DeepLinkUrlSchema rather than pinning the literal "eigenn", since
+   * `deepLinkProtocol` is configurable and an app that sets its own would
+   * otherwise fail a check written against this constant.
+   */
+  DEEP_LINK_URL: /^[a-zA-Z][a-zA-Z0-9+\-.]*:\/\//,
   /** Valid path segment pattern */
   PATH_SEGMENT: /^[a-zA-Z0-9\-_]+$/,
   /** Semantic version pattern */
