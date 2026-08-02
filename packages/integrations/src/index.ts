@@ -13,9 +13,18 @@ import {
 import {
   buildIntegrationDirectory,
   createIntegrationDirectoryResolver,
+  filterIntegrationDirectory,
   getConnectionAttentionCount,
 } from "./connection";
 import { getSimStudioParityReport } from "./parity";
+import {
+  assertSimStudioProviderProtocolParity,
+  getSimStudioProviderProtocolReport,
+} from "./provider-protocols";
+import {
+  getProviderExecutionStrategies,
+  getProviderExecutionStrategyReport,
+} from "./execution-strategy";
 import {
   getIntegration,
   getIntegrationCatalogue,
@@ -82,6 +91,7 @@ export {
   createIntegrationConnectionResolver,
   createIntegrationDirectoryResolver,
   createProductIntegrationKit,
+  filterIntegrationDirectory,
   getFunctionalSupportContract,
   getConnectionAttentionCount,
   getIntegration,
@@ -91,10 +101,14 @@ export {
   getProductIntegrations,
   getOperationTriggerCoverageReport,
   getSimStudioParityReport,
+  getSimStudioProviderProtocolReport,
+  getProviderExecutionStrategies,
+  getProviderExecutionStrategyReport,
   resolveIntegrationId,
   searchIntegrations,
   INTEGRATION_GOLDEN_JOURNEY_STEPS,
   runIntegrationGoldenJourney,
+  assertSimStudioProviderProtocolParity,
   validateFunctionalSupportContracts,
   validateOutcomeTemplates,
 };
@@ -114,8 +128,14 @@ export type {
   IntegrationConnectionResolver,
   IntegrationDirectory,
   IntegrationDirectoryEntry,
+  IntegrationDirectoryFacets,
+  IntegrationDirectoryFilter,
   IntegrationDirectoryLoader,
 } from "./connection";
+export {
+  EXECUTABLE_INTEGRATION_IDS,
+  EXECUTABLE_INTEGRATION_ID_SET,
+} from "./executable";
 export type {
   ActionResult,
   ConnectRequest,
@@ -133,6 +153,16 @@ export type {
   ProductIntegrationConnector,
 } from "./support";
 export type { IntegrationOutcomeTemplate } from "./templates";
+export type {
+  SimStudioProviderProtocol,
+  SimStudioProviderProtocolGap,
+  SimStudioProviderProtocolReport,
+} from "./provider-protocols";
+export type {
+  ProviderExecutionStrategy,
+  ProviderExecutionStrategyKind,
+  ProviderExecutionStrategyReport,
+} from "./execution-strategy";
 export type {
   IntegrationCommand,
   IntegrationConnectionRecordAdapter,

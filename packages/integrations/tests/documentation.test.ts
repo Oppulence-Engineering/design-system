@@ -96,14 +96,14 @@ describe("public documentation manifest", () => {
       "2026-07-31T00:00:00.000Z",
     );
     const serialized = serializePublicIntegrationManifest(manifest);
-    expect(manifest.integrations).toHaveLength(254);
-    expect(manifest.details).toHaveLength(254);
+    expect(manifest.integrations).toHaveLength(261);
+    expect(manifest.details).toHaveLength(261);
     expect(manifest.parity).toEqual({
-      totalProviders: 254,
+      totalProviders: 261,
       providers: 232,
       matched: 232,
-      extras: 22,
-      catalogueOnly: 254,
+      extras: 29,
+      catalogueOnly: 261,
       functionallySupported: 0,
       operationOrTriggerSupported: 0,
       catalogueOnlySimStudio: 232,

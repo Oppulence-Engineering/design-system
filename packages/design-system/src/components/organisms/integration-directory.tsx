@@ -21,14 +21,15 @@ import type {
 
 import { Button } from "../atoms/button";
 import { Badge } from "../atoms/badge";
+import { IntegrationLogo } from "../atoms/integration-logo";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "./dialog";
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+} from "./sheet";
 import {
   InputGroup,
   InputGroupAddon,
@@ -228,6 +229,69 @@ export interface IntegrationCardProps {
   onDetails?: (entry: IntegrationDirectoryEntry) => void;
 }
 
+export interface IntegrationRowProps {
+  entry: IntegrationDirectoryEntry;
+  onAction?: (
+    entry: IntegrationDirectoryEntry,
+    action: IntegrationAction,
+  ) => void;
+  onDetails?: (entry: IntegrationDirectoryEntry) => void;
+}
+
+/**
+ * The directory's list row: mark, name, one-line summary, and the state and
+ * action on the trailing edge.
+ *
+ * A catalogue of this size reads better as a dense list than as a card grid —
+ * a row is scannable at a glance and a few hundred of them stay navigable.
+ * `IntegrationCard` remains for the places that show a single provider.
+ */
+export function IntegrationRow({
+  entry,
+  onAction,
+  onDetails,
+}: IntegrationRowProps): React.ReactElement {
+  const state = representativeState(entry);
+  return (
+    <div
+      className="hover:bg-muted/40 flex items-center gap-3 px-3 py-2.5 transition-colors"
+      data-integration-row={entry.integration.id}
+    >
+      <IntegrationLogo
+        integrationId={entry.integration.id}
+        name={entry.integration.name}
+      />
+      <div className="min-w-0 grow">
+        <p className="truncate text-sm font-medium">{entry.integration.name}</p>
+        <p className="text-muted-foreground truncate text-xs">
+          {entry.integration.summary}
+        </p>
+      </div>
+      <IntegrationStatusBadge state={state} />
+      {entry.primaryAction && onAction && (
+        <Button
+          aria-label={`${actionLabel(entry.primaryAction)} ${entry.integration.name}`}
+          onClick={() => onAction(entry, entry.primaryAction!)}
+          size="sm"
+          variant="outline"
+        >
+          {actionLabel(entry.primaryAction)}
+        </Button>
+      )}
+      {onDetails && (
+        <Button
+          aria-label={`View details for ${entry.integration.name}`}
+          onClick={() => onDetails(entry)}
+          size="icon-sm"
+          variant="ghost"
+        >
+          <ChevronRight aria-hidden="true" />
+        </Button>
+      )}
+    </div>
+  );
+}
+
 export function IntegrationCard({
   entry,
   onAction,
@@ -269,11 +333,17 @@ export function IntegrationCard({
   return (
     <article className="border-border bg-card flex min-h-48 flex-col gap-4 rounded-xl border p-4 shadow-sm">
       <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0 space-y-1">
-          <h3 className="truncate font-medium">{entry.integration.name}</h3>
-          <p className="text-muted-foreground text-sm">
-            {entry.integration.summary}
-          </p>
+        <div className="flex min-w-0 gap-3">
+          <IntegrationLogo
+            integrationId={entry.integration.id}
+            name={entry.integration.name}
+          />
+          <div className="min-w-0 space-y-1">
+            <h3 className="truncate font-medium">{entry.integration.name}</h3>
+            <p className="text-muted-foreground text-sm">
+              {entry.integration.summary}
+            </p>
+          </div>
         </div>
         <IntegrationStatusBadge
           freshness={connection?.sourceFreshness}
@@ -429,16 +499,25 @@ export function IntegrationDetailPanel({
     Boolean(entry.primaryAction && onAction) &&
     (entry.connections.length === 0 || !onConnectionAction);
   return (
-    <Dialog onOpenChange={onOpenChange} open={open}>
-      <DialogContent showCloseButton={false}>
-        <DialogHeader>
-          <div className="flex items-start justify-between gap-3">
-            <DialogTitle>{entry.integration.name}</DialogTitle>
+    <Sheet onOpenChange={onOpenChange} open={open}>
+      <SheetContent showCloseButton={false} side="right">
+        <SheetHeader>
+          <div className="flex items-start justify-between gap-3 pr-2">
+            <div className="flex min-w-0 items-center gap-3">
+              <IntegrationLogo
+                integrationId={entry.integration.id}
+                name={entry.integration.name}
+                size="lg"
+              />
+              <SheetTitle>{entry.integration.name}</SheetTitle>
+            </div>
             <IntegrationStatusBadge state={state} />
           </div>
-          <DialogDescription>{entry.integration.summary}</DialogDescription>
-        </DialogHeader>
-        <div className="max-h-[60vh] space-y-6 overflow-y-auto px-4 pb-2">
+          <SheetDescription>{entry.integration.summary}</SheetDescription>
+        </SheetHeader>
+        {/* The sheet is full height, so the body takes the slack and scrolls
+            on its own rather than being capped to a fraction of the viewport. */}
+        <div className="flex-1 space-y-6 overflow-y-auto pb-2">
           <section className="space-y-2">
             <p className="text-sm font-medium">Capabilities</p>
             <ul className="text-muted-foreground grid gap-1 text-sm sm:grid-cols-2">
@@ -473,7 +552,7 @@ export function IntegrationDetailPanel({
             </section>
           )}
         </div>
-        <DialogFooter>
+        <SheetFooter>
           {showEntryAction && entry.primaryAction && onAction && (
             <Button onClick={() => onAction(entry, entry.primaryAction!)}>
               {actionLabel(entry.primaryAction)}
@@ -482,9 +561,9 @@ export function IntegrationDetailPanel({
           <Button onClick={() => onOpenChange(false)} variant="outline">
             Close
           </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
   );
 }
 
@@ -569,42 +648,50 @@ export function IntegrationDirectory({
 
   return (
     <section aria-label="Integration directory" className="space-y-6">
-      <div className="flex flex-col gap-3 sm:flex-row">
-        <label className="grow">
-          <span className="sr-only">Search integrations</span>
-          <InputGroup>
-            <InputGroupAddon align="inline-start">
-              <Search aria-hidden="true" className="size-4" />
-            </InputGroupAddon>
-            <InputGroupInput
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search providers, operations, and triggers"
-              type="search"
-              value={query}
-            />
-          </InputGroup>
-        </label>
-        <label>
-          <span className="sr-only">Filter by category</span>
-          <select
-            aria-label="Filter by category"
-            className="border-input bg-background h-9 rounded-md border px-3 text-sm"
-            onChange={(event) => setCategory(event.target.value)}
-            value={category}
+      <label className="block">
+        <span className="sr-only">Search integrations</span>
+        <InputGroup>
+          <InputGroupAddon align="inline-start">
+            <Search aria-hidden="true" className="size-4" />
+          </InputGroupAddon>
+          <InputGroupInput
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Search integrations, tools, or triggers…"
+            type="search"
+            value={query}
+          />
+        </InputGroup>
+      </label>
+      {/* Categories read as pills rather than a select: at this width the whole
+          set is visible at once, so filtering is one click and the available
+          categories are legible without opening anything. The capability
+          select follows them, so tab order matches the reading order. */}
+      <div
+        aria-label="Filter by category"
+        className="flex flex-wrap gap-1.5"
+        role="group"
+      >
+        {["all", ...categories].map((value) => (
+          <Button
+            aria-pressed={category === value}
+            key={value}
+            onClick={() => setCategory(value)}
+            size="sm"
+            variant={category === value ? "secondary" : "outline"}
           >
-            <option value="all">All categories</option>
-            {categories.map((value) => (
-              <option key={value} value={value}>
-                {value}
-              </option>
-            ))}
-          </select>
-        </label>
+            {value === "all" ? "All" : value.replace(/-/g, " ")}
+          </Button>
+        ))}
+      </div>
+      <div className="flex items-center justify-between gap-3">
+        <p aria-live="polite" className="text-muted-foreground text-sm">
+          {entries.length} integrations shown
+        </p>
         <label>
           <span className="sr-only">Filter by capability</span>
           <select
             aria-label="Filter by capability"
-            className="border-input bg-background h-9 rounded-md border px-3 text-sm"
+            className="border-input bg-background h-8 rounded-md border px-2 text-sm"
             onChange={(event) => setCapability(event.target.value)}
             value={capability}
           >
@@ -617,9 +704,6 @@ export function IntegrationDirectory({
           </select>
         </label>
       </div>
-      <p aria-live="polite" className="text-muted-foreground text-sm">
-        {entries.length} integrations shown
-      </p>
       {entries.length === 0 ? (
         <p className="border-border text-muted-foreground rounded-xl border border-dashed p-8 text-center text-sm">
           No integrations match these filters.
@@ -644,13 +728,12 @@ export function IntegrationDirectory({
                 >
                   {group.label} ({groupEntries.length})
                 </h2>
-                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                <div className="border-border divide-border divide-y rounded-xl border">
                   {groupEntries.map((entry) => (
-                    <IntegrationCard
+                    <IntegrationRow
                       entry={entry}
                       key={entry.integration.id}
                       onAction={onAction}
-                      onConnectionAction={onConnectionAction}
                       onDetails={(nextEntry) => {
                         const activeElement = document.activeElement;
                         openDetails(

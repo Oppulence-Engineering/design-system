@@ -259,6 +259,68 @@ export function buildIntegrationDirectory(
   };
 }
 
+export interface IntegrationDirectoryFilter {
+  /** Matched against the entry's precomputed search text, case-insensitively. */
+  query?: string;
+  /** Restrict to one catalogue category, for example "analytics". */
+  category?: string;
+  /** Restrict to particular directory states, for example only connectable. */
+  availability?: readonly DirectoryAvailability[];
+}
+
+export interface IntegrationDirectoryFacets {
+  /** Entry count per category, over the entries that survive the filter. */
+  categories: ReadonlyMap<string, number>;
+  /** Entry count per directory availability, over the same entries. */
+  availability: ReadonlyMap<DirectoryAvailability, number>;
+}
+
+function countBy<T, K>(
+  items: readonly T[],
+  key: (item: T) => K,
+): ReadonlyMap<K, number> {
+  const counts = new Map<K, number>();
+  for (const item of items) {
+    const bucket = key(item);
+    counts.set(bucket, (counts.get(bucket) ?? 0) + 1);
+  }
+  return counts;
+}
+
+/**
+ * Narrows a loaded directory. The catalogue is larger than any product wants to
+ * render at once and only some of it is connectable, so searching and faceting
+ * is the normal path rather than an optimisation. Kept pure and framework-free
+ * so it is testable without a DOM, the same way the loader controller is.
+ */
+export function filterIntegrationDirectory(
+  entries: readonly IntegrationDirectoryEntry[],
+  filter: IntegrationDirectoryFilter = {},
+): {
+  entries: readonly IntegrationDirectoryEntry[];
+  facets: IntegrationDirectoryFacets;
+} {
+  const needle = filter.query?.trim().toLocaleLowerCase("en-US");
+  const allowed = filter.availability?.length
+    ? new Set(filter.availability)
+    : undefined;
+  const matched = entries.filter((entry) => {
+    if (filter.category && entry.integration.category !== filter.category) {
+      return false;
+    }
+    if (allowed && !allowed.has(entry.availability)) return false;
+    if (!needle) return true;
+    return entry.searchText.toLocaleLowerCase("en-US").includes(needle);
+  });
+  return {
+    entries: matched,
+    facets: {
+      categories: countBy(matched, (entry) => entry.integration.category),
+      availability: countBy(matched, (entry) => entry.availability),
+    },
+  };
+}
+
 export function createIntegrationDirectoryResolver<TContext>(input: {
   product: Product;
   resolver: IntegrationConnectionResolver<TContext>;
