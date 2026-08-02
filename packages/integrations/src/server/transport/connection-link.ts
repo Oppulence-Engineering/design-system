@@ -344,11 +344,21 @@ export function createIntegrationConnectionLinkRuntime(
           "INTEGRATION_CONNECTION_LINK_PROVIDER_UNAVAILABLE",
         );
       }
+      /*
+       * Outside the catch below, which rewrites anything it does not recognise
+       * into COMPLETION_FAILED. The product's authorizer is the natural place
+       * to throw its own error to deny a request, and a plain Error — the
+       * obvious thing to throw — came back to the caller as a generic
+       * provider failure. The request was still refused, but an HTTP layer
+       * could not map it to a 403 and a denial was indistinguishable from a
+       * Plaid outage in monitoring.
+       */
+      await authorize(
+        { product: input.data.product, subjectId: input.data.subjectId },
+        "plaid",
+      );
+
       try {
-        await authorize(
-          { product: input.data.product, subjectId: input.data.subjectId },
-          "plaid",
-        );
         const response = await (
           plaidConfig.clientFactory ?? (() => createPlaidClient(plaidConfig))
         )().itemPublicTokenExchange({
@@ -458,11 +468,13 @@ export function createIntegrationConnectionLinkRuntime(
           "INTEGRATION_CONNECTION_LINK_PROVIDER_UNAVAILABLE",
         );
       }
+      // Outside the catch below, for the reason given in completePlaidLink.
+      await authorize(
+        { product: input.data.product, subjectId: input.data.subjectId },
+        "merge",
+      );
+
       try {
-        await authorize(
-          { product: input.data.product, subjectId: input.data.subjectId },
-          "merge",
-        );
         const response = await (mergeConfig.clientFactory ?? createMergeClient)(
           mergeConfig.apiKey,
         ).accountTokenRetrieve({ publicToken: input.data.publicToken });

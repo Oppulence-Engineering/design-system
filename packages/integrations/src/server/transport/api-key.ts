@@ -119,6 +119,64 @@ function validateSecureUrl(value: string): void {
   }
 }
 
+/**
+ * Hosts a connection may never point a request at.
+ *
+ * A literal `apiBaseUrl` in a provider profile is written in this package and
+ * is trusted. A host taken from `apiBaseUrlField` is not: it arrives in a
+ * credential field that whoever creates the connection controls. Without this,
+ * the scheme check alone would let a connection aim the server at anything it
+ * could reach — a link-local metadata endpoint, a service on the cluster
+ * network, another tenant's internal host — and the executor returns the
+ * response body to the caller, so it reads as well as reaches.
+ *
+ * IPv4-mapped and IPv6-embedded forms are covered because the check runs on the
+ * bracket-stripped hostname, and `0x7f.1`-style shorthands never parse as a
+ * hostname `URL` will accept alongside these patterns.
+ *
+ * This does not defeat a hostname that resolves to a private address: DNS is
+ * consulted by `fetch`, after this runs. Closing that needs resolve-then-pin,
+ * which the platform `fetch` does not expose. Treat this as the first line, and
+ * put egress control in the network for the rest.
+ */
+const BLOCKED_HOST_PATTERNS: readonly RegExp[] = [
+  /^localhost$/iu,
+  /\.localhost$/iu,
+  /^127\./u,
+  /^0\./u,
+  /^10\./u,
+  /^169\.254\./u,
+  /^192\.168\./u,
+  /^172\.(?:1[6-9]|2\d|3[01])\./u,
+  /^100\.(?:6[4-9]|[7-9]\d|1[01]\d|12[0-7])\./u,
+  /^::1$/u,
+  /^::$/u,
+  /^fe[89ab][0-9a-f]:/iu,
+  /^f[cd][0-9a-f]{2}:/iu,
+  /^::ffff:/iu,
+  /\.internal$/iu,
+  /\.local$/iu,
+];
+
+/**
+ * Validates a base URL supplied by a connection rather than by this package.
+ */
+function validateConnectionSuppliedUrl(value: string): void {
+  validateSecureUrl(value);
+
+  let hostname: string;
+  try {
+    // IPv6 hostnames arrive bracketed; the patterns above expect them bare.
+    hostname = new URL(value).hostname.replace(/^\[|\]$/gu, "");
+  } catch {
+    throw new ApiKeyProviderError("API_KEY_PROVIDER_CONFIGURATION_INVALID");
+  }
+
+  if (BLOCKED_HOST_PATTERNS.some((pattern) => pattern.test(hostname))) {
+    throw new ApiKeyProviderError("API_KEY_PROVIDER_CONFIGURATION_INVALID");
+  }
+}
+
 function providerApiUrl(apiBaseUrl: string, path: string): URL {
   if (
     path.length > 2_000 ||
@@ -218,8 +276,19 @@ export function createApiKeyProviderSdk(
 ): ApiKeyProviderSdk {
   const requestTimeoutMs = configuration.requestTimeoutMs ?? 15_000;
   const pathPrefix = configuration.credentialPathPrefix;
-  const hasTransport =
+  /*
+   * A profile names its host either literally or by the credential field that
+   * carries it. `apiBaseUrlField` was missing from both this and the guard
+   * below, so any profile that used it — the whole point of the field, a
+   * self-hosted or regional provider that has no single literal host — failed
+   * construction with CONFIGURATION_INVALID. The request path that reads the
+   * field was unreachable, which is why no provider adopted it.
+   */
+  const hasHost =
     configuration.apiBaseUrl !== undefined ||
+    configuration.apiBaseUrlField !== undefined;
+  const hasTransport =
+    hasHost ||
     configuration.credentialHeader !== undefined ||
     pathPrefix !== undefined;
   const headerName = configuration.credentialHeader?.toLocaleLowerCase("en-US");
@@ -227,10 +296,14 @@ export function createApiKeyProviderSdk(
     !Number.isSafeInteger(requestTimeoutMs) ||
     requestTimeoutMs < 100 ||
     requestTimeoutMs > 120_000 ||
-    // A transport needs a base URL and exactly one place to put the credential.
+    // A transport needs a host and exactly one place to put the credential.
     (hasTransport &&
-      (!configuration.apiBaseUrl ||
+      (!hasHost ||
         Boolean(configuration.credentialHeader) === Boolean(pathPrefix))) ||
+    // Naming both a literal host and a field to read one from is ambiguous;
+    // the request path would silently prefer the field.
+    (configuration.apiBaseUrl !== undefined &&
+      configuration.apiBaseUrlField !== undefined) ||
     (configuration.credentialHeader !== undefined &&
       (!SAFE_HEADER_NAME.test(configuration.credentialHeader) ||
         !headerName ||
@@ -309,7 +382,9 @@ export function createApiKeyProviderSdk(
         throw new ApiKeyProviderError("API_KEY_PROVIDER_TRANSPORT_UNAVAILABLE");
       }
       if (configuration.apiBaseUrlField) {
-        validateSecureUrl(configuredBase);
+        // The connection chose this host, so it is checked against the blocked
+        // ranges too, not only for scheme.
+        validateConnectionSuppliedUrl(configuredBase);
       }
       const url = providerApiUrl(configuredBase, path);
       const headers = new Headers(request.headers);
