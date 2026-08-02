@@ -202,7 +202,7 @@ export * as DesktopClient from "./index";
  * 0.1.0, so anything reporting the version, or gating behaviour on it, was told
  * the wrong number. index.test.ts fails if the two drift apart again.
  */
-export const VERSION = "0.1.0";
+export const VERSION = "0.2.0";
 
 /** Package metadata */
 export const METADATA = {

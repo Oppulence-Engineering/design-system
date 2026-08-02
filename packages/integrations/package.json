@@ -1,6 +1,6 @@
 {
   "name": "@oppulence/integrations",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Browser-safe integration catalogue, contracts, parity reporting, and directory helpers for Oppulence products",
   "type": "module",
   "sideEffects": false,
