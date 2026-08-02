@@ -37,7 +37,16 @@ for (const entry of readdirSync("src/server/providers", {
   const starts = [...source.matchAll(/^    action: "([a-z0-9-]+)",$/gmu)];
   for (let n = 0; n < starts.length; n += 1) {
     const from = starts[n]!.index!;
-    const to = n + 1 < starts.length ? starts[n + 1]!.index! : source.length;
+    // The last action ends at the close of the ACTIONS array, not at the end
+    // of the file: beyond it sits the deferrals map, whose keys are quoted at
+    // the same indent and read as body fields.
+    const arrayEnd = source.indexOf("\n];", from);
+    const to =
+      n + 1 < starts.length
+        ? starts[n + 1]!.index!
+        : arrayEnd >= 0
+          ? arrayEnd
+          : source.length;
     const block = source.slice(from, to);
     const method = /^    method: "([A-Z]+)",$/mu.exec(block)?.[1] ?? "";
     const urlAt = block.indexOf("    url: ");

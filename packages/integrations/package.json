@@ -117,6 +117,7 @@
     "providers:generate": "bun scripts/openapi-generate.ts",
     "providers:smoke": "bun scripts/smoke-routes.ts",
     "providers:sync": "bun scripts/sync-gate.ts",
+    "providers:verify": "bun scripts/verify-spec-fidelity.ts",
     "providers:wire": "bun scripts/wire-provider.ts",
     "providers:openapi": "bun scripts/openapi-plan.ts",
     "providers:plan": "bun scripts/provider-plan.ts",
