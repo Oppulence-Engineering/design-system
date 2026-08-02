@@ -116,6 +116,8 @@ interface Operation {
   summary: string;
   params: Param[];
   body?: { required: string[]; properties: Record<string, any> };
+  /** Whether the document marks the request body required. */
+  bodyRequired?: boolean;
   /** Set when the vendor serves a JSON dialect rather than application/json. */
   contentType?: string;
 }
@@ -145,8 +147,10 @@ for (const [path, rawItem] of Object.entries<any>(spec.paths ?? {})) {
       .filter((param) => param.name);
     let body: Operation["body"];
     let contentType: string | undefined;
+    let bodyRequired = false;
     let rawBodySchema: any;
     if (op.requestBody) {
+      bodyRequired = Boolean(deref(op.requestBody).required);
       const content = deref(op.requestBody).content ?? {};
       // A vendor may serve a JSON dialect rather than application/json —
       // Rootly's is application/vnd.api+json — and the request has to carry
@@ -180,6 +184,7 @@ for (const [path, rawItem] of Object.entries<any>(spec.paths ?? {})) {
         .trim(),
       params,
       body,
+      bodyRequired,
       ...(contentType && contentType !== "application/json"
         ? { contentType }
         : {}),
@@ -499,6 +504,14 @@ for (const entry of mapping) {
   const inputs: string[] = [];
   const seen = new Set<string>();
 
+  // Every variable the path template interpolates has to be declared, even
+  // when the document does not list it as a parameter. Otherwise restSegment
+  // is handed undefined and the action can never be invoked at all.
+  const templateVars = [...op.path.matchAll(/\{([^}]+)\}/gu)].map((m) => m[1]!);
+  for (const name of templateVars) {
+    if (pathParams.some((param) => param.name === name)) continue;
+    pathParams.push({ name, in: "path", required: true, type: "string" });
+  }
   for (const param of pathParams) {
     const key = camel(param.name);
     if (seen.has(key)) continue;
@@ -514,6 +527,22 @@ for (const entry of mapping) {
     );
   }
   const bodyEntries: string[] = [];
+  // A write whose document declares a request body this cannot decompose —
+  // a bare object, a oneOf, an inline additionalProperties — still has to send
+  // one. Without this the action POSTs nothing, which no create accepts.
+  if (
+    ["POST", "PUT", "PATCH"].includes(op.method) &&
+    !Object.keys(op.body?.properties ?? {}).length
+  ) {
+    // Required only when the document says so. An action sub-path like
+    // /alerts/{id}/acknowledge often accepts an empty POST, and demanding a
+    // body there would make a working call impossible.
+    inputs.push(
+      `        body: SpecObject${op.bodyRequired ? "" : ".optional()"},`,
+    );
+    bodyEntries.push("      ...(i.body ?? {}),");
+    seen.add("body");
+  }
   if (op.body) {
     for (const [name, rawSchema] of Object.entries(op.body.properties)) {
       const schema = deref(rawSchema);

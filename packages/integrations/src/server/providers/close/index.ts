@@ -57,9 +57,12 @@ const ACTIONS: readonly RestAction<any>[] = [
     url: "/lead/",
     input: z
       .object({
-        /* no declared parameters */
+        body: SpecObject,
       })
       .strict(),
+    body: (i) => ({
+      ...(i.body ?? {}),
+    }),
   },
   {
     action: "get-lead",
@@ -84,8 +87,12 @@ const ACTIONS: readonly RestAction<any>[] = [
     input: z
       .object({
         id: z.string().max(4_000),
+        body: SpecObject,
       })
       .strict(),
+    body: (i) => ({
+      ...(i.body ?? {}),
+    }),
   },
   {
     action: "delete-lead",
@@ -452,8 +459,12 @@ const ACTIONS: readonly RestAction<any>[] = [
     input: z
       .object({
         fields: z.string().max(4_000).optional(),
+        body: SpecObject,
       })
       .strict(),
+    body: (i) => ({
+      ...(i.body ?? {}),
+    }),
   },
   {
     action: "update-task",

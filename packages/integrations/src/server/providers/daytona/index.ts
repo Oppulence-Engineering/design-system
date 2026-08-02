@@ -160,8 +160,12 @@ const ACTIONS: readonly RestAction<any>[] = [
     input: z
       .object({
         sandboxIdOrName: z.string().max(4_000),
+        body: SpecObject.optional(),
       })
       .strict(),
+    body: (i) => ({
+      ...(i.body ?? {}),
+    }),
   },
   {
     action: "stop-sandbox",
@@ -174,8 +178,12 @@ const ACTIONS: readonly RestAction<any>[] = [
       .object({
         sandboxIdOrName: z.string().max(4_000),
         force: z.boolean().optional(),
+        body: SpecObject.optional(),
       })
       .strict(),
+    body: (i) => ({
+      ...(i.body ?? {}),
+    }),
   },
   {
     action: "delete-sandbox",

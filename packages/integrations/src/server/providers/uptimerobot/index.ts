@@ -65,9 +65,12 @@ const ACTIONS: readonly RestAction<any>[] = [
     url: "/monitors",
     input: z
       .object({
-        /* no declared parameters */
+        body: SpecObject,
       })
       .strict(),
+    body: (i) => ({
+      ...(i.body ?? {}),
+    }),
   },
   {
     action: "update-monitor",
@@ -217,8 +220,12 @@ const ACTIONS: readonly RestAction<any>[] = [
     input: z
       .object({
         id: z.number(),
+        body: SpecObject.optional(),
       })
       .strict(),
+    body: (i) => ({
+      ...(i.body ?? {}),
+    }),
   },
   {
     action: "start-monitor",
@@ -230,8 +237,12 @@ const ACTIONS: readonly RestAction<any>[] = [
     input: z
       .object({
         id: z.number(),
+        body: SpecObject.optional(),
       })
       .strict(),
+    body: (i) => ({
+      ...(i.body ?? {}),
+    }),
   },
   {
     action: "list-incidents",

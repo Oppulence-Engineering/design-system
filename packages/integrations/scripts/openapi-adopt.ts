@@ -75,6 +75,8 @@ interface Candidate {
     enum?: string[];
   }>;
   body?: { required: string[]; properties: Record<string, any> };
+  /** Whether the document marks the request body required. */
+  bodyRequired?: boolean;
   contentType?: string;
 }
 
@@ -99,8 +101,10 @@ for (const [path, rawItem] of Object.entries<any>(spec.paths ?? {})) {
       .filter((p) => p.name);
     let body: Candidate["body"];
     let contentType: string | undefined;
+    let bodyRequired = false;
     let bodyRaw: any;
     if (op.requestBody) {
+      bodyRequired = Boolean(deref(op.requestBody).required);
       const content = deref(op.requestBody).content ?? {};
       contentType =
         Object.keys(content).find((t) => t === "application/json") ??
@@ -145,6 +149,7 @@ for (const [path, rawItem] of Object.entries<any>(spec.paths ?? {})) {
         ).length,
       params,
       body,
+      bodyRequired,
       ...(contentType && contentType !== "application/json"
         ? { contentType }
         : {}),
@@ -306,6 +311,15 @@ for (const candidate of chosen) {
   const queryParams = candidate.params.filter((p) => p.in === "query");
   const inputs: string[] = [];
   const seen = new Set<string>();
+  // Every variable the path template interpolates has to be declared, even
+  // when the document does not list it as a parameter. Otherwise restSegment
+  // is handed undefined and the action can never be invoked at all.
+  for (const name of [...candidate.path.matchAll(/\{([^}]+)\}/gu)].map(
+    (m) => m[1]!,
+  )) {
+    if (pathParams.some((p) => p.name === name)) continue;
+    pathParams.push({ name, in: "path", required: true, type: "string" });
+  }
   for (const p of pathParams) {
     const key = camel(p.name);
     if (seen.has(key)) continue;
@@ -321,6 +335,22 @@ for (const candidate of chosen) {
     );
   }
   const bodyEntries: string[] = [];
+  // A write whose document declares a request body this cannot decompose —
+  // a bare object, a oneOf, an inline additionalProperties — still has to send
+  // one. Without this the action POSTs nothing, which no create accepts.
+  if (
+    ["POST", "PUT", "PATCH"].includes(candidate.method) &&
+    !Object.keys(candidate.body?.properties ?? {}).length
+  ) {
+    // Required only when the document says so. An action sub-path like
+    // /alerts/{id}/acknowledge often accepts an empty POST, and demanding a
+    // body there would make a working call impossible.
+    inputs.push(
+      `        body: SpecObject${candidate.bodyRequired ? "" : ".optional()"},`,
+    );
+    bodyEntries.push("      ...(i.body ?? {}),");
+    seen.add("body");
+  }
   for (const [field, rawSchema] of Object.entries(
     candidate.body?.properties ?? {},
   )) {

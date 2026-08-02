@@ -91,8 +91,12 @@ const ACTIONS: readonly RestAction<any>[] = [
         build: z.string().max(4_000).optional(),
         waitForFinish: z.number().optional(),
         webhooks: z.string().max(4_000).optional(),
+        body: SpecObject,
       })
       .strict(),
+    body: (i) => ({
+      ...(i.body ?? {}),
+    }),
   },
   {
     action: "get-dataset-items",

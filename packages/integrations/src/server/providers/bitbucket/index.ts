@@ -51,8 +51,12 @@ const ACTIONS: readonly RestAction<any>[] = [
       .object({
         repoSlug: z.string().max(4_000),
         workspace: z.string().max(4_000),
+        body: SpecObject.optional(),
       })
       .strict(),
+    body: (i) => ({
+      ...(i.body ?? {}),
+    }),
   },
   {
     action: "update-repository",
@@ -65,8 +69,12 @@ const ACTIONS: readonly RestAction<any>[] = [
       .object({
         repoSlug: z.string().max(4_000),
         workspace: z.string().max(4_000),
+        body: SpecObject.optional(),
       })
       .strict(),
+    body: (i) => ({
+      ...(i.body ?? {}),
+    }),
   },
   {
     action: "delete-repository",
@@ -133,8 +141,12 @@ const ACTIONS: readonly RestAction<any>[] = [
     input: z
       .object({
         workspace: z.string().max(4_000),
+        body: SpecObject.optional(),
       })
       .strict(),
+    body: (i) => ({
+      ...(i.body ?? {}),
+    }),
   },
   {
     action: "get-hook",
@@ -161,8 +173,12 @@ const ACTIONS: readonly RestAction<any>[] = [
       .object({
         uid: z.string().max(4_000),
         workspace: z.string().max(4_000),
+        body: SpecObject.optional(),
       })
       .strict(),
+    body: (i) => ({
+      ...(i.body ?? {}),
+    }),
   },
   {
     action: "create-snippet",
@@ -172,9 +188,12 @@ const ACTIONS: readonly RestAction<any>[] = [
     url: "/2.0/snippets",
     input: z
       .object({
-        /* no declared parameters */
+        body: SpecObject.optional(),
       })
       .strict(),
+    body: (i) => ({
+      ...(i.body ?? {}),
+    }),
   },
   {
     action: "get-snippet",
@@ -201,8 +220,12 @@ const ACTIONS: readonly RestAction<any>[] = [
       .object({
         encodedId: z.string().max(4_000),
         workspace: z.string().max(4_000),
+        body: SpecObject.optional(),
       })
       .strict(),
+    body: (i) => ({
+      ...(i.body ?? {}),
+    }),
   },
   {
     action: "delete-snippet",
@@ -305,9 +328,12 @@ const ACTIONS: readonly RestAction<any>[] = [
     url: "/2.0/addon",
     input: z
       .object({
-        /* no declared parameters */
+        body: SpecObject.optional(),
       })
       .strict(),
+    body: (i) => ({
+      ...(i.body ?? {}),
+    }),
   },
   {
     action: "delete-addon",

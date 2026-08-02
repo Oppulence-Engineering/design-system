@@ -250,8 +250,12 @@ const ACTIONS: readonly RestAction<any>[] = [
     input: z
       .object({
         force: z.boolean().optional(),
+        body: SpecObject.optional(),
       })
       .strict(),
+    body: (i) => ({
+      ...(i.body ?? {}),
+    }),
   },
   {
     action: "get-contact",
@@ -606,9 +610,12 @@ const ACTIONS: readonly RestAction<any>[] = [
     url: "/tasks",
     input: z
       .object({
-        /* no declared parameters */
+        body: SpecObject.optional(),
       })
       .strict(),
+    body: (i) => ({
+      ...(i.body ?? {}),
+    }),
   },
   {
     action: "update-task",
@@ -618,6 +625,7 @@ const ACTIONS: readonly RestAction<any>[] = [
     url: (i) => `/tasks/${restSegment(i.id)}`,
     input: z
       .object({
+        id: z.string().max(4_000),
         account: z.number().optional(),
         description: z.string().max(4_000).optional(),
         reminderDate: z.string().max(4_000).optional(),
@@ -643,7 +651,7 @@ const ACTIONS: readonly RestAction<any>[] = [
     url: (i) => `/tasks/${restSegment(i.id)}`,
     input: z
       .object({
-        /* no declared parameters */
+        id: z.string().max(4_000),
       })
       .strict(),
     emptyResponse: "optional",

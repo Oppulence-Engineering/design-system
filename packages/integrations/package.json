@@ -112,6 +112,7 @@
     "lint": "prettier --check \"{src,tests,scripts}/**/*.{ts,tsx}\"",
     "prepublishOnly": "bun run clean && bun run build",
     "providers:adopt": "bun scripts/openapi-adopt.ts",
+    "providers:audit": "bun scripts/audit-packs.ts",
     "providers:coverage": "bun scripts/provider-coverage.ts",
     "providers:generate": "bun scripts/openapi-generate.ts",
     "providers:smoke": "bun scripts/smoke-routes.ts",

@@ -823,8 +823,12 @@ const ACTIONS: readonly RestAction<any>[] = [
     input: z
       .object({
         id: z.string().max(4_000),
+        body: SpecObject.optional(),
       })
       .strict(),
+    body: (i) => ({
+      ...(i.body ?? {}),
+    }),
   },
   {
     action: "resolve-alert",

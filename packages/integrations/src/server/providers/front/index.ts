@@ -164,9 +164,12 @@ const ACTIONS: readonly RestAction<any>[] = [
     url: "/contacts",
     input: z
       .object({
-        /* no declared parameters */
+        body: SpecObject.optional(),
       })
       .strict(),
+    body: (i) => ({
+      ...(i.body ?? {}),
+    }),
   },
   {
     action: "get-contact",
