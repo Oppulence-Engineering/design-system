@@ -79,6 +79,7 @@ export const EXECUTABLE_INTEGRATION_IDS: readonly string[] = [
   "google-tasks",
   "google-translate",
   "google-vault",
+  "grafana",
   "granola",
   "hubspot",
   "hunter-io",

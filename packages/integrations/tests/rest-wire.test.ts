@@ -550,6 +550,21 @@ const CASES: ReadonlyArray<{
     path: "/0/jobs",
   },
   {
+    // Grafana has no dashboard collection; /api/search is how dashboards are
+    // listed. Its host comes from the connection, not from a fixed profile.
+    operationId: "grafana:list-dashboards",
+    input: {},
+    method: "GET",
+    path: "/api/search",
+  },
+  {
+    // "datasources" is one word in Grafana's paths.
+    operationId: "grafana:list-data-sources",
+    input: {},
+    method: "GET",
+    path: "/api/datasources",
+  },
+  {
     operationId: "wikipedia:get-page-summary",
     input: { title: "Rust" },
     method: "GET",

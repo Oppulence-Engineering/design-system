@@ -350,6 +350,22 @@ function score(actionSuffix: string, op: Operation): number {
 type Override = string | { defer: string };
 const OVERRIDES: Readonly<Record<string, Readonly<Record<string, Override>>>> =
   {
+    grafana: {
+      // "datasources" is one word in Grafana's paths and two in the action
+      // name, so token overlap finds nothing and all three are deferred.
+      "list-data-sources": "GET /api/datasources",
+      "get-data-source": "GET /api/datasources/uid/{uid}",
+      "check-data-source-health": "GET /api/datasources/uid/{uid}/health",
+      // Grafana has no dashboard collection: /api/search is how dashboards are
+      // listed, and /api/dashboard/snapshots — which scored highest — returns
+      // snapshots, a different resource.
+      "list-dashboards": "GET /api/search",
+      "get-health": "GET /api/health",
+      "update-dashboard": {
+        defer:
+          "Grafana upserts through POST /api/dashboards/db, already bound to create-dashboard. The highest-scoring alternative was /api/user/stars/dashboard/uid/{uid}, which stars a dashboard rather than updating it.",
+      },
+    },
     rootly: {
       "list-retrospectives": {
         defer:

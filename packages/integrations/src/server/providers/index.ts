@@ -204,6 +204,7 @@ export * from "./google-translate";
 export * from "./google-vault";
 export * from "./granola";
 export * from "./hubspot";
+export * from "./grafana";
 export * from "./hunter-io";
 export * from "./incident-io";
 export * from "./infisical";

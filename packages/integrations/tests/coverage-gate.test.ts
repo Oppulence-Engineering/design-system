@@ -20,8 +20,8 @@ import {
  * did. The target is the pinned source: 232 providers, 3,890 actions, and 363
  * triggers.
  */
-const EXECUTABLE_PROVIDERS = 137;
-const EXECUTABLE_ACTIONS = 2399;
+const EXECUTABLE_PROVIDERS = 138;
+const EXECUTABLE_ACTIONS = 2423;
 
 const oauthRuntime = {
   async withCredential<T>(
@@ -178,7 +178,7 @@ describe("provider parity coverage gate", () => {
 
     // Most providers ship as packs; the rest predate the pack contract and
     // are registered directly.
-    expect(report.providers).toBe(114);
+    expect(report.providers).toBe(115);
     // Deferrals fall into three kinds, and each one records which it is at
     // the action: an endpoint on a host this lane cannot reach, since a
     // provider resolves every action against one host; a request shape this
@@ -186,7 +186,7 @@ describe("provider parity coverage gate", () => {
     // own published document does not describe. The per-action reasons are
     // the record — enumerating them here would go stale every time a provider
     // lands, and a stale comment is worse than none.
-    expect(report.deferredOperations).toBe(150);
+    expect(report.deferredOperations).toBe(151);
     // Every supported action is owned by exactly one lane.
     expect(report.operations).toBe(
       report.byLane.sdk.operations +
@@ -196,7 +196,7 @@ describe("provider parity coverage gate", () => {
     // Typed REST is where a provider lands when no maintained SDK models its
     // surface. It is now the largest lane by action count, because the
     // providers still outstanding are almost all of that kind.
-    expect(report.byLane.typed_rest.operations).toBe(719);
+    expect(report.byLane.typed_rest.operations).toBe(743);
     // The special lane carries the seven protocol providers.
     expect(report.byLane.special.operations).toBe(108);
   });
@@ -206,7 +206,7 @@ describe("provider parity coverage gate", () => {
       pack.coverage.filter((action) => action.lane === "typed_rest"),
     );
 
-    expect(restActions).toHaveLength(719);
+    expect(restActions).toHaveLength(743);
     for (const action of restActions) {
       expect(action.sdkReview?.trim().length ?? 0).toBeGreaterThan(0);
     }
@@ -242,8 +242,8 @@ describe("provider parity coverage gate", () => {
       actionsRemaining: sourceActions - EXECUTABLE_ACTIONS,
       triggersRemaining: 363 - 60,
     }).toEqual({
-      providersRemaining: 95,
-      actionsRemaining: 1491,
+      providersRemaining: 94,
+      actionsRemaining: 1467,
       triggersRemaining: 303,
     });
   });

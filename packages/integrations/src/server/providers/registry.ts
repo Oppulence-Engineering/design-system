@@ -49,6 +49,7 @@ import { createGoogleMapsPack } from "./google-maps";
 import { createGoogleTranslatePack } from "./google-translate";
 import { createGoogleVaultPack } from "./google-vault";
 import { createGranolaPack } from "./granola";
+import { createGrafanaPack } from "./grafana";
 import { createHunterIoPack } from "./hunter-io";
 import { createIncidentIoPack } from "./incident-io";
 import { createInfisicalPack } from "./infisical";
@@ -168,6 +169,7 @@ export const BUILT_IN_PROVIDER_PACKS: readonly IntegrationProviderPack[] = [
   createGoogleTranslatePack(),
   createGoogleVaultPack(),
   createGranolaPack(),
+  createGrafanaPack(),
   createHunterIoPack(),
   createIamPack(),
   createIdentityCenterPack(),

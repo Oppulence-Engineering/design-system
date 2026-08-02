@@ -19,6 +19,16 @@ export interface ApiKeyProviderConfiguration {
    * cannot make arbitrary HTTP requests through this generic transport.
    */
   apiBaseUrl?: string;
+  /**
+   * Names the credential field that carries the base URL, for a provider whose
+   * host belongs to the connection rather than to the vendor — a self-hosted
+   * Grafana or WordPress, or a regional cloud. The field is required, and its
+   * value is validated as a secure URL on every request, so a connection
+   * cannot point the transport at an arbitrary host.
+   *
+   * Supply this or `apiBaseUrl`, not both.
+   */
+  apiBaseUrlField?: string;
   /** The credential is supplied in this server-side HTTP header. */
   credentialHeader?: string;
   /**
@@ -268,7 +278,7 @@ export function createApiKeyProviderSdk(
 
     async request(rawCredential, request) {
       if (
-        !configuration.apiBaseUrl ||
+        (!configuration.apiBaseUrl && !configuration.apiBaseUrlField) ||
         (!configuration.credentialHeader && !pathPrefix)
       ) {
         throw new ApiKeyProviderError("API_KEY_PROVIDER_TRANSPORT_UNAVAILABLE");
@@ -287,7 +297,21 @@ export function createApiKeyProviderSdk(
         }
         path = `${pathPrefix.replace("{credential}", credential.apiKey)}${request.path}`;
       }
-      const url = providerApiUrl(configuration.apiBaseUrl, path);
+      // A provider whose host is per-tenant — a self-hosted Grafana, a
+      // regional cloud, a customer's own WordPress — cannot name one literal
+      // host here. `apiBaseUrlField` says which credential field carries it,
+      // and the value is validated exactly like a configured host so a
+      // connection cannot redirect a request anywhere it likes.
+      const configuredBase = configuration.apiBaseUrlField
+        ? credential.fields?.[configuration.apiBaseUrlField]
+        : configuration.apiBaseUrl;
+      if (!configuredBase) {
+        throw new ApiKeyProviderError("API_KEY_PROVIDER_TRANSPORT_UNAVAILABLE");
+      }
+      if (configuration.apiBaseUrlField) {
+        validateSecureUrl(configuredBase);
+      }
+      const url = providerApiUrl(configuredBase, path);
       const headers = new Headers(request.headers);
       if (configuration.credentialHeader) {
         headers.set(
