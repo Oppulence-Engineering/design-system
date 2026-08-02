@@ -1,3 +1,23 @@
+/**
+ * Parses a rate-limit header value that must be a whole number.
+ *
+ * `Number.parseInt` stops at the first character it cannot read, so "12abc"
+ * becomes 12 and a malformed header turns into a plausible date rather than
+ * nothing. A header is either a number or it is not.
+ */
+function parseIntegerHeader(value: string): number | undefined {
+  const trimmed = value.trim();
+  if (!/^[+-]?\d+$/u.test(trimmed)) return undefined;
+  const parsed = Number(trimmed);
+  return Number.isSafeInteger(parsed) ? parsed : undefined;
+}
+
+/** A Date built from an out-of-range epoch is Invalid, which helps no caller. */
+function validDate(epochMs: number): Date | undefined {
+  const date = new Date(epochMs);
+  return Number.isNaN(date.getTime()) ? undefined : date;
+}
+
 export function calculateResetAt(
   resets: string | undefined | null,
   format:
@@ -32,14 +52,10 @@ function calculateUnixTimestampResetAt(
   // Check if the input is null or undefined
   if (!resets) return;
 
-  // Convert the string to a number
-  const resetAt = Number.parseInt(resets, 10);
+  const resetAt = parseIntegerHeader(resets);
+  if (resetAt === undefined) return;
 
-  // If the string doesn't match the expected format, return undefined
-  if (Number.isNaN(resetAt)) return;
-
-  // Return the date
-  return new Date(resetAt * 1000);
+  return validDate(resetAt * 1000);
 }
 
 function calculateUnixTimestampInMsResetAt(
@@ -49,14 +65,10 @@ function calculateUnixTimestampInMsResetAt(
   // Check if the input is null or undefined
   if (!resets) return;
 
-  // Convert the string to a number
-  const resetAt = Number.parseInt(resets, 10);
+  const resetAt = parseIntegerHeader(resets);
+  if (resetAt === undefined) return;
 
-  // If the string doesn't match the expected format, return undefined
-  if (Number.isNaN(resetAt)) return;
-
-  // Return the date
-  return new Date(resetAt);
+  return validDate(resetAt);
 }
 
 function calculateISO8601ResetAt(
@@ -97,17 +109,18 @@ function calculateISO8601DurationOpenAIVariantResetAt(
   const seconds = Number.parseFloat(match[4] ?? "0") || 0;
   const milliseconds = Number.parseInt(match[5] ?? "0", 10) || 0;
 
-  // Calculate the future date based on the current date plus the extracted time
-  const resetAt = new Date(now);
-  resetAt.setDate(resetAt.getDate() + days);
-  resetAt.setHours(resetAt.getHours() + hours);
-  resetAt.setMinutes(resetAt.getMinutes() + minutes);
-  resetAt.setSeconds(resetAt.getSeconds() + Math.floor(seconds));
-  resetAt.setMilliseconds(
-    resetAt.getMilliseconds() +
-      (seconds - Math.floor(seconds)) * 1000 +
-      milliseconds,
-  );
+  /*
+   * Added as elapsed milliseconds rather than through the local-time setters.
+   * A rate limit resets after a duration, and setDate/setHours move the wall
+   * clock instead: across a spring-forward boundary "1d" advanced the clock a
+   * day but only 23 hours, so a caller retried an hour early.
+   */
+  const totalMs =
+    days * 86_400_000 +
+    hours * 3_600_000 +
+    minutes * 60_000 +
+    seconds * 1_000 +
+    milliseconds;
 
-  return resetAt;
+  return validDate(now.getTime() + totalMs);
 }
