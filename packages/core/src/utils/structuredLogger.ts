@@ -36,7 +36,14 @@ export class SimpleStructuredLogger implements StructuredLogger {
   ) {}
 
   child(fields: Record<string, unknown>, level?: LogLevel) {
-    return new SimpleStructuredLogger(this.name, level, {
+    /*
+     * Falls back to this logger's level, not to the constructor default.
+     * Passing `level` straight through meant an omitted argument — the usual
+     * call — landed on the default parameter, which re-derives the level from
+     * DEBUG and VERBOSE. A logger built at LogLevel.error handed out children
+     * that logged at info.
+     */
+    return new SimpleStructuredLogger(this.name, level ?? this.level, {
       ...this.fields,
       ...fields,
     });

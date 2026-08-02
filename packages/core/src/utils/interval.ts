@@ -259,6 +259,9 @@ export class IntervalService {
   #clearNextInterval() {
     if (this._nextInterval) {
       clearTimeout(this._nextInterval);
+      // Dropped along with the timer. Left set, it made a cleared timer
+      // indistinguishable from a live one.
+      this._nextInterval = undefined;
     }
   }
 
@@ -272,6 +275,17 @@ export class IntervalService {
    * @private
    */
   #scheduleNextInterval() {
+    /*
+     * Any timer already scheduled is cancelled first, so exactly one is ever
+     * outstanding. Stopping and restarting while a tick was still awaiting left
+     * two: `start` scheduled one, and the in-flight tick's `finally` scheduled
+     * another, since the service was enabled again by then. The orphan fired
+     * first and ran early — measured 50ms after the previous execution began
+     * rather than the 30ms of work plus the 40ms interval — and the tick it
+     * started then cancelled the legitimate timer, so the schedule stayed
+     * shifted rather than settling back.
+     */
+    this.#clearNextInterval();
     this._nextInterval = setTimeout(this.#doInterval, this._intervalMs);
   }
 }

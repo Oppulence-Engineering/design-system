@@ -194,6 +194,17 @@ export class Logger {
       onFlush: options?.onFlush,
     };
 
+    /*
+     * Any interval from an earlier call is cleared first. Assigning over the
+     * handle left the previous timer running with nothing holding it: calling
+     * enableBatching twice — to change maxSize, say — kept flushing on the old
+     * cadence and held the event loop open, and disableBatching could only
+     * clear the most recent one.
+     */
+    if (this.#flushInterval) {
+      clearInterval(this.#flushInterval);
+    }
+
     // Set up periodic flush
     this.#flushInterval = setInterval(() => {
       this.flush();
@@ -230,7 +241,7 @@ export class Logger {
    *
    * @returns {Promise<void>} Resolves when flush is complete
    */
-  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: Async log flush with batch serialization, transport delivery, and partial failure recovery
+  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: Async log flush with batch serialization and per-level console routing
   async flush(): Promise<void> {
     if (this.#batchBuffer.length === 0) return;
 
@@ -405,14 +416,12 @@ function createReplacer(replacer?: (key: string, value: unknown) => unknown) {
       return value.toString();
     }
 
-    // Handle circular references
-    if (
-      typeof value === "object" &&
-      value !== null &&
-      (value as Record<string, unknown>).__circular__
-    ) {
-      return "[Circular]";
-    }
+    /*
+     * There was a branch here replacing any value carrying a `__circular__`
+     * property with "[Circular]". Nothing in this package ever set that
+     * property, so it only ever fired on a caller's own field of that name.
+     * Cycles are already resolved by safeJsonClone before serialization.
+     */
 
     if (replacer) {
       return replacer(key, value);
@@ -457,17 +466,25 @@ function safeJsonClone(obj: unknown): unknown {
     if (seen.has(value)) {
       return "[Circular]";
     }
+
+    /*
+     * `seen` holds the ancestors of the value being cloned, not everything the
+     * clone has ever touched. Held for the whole walk, it reported the second
+     * appearance of any shared object as circular: logging
+     * `{ first: shared, second: shared }` recorded `second` as "[Circular]" and
+     * dropped its contents — a logger silently losing the data being logged.
+     */
     seen.add(value);
 
-    if (Array.isArray(value)) {
-      return value.map(clone);
-    }
+    const cloned = Array.isArray(value)
+      ? value.map(clone)
+      : Object.fromEntries(
+          Object.entries(value).map(([key, val]) => [key, clone(val)]),
+        );
 
-    const result: Record<string, unknown> = {};
-    for (const [key, val] of Object.entries(value)) {
-      result[key] = clone(val);
-    }
-    return result;
+    seen.delete(value);
+
+    return cloned;
   };
 
   try {

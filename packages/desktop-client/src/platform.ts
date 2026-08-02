@@ -128,6 +128,26 @@ class PlatformState {
 const platformState = PlatformState.getInstance();
 
 /**
+ * Counter behind {@link nextListenerId}, so ids stay unique within a session.
+ */
+let listenerSequence = 0;
+
+/**
+ * Builds an id no other listener can share.
+ *
+ * Ids used to be `deep-link-${Date.now()}`, which two registrations in the same
+ * millisecond both produce. `registerListener` tears down whatever already holds
+ * an id, so the second registration silently unsubscribed the first, and the
+ * first's unsubscribe function then removed the second's listener instead of its
+ * own. Registering several handlers during start-up, or a double mount under
+ * React strict mode, was enough to hit it.
+ */
+function nextListenerId(prefix: string): string {
+  listenerSequence += 1;
+  return `${prefix}-${Date.now()}-${listenerSequence}`;
+}
+
+/**
  * Checks if the application is running in a desktop environment. This function
  * caches the result for performance.
  *
@@ -302,7 +322,7 @@ export async function listenForDeepLinks(
     return () => {};
   }
 
-  const listenerId = `deep-link-${Date.now()}`;
+  const listenerId = nextListenerId("deep-link");
 
   try {
     // Set up the event listener with error handling

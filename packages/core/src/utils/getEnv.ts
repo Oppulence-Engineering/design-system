@@ -15,19 +15,35 @@ export function getEnvVar(
   return env[name] ?? defaultValue;
 }
 
+/**
+ * Get an environment variable as a number. Runtime agnostic.
+ *
+ * Anything that is not a finite number — including an empty or blank value,
+ * which a shell produces for `VAR=` — falls back to the default.
+ *
+ * @param name The name of the environment variable.
+ * @param defaultValue The value to return when the variable is unset or not a number.
+ * @returns The parsed number, or the default value.
+ */
 export function getNumberEnvVar(
   name: string,
   defaultValue?: number,
 ): number | undefined {
   const value = getEnvVar(name);
 
-  if (value === undefined) {
+  /*
+   * `Number("")` and `Number(" ")` are both 0, so a variable that was set but
+   * left empty read as a deliberate zero rather than as absent — a timeout or
+   * a limit configured that way silently became 0.
+   */
+  if (value === undefined || value.trim() === "") {
     return defaultValue;
   }
 
   const parsed = Number(value);
 
-  if (Number.isNaN(parsed)) {
+  // Rejects NaN and the infinities, neither of which is a usable setting.
+  if (!Number.isFinite(parsed)) {
     return defaultValue;
   }
 

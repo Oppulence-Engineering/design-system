@@ -13,6 +13,38 @@ export const NULL_SENTINEL = "$@null((";
 export const CIRCULAR_REFERENCE_SENTINEL = "$@circular((";
 
 /**
+ * Sentinel value recorded where nesting exceeded {@link MAX_FLATTEN_DEPTH}.
+ * Flattening recurses, so an unbounded structure overflows the stack; this
+ * marks the truncation instead of losing it silently.
+ */
+export const DEPTH_LIMIT_SENTINEL = "$@depth((";
+
+/**
+ * How deep flattening will descend before recording
+ * {@link DEPTH_LIMIT_SENTINEL}. Far beyond any hand-written payload, and far
+ * short of the recursion limit.
+ */
+export const MAX_FLATTEN_DEPTH = 256;
+
+/**
+ * Longest array {@link unflattenAttributes} will materialise from numeric keys.
+ * The reconstructed length comes from the largest index in the input, so
+ * without a bound a single key of "900000000" allocates 900 million slots.
+ */
+export const MAX_UNFLATTEN_ARRAY_LENGTH = 100_000;
+
+/**
+ * Property names that must never be walked or written during reconstruction.
+ * Assigning through them reaches Object.prototype and changes every object in
+ * the process, so a key like "__proto__.polluted" is refused outright.
+ */
+const UNSAFE_KEYS: ReadonlySet<string> = new Set([
+  "__proto__",
+  "constructor",
+  "prototype",
+]);
+
+/**
  * Type definition for flattened attributes.
  *
  * Represents a flat key-value structure where keys are dot-notation paths
@@ -51,10 +83,15 @@ export type Attributes = Record<
  * - Converts Date objects to ISO strings
  * - Preserves null values using a sentinel
  * - Supports nested arrays and objects
+ * - Stops at {@link MAX_FLATTEN_DEPTH} rather than overflowing the stack
+ *
+ * A value that has no attribute representation — `undefined`, a function, a
+ * symbol, a bigint — is omitted, whether it sits in an object or an array.
  *
  * @param {Record<string, unknown> | Array<unknown> | string | boolean | number | null | undefined} obj - The object to flatten. Can be any type including nested objects, arrays, or primitives
  * @param {string} [prefix] - Optional prefix for the current nesting level. Used internally for recursion
- * @param {WeakSet<object>} [seen] - Internal parameter to track visited objects and prevent circular reference loops
+ * @param {WeakSet<object>} [seen] - Internal parameter tracking the ancestors of the current value, to detect circular references
+ * @param {number} [depth] - Internal parameter tracking how far the traversal has descended
  * @returns {Attributes} A flat object with dot-notation keys representing the original nested structure
  *
  * @example
@@ -95,7 +132,6 @@ export type Attributes = Record<
  * // }
  * ```
  */
-// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: Recursive object flattening with array handling, circular reference detection, and dot-notation key building
 export function flattenAttributes(
   obj:
     | Record<string, unknown>
@@ -107,6 +143,7 @@ export function flattenAttributes(
     | undefined,
   prefix?: string,
   seen: WeakSet<object> = new WeakSet(),
+  depth = 0,
 ): Attributes {
   const result: Attributes = {};
 
@@ -139,66 +176,76 @@ export function flattenAttributes(
     return result;
   }
 
-  if (obj !== null && typeof obj === "object" && seen.has(obj)) {
+  if (depth >= MAX_FLATTEN_DEPTH) {
+    result[prefix || ""] = DEPTH_LIMIT_SENTINEL;
+    return result;
+  }
+
+  if (seen.has(obj)) {
     result[prefix || ""] = CIRCULAR_REFERENCE_SENTINEL;
     return result;
   }
 
-  if (obj !== null && typeof obj === "object") {
-    seen.add(obj);
-  }
+  /*
+   * `seen` holds the ancestors of the current value, not everything visited.
+   * Held for the whole traversal it flagged any repeated reference, so
+   * `{ x: shared, y: shared }` — a perfectly acyclic structure — reported `y`
+   * as circular and dropped its contents.
+   */
+  seen.add(obj);
 
   for (const [key, value] of Object.entries(obj)) {
     const newPrefix = `${prefix ? `${prefix}.` : ""}${Array.isArray(obj) ? `[${key}]` : key}`;
-    if (Array.isArray(value)) {
-      for (let i = 0; i < value.length; i++) {
-        if (typeof value[i] === "object" && value[i] !== null) {
-          Object.assign(
-            result,
-            flattenAttributes(value[i], `${newPrefix}.[${i}]`, seen),
-          );
-        } else if (value[i] === null) {
-          result[`${newPrefix}.[${i}]`] = NULL_SENTINEL;
-        } else {
-          result[`${newPrefix}.[${i}]`] = value[i];
-        }
-      }
-    } else if (isRecord(value)) {
-      Object.assign(result, flattenAttributes(value, newPrefix, seen));
-    } else if (
-      typeof value === "number" ||
-      typeof value === "string" ||
-      typeof value === "boolean"
-    ) {
-      result[newPrefix] = value;
-    } else if (value === null) {
-      result[newPrefix] = NULL_SENTINEL;
-    }
+    collectValue(result, newPrefix, value, seen, depth);
   }
+
+  seen.delete(obj);
 
   return result;
 }
 
 /**
- * Type guard function to check if a value is a plain object (not null, not an array).
+ * Records one value under `key`, descending into it when it has structure.
  *
- * This utility function is used internally by flattenAttributes to determine
- * whether a value should be recursively flattened or treated as a primitive.
- *
- * @param {unknown} value - The value to check
- * @returns {value is Record<string, unknown>} True if the value is a plain object, false otherwise
- *
- * @example
- * ```typescript
- * isRecord({ name: "test" }); // true
- * isRecord([1, 2, 3]); // false
- * isRecord(null); // false
- * isRecord("string"); // false
- * isRecord(42); // false
- * ```
+ * Array members and object properties run through here alike. Handling them
+ * separately let arrays keep values the `Attributes` type does not allow:
+ * `undefined`, functions, symbols and bigints were written verbatim from an
+ * array while the object path dropped them.
  */
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return value !== null && typeof value === "object" && !Array.isArray(value);
+function collectValue(
+  result: Attributes,
+  key: string,
+  value: unknown,
+  seen: WeakSet<object>,
+  depth: number,
+): void {
+  if (value === null) {
+    result[key] = NULL_SENTINEL;
+    return;
+  }
+
+  if (typeof value === "object") {
+    Object.assign(
+      result,
+      flattenAttributes(
+        value as Record<string, unknown> | unknown[],
+        key,
+        seen,
+        depth + 1,
+      ),
+    );
+    return;
+  }
+
+  if (
+    typeof value === "string" ||
+    typeof value === "number" ||
+    typeof value === "boolean"
+  ) {
+    result[key] = value;
+  }
+
+  // undefined, functions, symbols and bigints have no attribute representation.
 }
 
 /**
@@ -310,6 +357,15 @@ export function unflattenAttributes(
       [] as (string | number)[],
     );
 
+    /*
+     * A key such as "__proto__.polluted" walks into Object.prototype and the
+     * assignment below then lands on every object in the process. The input is
+     * flattened payload data, so it is attacker-shaped; such a key is refused
+     * rather than reconstructed.
+     */
+    if (parts.some((part) => typeof part === "string" && UNSAFE_KEYS.has(part)))
+      continue;
+
     // biome-ignore lint/suspicious/noExplicitAny: recursive object traversal requires dynamic property assignment
     let current: any = result;
     for (let i = 0; i < parts.length - 1; i++) {
@@ -336,18 +392,38 @@ export function unflattenAttributes(
     }
   }
 
-  if (Object.keys(result).every((k) => /^\d+$/.test(k))) {
-    const maxIndex = Math.max(
-      ...Object.keys(result).map((k) => Number.parseInt(k, 10)),
-    );
-    const arrayResult = new Array(maxIndex + 1);
-    for (const key in result) {
-      arrayResult[Number.parseInt(key, 10)] = result[key];
-    }
-    return arrayResult as unknown as Record<string, unknown>;
+  return asArrayIfIndexed(result);
+}
+
+/**
+ * Turns a record whose keys are all array indices back into an array.
+ *
+ * Returns the record untouched when the keys do not describe an array, or
+ * when the largest index would allocate more than
+ * {@link MAX_UNFLATTEN_ARRAY_LENGTH} slots — the length comes straight from the
+ * input, so one short key could otherwise reserve hundreds of millions of them.
+ */
+function asArrayIfIndexed(
+  result: Record<string, unknown>,
+): Record<string, unknown> {
+  const keys = Object.keys(result);
+
+  // `[].every()` is true, and Math.max() of nothing is -Infinity.
+  if (keys.length === 0) return result;
+  if (!keys.every((key) => /^\d+$/.test(key))) return result;
+
+  let maxIndex = 0;
+  for (const key of keys) {
+    maxIndex = Math.max(maxIndex, Number.parseInt(key, 10));
   }
 
-  return result;
+  if (maxIndex + 1 > MAX_UNFLATTEN_ARRAY_LENGTH) return result;
+
+  const arrayResult = new Array(maxIndex + 1);
+  for (const key of keys) {
+    arrayResult[Number.parseInt(key, 10)] = result[key];
+  }
+  return arrayResult as unknown as Record<string, unknown>;
 }
 
 /**

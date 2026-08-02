@@ -179,9 +179,34 @@ const desktopPlugin = plugin.withOptions<Partial<DesktopVariantsConfig>>(
  * @function detectPlatform
  * @returns {Platform | null} The detected platform or null if not desktop
  */
+/**
+ * Whether the page is running inside a Tauri webview.
+ *
+ * Checks the same global `isTauri()` from `@tauri-apps/api` checks, rather than
+ * importing it: this module is also loaded by tailwind.config at build time,
+ * where pulling in the Tauri runtime API would be out of place.
+ *
+ * `__TAURI__` alone is not enough. That is the Tauri v1 global, and v2 defines
+ * it only when `app.withGlobalTauri` is turned on, which is off by default — so
+ * on a stock v2 app this reported "not desktop" while `isDesktopApp()` in
+ * platform.ts reported the opposite. `applyPlatformClasses` believed it and
+ * stripped the desktop classes, disabling every variant this plugin adds. Both
+ * older globals are still accepted.
+ */
+function isTauriRuntime(): boolean {
+  if (typeof globalThis === "undefined") {
+    return false;
+  }
+
+  const scope = globalThis as unknown as Record<string, unknown>;
+  return Boolean(
+    scope["isTauri"] ?? scope["__TAURI_INTERNALS__"] ?? scope["__TAURI__"],
+  );
+}
+
 export function detectPlatform(): Platform | null {
   // Check if running in Tauri desktop environment
-  if (typeof window !== "undefined" && "__TAURI__" in window) {
+  if (typeof navigator !== "undefined" && isTauriRuntime()) {
     const userAgent = navigator.userAgent.toLowerCase();
 
     if (userAgent.includes("mac") || userAgent.includes("darwin")) {

@@ -79,6 +79,8 @@ import type { Result } from "./utils/error-handler";
  */
 export class WindowManager {
   private static instance: WindowManager;
+  /** Makes each onWindowStateChange registration's listener keys unique. */
+  private static stateListenerSequence = 0;
   private currentWindow: TauriWindow | null = null;
   private readonly stateListeners: Map<string, UnlistenFn> = new Map();
   private readonly logContext = logger.withCategory("WindowManager");
@@ -427,7 +429,16 @@ export class WindowManager {
   public async onWindowStateChange(
     callback: (state: WindowState) => void,
   ): Promise<() => void> {
-    const listenerId = `state-${Date.now()}`;
+    /*
+     * The counter keeps this unique. `state-${Date.now()}` is shared by two
+     * registrations in the same millisecond, and both write their unlisten
+     * functions to `stateListeners` under the same keys — so the second
+     * overwrote the first's entries and `cleanup()` could no longer reach them.
+     * The first caller's own unsubscribe still worked, but a manager-wide
+     * cleanup left five Tauri listeners attached.
+     */
+    WindowManager.stateListenerSequence += 1;
+    const listenerId = `state-${Date.now()}-${WindowManager.stateListenerSequence}`;
     const listeners: UnlistenFn[] = [];
 
     try {
@@ -523,13 +534,17 @@ export async function openExternalUrl(url: string): Promise<Result<void>> {
     const urlObj = new URL(url);
 
     // Only allow safe protocols
-    if (!["http:", "https:", "mailto:", "tel:"].includes(urlObj.protocol)) {
+    const allowedProtocols = ["http:", "https:", "mailto:", "tel:"];
+    if (!allowedProtocols.includes(urlObj.protocol)) {
       return {
         success: false,
         error: {
           code: "UNKNOWN_ERROR",
-          message: "Invalid URL protocol. Only HTTP and HTTPS are allowed.",
-          context: { url, protocol: urlObj.protocol },
+          // The message used to name only HTTP and HTTPS, so a caller reading
+          // it would not know mailto: and tel: were already permitted, and
+          // could not tell which of its links this rule would reject.
+          message: `Invalid URL protocol. Allowed protocols are ${allowedProtocols.join(", ")}.`,
+          context: { url, protocol: urlObj.protocol, allowedProtocols },
         },
       };
     }

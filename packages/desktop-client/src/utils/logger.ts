@@ -24,6 +24,15 @@ export type LoggerConfig = {
   showCategory: boolean;
   /** Whether to output logs in JSON format */
   jsonOutput: boolean;
+  /**
+   * Whether to wrap console output in ANSI colour codes.
+   *
+   * Defaults to off in a browser. This package runs inside a Tauri webview,
+   * and none of the webviews it targets — WKWebView, WebView2, WebKitGTK —
+   * interpret ANSI, so the codes were printed literally and every line arrived
+   * wrapped in `[32m…[0m`.
+   */
+  useColors: boolean;
   /** Custom log handler for external integrations */
   customHandler?: ((entry: LogEntry) => void) | undefined;
 };
@@ -91,12 +100,22 @@ export class Logger {
    * @class
    * @param {Partial<LoggerConfig>} config - Logger configuration options
    */
+  /**
+   * Whether the current console renders ANSI escape codes.
+   *
+   * A DOM means a browser console, which prints them verbatim.
+   */
+  private static supportsAnsi(): boolean {
+    return typeof document === "undefined";
+  }
+
   private constructor(config: Partial<LoggerConfig> = {}) {
     this.config = {
       minLevel: config.minLevel ?? "info",
       showTimestamps: config.showTimestamps ?? true,
       showCategory: config.showCategory ?? true,
       jsonOutput: config.jsonOutput ?? false,
+      useColors: config.useColors ?? Logger.supportsAnsi(),
       customHandler: config.customHandler ?? undefined,
     };
   }
@@ -164,22 +183,29 @@ export class Logger {
     }
 
     const parts: string[] = [];
-    const color = Logger.COLORS[entry.level];
+
+    /*
+     * A no-op when colours are off, which is the default in a browser: the
+     * webviews this package targets print ANSI escape codes literally rather
+     * than acting on them.
+     */
+    const paint = (text: string, color: string): string =>
+      this.config.useColors ? `${color}${text}${Logger.COLORS.reset}` : text;
 
     // Add timestamp
     if (this.config.showTimestamps) {
       const timestamp = entry.timestamp.toISOString();
-      parts.push(`${Logger.COLORS.dim}[${timestamp}]${Logger.COLORS.reset}`);
+      parts.push(paint(`[${timestamp}]`, Logger.COLORS.dim));
     }
 
     // Add level
-    parts.push(`${color}[${entry.level.toUpperCase()}]${Logger.COLORS.reset}`);
+    parts.push(
+      paint(`[${entry.level.toUpperCase()}]`, Logger.COLORS[entry.level]),
+    );
 
     // Add category
     if (this.config.showCategory && entry.category) {
-      parts.push(
-        `${Logger.COLORS.dim}[${entry.category}]${Logger.COLORS.reset}`,
-      );
+      parts.push(paint(`[${entry.category}]`, Logger.COLORS.dim));
     }
 
     // Add message
@@ -187,11 +213,7 @@ export class Logger {
 
     // Add metadata if present
     if (entry.metadata && Object.keys(entry.metadata).length > 0) {
-      parts.push(
-        Logger.COLORS.dim +
-          JSON.stringify(entry.metadata) +
-          Logger.COLORS.reset,
-      );
+      parts.push(paint(JSON.stringify(entry.metadata), Logger.COLORS.dim));
     }
 
     return parts.join(" ");

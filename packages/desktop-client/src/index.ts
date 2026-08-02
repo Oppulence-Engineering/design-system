@@ -195,14 +195,20 @@ export * as DesktopClient from "./index";
 // Version Information
 // ============================================================================
 
-/** Package version information */
-export const VERSION = "1.0.0";
+/**
+ * Package version.
+ *
+ * Kept in step with package.json by hand — it read "1.0.0" against a published
+ * 0.1.0, so anything reporting the version, or gating behaviour on it, was told
+ * the wrong number. index.test.ts fails if the two drift apart again.
+ */
+export const VERSION = "0.1.0";
 
 /** Package metadata */
 export const METADATA = {
   name: "@oppulence/desktop-client",
   version: VERSION,
-  description: "Desktop client utilities for Canvas applications",
+  description: "Tauri desktop utilities for Oppulence applications",
   author: "Canvas Team",
   license: "MIT",
 } as const;

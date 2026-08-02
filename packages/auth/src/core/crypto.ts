@@ -165,8 +165,16 @@ export function generateOAuthState(): string {
 }
 
 /**
- * Validates an OAuth state parameter.
- * Checks that it's not too old (max 10 minutes).
+ * Checks that an OAuth state parameter is well-formed and recent.
+ *
+ * This is an age check and nothing more. The random half of the state is not
+ * examined, because this function has nothing to compare it against — a caller
+ * that only asks this will accept any `<base36-timestamp>.<anything>`.
+ *
+ * To actually tie a callback to the browser that started the flow, compare the
+ * returned state against the copy stored in the state cookie with
+ * {@link constantTimeCompare}, as the Next.js callback handler does, and treat
+ * this as the freshness check on top.
  */
 export function validateOAuthState(
   state: string,

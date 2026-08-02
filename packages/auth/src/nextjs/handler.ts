@@ -22,12 +22,41 @@ import {
   updateSessionOrganization,
 } from "../core/session";
 import {
+  getCookieFromRequest,
   getSessionFromRequest,
   createSessionCookieHeader,
   createClearSessionCookieHeader,
+  /*
+   * DELIBERATELY UNUSED — this handler performs no CSRF validation.
+   *
+   * The import is kept, and named here, because its absence would read as
+   * "CSRF was never considered" when the opposite is true: cookies.ts ships a
+   * complete double-submit implementation — generateCSRFToken issues a
+   * JS-readable token cookie, validateCSRFToken compares it against the
+   * x-csrf-token header in constant time — and no route calls either one. No
+   * endpoint issues the cookie, so turning validation on here would reject
+   * every request from every existing client at once. That makes it a
+   * coordinated rollout, not a repair, which is why it has not been done as
+   * part of a bug-fix pass.
+   *
+   * What stands in for it today: the session cookie is SameSite=Lax, which
+   * stops a cross-site form post from carrying it, so the classic
+   * cross-site POST is already blocked in current browsers. Lax does not
+   * cover same-site attackers, subdomain takeover, or clients that send the
+   * session another way, so this is mitigation and not a substitute.
+   *
+   * To finish it: issue the cookie alongside the session on sign-in, have the
+   * React provider read it and send the header from authFetch, then call
+   * validateCSRFToken at the top of every state-changing route below. Ship the
+   * first two before the third.
+   */
   validateCSRFToken,
 } from "../core/cookies";
-import { validateOAuthState, generateOAuthState } from "../core/crypto";
+import {
+  constantTimeCompare,
+  validateOAuthState,
+  generateOAuthState,
+} from "../core/crypto";
 import { getEnvVar, debugLog, getCallbackUrl } from "../core/env";
 import { AuthError } from "../core/types";
 import type {
@@ -71,11 +100,18 @@ export interface AuthHandlerConfig {
 
   /**
    * WorkOS webhook secret for signature verification.
+   *
+   * NOT YET WIRED UP. The webhook route is unimplemented, so nothing reads
+   * this and no signature is ever verified. Setting it does not make the
+   * handler accept webhooks.
    */
   webhookSecret?: string;
 
   /**
    * Custom webhook handlers.
+   *
+   * NOT YET WIRED UP. The webhook route is unimplemented, so these are never
+   * called. A POST to the webhook route answers 501.
    */
   webhooks?: Partial<
     Record<WorkOSWebhookEvent, (payload: WorkOSWebhookPayload) => Promise<void>>
@@ -117,6 +153,50 @@ function jsonResponse(
 
 function errorResponse(error: AuthError): Response {
   return jsonResponse(error.toJSON(), error.status);
+}
+
+/**
+ * Reads a JSON object from the request body, or fails with a 400.
+ *
+ * `request.json()` throws on an empty or malformed body, and the handlers left
+ * that to their catch blocks — which report it as something it is not. Sign-in
+ * turned a malformed body into 401 "Sign-in failed", telling a caller its
+ * credentials were wrong when its request never parsed; elsewhere it reached
+ * the dispatcher's catch and became a 500 carrying the JSON parser's own
+ * message. A body the client got wrong is a 400.
+ *
+ * A non-object body is refused for the same reason: `null` is valid JSON, and
+ * the verify-email and org-switch handlers destructure the body directly, so
+ * `null` threw a TypeError from inside them.
+ *
+ * Uses UNKNOWN_ERROR because AuthErrorCode has no code for a malformed
+ * request; adding one would change a union consumers may switch on
+ * exhaustively. The status and message carry the meaning.
+ */
+async function readJsonBody(
+  request: Request,
+): Promise<Record<string, unknown>> {
+  let body: unknown;
+
+  try {
+    body = await request.json();
+  } catch {
+    throw new AuthError(
+      "Request body must be valid JSON",
+      "UNKNOWN_ERROR",
+      400,
+    );
+  }
+
+  if (body === null || typeof body !== "object" || Array.isArray(body)) {
+    throw new AuthError(
+      "Request body must be a JSON object",
+      "UNKNOWN_ERROR",
+      400,
+    );
+  }
+
+  return body as Record<string, unknown>;
 }
 
 function redirectResponse(
@@ -201,7 +281,7 @@ async function handleSignIn(
   config: AuthHandlerConfig,
 ): Promise<Response> {
   try {
-    const body = await request.json();
+    const body = await readJsonBody(request);
     const data = signInSchema.parse(body);
 
     const { user, accessToken, refreshToken } = await authenticateWithPassword(
@@ -248,7 +328,7 @@ async function handleSignIn(
 
 async function handleSignUp(request: Request): Promise<Response> {
   try {
-    const body = await request.json();
+    const body = await readJsonBody(request);
     const data = signUpSchema.parse(body);
 
     await createUserWithPassword(data.email, data.password, {
@@ -294,6 +374,36 @@ async function handleSignOut(
   });
 }
 
+/**
+ * POST routes the client calls that this handler does not serve yet.
+ *
+ * Kept explicit so they answer 501 rather than 404: the React provider posts to
+ * the MFA routes (see provider.tsx), and `webhookSecret`/`webhooks` are
+ * accepted in the handler config, so a consumer has every reason to think these
+ * work.
+ */
+const UNIMPLEMENTED_POST_ROUTES: ReadonlySet<string> = new Set([
+  "mfa/enroll",
+  "mfa/verify",
+  "mfa/sms",
+  "webhook",
+]);
+
+/** Cookie holding the OAuth state, so the callback can be tied to this browser. */
+const OAUTH_STATE_COOKIE = "__oppulence_oauth_state";
+
+/** Expires the state cookie; the state is single-use. */
+const CLEAR_OAUTH_STATE_COOKIE = [
+  `${OAUTH_STATE_COOKIE}=`,
+  "Path=/",
+  "HttpOnly",
+  "SameSite=Lax",
+  "Max-Age=0",
+  "Expires=Thu, 01 Jan 1970 00:00:00 GMT",
+]
+  .filter(Boolean)
+  .join("; ");
+
 async function handleOAuthStart(request: Request): Promise<Response> {
   const url = new URL(request.url);
   const provider = url.searchParams.get("provider") as OAuthProvider | null;
@@ -309,7 +419,17 @@ async function handleOAuthStart(request: Request): Promise<Response> {
   const authUrl = getOAuthAuthorizationUrl(provider, redirectUri, state);
 
   // Set state in cookie for validation
-  const stateCookie = `__oppulence_oauth_state=${state}; Path=/; HttpOnly; SameSite=Lax; Max-Age=600`;
+  const stateCookie = [
+    `${OAUTH_STATE_COOKIE}=${encodeURIComponent(state)}`,
+    "Path=/",
+    "HttpOnly",
+    "SameSite=Lax",
+    "Max-Age=600",
+    // Matches the session cookie: over HTTPS only, outside development.
+    process.env.NODE_ENV === "production" ? "Secure" : "",
+  ]
+    .filter(Boolean)
+    .join("; ");
 
   return redirectResponse(authUrl, { "Set-Cookie": stateCookie });
 }
@@ -326,21 +446,41 @@ async function handleOAuthCallback(
   // Check for OAuth error
   if (error) {
     const redirectUrl = config.afterSignInUrl ?? "/sign-in";
-    return redirectResponse(
-      `${redirectUrl}?error=${encodeURIComponent(error)}`,
+    return withClearedOAuthState(
+      redirectResponse(`${redirectUrl}?error=${encodeURIComponent(error)}`),
     );
   }
 
-  // Validate state
-  if (!state || !validateOAuthState(state)) {
-    return errorResponse(
-      new AuthError("Invalid OAuth state", "INVALID_TOKEN", 400),
+  /*
+   * The state must match the cookie set when the flow started, which is what
+   * ties this callback to the browser that began it.
+   *
+   * handleOAuthStart has always set that cookie, but the callback never read
+   * it: `validateOAuthState` only checks that the timestamp prefix is recent,
+   * so any `<base36-timestamp>.<anything>` was accepted. That left the callback
+   * open to being driven by a third party — an attacker could run the flow with
+   * their own account and hand the resulting code and a self-made state to a
+   * victim, logging the victim's browser into the attacker's account. The
+   * random half of the state was generated and then never compared to anything.
+   */
+  const expectedState = getCookieFromRequest(request, OAUTH_STATE_COOKIE);
+
+  if (
+    !state ||
+    !expectedState ||
+    !constantTimeCompare(state, expectedState) ||
+    !validateOAuthState(state)
+  ) {
+    return withClearedOAuthState(
+      errorResponse(new AuthError("Invalid OAuth state", "INVALID_TOKEN", 400)),
     );
   }
 
   if (!code) {
-    return errorResponse(
-      new AuthError("Missing authorization code", "INVALID_CODE", 400),
+    return withClearedOAuthState(
+      errorResponse(
+        new AuthError("Missing authorization code", "INVALID_CODE", 400),
+      ),
     );
   }
 
@@ -363,14 +503,29 @@ async function handleOAuthCallback(
     await config.onSignIn?.(user, !user.emailVerified); // New if not verified
 
     const redirectUrl = config.afterSignInUrl ?? "/dashboard";
-    return redirectResponse(redirectUrl, {
-      "Set-Cookie": createSessionCookieHeader(sessionToken),
-    });
+    return withClearedOAuthState(
+      redirectResponse(redirectUrl, {
+        "Set-Cookie": createSessionCookieHeader(sessionToken),
+      }),
+    );
   } catch (error) {
     debugLog("OAuth callback error", { error });
     const redirectUrl = config.afterSignInUrl ?? "/sign-in";
-    return redirectResponse(`${redirectUrl}?error=oauth_failed`);
+    return withClearedOAuthState(
+      redirectResponse(`${redirectUrl}?error=oauth_failed`),
+    );
   }
+}
+
+/**
+ * Expires the OAuth state cookie on the way out.
+ *
+ * Appended rather than set, so it survives alongside the session cookie the
+ * success path already writes. A state is good for exactly one callback.
+ */
+function withClearedOAuthState(response: Response): Response {
+  response.headers.append("Set-Cookie", CLEAR_OAUTH_STATE_COOKIE);
+  return response;
 }
 
 async function handleRefresh(request: Request): Promise<Response> {
@@ -407,8 +562,16 @@ async function handleRefresh(request: Request): Promise<Response> {
 }
 
 async function handleForgotPassword(request: Request): Promise<Response> {
+  /*
+   * Read outside the catch below, which answers "sent" to everything so that a
+   * caller cannot learn which addresses exist. A body that is not JSON reveals
+   * nothing about any account, so refusing it leaks nothing — and reporting
+   * "a reset link has been sent" to a request that never parsed only hides a
+   * client bug.
+   */
+  const body = await readJsonBody(request);
+
   try {
-    const body = await request.json();
     const data = forgotPasswordSchema.parse(body);
 
     await sendPasswordResetEmail(data.email);
@@ -430,7 +593,7 @@ async function handleForgotPassword(request: Request): Promise<Response> {
 
 async function handleResetPassword(request: Request): Promise<Response> {
   try {
-    const body = await request.json();
+    const body = await readJsonBody(request);
     const data = resetPasswordSchema.parse(body);
 
     await resetPassword(data.token, data.password);
@@ -452,7 +615,7 @@ async function handleResetPassword(request: Request): Promise<Response> {
 
 async function handleVerifyEmail(request: Request): Promise<Response> {
   try {
-    const body = await request.json();
+    const body = await readJsonBody(request);
     const { action, code } = body;
 
     const token = getSessionFromRequest(request);
@@ -515,8 +678,29 @@ async function handleOrgSwitch(
   config: AuthHandlerConfig,
 ): Promise<Response> {
   try {
-    const body = await request.json();
-    const { organizationId } = body;
+    const body = await readJsonBody(request);
+
+    /*
+     * Validated rather than destructured straight out of the body. It is
+     * passed to updateSessionOrganization and stored in the session, and
+     * nothing checked it was a string — a number, an object or an array went
+     * in unexamined.
+     */
+    const rawOrganizationId = body["organizationId"];
+    if (
+      rawOrganizationId !== undefined &&
+      rawOrganizationId !== null &&
+      typeof rawOrganizationId !== "string"
+    ) {
+      return errorResponse(
+        new AuthError(
+          "organizationId must be a string or null",
+          "UNKNOWN_ERROR",
+          400,
+        ),
+      );
+    }
+    const organizationId = rawOrganizationId ?? null;
 
     const token = getSessionFromRequest(request);
     if (!token) {
@@ -597,13 +781,13 @@ export function createAuthHandler(config: AuthHandlerConfig = {}) {
       if (request.method === "GET") {
         switch (route) {
           case "session":
-            return handleSession(request);
+            return await handleSession(request);
           case "callback":
-            return handleOAuthCallback(request, config);
+            return await handleOAuthCallback(request, config);
           default:
             // Check if it's an OAuth start (has provider param)
             if (url.searchParams.has("provider")) {
-              return handleOAuthStart(request);
+              return await handleOAuthStart(request);
             }
             return errorResponse(
               new AuthError("Route not found", "CONFIGURATION_ERROR", 404),
@@ -615,27 +799,39 @@ export function createAuthHandler(config: AuthHandlerConfig = {}) {
       if (request.method === "POST") {
         switch (route) {
           case "sign-in":
-            return handleSignIn(request, config);
+            return await handleSignIn(request, config);
           case "sign-up":
-            return handleSignUp(request);
+            return await handleSignUp(request);
           case "sign-out":
-            return handleSignOut(request, config);
+            return await handleSignOut(request, config);
           case "refresh":
-            return handleRefresh(request);
+            return await handleRefresh(request);
           case "forgot-password":
-            return handleForgotPassword(request);
+            return await handleForgotPassword(request);
           case "reset-password":
-            return handleResetPassword(request);
+            return await handleResetPassword(request);
           case "verify-email":
-            return handleVerifyEmail(request);
+            return await handleVerifyEmail(request);
           case "org/switch":
-            return handleOrgSwitch(request, config);
-          // TODO: MFA routes
-          // case "mfa/enroll":
-          // case "mfa/verify":
-          // TODO: Webhook handler
-          // case "webhook":
+            return await handleOrgSwitch(request, config);
           default:
+            /*
+             * Routes the client already calls that this handler has not
+             * implemented. The React provider posts to every MFA route below,
+             * and the MFA components are shipped and wired to them, so these
+             * were reached in normal use and answered the generic "Route not
+             * found" 404 — which reads as a mistyped URL rather than a missing
+             * feature. They now say what is actually wrong.
+             */
+            if (UNIMPLEMENTED_POST_ROUTES.has(route)) {
+              return errorResponse(
+                new AuthError(
+                  `The "${route}" route is not implemented in @oppulence/auth yet`,
+                  "CONFIGURATION_ERROR",
+                  501,
+                ),
+              );
+            }
             return errorResponse(
               new AuthError("Route not found", "CONFIGURATION_ERROR", 404),
             );

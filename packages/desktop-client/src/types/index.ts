@@ -66,7 +66,27 @@ export const DeepLinkPathSchema = z
   .string()
   .min(0)
   .max(2048)
-  .regex(/^[a-zA-Z0-9\-_/]*$/, "Path contains invalid characters")
+  /*
+   * The unreserved characters of RFC 3986 (A-Z a-z 0-9 - . _ ~), plus "/" as
+   * the segment separator and "%" for percent-encoding.
+   *
+   * "." and "%" used to be excluded, which rejected the very shape this
+   * package's own deep links carry: a redeem link such as
+   * "api/auth/desktop/redeem/<token>" fails the moment the token is a JWT,
+   * because JWTs are dot-separated. Those links were reported as invalid paths
+   * and dropped. Everything with meaning in a URL — "?", "#", ":", spaces —
+   * is still refused, and the check below refuses traversal.
+   */
+  .regex(/^[a-zA-Z0-9\-._~%/]*$/, "Path contains invalid characters")
+  /*
+   * Allowing "." makes ".." expressible, and these paths are used to navigate.
+   * A segment that is exactly ".." is refused so a deep link cannot climb out
+   * of the route it was given.
+   */
+  .refine(
+    (path) => !path.split("/").includes(".."),
+    "Path must not contain a parent-directory segment",
+  )
   .transform((path) => path.replace(/^\/+|\/+$/g, "")); // Trim leading/trailing slashes
 
 /** Type representing a validated deep link path. */
@@ -78,7 +98,18 @@ export type DeepLinkPath = z.infer<typeof DeepLinkPathSchema>;
  */
 export const DeepLinkUrlSchema = z
   .string()
-  .regex(/^eigenn:\/\//, "Deep link must start with eigenn://")
+  /*
+   * Any scheme of valid syntax, not the literal "eigenn". The protocol is a
+   * documented configuration option — `deepLinkProtocol` on
+   * DesktopClientConfigSchema — so pinning the schema to one product's scheme
+   * meant createDeepLink produced URLs that this very schema rejected as soon
+   * as an application configured its own. Scheme syntax is RFC 3986's:
+   * a letter, then letters, digits, "+", "-" or ".".
+   */
+  .regex(
+    /^[a-zA-Z][a-zA-Z0-9+\-.]*:\/\//,
+    "Deep link must start with a scheme followed by ://",
+  )
   .max(2048);
 
 /** Type representing a validated deep link URL. */

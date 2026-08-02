@@ -378,13 +378,21 @@ export function hexToBuffer(hex: string): Uint8Array {
     throw new Error("Hex string must have even length");
   }
 
+  /*
+   * Validated up front rather than by testing each parse for NaN.
+   * `Number.parseInt` reads as far as it can and stops, so only a pair with no
+   * valid leading digit was rejected: "1z", "+1" and " 1" all parsed as 1 and
+   * produced a byte the caller never supplied. Corrupt hex now fails instead of
+   * decoding to something plausible.
+   */
+  const invalidAt = hex.search(/[^0-9a-fA-F]/);
+  if (invalidAt !== -1) {
+    throw new Error(`Invalid hex character at position ${invalidAt}`);
+  }
+
   const bytes = new Uint8Array(hex.length / 2);
   for (let i = 0; i < hex.length; i += 2) {
-    const byte = Number.parseInt(hex.slice(i, i + 2), 16);
-    if (Number.isNaN(byte)) {
-      throw new Error(`Invalid hex character at position ${i}`);
-    }
-    bytes[i / 2] = byte;
+    bytes[i / 2] = Number.parseInt(hex.slice(i, i + 2), 16);
   }
   return bytes;
 }

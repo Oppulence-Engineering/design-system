@@ -69,7 +69,13 @@ export function omit<T extends Record<string, unknown>, K extends keyof T>(
 ): Omit<T, K> {
   const result: Record<string, unknown> = {};
 
-  for (const key in obj) {
+  /*
+   * `Object.keys` rather than `for...in`, which also walks the prototype chain.
+   * Inherited enumerable properties were copied into the result — including
+   * anything on a polluted Object.prototype — so a function whose job is to
+   * leave properties out was adding ones the caller never had.
+   */
+  for (const key of Object.keys(obj)) {
     if (!keys.includes(key as unknown as K)) {
       result[key] = obj[key];
     }

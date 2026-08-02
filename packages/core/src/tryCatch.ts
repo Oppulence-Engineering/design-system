@@ -307,14 +307,20 @@ export async function tryCatchWithAbort<T, E = Error>(
     return [new DOMException("Operation aborted", "AbortError") as E, null];
   }
 
+  /*
+   * The listener is removed in a finally rather than left to `once`, which
+   * only fires on abort. When the promise settles first — the ordinary case —
+   * `once` never triggers and the listener stays on the signal for as long as
+   * the signal lives, so repeated calls against one long-lived controller
+   * accumulate them. `sleep` in this package already unregisters this way.
+   */
+  let onAbort: (() => void) | undefined;
+
   const abortPromise = new Promise<never>((_, reject) => {
-    signal.addEventListener(
-      "abort",
-      () => {
-        reject(new DOMException("Operation aborted", "AbortError"));
-      },
-      { once: true },
-    );
+    onAbort = () => {
+      reject(new DOMException("Operation aborted", "AbortError"));
+    };
+    signal.addEventListener("abort", onAbort, { once: true });
   });
 
   try {
@@ -322,6 +328,10 @@ export async function tryCatchWithAbort<T, E = Error>(
     return [null, result];
   } catch (error) {
     return [error as E, null];
+  } finally {
+    if (onAbort) {
+      signal.removeEventListener("abort", onAbort);
+    }
   }
 }
 

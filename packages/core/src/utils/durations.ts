@@ -77,7 +77,18 @@ export function formatDuration(
   end?: Date | null,
   options?: DurationOptions,
 ): string {
-  if (!(start && end)) {
+  /*
+   * An Invalid Date is an object, so it passed the truthiness check and its
+   * NaN difference formatted as "0 seconds" — a plausible-looking duration
+   * standing in for one that could not be computed. It is treated like a
+   * missing date instead.
+   */
+  if (
+    !start ||
+    !end ||
+    Number.isNaN(start.getTime()) ||
+    Number.isNaN(end.getTime())
+  ) {
     return "–";
   }
 
@@ -148,7 +159,7 @@ export function millisecondsToNanoseconds(milliseconds: number): number {
  *
  * // For very short durations
  * const shortNs = 50000000; // 50 milliseconds
- * formatDurationNanoseconds(shortNs); // "50ms"
+ * formatDurationNanoseconds(shortNs); // "50 milliseconds"
  * ```
  */
 export function formatDurationNanoseconds(
@@ -200,7 +211,8 @@ const belowOneSecondUnits = ["ms"] as Unit[];
  * }); // "1 hour 30 minutes"
  *
  * // Very short durations
- * formatDurationMilliseconds(500); // "500ms"
+ * formatDurationMilliseconds(500); // "500 milliseconds"
+ * formatDurationMilliseconds(500, { style: 'short' }); // "500ms"
  *
  * // Long durations
  * formatDurationMilliseconds(2592000000); // "30 days" (30 days in milliseconds)
