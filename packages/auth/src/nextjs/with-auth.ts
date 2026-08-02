@@ -8,6 +8,7 @@
 import type { NextApiRequest, NextApiResponse, NextApiHandler } from "next";
 import type { GetServerSidePropsContext, GetServerSidePropsResult } from "next";
 import { getSessionFromRequest, getUserFromSession } from "./server";
+import { hasRoleLevel } from "../core/constants";
 import type {
   User,
   Session,
@@ -155,14 +156,25 @@ export function withAuth(
           return res.status(403).json({ error: "Organization required" });
         }
 
-        // Check role requirement
-        if (requiredRole && membership) {
-          const roleHierarchy = { owner: 3, admin: 2, member: 1 };
-          const userRoleLevel =
-            roleHierarchy[membership.role as keyof typeof roleHierarchy] ?? 0;
-          const requiredRoleLevel = roleHierarchy[requiredRole];
-
-          if (userRoleLevel < requiredRoleLevel) {
+        /*
+         * Check role requirement.
+         *
+         * The absence of a membership is a denial, not a reason to skip the
+         * check. This was `if (requiredRole && membership)`, so a user with no
+         * membership fell straight past it: `withAdmin` and `withOwner` — the
+         * package's admin gates — admitted any authenticated user who had not
+         * selected an organization, and admitted anyone at all whenever
+         * resolveSession failed to load the membership, which it swallows and
+         * reports as null. The tRPC middleware and the React `hasRole` both
+         * treat a missing membership as a denial; this was the one gate that
+         * did not.
+         *
+         * Uses the shared hierarchy rather than a local copy, which had already
+         * drifted: it omitted "guest" and scored an unknown role 0 instead of
+         * -1.
+         */
+        if (requiredRole) {
+          if (!membership || !hasRoleLevel(membership.role, requiredRole)) {
             if (onUnauthorized) {
               return onUnauthorized(req, res);
             }
