@@ -367,6 +367,12 @@ jobs:
               [[ "$changed_flag" == "true" ]]
           }
 
+          # Packages that changed on this push but had nothing to publish,
+          # because their version was already on the registry. That is a
+          # forgotten bump, and reporting success for it is how a merge ships
+          # nothing while every check stays green.
+          unbumped=()
+
           publish_package() {
             local package_dir="$1"
             local changed_flag="$2"
@@ -389,6 +395,16 @@ jobs:
             fi
 
             if npm view "$package_name@$package_version" version >/dev/null 2>&1; then
+              # Idempotent when a release or an explicit request republishes
+              # everything: most of those packages will not have moved. A
+              # mistake when this push is here *because* the package changed.
+              if [[ "$PUBLISH_ALL" != "true" &&
+                    "$REQUESTED_PACKAGE" != "$package_dir" &&
+                    "$changed_flag" == "true" ]]; then
+                unbumped+=("$package_name@$package_version")
+                echo "::error title=Version not bumped::$package_name changed on this push but $package_version is already published. Bump the version in packages/$package_dir/package.json."
+                return
+              fi
               echo "$package_name@$package_version is already published; skipping."
               return
             fi
@@ -402,3 +418,8 @@ jobs:
           publish_package events "$EVENTS_CHANGED"
           publish_package import "$IMPORT_CHANGED"
           publish_package integrations "$INTEGRATIONS_CHANGED"
+
+          if (( ${#unbumped[@]} > 0 )); then
+            echo "::error title=Nothing published::${#unbumped[@]} package(s) changed on this push and published nothing: ${unbumped[*]}"
+            exit 1
+          fi
