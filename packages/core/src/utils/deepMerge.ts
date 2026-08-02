@@ -22,6 +22,21 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
 }
 
 /**
+ * Keys that are never copied from a source.
+ *
+ * Assigning `__proto__` re-parents the object being built; with `clone: false`
+ * the object being built is the caller's target, and a source shaped like
+ * `JSON.parse('{"__proto__":{"polluted":1}}')` wrote straight onto
+ * Object.prototype, changing every object in the process. Sources are usually
+ * parsed configuration or request data, so they are attacker-shaped.
+ */
+const UNSAFE_MERGE_KEYS: ReadonlySet<string> = new Set([
+  "__proto__",
+  "constructor",
+  "prototype",
+]);
+
+/**
  * Options for deep merge behavior.
  */
 export type DeepMergeOptions = {
@@ -185,6 +200,10 @@ export function deepMergeWithOptions<T extends Record<string, unknown>>(
     }
 
     for (const [key, sourceValue] of Object.entries(source)) {
+      if (UNSAFE_MERGE_KEYS.has(key)) {
+        continue;
+      }
+
       const targetValue = result[key];
 
       // Check for custom merge
@@ -261,12 +280,27 @@ export function deepMergeWithOptions<T extends Record<string, unknown>>(
 /**
  * Creates a deep clone of a value.
  *
+ * Objects already met during this clone are returned as the clone made for
+ * them, so a structure that refers to itself is reproduced with its shape
+ * intact. Without that, cloning a self-referential object recursed until the
+ * stack ran out — including through `deepMerge`, whose target it clones by
+ * default.
+ *
  * @param {T} value - The value to clone
+ * @param {WeakMap<object, unknown>} [seen] - Internal map of originals to their clones
  * @returns {T} A deep clone of the value
  */
-function deepClone<T>(value: T): T {
+function deepClone<T>(
+  value: T,
+  seen: WeakMap<object, unknown> = new WeakMap(),
+): T {
   if (value === null || typeof value !== "object") {
     return value;
+  }
+
+  const alreadyCloned = seen.get(value);
+  if (alreadyCloned !== undefined) {
+    return alreadyCloned as T;
   }
 
   if (value instanceof Date) {
@@ -277,30 +311,46 @@ function deepClone<T>(value: T): T {
     return new RegExp(value.source, value.flags) as T;
   }
 
+  /*
+   * Each clone is registered before its contents are walked. Registering after
+   * would leave a cycle unresolved at the moment it is followed.
+   */
   if (value instanceof Map) {
     const cloned = new Map();
+    seen.set(value, cloned);
     for (const [k, v] of value) {
-      cloned.set(deepClone(k), deepClone(v));
+      cloned.set(deepClone(k, seen), deepClone(v, seen));
     }
     return cloned as T;
   }
 
   if (value instanceof Set) {
     const cloned = new Set();
+    seen.set(value, cloned);
     for (const v of value) {
-      cloned.add(deepClone(v));
+      cloned.add(deepClone(v, seen));
     }
     return cloned as T;
   }
 
   if (Array.isArray(value)) {
-    return value.map(deepClone) as T;
+    const cloned: unknown[] = [];
+    seen.set(value, cloned);
+    for (const item of value) {
+      cloned.push(deepClone(item, seen));
+    }
+    return cloned as T;
   }
 
   if (isPlainObject(value)) {
     const cloned: Record<string, unknown> = {};
+    seen.set(value, cloned);
     for (const [k, v] of Object.entries(value)) {
-      cloned[k] = deepClone(v);
+      // Copying `__proto__` would re-parent the clone rather than fill it.
+      if (UNSAFE_MERGE_KEYS.has(k)) {
+        continue;
+      }
+      cloned[k] = deepClone(v, seen);
     }
     return cloned as T;
   }
