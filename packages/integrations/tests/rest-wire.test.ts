@@ -510,6 +510,46 @@ const CASES: ReadonlyArray<{
     path: "/api/v1/runs/batch",
   },
   {
+    // Adopted outside the pinned source: Close writes collection paths with a
+    // trailing slash.
+    operationId: "close:list-lead",
+    input: {},
+    method: "GET",
+    path: "/lead/",
+  },
+  {
+    operationId: "salesflare:list-accounts",
+    input: {},
+    method: "GET",
+    path: "/accounts",
+  },
+  {
+    operationId: "front:list-conversations",
+    input: {},
+    method: "GET",
+    path: "/conversations",
+  },
+  {
+    // Bitbucket mounts everything under a dotted version segment.
+    operationId: "bitbucket:get-repository",
+    input: { workspace: "acme" },
+    method: "GET",
+    path: "/2.0/repositories/acme",
+  },
+  {
+    operationId: "copper:list-related",
+    input: { entityType: "people", entityId: 1 },
+    method: "GET",
+    path: "/people/1/related",
+  },
+  {
+    // Taleez mounts under /0/, a numeric version rather than a resource.
+    operationId: "taleez:list-jobs",
+    input: {},
+    method: "GET",
+    path: "/0/jobs",
+  },
+  {
     operationId: "wikipedia:get-page-summary",
     input: { title: "Rust" },
     method: "GET",

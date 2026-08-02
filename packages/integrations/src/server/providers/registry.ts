@@ -20,6 +20,7 @@ import { createStsPack } from "./aws-sts";
 import { createTextractPack } from "./aws-textract";
 import { createAzureAdPack } from "./azure-ad";
 import { createAzureDevOpsPack } from "./azure-devops";
+import { createBitbucketPack } from "./bitbucket";
 import { createBoxPack } from "./box";
 import { createBrandfetchPack } from "./brandfetch";
 import { createCalComPack } from "./cal-com";
@@ -27,11 +28,13 @@ import { createCalendlyPack } from "./calendly";
 import { createClerkPack } from "./clerk";
 import { createClickHousePack } from "./clickhouse";
 import { createClickUpPack } from "./clickup";
+import { createClosePack } from "./close";
 import { createCloudflarePack } from "./cloudflare";
 import { createCloudFormationPack } from "./cloudformation";
 import { createCloudWatchPack } from "./cloudwatch";
 import { createCodePipelinePack } from "./codepipeline";
 import { createConfluencePack } from "./confluence";
+import { createCopperPack } from "./copper";
 import { createDatadogPack } from "./datadog";
 import { createDaytonaPack } from "./daytona";
 import { createDevinPack } from "./devin";
@@ -39,6 +42,7 @@ import { createDiscordPack } from "./discord";
 import { createDocuSignPack } from "./docusign";
 import { createElasticsearchPack } from "./elasticsearch";
 import { createExaPack } from "./exa";
+import { createFrontPack } from "./front";
 import { createGoogleAppSheetPack } from "./google-appsheet";
 import { createGoogleBigQueryPack } from "./google-bigquery";
 import { createGoogleMapsPack } from "./google-maps";
@@ -82,6 +86,7 @@ import { createRedditPack } from "./reddit";
 import { createRedisPack } from "./redis";
 import { createRootlyPack } from "./rootly";
 import { createS3Pack } from "./s3";
+import { createSalesflarePack } from "./salesflare";
 import { createSalesforcePack } from "./salesforce";
 import { createSendGridPack } from "./sendgrid";
 import { createSentryPack } from "./sentry";
@@ -93,6 +98,7 @@ import { createSshPack } from "./ssh";
 import { createStagehandPack } from "./stagehand";
 import { createSupabasePack } from "./supabase";
 import { createTailscalePack } from "./tailscale";
+import { createTaleezPack } from "./taleez";
 import { createTavilyPack } from "./tavily";
 import { createTelegramPack } from "./telegram";
 import { createTemporalPack } from "./temporal";
@@ -132,6 +138,7 @@ export const BUILT_IN_PROVIDER_PACKS: readonly IntegrationProviderPack[] = [
   createAttioPack(),
   createAzureAdPack(),
   createAzureDevOpsPack(),
+  createBitbucketPack(),
   createBoxPack(),
   createBrandfetchPack(),
   createCalComPack(),
@@ -139,11 +146,13 @@ export const BUILT_IN_PROVIDER_PACKS: readonly IntegrationProviderPack[] = [
   createClerkPack(),
   createClickHousePack(),
   createClickUpPack(),
+  createClosePack(),
   createCloudFormationPack(),
   createCloudWatchPack(),
   createCloudflarePack(),
   createCodePipelinePack(),
   createConfluencePack(),
+  createCopperPack(),
   createDatadogPack(),
   createDaytonaPack(),
   createDevinPack(),
@@ -152,6 +161,7 @@ export const BUILT_IN_PROVIDER_PACKS: readonly IntegrationProviderPack[] = [
   createDynamoDbPack(),
   createElasticsearchPack(),
   createExaPack(),
+  createFrontPack(),
   createGoogleAppSheetPack(),
   createGoogleBigQueryPack(),
   createGoogleMapsPack(),
@@ -198,6 +208,7 @@ export const BUILT_IN_PROVIDER_PACKS: readonly IntegrationProviderPack[] = [
   createRedisPack(),
   createRootlyPack(),
   createS3Pack(),
+  createSalesflarePack(),
   createSalesforcePack(),
   createSecretsManagerPack(),
   createSendGridPack(),
@@ -213,6 +224,7 @@ export const BUILT_IN_PROVIDER_PACKS: readonly IntegrationProviderPack[] = [
   createStsPack(),
   createSupabasePack(),
   createTailscalePack(),
+  createTaleezPack(),
   createTavilyPack(),
   createTelegramPack(),
   createTemporalPack(),

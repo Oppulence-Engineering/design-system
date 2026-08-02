@@ -173,7 +173,7 @@ for (const [path, rawItem] of Object.entries<any>(spec.paths ?? {})) {
     }
     operations.push({
       method: method.toUpperCase(),
-      path: `${specBasePath}${path}`,
+      path: `${specBasePath}${path}`.replace(/\/{2,}/gu, "/"),
       operationId: op.operationId ?? "",
       summary: String(op.summary ?? op.description ?? "")
         .split("\n")[0]!

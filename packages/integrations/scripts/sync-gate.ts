@@ -50,10 +50,19 @@ const partial = getProviderSdkCoverageReport(
   }),
 );
 
-const executableIds = SIMSTUDIO_BASELINE.integrations
-  .filter((integration) => full.get(integration.id))
-  .map((integration) => integration.id)
-  .sort();
+// Providers adopted outside the pinned source are executable too, and the
+// directory reads availability from this list — deriving it from the baseline
+// alone would leave every adopted provider advertised as planned.
+const executableIds = [
+  ...new Set([
+    ...SIMSTUDIO_BASELINE.integrations
+      .filter((integration) => full.get(integration.id))
+      .map((integration) => integration.id),
+    ...BUILT_IN_PROVIDER_PACKS.map((pack) => pack.integrationId).filter((id) =>
+      full.get(id),
+    ),
+  ]),
+].sort();
 
 const sourceActions = SIMSTUDIO_BASELINE.integrations.reduce(
   (total, integration) => total + integration.operations.length,

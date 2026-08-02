@@ -121,13 +121,25 @@ describe("provider parity coverage gate", () => {
       oauthRuntime,
       noAuthRuntime,
     });
-    const shipped = SIMSTUDIO_BASELINE.integrations
-      .filter((integration) => registry.get(integration.id))
-      .map((integration) => integration.id)
-      .sort();
+    // Adopted providers are executable but outside the pinned source, so the
+    // list is baseline ∪ packs rather than baseline alone.
+    const shipped = [
+      ...new Set([
+        ...SIMSTUDIO_BASELINE.integrations
+          .filter((integration) => registry.get(integration.id))
+          .map((integration) => integration.id),
+        ...BUILT_IN_PROVIDER_PACKS.map((pack) => pack.integrationId).filter(
+          (id) => registry.get(id),
+        ),
+      ]),
+    ].sort();
 
     expect([...EXECUTABLE_INTEGRATION_IDS]).toEqual(shipped);
-    expect(EXECUTABLE_INTEGRATION_IDS).toHaveLength(EXECUTABLE_PROVIDERS);
+    // The parity figure counts only baseline providers, so the adopted ones
+    // add to the list without inflating what parity measures.
+    expect(EXECUTABLE_INTEGRATION_IDS.length).toBeGreaterThanOrEqual(
+      EXECUTABLE_PROVIDERS,
+    );
   });
 
   test("every executable integration is offerable in the directory", () => {
@@ -166,7 +178,7 @@ describe("provider parity coverage gate", () => {
 
     // Most providers ship as packs; the rest predate the pack contract and
     // are registered directly.
-    expect(report.providers).toBe(108);
+    expect(report.providers).toBe(114);
     // Deferrals fall into three kinds, and each one records which it is at
     // the action: an endpoint on a host this lane cannot reach, since a
     // provider resolves every action against one host; a request shape this
@@ -184,7 +196,7 @@ describe("provider parity coverage gate", () => {
     // Typed REST is where a provider lands when no maintained SDK models its
     // surface. It is now the largest lane by action count, because the
     // providers still outstanding are almost all of that kind.
-    expect(report.byLane.typed_rest.operations).toBe(594);
+    expect(report.byLane.typed_rest.operations).toBe(719);
     // The special lane carries the seven protocol providers.
     expect(report.byLane.special.operations).toBe(108);
   });
@@ -194,7 +206,7 @@ describe("provider parity coverage gate", () => {
       pack.coverage.filter((action) => action.lane === "typed_rest"),
     );
 
-    expect(restActions).toHaveLength(594);
+    expect(restActions).toHaveLength(719);
     for (const action of restActions) {
       expect(action.sdkReview?.trim().length ?? 0).toBeGreaterThan(0);
     }

@@ -550,6 +550,40 @@ export const BUILT_IN_API_KEY_PROVIDER_CONFIGURATIONS = Object.freeze([
     credentialHeader: "x-api-key",
   },
   {
+    integrationId: "close" as const,
+    apiBaseUrl: "https://api.close.com/api/v1",
+    credentialHeader: "Authorization",
+    credentialPrefix: "Bearer",
+  },
+  {
+    integrationId: "salesflare" as const,
+    apiBaseUrl: "https://api.salesflare.com",
+    credentialHeader: "Authorization",
+    credentialPrefix: "Bearer",
+  },
+  {
+    integrationId: "front" as const,
+    apiBaseUrl: "https://api2.frontapp.com",
+    credentialHeader: "Authorization",
+    credentialPrefix: "Bearer",
+  },
+  {
+    integrationId: "bitbucket" as const,
+    apiBaseUrl: "https://api.bitbucket.org",
+    credentialHeader: "Authorization",
+    credentialPrefix: "Bearer",
+  },
+  {
+    integrationId: "copper" as const,
+    apiBaseUrl: "https://api.copper.com/developer_api/v1",
+    credentialHeader: "X-PW-AccessToken",
+  },
+  {
+    integrationId: "taleez" as const,
+    apiBaseUrl: "https://api.taleez.com",
+    credentialHeader: "X-taleez-api-secret",
+  },
+  {
     integrationId: "mongodb" as const,
     credentialFields: [{ name: "uri", required: true }],
   },

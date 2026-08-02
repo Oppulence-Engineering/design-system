@@ -108,6 +108,14 @@ export interface RestPackConfig {
    * considered omission from an oversight.
    */
   deferrals?: Readonly<Record<string, string>>;
+  /**
+   * Set for a provider the pinned source does not carry — one reached for
+   * because a customer needs it rather than because parity asks for it. Its
+   * own action table becomes its coverage, since there is no external list to
+   * report against. Leave unset for anything in the baseline, so a typo in an
+   * integration ID still fails loudly instead of silently self-certifying.
+   */
+  beyondBaseline?: true;
 }
 
 export interface RestRuntimes {
@@ -212,9 +220,30 @@ export function createRestPack(
     (integration) => integration.id === config.integrationId,
   );
   if (!baseline) {
-    throw new IntegrationProviderSdkError(
-      "INTEGRATION_PROVIDER_SDK_CONFIGURATION_INVALID",
-    );
+    // A provider outside the pinned source has no external action list to be
+    // measured against, so its own table is the list. Coverage is still
+    // reported, and the parity report counts only baseline providers, so this
+    // cannot inflate the figure it exists to track.
+    if (!config.beyondBaseline) {
+      throw new IntegrationProviderSdkError(
+        "INTEGRATION_PROVIDER_SDK_CONFIGURATION_INVALID",
+      );
+    }
+    return {
+      integrationId: config.integrationId,
+      beyondBaseline: true as const,
+      coverage: config.actions.map((action) => ({
+        sourceOperationId: `${config.integrationId}:${action.action}`,
+        lane: "typed_rest" as const,
+        disposition: "supported" as const,
+        sdkReview: config.sdkReview,
+      })),
+      triggerCoverage: [],
+      create(context) {
+        const provider = createRestProviderSdk(config, context);
+        return provider ? [provider] : [];
+      },
+    };
   }
   const declared = new Set(
     config.actions.map((action) => `${config.integrationId}:${action.action}`),

@@ -62,6 +62,13 @@ const GENERATED = new Set([
   "tailscale",
   "attio",
   "posthog",
+  // Adopted outside the pinned source.
+  "close",
+  "salesflare",
+  "front",
+  "bitbucket",
+  "copper",
+  "taleez",
 ]);
 
 interface Probe {

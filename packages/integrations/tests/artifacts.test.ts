@@ -39,10 +39,10 @@ test("build emits every documented package entrypoint and the generated public m
       operationOrTriggerSupported: number;
     };
   };
-  expect(manifest.integrations).toHaveLength(255);
-  expect(manifest.details).toHaveLength(255);
+  expect(manifest.integrations).toHaveLength(261);
+  expect(manifest.details).toHaveLength(261);
   expect(manifest.parity).toMatchObject({
-    catalogueOnly: 255,
+    catalogueOnly: 261,
     functionallySupported: 0,
     operationOrTriggerSupported: 0,
   });

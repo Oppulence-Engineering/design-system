@@ -72,6 +72,13 @@ export interface IntegrationProviderPack {
   readonly coverage: readonly ProviderPackOperationCoverage[];
   readonly triggerCoverage: readonly ProviderPackTriggerCoverage[];
   /**
+   * Set for a provider the pinned source does not carry. Such a pack has no
+   * entry to be measured against, so its own action table is its coverage —
+   * stated here rather than inferred, so a typo in an integration ID still
+   * fails the contract instead of quietly self-certifying.
+   */
+  readonly beyondBaseline?: true;
+  /**
    * Builds the execution adapters. Returns several when a provider composes
    * lanes, for example an SDK adapter plus a typed REST adapter for the
    * actions that SDK cannot reach. Returns none when the context lacks the
@@ -206,6 +213,10 @@ export function getProviderPackContractIssues(
 ): readonly ProviderPackContractIssue[] {
   const baseline = baselineFor(pack.integrationId);
   if (!baseline) {
+    // A provider adopted outside the pinned source has no entry to match, and
+    // its own action table is its coverage. It still has to say so explicitly,
+    // so a typo in an integration ID cannot pass as an adoption.
+    if (pack.beyondBaseline) return [];
     return [
       {
         integrationId: pack.integrationId,

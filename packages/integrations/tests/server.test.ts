@@ -655,6 +655,12 @@ describe("server API-key runtime", () => {
       "thrive",
       "uptimerobot",
       "langsmith",
+      "close",
+      "salesflare",
+      "front",
+      "bitbucket",
+      "copper",
+      "taleez",
       "mongodb",
       "neo4j",
     ]);
