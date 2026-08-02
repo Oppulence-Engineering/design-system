@@ -215,7 +215,17 @@ export const ValidationPatterns = {
     /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
 } as const;
 
-const { NODE_ENV } = process.env;
+/**
+ * The build mode, read defensively.
+ *
+ * This package is built for the browser and runs inside a Tauri webview, where
+ * `process` does not exist. Destructuring `process.env` at module scope threw
+ * `ReferenceError: process is not defined` on import — and because this module
+ * is reached from every entry point, importing any part of the package failed
+ * outright unless the host bundler happened to inject a `process` shim.
+ */
+const NODE_ENV =
+  typeof process === "undefined" ? undefined : process.env?.["NODE_ENV"];
 
 /**
  * Default configuration values.

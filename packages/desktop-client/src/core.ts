@@ -79,6 +79,8 @@ import type { Result } from "./utils/error-handler";
  */
 export class WindowManager {
   private static instance: WindowManager;
+  /** Makes each onWindowStateChange registration's listener keys unique. */
+  private static stateListenerSequence = 0;
   private currentWindow: TauriWindow | null = null;
   private readonly stateListeners: Map<string, UnlistenFn> = new Map();
   private readonly logContext = logger.withCategory("WindowManager");
@@ -427,7 +429,16 @@ export class WindowManager {
   public async onWindowStateChange(
     callback: (state: WindowState) => void,
   ): Promise<() => void> {
-    const listenerId = `state-${Date.now()}`;
+    /*
+     * The counter keeps this unique. `state-${Date.now()}` is shared by two
+     * registrations in the same millisecond, and both write their unlisten
+     * functions to `stateListeners` under the same keys — so the second
+     * overwrote the first's entries and `cleanup()` could no longer reach them.
+     * The first caller's own unsubscribe still worked, but a manager-wide
+     * cleanup left five Tauri listeners attached.
+     */
+    WindowManager.stateListenerSequence += 1;
+    const listenerId = `state-${Date.now()}-${WindowManager.stateListenerSequence}`;
     const listeners: UnlistenFn[] = [];
 
     try {

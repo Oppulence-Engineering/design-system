@@ -213,7 +213,10 @@ export class ErrorHandler {
         }
 
         if (attempt < maxRetries) {
-          await ErrorHandler.delay(retryDelay * attempt); // Exponential backoff
+          // Linear backoff: the delay grows by one step per attempt. Previously
+          // labelled exponential, which is what RetryConstants.BACKOFF_MULTIPLIER
+          // describes and not what this computes.
+          await ErrorHandler.delay(retryDelay * attempt);
         }
       }
     }
@@ -225,7 +228,19 @@ export class ErrorHandler {
       });
     }
 
-    throw lastError;
+    /*
+     * `lastError` is only set by a failed attempt, so a maxRetries of 0 or less
+     * ran no attempts and threw `undefined` — a rejection a caller cannot
+     * inspect, log, or match on.
+     */
+    throw (
+      lastError ??
+      ErrorHandler.toDesktopClientError(
+        `withRetry ran no attempts: maxRetries was ${maxRetries}`,
+        "UNKNOWN_ERROR",
+        { maxRetries },
+      )
+    );
   }
 
   /**

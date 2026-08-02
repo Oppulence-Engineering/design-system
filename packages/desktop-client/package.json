@@ -55,6 +55,7 @@
     "format": "prettier --write \"src/**/*.{ts,tsx}\"",
     "lint": "prettier --check \"src/**/*.{ts,tsx}\"",
     "prepublishOnly": "bun run clean && bun run build",
+    "test": "bun test src",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
