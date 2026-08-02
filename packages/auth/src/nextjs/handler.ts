@@ -76,11 +76,18 @@ export interface AuthHandlerConfig {
 
   /**
    * WorkOS webhook secret for signature verification.
+   *
+   * NOT YET WIRED UP. The webhook route is unimplemented, so nothing reads
+   * this and no signature is ever verified. Setting it does not make the
+   * handler accept webhooks.
    */
   webhookSecret?: string;
 
   /**
    * Custom webhook handlers.
+   *
+   * NOT YET WIRED UP. The webhook route is unimplemented, so these are never
+   * called. A POST to the webhook route answers 501.
    */
   webhooks?: Partial<
     Record<WorkOSWebhookEvent, (payload: WorkOSWebhookPayload) => Promise<void>>
@@ -298,6 +305,21 @@ async function handleSignOut(
     "Set-Cookie": createClearSessionCookieHeader(),
   });
 }
+
+/**
+ * POST routes the client calls that this handler does not serve yet.
+ *
+ * Kept explicit so they answer 501 rather than 404: the React provider posts to
+ * the MFA routes (see provider.tsx), and `webhookSecret`/`webhooks` are
+ * accepted in the handler config, so a consumer has every reason to think these
+ * work.
+ */
+const UNIMPLEMENTED_POST_ROUTES: ReadonlySet<string> = new Set([
+  "mfa/enroll",
+  "mfa/verify",
+  "mfa/sms",
+  "webhook",
+]);
 
 /** Cookie holding the OAuth state, so the callback can be tied to this browser. */
 const OAUTH_STATE_COOKIE = "__oppulence_oauth_state";
@@ -695,12 +717,24 @@ export function createAuthHandler(config: AuthHandlerConfig = {}) {
             return handleVerifyEmail(request);
           case "org/switch":
             return handleOrgSwitch(request, config);
-          // TODO: MFA routes
-          // case "mfa/enroll":
-          // case "mfa/verify":
-          // TODO: Webhook handler
-          // case "webhook":
           default:
+            /*
+             * Routes the client already calls that this handler has not
+             * implemented. The React provider posts to every MFA route below,
+             * and the MFA components are shipped and wired to them, so these
+             * were reached in normal use and answered the generic "Route not
+             * found" 404 — which reads as a mistyped URL rather than a missing
+             * feature. They now say what is actually wrong.
+             */
+            if (UNIMPLEMENTED_POST_ROUTES.has(route)) {
+              return errorResponse(
+                new AuthError(
+                  `The "${route}" route is not implemented in @oppulence/auth yet`,
+                  "CONFIGURATION_ERROR",
+                  501,
+                ),
+              );
+            }
             return errorResponse(
               new AuthError("Route not found", "CONFIGURATION_ERROR", 404),
             );

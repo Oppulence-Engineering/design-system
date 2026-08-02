@@ -144,9 +144,20 @@ export function getCallbackUrl(): string {
 
 /**
  * Gets debug mode status.
+ *
+ * Never throws. `getEnvVar` validates the whole schema, so asking for this one
+ * optional flag used to fail whenever any required variable was missing — and
+ * because `debugLog` asks on every call, logging threw. Several functions log
+ * from inside a `catch` and then return null, so the throw escaped from there
+ * instead: `decodeSession("garbage")`, documented to return null for an invalid
+ * token, threw a configuration error out of its own error handler.
  */
 export function isDebugMode(): boolean {
-  return getEnvVar("WORKOS_DEBUG") ?? false;
+  try {
+    return getEnvVar("WORKOS_DEBUG") ?? false;
+  } catch {
+    return false;
+  }
 }
 
 /**

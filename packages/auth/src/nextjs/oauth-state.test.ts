@@ -197,3 +197,36 @@ describe("OAuth start", () => {
     expect(cookieState).toBe(sentState);
   });
 });
+
+/*
+ * The React provider posts to every MFA route below, and the MFA components are
+ * shipped and wired to them, so these were reached in normal use — and answered
+ * the same "Route not found" 404 as a mistyped URL. `webhookSecret` and
+ * `webhooks` are likewise accepted in the handler config while the route that
+ * would use them does not exist.
+ */
+describe("routes the client calls but the handler does not implement", () => {
+  const post = (route: string) =>
+    handler(
+      new Request(`https://app.example.test/api/auth/${route}`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: "{}",
+      }),
+    ) as Promise<Response>;
+
+  for (const route of ["mfa/enroll", "mfa/verify", "mfa/sms", "webhook"]) {
+    it(`answers 501 for ${route}, not 404`, async () => {
+      const response = await post(route);
+
+      expect(response.status).toBe(501);
+      expect(await response.json()).toMatchObject({
+        message: expect.stringContaining("not implemented"),
+      });
+    });
+  }
+
+  it("still answers 404 for a route that simply does not exist", async () => {
+    expect((await post("nonsense")).status).toBe(404);
+  });
+});
