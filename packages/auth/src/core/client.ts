@@ -478,9 +478,25 @@ export async function getOrganizationMembership(
       id: membership.id,
       userId: membership.userId,
       organizationId: membership.organizationId,
+      /*
+       * Falls back to the least privilege in the hierarchy, not to "member".
+       * A membership that arrives without a role slug is missing data, and
+       * defaulting it to "member" handed out the level that requireRole
+       * ("member") and roleMiddleware("member") accept.
+       */
       role:
-        (membership.role?.slug as OrganizationMembership["role"]) ?? "member",
-      permissions: [], // WorkOS doesn't expose this directly; implement via role mapping
+        (membership.role?.slug as OrganizationMembership["role"]) ?? "guest",
+      /*
+       * Always empty: WorkOS does not return permissions on a membership, and
+       * this package has no role-to-permission mapping to derive them from.
+       *
+       * Everything that reads this therefore denies — requirePermission,
+       * permissionMiddleware, anyPermissionMiddleware and the React
+       * hasPermission all refuse every permission, for every role including
+       * owner. That is the safe direction, but it means permission checks are
+       * not usable until a mapping exists; use the role checks instead.
+       */
+      permissions: [],
       createdAt: new Date(membership.createdAt),
     };
   } catch (error) {

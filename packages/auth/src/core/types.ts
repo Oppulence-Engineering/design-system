@@ -134,7 +134,15 @@ export interface OrganizationMembership {
   organizationId: string;
   /** User's role in the organization */
   role: OrganizationRole;
-  /** Explicit permissions granted */
+  /**
+   * Explicit permissions granted.
+   *
+   * ALWAYS EMPTY as things stand. WorkOS does not return permissions on a
+   * membership and this package has no role-to-permission mapping, so
+   * requirePermission, permissionMiddleware, anyPermissionMiddleware and the
+   * React hasPermission refuse every permission, for every role including
+   * owner. Use the role checks until a mapping exists.
+   */
   permissions: Permission[];
   /** When the membership was created */
   createdAt: Date;

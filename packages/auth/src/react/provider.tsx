@@ -25,6 +25,7 @@ import type {
   Organization,
   OrganizationMembership,
   AuthError as AuthErrorType,
+  AuthErrorCode,
   OAuthProvider,
   Permission,
   OrganizationRole,
@@ -76,12 +77,38 @@ async function authFetch<T>(
     credentials: "include",
   });
 
-  const data = await response.json();
+  /*
+   * The body may not be JSON at all. A gateway 502, a framework error page, a
+   * 204 with no body — all of them made `response.json()` throw a SyntaxError
+   * that escaped in place of the AuthError callers catch, so a proxy hiccup
+   * surfaced to the user as "Unexpected token < in JSON at position 0" with no
+   * status attached.
+   */
+  let data: unknown;
+  let parsed = true;
+  try {
+    data = await response.json();
+  } catch {
+    parsed = false;
+  }
+
+  // Shape the handler sends for errors; unvalidated, so both fields optional.
+  const body = (
+    parsed && data !== null && typeof data === "object" ? data : {}
+  ) as { message?: string; code?: AuthErrorCode };
 
   if (!response.ok) {
     throw new AuthError(
-      data.message || "Request failed",
-      data.code || "UNKNOWN_ERROR",
+      body.message || `Request failed with status ${response.status}`,
+      body.code || "UNKNOWN_ERROR",
+      response.status,
+    );
+  }
+
+  if (!parsed) {
+    throw new AuthError(
+      `Expected a JSON response from ${endpoint} but the body could not be parsed`,
+      "UNKNOWN_ERROR",
       response.status,
     );
   }
