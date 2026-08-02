@@ -534,13 +534,17 @@ export async function openExternalUrl(url: string): Promise<Result<void>> {
     const urlObj = new URL(url);
 
     // Only allow safe protocols
-    if (!["http:", "https:", "mailto:", "tel:"].includes(urlObj.protocol)) {
+    const allowedProtocols = ["http:", "https:", "mailto:", "tel:"];
+    if (!allowedProtocols.includes(urlObj.protocol)) {
       return {
         success: false,
         error: {
           code: "UNKNOWN_ERROR",
-          message: "Invalid URL protocol. Only HTTP and HTTPS are allowed.",
-          context: { url, protocol: urlObj.protocol },
+          // The message used to name only HTTP and HTTPS, so a caller reading
+          // it would not know mailto: and tel: were already permitted, and
+          // could not tell which of its links this rule would reject.
+          message: `Invalid URL protocol. Allowed protocols are ${allowedProtocols.join(", ")}.`,
+          context: { url, protocol: urlObj.protocol, allowedProtocols },
         },
       };
     }
