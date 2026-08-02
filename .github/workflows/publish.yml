@@ -132,10 +132,89 @@ jobs:
         run: bun install --frozen-lockfile
         working-directory: .
 
+      - name: Resolve workspace dependencies for the published tarball
+        working-directory: .
+        run: |
+          cp packages/design-system/package.json /tmp/design-system.package.json
+          node -e '
+            const fs = require("node:fs");
+            const path = require("node:path");
+            // Truth comes from each sibling package.json, not from bun.lock,
+            // which records workspace versions and had drifted three releases
+            // behind when this was written.
+            const versions = new Map(
+              fs.readdirSync("packages", { withFileTypes: true })
+                .filter((entry) => entry.isDirectory())
+                .map((entry) => path.join("packages", entry.name, "package.json"))
+                .filter((file) => fs.existsSync(file))
+                .map((file) => JSON.parse(fs.readFileSync(file, "utf8")))
+                .map((pkg) => [pkg.name, pkg.version]),
+            );
+            const target = "packages/design-system/package.json";
+            const pkg = JSON.parse(fs.readFileSync(target, "utf8"));
+            let resolved = 0;
+            for (const field of ["dependencies", "peerDependencies", "optionalDependencies"]) {
+              for (const [name, spec] of Object.entries(pkg[field] ?? {})) {
+                if (!String(spec).startsWith("workspace:")) continue;
+                const version = versions.get(name);
+                if (!version) throw new Error(`no workspace package provides ${name}`);
+                pkg[field][name] = `^${version}`;
+                resolved += 1;
+                console.log(`${field}.${name}: ${spec} -> ^${version}`);
+              }
+            }
+            fs.writeFileSync(target, `${JSON.stringify(pkg, null, 2)}\n`);
+            console.log(`resolved ${resolved} workspace specifier(s)`);
+          '
+
+      - name: Fail if any workspace specifier would ship
+        run: |
+          # npm does not rewrite the workspace: protocol on publish, so a
+          # specifier that survives to here produces a tarball npm cannot
+          # install: EUNSUPPORTEDPROTOCOL for every consumer. @oppulence/
+          # design-system@1.2.3 shipped that way and was uninstallable, and it
+          # took @oppulence/auth with it through its peer dependency.
+          # Only the fields a consumer installs are checked. devDependencies
+          # ship in the manifest but are never installed by a consumer, and
+          # some of them name private workspace packages that have no version
+          # on npm to point at.
+          node -e '
+            const pkg = require("./package.json");
+            const bad = [];
+            for (const field of ["dependencies", "peerDependencies", "optionalDependencies"]) {
+              for (const [name, spec] of Object.entries(pkg[field] ?? {})) {
+                if (String(spec).startsWith("workspace:")) bad.push(`${field}.${name} = ${spec}`);
+              }
+            }
+            if (bad.length) {
+              console.log(`::error::a workspace: specifier survived into the published manifest: ${bad.join(", ")}`);
+              process.exit(1);
+            }
+            console.log("No workspace: specifiers remain in installable fields.");
+          '
+
       - name: Publish to npm
         run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Restore the workspace specifiers
+        if: always()
+        working-directory: .
+        run: |
+          # Only the dependency fields are put back. The version bump above
+          # must survive, because the commit step below pushes it.
+          node -e '
+            const fs = require("node:fs");
+            const target = "packages/design-system/package.json";
+            const current = JSON.parse(fs.readFileSync(target, "utf8"));
+            const original = JSON.parse(fs.readFileSync("/tmp/design-system.package.json", "utf8"));
+            for (const field of ["dependencies", "peerDependencies", "optionalDependencies"]) {
+              if (original[field]) current[field] = original[field];
+            }
+            fs.writeFileSync(target, `${JSON.stringify(current, null, 2)}\n`);
+            console.log("workspace specifiers restored; version kept at", current.version);
+          '
 
       - name: Commit version bump
         working-directory: .
