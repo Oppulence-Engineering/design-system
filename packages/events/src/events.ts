@@ -775,6 +775,128 @@ export const OnboardingEvents = {
       tags: ["onboarding"],
     },
   ),
+  OnboardingStageViewed: createEvent(
+    "Onboarding Stage Viewed",
+    EventChannel.ONBOARDING,
+    {
+      description: "User viewed a stage in the unified onboarding journey",
+      tags: ["onboarding", "funnel", "stage"],
+    },
+  ),
+  OnboardingStageCompleted: createEvent(
+    "Onboarding Stage Completed",
+    EventChannel.ONBOARDING,
+    {
+      description: "User completed a stage in the unified onboarding journey",
+      tags: ["onboarding", "funnel", "stage", "conversion"],
+    },
+  ),
+  OnboardingNextActionShown: createEvent(
+    "Onboarding Next Action Shown",
+    EventChannel.ONBOARDING,
+    {
+      description: "The canonical next best action was shown to a user",
+      tags: ["onboarding", "next-action", "impression"],
+    },
+  ),
+  OnboardingNextActionClicked: createEvent(
+    "Onboarding Next Action Clicked",
+    EventChannel.ONBOARDING,
+    {
+      description: "A user selected the canonical next best action",
+      tags: ["onboarding", "next-action", "conversion"],
+    },
+  ),
+  OnboardingGuideOpened: createEvent(
+    "Onboarding Guide Opened",
+    EventChannel.ONBOARDING,
+    {
+      description: "A user opened the setup guide or activation hub",
+      tags: ["onboarding", "guide", "discovery"],
+    },
+  ),
+  OnboardingGuideActionClicked: createEvent(
+    "Onboarding Guide Action Clicked",
+    EventChannel.ONBOARDING,
+    {
+      description: "A user selected an action from the setup guide",
+      tags: ["onboarding", "guide", "conversion"],
+    },
+  ),
+  OnboardingActivationMilestone: createEvent(
+    "Onboarding Activation Milestone",
+    EventChannel.ACTIVATION,
+    {
+      description: "A live business predicate completed an activation step",
+      tags: ["onboarding", "activation", "milestone"],
+    },
+  ),
+  OnboardingProviderError: createEvent(
+    "Onboarding Provider Error",
+    EventChannel.ONBOARDING,
+    {
+      description: "A provider failed during guided connection setup",
+      severity: EventSeverity.WARNING,
+      tags: ["onboarding", "provider", "error"],
+    },
+  ),
+  OnboardingRecoveryAction: createEvent(
+    "Onboarding Recovery Action",
+    EventChannel.ONBOARDING,
+    {
+      description: "A user selected a recovery path after setup friction",
+      tags: ["onboarding", "provider", "recovery"],
+    },
+  ),
+  OnboardingFirstValueReached: createEvent(
+    "Onboarding First Value Reached",
+    EventChannel.ACTIVATION,
+    {
+      description: "A workspace reached the first value for its chosen outcome",
+      tags: ["onboarding", "activation", "first-value", "conversion"],
+    },
+  ),
+  OnboardingTourStarted: createEvent(
+    "Onboarding Tour Started",
+    EventChannel.ONBOARDING,
+    {
+      description: "A user started or resumed a contextual product tour",
+      tags: ["onboarding", "tour", "activation"],
+    },
+  ),
+  OnboardingTourAdvanced: createEvent(
+    "Onboarding Tour Advanced",
+    EventChannel.ONBOARDING,
+    {
+      description: "A user advanced to another contextual tour step",
+      tags: ["onboarding", "tour"],
+    },
+  ),
+  OnboardingTourSkipped: createEvent(
+    "Onboarding Tour Skipped",
+    EventChannel.ONBOARDING,
+    {
+      description: "A user dismissed a contextual product tour",
+      tags: ["onboarding", "tour", "drop-off"],
+    },
+  ),
+  OnboardingTourCompleted: createEvent(
+    "Onboarding Tour Completed",
+    EventChannel.ONBOARDING,
+    {
+      description: "A user completed a contextual product tour",
+      tags: ["onboarding", "tour", "conversion"],
+    },
+  ),
+  OnboardingCommunityJoinClicked: createEvent(
+    "Onboarding Community Join Clicked",
+    EventChannel.ONBOARDING,
+    {
+      description:
+        "User clicked through to the Discord invite from the onboarding flow's community step",
+      tags: ["onboarding", "community", "activation"],
+    },
+  ),
 } as const;
 
 /**
@@ -1734,6 +1856,15 @@ export const EngagementEvents = {
     EventChannel.INVOICE,
     {
       description: "User resumed a paused recurring invoice schedule",
+      tags: ["engagement", "invoice", "recurring"],
+    },
+  ),
+  RecurringInvoiceCanceled: createEvent(
+    "Recurring Invoice Canceled",
+    EventChannel.INVOICE,
+    {
+      description:
+        "User canceled a recurring invoice schedule, ending future issuance",
       tags: ["engagement", "invoice", "recurring"],
     },
   ),
