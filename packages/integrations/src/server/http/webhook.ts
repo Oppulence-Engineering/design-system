@@ -15,6 +15,10 @@ import {
 import { z } from "zod";
 
 import { ProductSchema, type Product } from "../../contracts";
+import {
+  reportIntegrationFailure,
+  type IntegrationFailureObserver,
+} from "../../reliability";
 
 export type IntegrationWebhookProvider = "plaid" | "merge";
 
@@ -53,7 +57,7 @@ export interface PlaidIntegrationWebhookConfig {
     webhookCode?: string;
   }): Promise<IntegrationWebhookConnection | undefined>;
   clientFactory?: () => PlaidWebhookSdk;
-  /** 5 minutes by default; a fresh key is retried if cached verification fails. */
+  /** 5 minutes by default; a fresh key is retried at most once per minute. */
   verificationKeyCacheTtlMs?: number;
 }
 
@@ -78,6 +82,8 @@ export interface IntegrationWebhookRuntimeConfig {
    */
   onSyncRequired(input: IntegrationWebhookSyncRequest): Promise<void>;
   now?: () => Date;
+  /** Receives classified failures only; raw payloads and provider errors stay local. */
+  onFailure?: IntegrationFailureObserver;
 }
 
 export interface ProcessIntegrationWebhookResult {
@@ -221,6 +227,19 @@ export function createIntegrationWebhookRuntime(
   const plaidConfig = config.plaid;
   const mergeConfig = config.merge;
   const plaidKeyCache = new Map<string, { key: JWK; expiresAt: number }>();
+  const plaidKeyRefreshes = new Map<string, number>();
+  const PLAID_KEY_REFRESH_COOLDOWN_MS = 60_000;
+
+  async function reportFailure(
+    integrationId: IntegrationWebhookProvider,
+    error: unknown,
+  ): Promise<void> {
+    await reportIntegrationFailure(config.onFailure, {
+      phase: "webhook",
+      error,
+      integrationId,
+    });
+  }
 
   async function enqueue(
     integrationId: IntegrationWebhookProvider,
@@ -294,7 +313,21 @@ export function createIntegrationWebhookRuntime(
         providerExpiry ?? Number.MAX_SAFE_INTEGER,
       ),
     });
+    plaidKeyRefreshes.set(keyId, current);
     return key;
+  }
+
+  function allowPlaidKeyRefresh(keyId: string): boolean {
+    const current = now().getTime();
+    const lastRefresh = plaidKeyRefreshes.get(keyId);
+    if (
+      lastRefresh !== undefined &&
+      current - lastRefresh < PLAID_KEY_REFRESH_COOLDOWN_MS
+    ) {
+      return false;
+    }
+    plaidKeyRefreshes.set(keyId, current);
+    return true;
   }
 
   async function verifyPlaid(
@@ -349,6 +382,11 @@ export function createIntegrationWebhookRuntime(
       if (error instanceof IntegrationWebhookError) {
         throw error;
       }
+      if (!allowPlaidKeyRefresh(header.kid)) {
+        throw new IntegrationWebhookError(
+          "INTEGRATION_WEBHOOK_SIGNATURE_INVALID",
+        );
+      }
       try {
         payload = await verify(true);
       } catch (retryError) {
@@ -377,82 +415,92 @@ export function createIntegrationWebhookRuntime(
 
   return {
     async processPlaid({ rawBody, verificationHeader }) {
-      await verifyPlaid(rawBody, verificationHeader);
-      const payload = parsePayload(rawBody);
-      const itemId = optionalString(payload.item_id);
-      if (!itemId || !plaidConfig) {
-        return { integrationId: "plaid", accepted: true, enqueued: false };
-      }
-      const webhookType = optionalString(payload.webhook_type);
-      const webhookCode = optionalString(payload.webhook_code);
-      let connection: IntegrationWebhookConnection | undefined;
       try {
-        connection = await plaidConfig.resolveConnection({
-          itemId,
-          webhookType,
-          webhookCode,
-        });
-      } catch {
-        throw new IntegrationWebhookError(
-          "INTEGRATION_WEBHOOK_SYNC_ENQUEUE_FAILED",
+        await verifyPlaid(rawBody, verificationHeader);
+        const payload = parsePayload(rawBody);
+        const itemId = optionalString(payload.item_id);
+        if (!itemId || !plaidConfig) {
+          return { integrationId: "plaid", accepted: true, enqueued: false };
+        }
+        const webhookType = optionalString(payload.webhook_type);
+        const webhookCode = optionalString(payload.webhook_code);
+        let connection: IntegrationWebhookConnection | undefined;
+        try {
+          connection = await plaidConfig.resolveConnection({
+            itemId,
+            webhookType,
+            webhookCode,
+          });
+        } catch {
+          throw new IntegrationWebhookError(
+            "INTEGRATION_WEBHOOK_SYNC_ENQUEUE_FAILED",
+          );
+        }
+        if (!connection) {
+          return { integrationId: "plaid", accepted: true, enqueued: false };
+        }
+        await enqueue(
+          "plaid",
+          connection,
+          eventName([webhookType, webhookCode]),
+          rawBody,
         );
+        return { integrationId: "plaid", accepted: true, enqueued: true };
+      } catch (error) {
+        await reportFailure("plaid", error);
+        throw error;
       }
-      if (!connection) {
-        return { integrationId: "plaid", accepted: true, enqueued: false };
-      }
-      await enqueue(
-        "plaid",
-        connection,
-        eventName([webhookType, webhookCode]),
-        rawBody,
-      );
-      return { integrationId: "plaid", accepted: true, enqueued: true };
     },
 
     async processMerge({ rawBody, signatureHeader }) {
-      if (!mergeConfig) {
-        throw new IntegrationWebhookError(
-          "INTEGRATION_WEBHOOK_PROVIDER_UNAVAILABLE",
-        );
-      }
-      const providedSignature = mergeSignatureBytes(signatureHeader);
-      const expectedSignature = createHmac("sha256", mergeConfig.signatureKey)
-        .update(rawBody)
-        .digest();
-      if (
-        !providedSignature ||
-        !safeEqual(expectedSignature, providedSignature)
-      ) {
-        throw new IntegrationWebhookError(
-          "INTEGRATION_WEBHOOK_SIGNATURE_INVALID",
-        );
-      }
-      const payload = parsePayload(rawBody);
-      const linkedAccount = asRecord(payload.linked_account);
-      const hook = asRecord(payload.hook);
-      const linkedAccountId = optionalString(linkedAccount?.id);
-      if (!linkedAccountId) {
-        return { integrationId: "merge", accepted: true, enqueued: false };
-      }
-      const event = optionalString(hook?.event);
-      let connection: IntegrationWebhookConnection | undefined;
       try {
-        connection = await mergeConfig.resolveConnection({
-          linkedAccountId,
-          endUserOriginId: optionalString(linkedAccount?.end_user_origin_id),
-          integrationSlug: optionalString(linkedAccount?.integration_slug),
-          event,
-        });
-      } catch {
-        throw new IntegrationWebhookError(
-          "INTEGRATION_WEBHOOK_SYNC_ENQUEUE_FAILED",
-        );
+        if (!mergeConfig) {
+          throw new IntegrationWebhookError(
+            "INTEGRATION_WEBHOOK_PROVIDER_UNAVAILABLE",
+          );
+        }
+        const providedSignature = mergeSignatureBytes(signatureHeader);
+        const expectedSignature = createHmac("sha256", mergeConfig.signatureKey)
+          .update(rawBody)
+          .digest();
+        if (
+          !providedSignature ||
+          !safeEqual(expectedSignature, providedSignature)
+        ) {
+          throw new IntegrationWebhookError(
+            "INTEGRATION_WEBHOOK_SIGNATURE_INVALID",
+          );
+        }
+        const payload = parsePayload(rawBody);
+        const linkedAccount = asRecord(payload.linked_account);
+        const hook = asRecord(payload.hook);
+        const linkedAccountId = optionalString(linkedAccount?.id);
+        if (!linkedAccountId) {
+          return { integrationId: "merge", accepted: true, enqueued: false };
+        }
+        const event = optionalString(hook?.event);
+        let connection: IntegrationWebhookConnection | undefined;
+        try {
+          connection = await mergeConfig.resolveConnection({
+            linkedAccountId,
+            endUserOriginId: optionalString(linkedAccount?.end_user_origin_id),
+            integrationSlug: optionalString(linkedAccount?.integration_slug),
+            event,
+          });
+        } catch {
+          throw new IntegrationWebhookError(
+            "INTEGRATION_WEBHOOK_SYNC_ENQUEUE_FAILED",
+          );
+        }
+        if (!connection) {
+          return { integrationId: "merge", accepted: true, enqueued: false };
+        }
+        await enqueue("merge", connection, eventName([event]), rawBody);
+        return { integrationId: "merge", accepted: true, enqueued: true };
+      } catch (error) {
+        await reportFailure("merge", error);
+        throw error;
       }
-      if (!connection) {
-        return { integrationId: "merge", accepted: true, enqueued: false };
-      }
-      await enqueue("merge", connection, eventName([event]), rawBody);
-      return { integrationId: "merge", accepted: true, enqueued: true };
     },
   };
 }

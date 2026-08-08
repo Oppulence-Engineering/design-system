@@ -3,6 +3,10 @@ import { createHash } from "node:crypto";
 import { z } from "zod";
 
 import { ProductSchema, type Product } from "../../contracts";
+import {
+  reportIntegrationFailure,
+  type IntegrationFailureObserver,
+} from "../../reliability";
 import type { IntegrationCredentialReference } from "../transport/credentials";
 
 /**
@@ -147,6 +151,11 @@ export interface IntegrationTriggerStore {
     idempotencyKey: string;
     expiresAt: string;
   }): Promise<boolean>;
+  /** Releases one failed delivery while preserving other events in the checkpoint. */
+  deleteDelivery(input: {
+    key: IntegrationTriggerCheckpointKey;
+    idempotencyKey: string;
+  }): Promise<void>;
   deleteDeliveries(key: IntegrationTriggerCheckpointKey): Promise<void>;
 }
 
@@ -185,6 +194,8 @@ export interface IntegrationTriggerRuntimeConfig {
   deliveryRetentionSeconds?: number;
   /** Marks a trigger stale after this long with no event. Default 24 hours. */
   freshnessSeconds?: number;
+  /** Receives classified failures without receiving provider payloads or errors. */
+  onFailure?: IntegrationFailureObserver;
   now?: () => Date;
 }
 
@@ -446,17 +457,39 @@ export function createIntegrationTriggerRuntime(
     }
   }
 
+  async function reportFailure(
+    phase: Parameters<typeof reportIntegrationFailure>[1]["phase"],
+    error: unknown,
+    reference?: IntegrationCredentialReference,
+  ): Promise<void> {
+    await reportIntegrationFailure(config.onFailure, {
+      phase,
+      error,
+      integrationId: reference?.integrationId,
+      connectionId: reference?.connectionId,
+    });
+  }
+
   async function readCheckpoint(
     key: IntegrationTriggerCheckpointKey,
   ): Promise<IntegrationTriggerCheckpoint> {
     return (await config.store.readCheckpoint(key)) ?? emptyCheckpoint();
   }
 
-  /**
-   * Records the key first and emits second, then releases the key when the
-   * product handler exhausts its attempts. This keeps a concurrent redelivery
-   * from double-emitting while still letting the provider retry a failure.
-   */
+  async function markFailure(
+    key: IntegrationTriggerCheckpointKey,
+    at: string,
+  ): Promise<void> {
+    const checkpoint = await readCheckpoint(key);
+    await config.store.saveCheckpoint(key, {
+      ...checkpoint,
+      lastRunAt: at,
+      lastErrorAt: at,
+      consecutiveFailures: checkpoint.consecutiveFailures + 1,
+    });
+  }
+
+  /** Records a key before emitting, releasing only the failed event on exhaustion. */
   async function emit(
     key: IntegrationTriggerCheckpointKey,
     event: IntegrationTriggerEvent,
@@ -506,6 +539,10 @@ export function createIntegrationTriggerRuntime(
       product: event.connection.product,
       idempotencyKey: event.idempotencyKey,
       detail: lastError instanceof Error ? lastError.name : undefined,
+    });
+    await config.store.deleteDelivery({
+      key,
+      idempotencyKey: event.idempotencyKey,
     });
     throw new IntegrationTriggerError("INTEGRATION_TRIGGER_DELIVERY_FAILED");
   }
@@ -598,88 +635,110 @@ export function createIntegrationTriggerRuntime(
     },
 
     async deliver(input) {
-      const source = sourceFor(input.integrationId, input.triggerId);
-      if (source.kind === "poll") {
-        throw new IntegrationTriggerError(
-          "INTEGRATION_TRIGGER_SOURCE_UNAVAILABLE",
-        );
+      try {
+        const source = sourceFor(input.integrationId, input.triggerId);
+        if (source.kind === "poll") {
+          throw new IntegrationTriggerError(
+            "INTEGRATION_TRIGGER_SOURCE_UNAVAILABLE",
+          );
+        }
+        const delivery =
+          source.kind === "webhook"
+            ? await source.verify({
+                rawBody: input.rawBody,
+                headers: input.headers,
+              })
+            : await source.verify({
+                rawBody: input.rawBody,
+                headers: input.headers,
+                subscriptionId: undefined,
+              });
+        if (!delivery) {
+          throw new IntegrationTriggerError(
+            "INTEGRATION_TRIGGER_SIGNATURE_INVALID",
+          );
+        }
+        const counts = await dispatch({ source, delivery });
+        return {
+          integrationId: source.integrationId,
+          triggerId: source.triggerId,
+          accepted: true,
+          ...counts,
+        };
+      } catch (error) {
+        await reportFailure("webhook", error);
+        throw error;
       }
-      const delivery =
-        source.kind === "webhook"
-          ? await source.verify({
-              rawBody: input.rawBody,
-              headers: input.headers,
-            })
-          : await source.verify({
-              rawBody: input.rawBody,
-              headers: input.headers,
-              subscriptionId: undefined,
-            });
-      if (!delivery) {
-        throw new IntegrationTriggerError(
-          "INTEGRATION_TRIGGER_SIGNATURE_INVALID",
-        );
-      }
-      const counts = await dispatch({ source, delivery });
-      return {
-        integrationId: source.integrationId,
-        triggerId: source.triggerId,
-        accepted: true,
-        ...counts,
-      };
     },
 
     async poll(input) {
-      const source = sourceFor(input.reference.integrationId, input.triggerId);
-      if (source.kind !== "poll") {
-        throw new IntegrationTriggerError(
-          "INTEGRATION_TRIGGER_SOURCE_UNAVAILABLE",
+      try {
+        const source = sourceFor(
+          input.reference.integrationId,
+          input.triggerId,
         );
-      }
-      const key = checkpointKey({
-        connectionId: input.reference.connectionId,
-        integrationId: input.reference.integrationId,
-        product: input.reference.product,
-        triggerId: input.triggerId,
-      });
-      const checkpoint = await readCheckpoint(key);
-      const currentTime = now().getTime();
-      if (!input.force && checkpoint.lastRunAt) {
-        const elapsed = currentTime - Date.parse(checkpoint.lastRunAt);
-        if (elapsed < source.intervalSeconds * 1_000) {
-          throw new IntegrationTriggerError("INTEGRATION_TRIGGER_NOT_DUE");
+        if (source.kind !== "poll") {
+          throw new IntegrationTriggerError(
+            "INTEGRATION_TRIGGER_SOURCE_UNAVAILABLE",
+          );
         }
-      }
-      const result = await source.poll({
-        reference: input.reference,
-        cursor: checkpoint.cursor,
-      });
-      const counts = await dispatch({
-        source,
-        delivery: {
-          connection: {
-            connectionId: input.reference.connectionId,
-            integrationId: input.reference.integrationId,
-            product: input.reference.product,
-            subjectId: input.subjectId,
-          },
-          events: result.events,
-        },
-      });
-      if (result.cursor !== undefined && result.cursor !== checkpoint.cursor) {
-        const advanced = await readCheckpoint(key);
-        await config.store.saveCheckpoint(key, {
-          ...advanced,
-          cursor: result.cursor,
+        const key = checkpointKey({
+          connectionId: input.reference.connectionId,
+          integrationId: input.reference.integrationId,
+          product: input.reference.product,
+          triggerId: input.triggerId,
         });
+        const checkpoint = await readCheckpoint(key);
+        const currentTime = now().getTime();
+        if (!input.force && checkpoint.lastRunAt) {
+          const elapsed = currentTime - Date.parse(checkpoint.lastRunAt);
+          if (elapsed < source.intervalSeconds * 1_000) {
+            throw new IntegrationTriggerError("INTEGRATION_TRIGGER_NOT_DUE");
+          }
+        }
+        let result: Awaited<ReturnType<IntegrationPollTriggerSource["poll"]>>;
+        try {
+          result = await source.poll({
+            reference: input.reference,
+            cursor: checkpoint.cursor,
+          });
+        } catch (error) {
+          await markFailure(key, now().toISOString());
+          throw error;
+        }
+        const counts = await dispatch({
+          source,
+          delivery: {
+            connection: {
+              connectionId: input.reference.connectionId,
+              integrationId: input.reference.integrationId,
+              product: input.reference.product,
+              subjectId: input.subjectId,
+            },
+            events: result.events,
+          },
+        });
+        if (
+          result.cursor !== undefined &&
+          result.cursor !== checkpoint.cursor
+        ) {
+          const advanced = await readCheckpoint(key);
+          await config.store.saveCheckpoint(key, {
+            ...advanced,
+            cursor: result.cursor,
+          });
+        }
+        return {
+          integrationId: source.integrationId,
+          triggerId: source.triggerId,
+          accepted: true,
+          ...counts,
+          ...(result.cursor === undefined ? {} : { cursor: result.cursor }),
+        };
+      } catch (error) {
+        await reportFailure("sync", error, input.reference);
+        throw error;
       }
-      return {
-        integrationId: source.integrationId,
-        triggerId: source.triggerId,
-        accepted: true,
-        ...counts,
-        ...(result.cursor === undefined ? {} : { cursor: result.cursor }),
-      };
     },
 
     async subscribe(input) {
@@ -689,23 +748,25 @@ export function createIntegrationTriggerRuntime(
           "INTEGRATION_TRIGGER_SOURCE_UNAVAILABLE",
         );
       }
-      let registration: { subscriptionId: string; expiresAt?: string };
-      try {
-        registration = await source.subscribe({
-          reference: input.reference,
-          callbackUrl: input.callbackUrl,
-        });
-      } catch {
-        throw new IntegrationTriggerError(
-          "INTEGRATION_TRIGGER_SUBSCRIPTION_FAILED",
-        );
-      }
       const key = checkpointKey({
         connectionId: input.reference.connectionId,
         integrationId: input.reference.integrationId,
         product: input.reference.product,
         triggerId: input.triggerId,
       });
+      let registration: { subscriptionId: string; expiresAt?: string };
+      try {
+        registration = await source.subscribe({
+          reference: input.reference,
+          callbackUrl: input.callbackUrl,
+        });
+      } catch (error) {
+        await markFailure(key, now().toISOString());
+        await reportFailure("connect", error, input.reference);
+        throw new IntegrationTriggerError(
+          "INTEGRATION_TRIGGER_SUBSCRIPTION_FAILED",
+        );
+      }
       const checkpoint = await readCheckpoint(key);
       await config.store.saveCheckpoint(key, {
         ...checkpoint,
@@ -757,7 +818,9 @@ export function createIntegrationTriggerRuntime(
           reference: input.reference,
           subscriptionId: checkpoint.subscriptionId,
         });
-      } catch {
+      } catch (error) {
+        await markFailure(key, now().toISOString());
+        await reportFailure("refresh", error, input.reference);
         throw new IntegrationTriggerError(
           "INTEGRATION_TRIGGER_SUBSCRIPTION_FAILED",
         );
@@ -882,6 +945,53 @@ export interface IntegrationTriggerRoutesConfig {
 
 const DEFAULT_MAX_BODY_BYTES = 1_048_576;
 
+function maximumBodyBytes(value: number | undefined): number {
+  const maximum = value ?? DEFAULT_MAX_BODY_BYTES;
+  if (
+    !Number.isSafeInteger(maximum) ||
+    maximum < 1_024 ||
+    maximum > 1_048_576
+  ) {
+    throw new IntegrationTriggerError(
+      "INTEGRATION_TRIGGER_CONFIGURATION_INVALID",
+    );
+  }
+  return maximum;
+}
+
+async function readRawBody(
+  request: Request,
+  maximum: number,
+): Promise<Uint8Array> {
+  const contentLength = Number(request.headers.get("content-length"));
+  if (Number.isFinite(contentLength) && contentLength > maximum) {
+    throw new IntegrationTriggerError("INTEGRATION_TRIGGER_PAYLOAD_INVALID");
+  }
+  const reader = request.body?.getReader();
+  if (!reader) {
+    throw new IntegrationTriggerError("INTEGRATION_TRIGGER_PAYLOAD_INVALID");
+  }
+  const chunks: Uint8Array[] = [];
+  let length = 0;
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    length += value.byteLength;
+    if (length > maximum) {
+      await reader.cancel().catch(() => undefined);
+      throw new IntegrationTriggerError("INTEGRATION_TRIGGER_PAYLOAD_INVALID");
+    }
+    chunks.push(value);
+  }
+  const body = new Uint8Array(length);
+  let offset = 0;
+  for (const chunk of chunks) {
+    body.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return body;
+}
+
 /**
  * Mounts trigger delivery at
  * `POST /:integrationId/triggers/:triggerId`. Signature verification belongs
@@ -892,7 +1002,7 @@ export function createIntegrationTriggerRoutes(
   config: IntegrationTriggerRoutesConfig,
 ): { handle(request: Request): Promise<Response | undefined> } {
   const basePath = config.basePath ?? "/integrations";
-  const maxBodyBytes = config.maxBodyBytes ?? DEFAULT_MAX_BODY_BYTES;
+  const maxBodyBytes = maximumBodyBytes(config.maxBodyBytes);
 
   return {
     async handle(request) {
@@ -904,15 +1014,12 @@ export function createIntegrationTriggerRoutes(
         return new Response(null, { status: 405 });
       }
       const [integrationId, , triggerId] = segments;
-      const buffer = await request.arrayBuffer();
-      if (buffer.byteLength > maxBodyBytes) {
-        return new Response(null, { status: 413 });
-      }
       try {
+        const buffer = await readRawBody(request, maxBodyBytes);
         const result = await config.runtime.deliver({
           integrationId: decodeURIComponent(integrationId),
           triggerId: decodeURIComponent(triggerId),
-          rawBody: new Uint8Array(buffer),
+          rawBody: buffer,
           headers: request.headers,
         });
         return Response.json(result, { status: 202 });
@@ -938,7 +1045,10 @@ export function createIntegrationTriggerRoutes(
  * An in-memory store for tests and local development. Products supply a
  * durable implementation; trigger state must survive a restart.
  */
-export function createInMemoryIntegrationTriggerStore(): IntegrationTriggerStore {
+export function createInMemoryIntegrationTriggerStore(input?: {
+  now?: () => Date;
+}): IntegrationTriggerStore {
+  const now = input?.now ?? (() => new Date());
   const checkpoints = new Map<string, IntegrationTriggerCheckpoint>();
   const deliveries = new Map<string, Map<string, number>>();
   const serialize = (key: IntegrationTriggerCheckpointKey): string =>
@@ -960,9 +1070,14 @@ export function createInMemoryIntegrationTriggerStore(): IntegrationTriggerStore
       deliveries.set(serialized, seen);
       const expiry = Date.parse(expiresAt);
       const existing = seen.get(idempotencyKey);
-      if (existing !== undefined && existing > Date.now()) return false;
+      if (existing !== undefined && existing > now().getTime()) return false;
       seen.set(idempotencyKey, expiry);
       return true;
+    },
+    async deleteDelivery({ key, idempotencyKey }) {
+      const seen = deliveries.get(serialize(key));
+      seen?.delete(idempotencyKey);
+      if (seen && seen.size === 0) deliveries.delete(serialize(key));
     },
     async deleteDeliveries(key) {
       deliveries.delete(serialize(key));

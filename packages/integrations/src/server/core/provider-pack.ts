@@ -1,4 +1,5 @@
 import { SIMSTUDIO_BASELINE } from "../../catalog";
+import { metadataForIntegration } from "../../integration-metadata";
 import type { IntegrationApiKeyRuntime } from "../runtime/api-key";
 import type { IntegrationConnectionLinkRuntime } from "../transport/connection-link";
 import type { IntegrationNoAuthRuntime } from "../runtime/no-auth";
@@ -17,6 +18,8 @@ export type ProviderPackDisposition = "supported" | "deferred";
 
 export interface ProviderPackOperationCoverage {
   readonly sourceOperationId: string;
+  /** Optional catalog surface used by this operation. */
+  readonly surfaceId?: string;
   /** Required when supported; the lane that owns execution. */
   readonly lane?: IntegrationProviderExecutionLane;
   readonly disposition: ProviderPackDisposition;
@@ -32,6 +35,8 @@ export interface ProviderPackOperationCoverage {
 
 export interface ProviderPackTriggerCoverage {
   readonly sourceTriggerId: string;
+  /** Optional catalog surface used by this trigger. */
+  readonly surfaceId?: string;
   /** Required when supported; how the trigger observes provider events. */
   readonly kind?: "webhook" | "poll" | "subscription";
   readonly disposition: ProviderPackDisposition;
@@ -203,6 +208,44 @@ function triggerIssue(entry: ProviderPackTriggerCoverage): string | undefined {
   return entry.kind ? undefined : "is supported without a delivery kind.";
 }
 
+function surfaceIssues(
+  pack: IntegrationProviderPack,
+): ProviderPackContractIssue[] {
+  const surfaces = new Set(
+    metadataForIntegration(pack.integrationId)?.surfaces.map(
+      (surface) => surface.id,
+    ) ?? [],
+  );
+  if (
+    !pack.coverage.some((entry) => entry.surfaceId) &&
+    !pack.triggerCoverage.some((entry) => entry.surfaceId)
+  ) {
+    return [];
+  }
+  const issues: ProviderPackContractIssue[] = [];
+  for (const entry of pack.coverage) {
+    if (entry.surfaceId && !surfaces.has(entry.surfaceId)) {
+      issues.push({
+        integrationId: pack.integrationId,
+        descriptor: "operation",
+        sourceId: entry.sourceOperationId,
+        detail: `references unknown execution surface ${entry.surfaceId}.`,
+      });
+    }
+  }
+  for (const entry of pack.triggerCoverage) {
+    if (entry.surfaceId && !surfaces.has(entry.surfaceId)) {
+      issues.push({
+        integrationId: pack.integrationId,
+        descriptor: "trigger",
+        sourceId: entry.sourceTriggerId,
+        detail: `references unknown execution surface ${entry.surfaceId}.`,
+      });
+    }
+  }
+  return issues;
+}
+
 /**
  * Returns every way a pack breaks the delivery contract. Returning the full
  * list rather than the first failure keeps a contract test readable when a
@@ -212,11 +255,12 @@ export function getProviderPackContractIssues(
   pack: IntegrationProviderPack,
 ): readonly ProviderPackContractIssue[] {
   const baseline = baselineFor(pack.integrationId);
+  const surfaces = surfaceIssues(pack);
   if (!baseline) {
     // A provider adopted outside the pinned source has no entry to match, and
     // its own action table is its coverage. It still has to say so explicitly,
     // so a typo in an integration ID cannot pass as an adoption.
-    if (pack.beyondBaseline) return [];
+    if (pack.beyondBaseline) return surfaces;
     return [
       {
         integrationId: pack.integrationId,
@@ -226,6 +270,7 @@ export function getProviderPackContractIssues(
     ];
   }
   return [
+    ...surfaces,
     ...collectDescriptorIssues({
       integrationId: pack.integrationId,
       descriptor: "operation",
@@ -243,6 +288,72 @@ export function getProviderPackContractIssues(
       validate: triggerIssue,
     }),
   ];
+}
+
+export interface ProviderPackSurfaceCoverageReport {
+  readonly mappedOperations: number;
+  readonly mappedTriggers: number;
+  readonly unmappedOperations: readonly string[];
+  readonly unmappedTriggers: readonly string[];
+}
+
+/**
+ * Resolves an operation's execution surface during the metadata migration.
+ * Explicit mappings always win; a single catalog surface is a safe implicit
+ * default. Providers with multiple surfaces must declare the mapping.
+ */
+export function resolveProviderPackSurface(
+  pack: IntegrationProviderPack,
+  descriptorId: string,
+): string | undefined {
+  const operation = pack.coverage.find(
+    (entry) => entry.sourceOperationId === descriptorId,
+  );
+  const trigger = pack.triggerCoverage.find(
+    (entry) => entry.sourceTriggerId === descriptorId,
+  );
+  const explicit = operation?.surfaceId ?? trigger?.surfaceId;
+  const surfaces = metadataForIntegration(pack.integrationId)?.surfaces ?? [];
+  if (explicit) {
+    return surfaces.some((surface) => surface.id === explicit)
+      ? explicit
+      : undefined;
+  }
+  return surfaces.length === 1 ? surfaces[0]?.id : undefined;
+}
+
+/** Reports which executable declarations are tied to a catalog surface. */
+export function getProviderPackSurfaceCoverageReport(
+  packs: readonly IntegrationProviderPack[],
+): ProviderPackSurfaceCoverageReport {
+  const unmappedOperations: string[] = [];
+  const unmappedTriggers: string[] = [];
+  let mappedOperations = 0;
+  let mappedTriggers = 0;
+  for (const pack of packs) {
+    // Metadata is intentionally being promoted provider-by-provider. The
+    // gate must enforce mappings once a provider enters that migration, while
+    // leaving legacy packs measurable until their metadata exists.
+    if (!metadataForIntegration(pack.integrationId)) continue;
+    for (const entry of pack.coverage) {
+      if (entry.disposition !== "supported") continue;
+      if (resolveProviderPackSurface(pack, entry.sourceOperationId))
+        mappedOperations += 1;
+      else unmappedOperations.push(entry.sourceOperationId);
+    }
+    for (const entry of pack.triggerCoverage) {
+      if (entry.disposition !== "supported") continue;
+      if (resolveProviderPackSurface(pack, entry.sourceTriggerId))
+        mappedTriggers += 1;
+      else unmappedTriggers.push(entry.sourceTriggerId);
+    }
+  }
+  return {
+    mappedOperations,
+    mappedTriggers,
+    unmappedOperations,
+    unmappedTriggers,
+  };
 }
 
 /**

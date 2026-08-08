@@ -21,6 +21,10 @@ import {
   type ApiKeyProviderConfiguration,
   type ApiKeyProviderRequest,
 } from "../transport/api-key";
+import {
+  reportIntegrationFailure,
+  type IntegrationFailureObserver,
+} from "../../reliability";
 
 export interface IntegrationApiKeySubject {
   product: Product;
@@ -39,6 +43,8 @@ export interface IntegrationApiKeyRuntimeConfig {
     product: Product;
     subjectId: string;
   }): Promise<void>;
+  /** Receives classified failures only; provider errors and credentials stay local. */
+  onFailure?: IntegrationFailureObserver;
 }
 
 /**
@@ -710,54 +716,84 @@ export function createIntegrationApiKeyRuntime(
 ): IntegrationApiKeyRuntime {
   const providers = providersByIntegrationId(config.providers, config.fetcher);
 
+  async function observe<T>(
+    phase: Parameters<typeof reportIntegrationFailure>[1]["phase"],
+    operation: () => Promise<T>,
+    reference?: IntegrationCredentialReference,
+  ): Promise<T> {
+    try {
+      return await operation();
+    } catch (error) {
+      await reportIntegrationFailure(config.onFailure, {
+        phase,
+        error,
+        integrationId: reference?.integrationId,
+        connectionId: reference?.connectionId,
+      });
+      throw error;
+    }
+  }
+
+  async function reportInvalid(
+    phase: Parameters<typeof reportIntegrationFailure>[1]["phase"],
+    error: unknown,
+  ): Promise<never> {
+    await reportIntegrationFailure(config.onFailure, { phase, error });
+    throw error;
+  }
+
   return {
     async connect(rawInput, authorize) {
-      const input = ConnectIntegrationApiKeyInputSchema.safeParse(rawInput);
-      if (!input.success) {
-        throw new IntegrationApiKeyRuntimeError("INTEGRATION_API_KEY_INVALID");
-      }
-      const provider = providers.get(input.data.integrationId);
-      if (!provider) {
-        throw new IntegrationApiKeyRuntimeError(
-          "INTEGRATION_API_KEY_PROVIDER_UNAVAILABLE",
-        );
-      }
-      await authorize({
-        integrationId: input.data.integrationId,
-        product: input.data.product,
-        subjectId: input.data.subjectId,
-      });
-      const connectionId = createConnectionId();
-      const reference = createIntegrationCredentialReference({
-        connectionId,
-        integrationId: provider.configuration.integrationId,
-        product: input.data.product,
-      });
-      const credential = await encryptIntegrationApiKeyCredential({
-        reference,
-        credential: { apiKey: input.data.apiKey },
-        keyring: config.credentialKeyring,
-      });
-      await config.credentialVault.save(reference, credential);
-      try {
-        await config.onConnected?.({
+      return observe("connect", async () => {
+        const input = ConnectIntegrationApiKeyInputSchema.safeParse(rawInput);
+        if (!input.success) {
+          throw new IntegrationApiKeyRuntimeError(
+            "INTEGRATION_API_KEY_INVALID",
+          );
+        }
+        const provider = providers.get(input.data.integrationId);
+        if (!provider) {
+          throw new IntegrationApiKeyRuntimeError(
+            "INTEGRATION_API_KEY_PROVIDER_UNAVAILABLE",
+          );
+        }
+        await authorize({
+          integrationId: input.data.integrationId,
+          product: input.data.product,
+          subjectId: input.data.subjectId,
+        });
+        const connectionId = createConnectionId();
+        const reference = createIntegrationCredentialReference({
+          connectionId,
+          integrationId: provider.configuration.integrationId,
+          product: input.data.product,
+        });
+        const credential = await encryptIntegrationApiKeyCredential({
+          reference,
+          credential: { apiKey: input.data.apiKey },
+          keyring: config.credentialKeyring,
+        });
+        await config.credentialVault.save(reference, credential);
+        try {
+          await config.onConnected?.({
+            connectionId,
+            integrationId: provider.configuration.integrationId,
+            product: input.data.product,
+            subjectId: input.data.subjectId,
+          });
+        } catch {
+          await config.credentialVault.revoke(reference);
+          throw new IntegrationApiKeyRuntimeError(
+            "INTEGRATION_API_KEY_FINALIZATION_FAILED",
+          );
+        }
+        return {
           connectionId,
           integrationId: provider.configuration.integrationId,
           product: input.data.product,
           subjectId: input.data.subjectId,
-        });
-      } catch {
-        await config.credentialVault.revoke(reference);
-        throw new IntegrationApiKeyRuntimeError(
-          "INTEGRATION_API_KEY_FINALIZATION_FAILED",
-        );
-      }
-      return {
-        connectionId,
-        integrationId: provider.configuration.integrationId,
-        product: input.data.product,
-        subjectId: input.data.subjectId,
-      };
+        };
+      });
     },
 
     async request(input) {
@@ -765,79 +801,103 @@ export function createIntegrationApiKeyRuntime(
         input.reference,
       );
       if (!reference.success) {
-        throw new IntegrationApiKeyRuntimeError(
-          "INTEGRATION_API_KEY_CREDENTIAL_UNAVAILABLE",
+        return reportInvalid(
+          "request",
+          new IntegrationApiKeyRuntimeError(
+            "INTEGRATION_API_KEY_CREDENTIAL_UNAVAILABLE",
+          ),
         );
       }
-      const provider = providers.get(reference.data.integrationId);
-      if (!provider) {
-        throw new IntegrationApiKeyRuntimeError(
-          "INTEGRATION_API_KEY_PROVIDER_UNAVAILABLE",
-        );
-      }
-      const encrypted = await config.credentialVault.read(reference.data);
-      if (!encrypted) {
-        throw new IntegrationApiKeyRuntimeError(
-          "INTEGRATION_API_KEY_CREDENTIAL_UNAVAILABLE",
-        );
-      }
-      const credential = await decryptIntegrationApiKeyCredential({
-        reference: reference.data,
-        credential: encrypted,
-        keyring: config.credentialKeyring,
-      });
-      return provider.request(credential, input.request);
+      return observe(
+        "request",
+        async () => {
+          const provider = providers.get(reference.data.integrationId);
+          if (!provider) {
+            throw new IntegrationApiKeyRuntimeError(
+              "INTEGRATION_API_KEY_PROVIDER_UNAVAILABLE",
+            );
+          }
+          const encrypted = await config.credentialVault.read(reference.data);
+          if (!encrypted) {
+            throw new IntegrationApiKeyRuntimeError(
+              "INTEGRATION_API_KEY_CREDENTIAL_UNAVAILABLE",
+            );
+          }
+          const credential = await decryptIntegrationApiKeyCredential({
+            reference: reference.data,
+            credential: encrypted,
+            keyring: config.credentialKeyring,
+          });
+          return provider.request(credential, input.request);
+        },
+        reference.data,
+      );
     },
 
     async withCredential(rawReference, operation) {
       const reference =
         IntegrationCredentialReferenceSchema.safeParse(rawReference);
       if (!reference.success) {
-        throw new IntegrationApiKeyRuntimeError(
-          "INTEGRATION_API_KEY_CREDENTIAL_UNAVAILABLE",
-        );
-      }
-      if (!providers.has(reference.data.integrationId)) {
-        throw new IntegrationApiKeyRuntimeError(
-          "INTEGRATION_API_KEY_PROVIDER_UNAVAILABLE",
-        );
-      }
-      const encrypted = await config.credentialVault.read(reference.data);
-      if (!encrypted) {
-        throw new IntegrationApiKeyRuntimeError(
-          "INTEGRATION_API_KEY_CREDENTIAL_UNAVAILABLE",
-        );
-      }
-      const credential = await decryptIntegrationApiKeyCredential({
-        reference: reference.data,
-        credential: encrypted,
-        keyring: config.credentialKeyring,
-      });
-      // This is where a vendor pack receives its secrets, so it is where the
-      // credential is held to the fields its provider declared. A missing
-      // application key fails here rather than as an opaque provider error.
-      const provider = providers.get(reference.data.integrationId);
-      if (provider) {
-        try {
-          assertCredentialFields(provider.configuration, credential);
-        } catch {
-          throw new IntegrationApiKeyRuntimeError(
+        return reportInvalid(
+          "request",
+          new IntegrationApiKeyRuntimeError(
             "INTEGRATION_API_KEY_CREDENTIAL_UNAVAILABLE",
-          );
-        }
+          ),
+        );
       }
-      return operation(credential);
+      return observe(
+        "request",
+        async () => {
+          if (!providers.has(reference.data.integrationId)) {
+            throw new IntegrationApiKeyRuntimeError(
+              "INTEGRATION_API_KEY_PROVIDER_UNAVAILABLE",
+            );
+          }
+          const encrypted = await config.credentialVault.read(reference.data);
+          if (!encrypted) {
+            throw new IntegrationApiKeyRuntimeError(
+              "INTEGRATION_API_KEY_CREDENTIAL_UNAVAILABLE",
+            );
+          }
+          const credential = await decryptIntegrationApiKeyCredential({
+            reference: reference.data,
+            credential: encrypted,
+            keyring: config.credentialKeyring,
+          });
+          // This is where a vendor pack receives its secrets, so it is where the
+          // credential is held to the fields its provider declared.
+          const provider = providers.get(reference.data.integrationId);
+          if (provider) {
+            try {
+              assertCredentialFields(provider.configuration, credential);
+            } catch {
+              throw new IntegrationApiKeyRuntimeError(
+                "INTEGRATION_API_KEY_CREDENTIAL_UNAVAILABLE",
+              );
+            }
+          }
+          return operation(credential);
+        },
+        reference.data,
+      );
     },
 
     async revoke(rawReference) {
       const reference =
         IntegrationCredentialReferenceSchema.safeParse(rawReference);
       if (!reference.success) {
-        throw new IntegrationApiKeyRuntimeError(
-          "INTEGRATION_API_KEY_CREDENTIAL_UNAVAILABLE",
+        return reportInvalid(
+          "disconnect",
+          new IntegrationApiKeyRuntimeError(
+            "INTEGRATION_API_KEY_CREDENTIAL_UNAVAILABLE",
+          ),
         );
       }
-      await config.credentialVault.revoke(reference.data);
+      await observe(
+        "disconnect",
+        () => config.credentialVault.revoke(reference.data),
+        reference.data,
+      );
     },
   };
 }

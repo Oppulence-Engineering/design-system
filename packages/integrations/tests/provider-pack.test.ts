@@ -5,6 +5,7 @@ import {
   assertProviderPackCoverage,
   getProviderPackContractIssues,
   getProviderPackCoverageReport,
+  getProviderPackSurfaceCoverageReport,
   ProviderPackContractError,
   type IntegrationProviderPack,
   type ProviderPackOperationCoverage,
@@ -215,6 +216,81 @@ describe("provider pack contract", () => {
         typed_rest: { operations: 1 },
         special: { operations: 0 },
       },
+    });
+  });
+
+  test("validates and reports catalog surface mappings", () => {
+    const stripeOperation =
+      SIMSTUDIO_BASELINE.integrations.find(
+        (integration) => integration.id === "stripe",
+      )?.operations[0]?.id ?? "stripe:create-payment-intent";
+    const mapped: IntegrationProviderPack = {
+      integrationId: "stripe",
+      coverage: [
+        {
+          sourceOperationId: stripeOperation,
+          surfaceId: "stripe-http",
+          lane: "sdk",
+          disposition: "supported",
+        },
+      ],
+      triggerCoverage: [],
+      create: () => [],
+    };
+
+    const issues = getProviderPackContractIssues(mapped);
+    expect(issues.length).toBeGreaterThan(0);
+    expect(
+      issues.some((issue) =>
+        issue.detail.includes("unknown execution surface"),
+      ),
+    ).toBeFalse();
+    expect(getProviderPackSurfaceCoverageReport([mapped])).toEqual({
+      mappedOperations: 1,
+      mappedTriggers: 0,
+      unmappedOperations: [],
+      unmappedTriggers: [],
+    });
+  });
+
+  test("rejects a surface mapping that is not in the integration metadata", () => {
+    const stripeOperation =
+      SIMSTUDIO_BASELINE.integrations.find(
+        (integration) => integration.id === "stripe",
+      )?.operations[0]?.id ?? "stripe:create-payment-intent";
+    const issues = getProviderPackContractIssues({
+      integrationId: "stripe",
+      coverage: [
+        {
+          sourceOperationId: stripeOperation,
+          surfaceId: "stripe-missing",
+          lane: "sdk",
+          disposition: "supported",
+        },
+      ],
+      triggerCoverage: [],
+      create: () => [],
+    });
+    expect(issues[0]?.detail).toContain("unknown execution surface");
+    expect(
+      getProviderPackSurfaceCoverageReport([
+        {
+          integrationId: "stripe",
+          coverage: [
+            {
+              sourceOperationId: stripeOperation,
+              surfaceId: "stripe-missing",
+              lane: "sdk",
+              disposition: "supported",
+            },
+          ],
+          triggerCoverage: [],
+          create: () => [],
+        },
+      ]),
+    ).toMatchObject({
+      mappedOperations: 0,
+      unmappedOperations: [stripeOperation],
     });
   });
 });

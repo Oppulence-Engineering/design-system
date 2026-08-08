@@ -5,7 +5,9 @@ import {
   INTEGRATION_CAPABILITIES,
   INTEGRATION_CATEGORIES,
   IntegrationConnectionProjectionSchema,
+  IntegrationConnectionIssueSchema,
   IntegrationDefinitionSchema,
+  SafeIntegrationSummarySchema,
   IntegrationIdSchema,
   IntegrationSummarySchema,
   ProductIntegrationSchema,
@@ -50,6 +52,8 @@ import {
   validateFunctionalSupportContracts,
 } from "./support";
 import {
+  assertIntegrationOutcomeReadiness,
+  getIntegrationOutcomeReadiness,
   IntegrationOutcomeTemplateSchema,
   validateOutcomeTemplates,
 } from "./templates";
@@ -71,12 +75,15 @@ export {
   INTEGRATION_CATALOGUE,
   INTEGRATION_CATEGORIES,
   IntegrationConnectionProjectionSchema,
+  IntegrationConnectionIssueSchema,
   IntegrationDefinitionSchema,
   IntegrationActionContractSchema,
   IntegrationActionRequestSchema,
   IntegrationEntitlementPolicySchema,
   IntegrationIdSchema,
   IntegrationOutcomeTemplateSchema,
+  assertIntegrationOutcomeReadiness,
+  getIntegrationOutcomeReadiness,
   IntegrationSummarySchema,
   IntegrationSupportContractSchema,
   ProductIntegrationSchema,
@@ -118,12 +125,30 @@ export type {
   IntegrationCapability,
   IntegrationCategory,
   IntegrationConnectionProjection,
+  IntegrationConnectionIssue,
   IntegrationDefinition,
   IntegrationId,
   IntegrationSummary,
   Product,
   ProductIntegration,
 } from "./contracts";
+export {
+  IntegrationFailureCodeSchema,
+  IntegrationFailurePhaseSchema,
+  IntegrationFailureSchema,
+  createConnectionIssue,
+  createIntegrationFailure,
+  classifyIntegrationFailure,
+  isRetryableIntegrationFailure,
+  planConnectionRecovery,
+  reportIntegrationFailure,
+} from "./reliability";
+export type {
+  ConnectionRecoveryPlan,
+  IntegrationFailure,
+  IntegrationFailureObservation,
+  IntegrationFailureObserver,
+} from "./reliability";
 export type {
   IntegrationConnectionResolver,
   IntegrationDirectory,
@@ -152,7 +177,33 @@ export type {
   OperationTriggerCoverageReport,
   ProductIntegrationConnector,
 } from "./support";
-export type { IntegrationOutcomeTemplate } from "./templates";
+export type {
+  IntegrationOutcomeReadiness,
+  IntegrationOutcomeTemplate,
+} from "./templates";
+export {
+  INTEGRATION_CREDENTIAL_TYPES,
+  INTEGRATION_EVIDENCE_BASIS,
+  INTEGRATION_EVIDENCE_TYPES,
+  INTEGRATION_SURFACE_TYPES,
+  INTEGRATION_VERIFICATION_STATUS,
+  IntegrationAuthAlternativeSchema,
+  IntegrationCredentialDefinitionSchema,
+  IntegrationCredentialFieldSchema,
+  IntegrationCredentialUseSchema,
+  IntegrationEvidenceSchema,
+  IntegrationSurfaceAuthSchema,
+  IntegrationSurfaceSchema,
+} from "./surfaces";
+export type {
+  IntegrationAuthAlternative,
+  IntegrationCredentialDefinition,
+  IntegrationCredentialField,
+  IntegrationCredentialUse,
+  IntegrationEvidence,
+  IntegrationSurface,
+  IntegrationSurfaceAuth,
+} from "./surfaces";
 export type {
   SimStudioProviderProtocol,
   SimStudioProviderProtocolGap,

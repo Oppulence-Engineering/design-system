@@ -119,6 +119,42 @@ export const StableDescriptorIdSchema = z
     "Descriptor IDs must be stable lowercase identifiers.",
   );
 
+const SECRET_BEARING_SUMMARY_PATTERNS = [
+  /\b(?:sk|pk)_(?:live|test)_[A-Za-z0-9]+/u,
+  /\b(?:ghp|gho|ghs|ghr|xoxb|xoxp|AKIA)[A-Za-z0-9_-]{12,}/u,
+  /\bBearer\s+[A-Za-z0-9._~+/=-]{16,}/iu,
+  /\b(?:api[_-]?key|access[_-]?token|refresh[_-]?token|client[_-]?secret|password|bearer)\b/iu,
+  /\b[A-Za-z0-9+/=]{24,}\b/u,
+  /\b[A-Za-z0-9]+(?:[-_][A-Za-z0-9]+){2,}\b/u,
+] as const;
+
+/** Product-safe text for values that can cross into a browser or user UI. */
+export const SafeIntegrationSummarySchema = z
+  .string()
+  .min(1)
+  .max(500)
+  .superRefine((summary, context) => {
+    if (/[\u0000-\u001f\u007f]/u.test(summary)) {
+      context.addIssue({
+        code: "custom",
+        message: "Summaries cannot contain control characters.",
+      });
+    }
+    if (
+      SECRET_BEARING_SUMMARY_PATTERNS.some((pattern) =>
+        pattern.test(summary),
+      ) ||
+      /[<>]/u.test(summary) ||
+      /\b(?:javascript|data):/iu.test(summary) ||
+      /https?:\/\//iu.test(summary)
+    ) {
+      context.addIssue({
+        code: "custom",
+        message: "Summaries must be plain, credential-free product text.",
+      });
+    }
+  });
+
 const CapabilityListSchema = z.array(IntegrationCapabilitySchema).readonly();
 const AuthMethodListSchema = z
   .array(IntegrationAuthMethodSchema)
@@ -321,6 +357,55 @@ export const SourceFreshnessSchema = z
   })
   .strict();
 
+export const IntegrationConnectionIssueSchema = z
+  .object({
+    code: z
+      .string()
+      .min(1)
+      .max(160)
+      .regex(
+        /^[A-Za-z0-9][A-Za-z0-9:_-]*$/u,
+        "Issue codes must be stable alphanumeric identifiers.",
+      )
+      .refine(
+        (code) =>
+          !SECRET_BEARING_SUMMARY_PATTERNS.some((pattern) =>
+            pattern.test(code),
+          ),
+        "Issue codes cannot contain credential or token values.",
+      ),
+    summary: SafeIntegrationSummarySchema,
+    recoverable: z.boolean(),
+    severity: z.enum(["info", "warning", "error", "critical"]).default("error"),
+    suggestedAction: z
+      .enum(["reconnect", "sync_now", "configure", "disconnect", "inspect"])
+      .optional(),
+    occurredAt: z.string().datetime({ offset: true }).optional(),
+    nextRetryAt: z.string().datetime({ offset: true }).optional(),
+  })
+  .strict()
+  .superRefine((issue, context) => {
+    if (issue.nextRetryAt && !issue.recoverable) {
+      context.addIssue({
+        code: "custom",
+        path: ["nextRetryAt"],
+        message: "A retry time requires a recoverable issue.",
+      });
+    }
+    if (
+      !issue.recoverable &&
+      issue.suggestedAction !== undefined &&
+      !["disconnect", "inspect"].includes(issue.suggestedAction)
+    ) {
+      context.addIssue({
+        code: "custom",
+        path: ["suggestedAction"],
+        message:
+          "Non-recoverable issues may only suggest disconnect or inspect.",
+      });
+    }
+  });
+
 export const IntegrationConnectionProjectionSchema = z
   .object({
     id: z.string().min(1).max(160),
@@ -332,14 +417,7 @@ export const IntegrationConnectionProjectionSchema = z
     sourceFreshness: SourceFreshnessSchema.optional(),
     accountLabel: z.string().min(1).max(200).optional(),
     permittedActions: z.array(z.enum(PERMITTED_CONNECTION_ACTIONS)).readonly(),
-    safeIssue: z
-      .object({
-        code: z.string().min(1).max(100),
-        summary: z.string().min(1).max(500),
-        recoverable: z.boolean(),
-      })
-      .strict()
-      .optional(),
+    safeIssue: IntegrationConnectionIssueSchema.optional(),
   })
   .strict();
 
@@ -358,4 +436,7 @@ export type IntegrationDefinition = z.infer<typeof IntegrationDefinitionSchema>;
 export type IntegrationSummary = z.infer<typeof IntegrationSummarySchema>;
 export type IntegrationConnectionProjection = z.infer<
   typeof IntegrationConnectionProjectionSchema
+>;
+export type IntegrationConnectionIssue = z.infer<
+  typeof IntegrationConnectionIssueSchema
 >;

@@ -11,6 +11,10 @@ import {
   type UnauthenticatedProviderConfiguration,
   type UnauthenticatedProviderRequest,
 } from "../transport/unauthenticated";
+import {
+  reportIntegrationFailure,
+  type IntegrationFailureObserver,
+} from "../../reliability";
 
 export interface IntegrationNoAuthSubject {
   product: Product;
@@ -27,6 +31,8 @@ export interface IntegrationNoAuthRuntimeConfig {
     subjectId: string;
   }): Promise<void>;
   fetcher?: typeof fetch;
+  /** Receives classified failures only; raw provider errors stay local. */
+  onFailure?: IntegrationFailureObserver;
 }
 
 export interface ConnectIntegrationNoAuthInput extends IntegrationNoAuthSubject {
@@ -122,56 +128,94 @@ export function createIntegrationNoAuthRuntime(
 ): IntegrationNoAuthRuntime {
   const providers = providersByIntegrationId(config.providers, config.fetcher);
 
+  async function observe<T>(
+    phase: Parameters<typeof reportIntegrationFailure>[1]["phase"],
+    operation: () => Promise<T>,
+    integrationId?: string,
+  ): Promise<T> {
+    try {
+      return await operation();
+    } catch (error) {
+      await reportIntegrationFailure(config.onFailure, {
+        phase,
+        error,
+        integrationId,
+      });
+      throw error;
+    }
+  }
+
+  async function reportInvalid(
+    phase: Parameters<typeof reportIntegrationFailure>[1]["phase"],
+    error: unknown,
+  ): Promise<never> {
+    await reportIntegrationFailure(config.onFailure, { phase, error });
+    throw error;
+  }
+
   return {
     async connect(rawInput, authorize) {
-      const input = ConnectIntegrationNoAuthInputSchema.safeParse(rawInput);
-      if (!input.success) {
-        throw new IntegrationNoAuthRuntimeError("INTEGRATION_NO_AUTH_INVALID");
-      }
-      const provider = providers.get(input.data.integrationId);
-      if (!provider) {
-        throw new IntegrationNoAuthRuntimeError(
-          "INTEGRATION_NO_AUTH_PROVIDER_UNAVAILABLE",
-        );
-      }
-      await authorize({
-        integrationId: input.data.integrationId,
-        product: input.data.product,
-        subjectId: input.data.subjectId,
-      });
-      const connectionId = createConnectionId();
-      try {
-        await config.onConnected?.({
+      return observe("connect", async () => {
+        const input = ConnectIntegrationNoAuthInputSchema.safeParse(rawInput);
+        if (!input.success) {
+          throw new IntegrationNoAuthRuntimeError(
+            "INTEGRATION_NO_AUTH_INVALID",
+          );
+        }
+        const provider = providers.get(input.data.integrationId);
+        if (!provider) {
+          throw new IntegrationNoAuthRuntimeError(
+            "INTEGRATION_NO_AUTH_PROVIDER_UNAVAILABLE",
+          );
+        }
+        await authorize({
+          integrationId: input.data.integrationId,
+          product: input.data.product,
+          subjectId: input.data.subjectId,
+        });
+        const connectionId = createConnectionId();
+        try {
+          await config.onConnected?.({
+            connectionId,
+            integrationId: provider.configuration.integrationId,
+            product: input.data.product,
+            subjectId: input.data.subjectId,
+          });
+        } catch {
+          throw new IntegrationNoAuthRuntimeError(
+            "INTEGRATION_NO_AUTH_FINALIZATION_FAILED",
+          );
+        }
+        return {
           connectionId,
           integrationId: provider.configuration.integrationId,
           product: input.data.product,
           subjectId: input.data.subjectId,
-        });
-      } catch {
-        throw new IntegrationNoAuthRuntimeError(
-          "INTEGRATION_NO_AUTH_FINALIZATION_FAILED",
-        );
-      }
-      return {
-        connectionId,
-        integrationId: provider.configuration.integrationId,
-        product: input.data.product,
-        subjectId: input.data.subjectId,
-      };
+        };
+      });
     },
 
     async request(input) {
       const integrationId = IntegrationIdSchema.safeParse(input.integrationId);
       if (!integrationId.success) {
-        throw new IntegrationNoAuthRuntimeError("INTEGRATION_NO_AUTH_INVALID");
-      }
-      const provider = providers.get(integrationId.data);
-      if (!provider) {
-        throw new IntegrationNoAuthRuntimeError(
-          "INTEGRATION_NO_AUTH_PROVIDER_UNAVAILABLE",
+        return reportInvalid(
+          "request",
+          new IntegrationNoAuthRuntimeError("INTEGRATION_NO_AUTH_INVALID"),
         );
       }
-      return provider.request(input.request);
+      return observe(
+        "request",
+        async () => {
+          const provider = providers.get(integrationId.data);
+          if (!provider) {
+            throw new IntegrationNoAuthRuntimeError(
+              "INTEGRATION_NO_AUTH_PROVIDER_UNAVAILABLE",
+            );
+          }
+          return provider.request(input.request);
+        },
+        integrationId.data,
+      );
     },
   };
 }

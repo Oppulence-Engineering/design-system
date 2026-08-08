@@ -20,6 +20,10 @@ import {
   type MergeConnectionLinkCredential,
   type PlaidConnectionLinkCredential,
 } from "./credentials";
+import {
+  reportIntegrationFailure,
+  type IntegrationFailureObserver,
+} from "../../reliability";
 
 export interface IntegrationConnectionLinkSubject {
   product: Product;
@@ -113,6 +117,8 @@ export interface IntegrationConnectionLinkRuntimeConfig {
     subjectId: string;
     providerMetadata: Readonly<Record<string, string>>;
   }): Promise<void>;
+  /** Receives classified failures only; provider credentials and errors stay local. */
+  onFailure?: IntegrationFailureObserver;
 }
 
 export interface CreatePlaidLinkTokenInput extends IntegrationConnectionLinkSubject {}
@@ -282,19 +288,40 @@ export function createIntegrationConnectionLinkRuntime(
   const plaidConfig = config.plaid;
   const mergeConfig = config.merge;
 
+  async function reportInvalid(
+    phase: Parameters<typeof reportIntegrationFailure>[1]["phase"],
+    error: unknown,
+    integrationId: "plaid" | "merge",
+  ): Promise<never> {
+    await reportIntegrationFailure(config.onFailure, {
+      phase,
+      error,
+      integrationId,
+    });
+    throw error;
+  }
+
   return {
     async createPlaidLinkToken(
       rawInput: CreatePlaidLinkTokenInput,
     ): Promise<ConnectionLinkTokenResult> {
       const subject = SubjectSchema.safeParse(rawInput);
       if (!subject.success) {
-        throw new IntegrationConnectionLinkError(
-          "INTEGRATION_CONNECTION_LINK_INPUT_INVALID",
+        return reportInvalid(
+          "connect",
+          new IntegrationConnectionLinkError(
+            "INTEGRATION_CONNECTION_LINK_INPUT_INVALID",
+          ),
+          "plaid",
         );
       }
       if (!plaidConfig) {
-        throw new IntegrationConnectionLinkError(
-          "INTEGRATION_CONNECTION_LINK_PROVIDER_UNAVAILABLE",
+        return reportInvalid(
+          "connect",
+          new IntegrationConnectionLinkError(
+            "INTEGRATION_CONNECTION_LINK_PROVIDER_UNAVAILABLE",
+          ),
+          "plaid",
         );
       }
       try {
@@ -323,6 +350,13 @@ export function createIntegrationConnectionLinkRuntime(
           }),
         };
       } catch {
+        await reportIntegrationFailure(config.onFailure, {
+          phase: "connect",
+          error: new IntegrationConnectionLinkError(
+            "INTEGRATION_CONNECTION_LINK_TOKEN_FAILED",
+          ),
+          integrationId: "plaid",
+        });
         throw new IntegrationConnectionLinkError(
           "INTEGRATION_CONNECTION_LINK_TOKEN_FAILED",
         );
@@ -335,13 +369,21 @@ export function createIntegrationConnectionLinkRuntime(
     ): Promise<CompleteConnectionLinkResult> {
       const input = CompleteInputSchema.safeParse(rawInput);
       if (!input.success) {
-        throw new IntegrationConnectionLinkError(
-          "INTEGRATION_CONNECTION_LINK_INPUT_INVALID",
+        return reportInvalid(
+          "connect",
+          new IntegrationConnectionLinkError(
+            "INTEGRATION_CONNECTION_LINK_INPUT_INVALID",
+          ),
+          "plaid",
         );
       }
       if (!plaidConfig) {
-        throw new IntegrationConnectionLinkError(
-          "INTEGRATION_CONNECTION_LINK_PROVIDER_UNAVAILABLE",
+        return reportInvalid(
+          "connect",
+          new IntegrationConnectionLinkError(
+            "INTEGRATION_CONNECTION_LINK_PROVIDER_UNAVAILABLE",
+          ),
+          "plaid",
         );
       }
       /*
@@ -353,10 +395,19 @@ export function createIntegrationConnectionLinkRuntime(
        * could not map it to a 403 and a denial was indistinguishable from a
        * Plaid outage in monitoring.
        */
-      await authorize(
-        { product: input.data.product, subjectId: input.data.subjectId },
-        "plaid",
-      );
+      try {
+        await authorize(
+          { product: input.data.product, subjectId: input.data.subjectId },
+          "plaid",
+        );
+      } catch (error) {
+        await reportIntegrationFailure(config.onFailure, {
+          phase: "authorize",
+          error,
+          integrationId: "plaid",
+        });
+        throw error;
+      }
 
       try {
         const response = await (
@@ -385,6 +436,11 @@ export function createIntegrationConnectionLinkRuntime(
           }),
         });
       } catch (error) {
+        await reportIntegrationFailure(config.onFailure, {
+          phase: "connect",
+          error,
+          integrationId: "plaid",
+        });
         if (error instanceof IntegrationConnectionLinkError) throw error;
         throw new IntegrationConnectionLinkError(
           "INTEGRATION_CONNECTION_LINK_COMPLETION_FAILED",
@@ -397,13 +453,21 @@ export function createIntegrationConnectionLinkRuntime(
     ): Promise<ConnectionLinkTokenResult> {
       const subject = SubjectSchema.safeParse(rawInput);
       if (!subject.success) {
-        throw new IntegrationConnectionLinkError(
-          "INTEGRATION_CONNECTION_LINK_INPUT_INVALID",
+        return reportInvalid(
+          "connect",
+          new IntegrationConnectionLinkError(
+            "INTEGRATION_CONNECTION_LINK_INPUT_INVALID",
+          ),
+          "merge",
         );
       }
       if (!mergeConfig) {
-        throw new IntegrationConnectionLinkError(
-          "INTEGRATION_CONNECTION_LINK_PROVIDER_UNAVAILABLE",
+        return reportInvalid(
+          "connect",
+          new IntegrationConnectionLinkError(
+            "INTEGRATION_CONNECTION_LINK_PROVIDER_UNAVAILABLE",
+          ),
+          "merge",
         );
       }
       try {
@@ -447,6 +511,13 @@ export function createIntegrationConnectionLinkRuntime(
           }),
         };
       } catch {
+        await reportIntegrationFailure(config.onFailure, {
+          phase: "connect",
+          error: new IntegrationConnectionLinkError(
+            "INTEGRATION_CONNECTION_LINK_TOKEN_FAILED",
+          ),
+          integrationId: "merge",
+        });
         throw new IntegrationConnectionLinkError(
           "INTEGRATION_CONNECTION_LINK_TOKEN_FAILED",
         );
@@ -459,20 +530,37 @@ export function createIntegrationConnectionLinkRuntime(
     ): Promise<CompleteConnectionLinkResult> {
       const input = CompleteInputSchema.safeParse(rawInput);
       if (!input.success) {
-        throw new IntegrationConnectionLinkError(
-          "INTEGRATION_CONNECTION_LINK_INPUT_INVALID",
+        return reportInvalid(
+          "connect",
+          new IntegrationConnectionLinkError(
+            "INTEGRATION_CONNECTION_LINK_INPUT_INVALID",
+          ),
+          "merge",
         );
       }
       if (!mergeConfig) {
-        throw new IntegrationConnectionLinkError(
-          "INTEGRATION_CONNECTION_LINK_PROVIDER_UNAVAILABLE",
+        return reportInvalid(
+          "connect",
+          new IntegrationConnectionLinkError(
+            "INTEGRATION_CONNECTION_LINK_PROVIDER_UNAVAILABLE",
+          ),
+          "merge",
         );
       }
       // Outside the catch below, for the reason given in completePlaidLink.
-      await authorize(
-        { product: input.data.product, subjectId: input.data.subjectId },
-        "merge",
-      );
+      try {
+        await authorize(
+          { product: input.data.product, subjectId: input.data.subjectId },
+          "merge",
+        );
+      } catch (error) {
+        await reportIntegrationFailure(config.onFailure, {
+          phase: "authorize",
+          error,
+          integrationId: "merge",
+        });
+        throw error;
+      }
 
       try {
         const response = await (mergeConfig.clientFactory ?? createMergeClient)(
@@ -497,6 +585,11 @@ export function createIntegrationConnectionLinkRuntime(
           providerMetadata: optionalMetadata({ integrationName }),
         });
       } catch (error) {
+        await reportIntegrationFailure(config.onFailure, {
+          phase: "connect",
+          error,
+          integrationId: "merge",
+        });
         if (error instanceof IntegrationConnectionLinkError) throw error;
         throw new IntegrationConnectionLinkError(
           "INTEGRATION_CONNECTION_LINK_COMPLETION_FAILED",
@@ -508,71 +601,101 @@ export function createIntegrationConnectionLinkRuntime(
       rawReference: IntegrationCredentialReference,
       operation: (credential: PlaidConnectionLinkCredential) => Promise<T>,
     ): Promise<T> {
-      const reference =
-        IntegrationCredentialReferenceSchema.safeParse(rawReference);
-      if (!reference.success || reference.data.integrationId !== "plaid") {
-        throw new IntegrationConnectionLinkError(
-          "INTEGRATION_CONNECTION_LINK_CREDENTIAL_UNAVAILABLE",
-        );
+      try {
+        const reference =
+          IntegrationCredentialReferenceSchema.safeParse(rawReference);
+        if (!reference.success || reference.data.integrationId !== "plaid") {
+          throw new IntegrationConnectionLinkError(
+            "INTEGRATION_CONNECTION_LINK_CREDENTIAL_UNAVAILABLE",
+          );
+        }
+        const encrypted = await config.credentialVault.read(reference.data);
+        if (!encrypted) {
+          throw new IntegrationConnectionLinkError(
+            "INTEGRATION_CONNECTION_LINK_CREDENTIAL_UNAVAILABLE",
+          );
+        }
+        const credential = await decryptIntegrationConnectionLinkCredential({
+          reference: reference.data,
+          credential: encrypted,
+          keyring: config.credentialKeyring,
+        });
+        if (credential.kind !== "plaid") {
+          throw new IntegrationConnectionLinkError(
+            "INTEGRATION_CONNECTION_LINK_CREDENTIAL_MISMATCH",
+          );
+        }
+        return await operation(credential);
+      } catch (error) {
+        await reportIntegrationFailure(config.onFailure, {
+          phase: "request",
+          error,
+          integrationId: "plaid",
+          connectionId: rawReference.connectionId,
+        });
+        throw error;
       }
-      const encrypted = await config.credentialVault.read(reference.data);
-      if (!encrypted) {
-        throw new IntegrationConnectionLinkError(
-          "INTEGRATION_CONNECTION_LINK_CREDENTIAL_UNAVAILABLE",
-        );
-      }
-      const credential = await decryptIntegrationConnectionLinkCredential({
-        reference: reference.data,
-        credential: encrypted,
-        keyring: config.credentialKeyring,
-      });
-      if (credential.kind !== "plaid") {
-        throw new IntegrationConnectionLinkError(
-          "INTEGRATION_CONNECTION_LINK_CREDENTIAL_MISMATCH",
-        );
-      }
-      return operation(credential);
     },
 
     async withMergeCredential<T>(
       rawReference: IntegrationCredentialReference,
       operation: (credential: MergeConnectionLinkCredential) => Promise<T>,
     ): Promise<T> {
-      const reference =
-        IntegrationCredentialReferenceSchema.safeParse(rawReference);
-      if (!reference.success || reference.data.integrationId !== "merge") {
-        throw new IntegrationConnectionLinkError(
-          "INTEGRATION_CONNECTION_LINK_CREDENTIAL_UNAVAILABLE",
-        );
+      try {
+        const reference =
+          IntegrationCredentialReferenceSchema.safeParse(rawReference);
+        if (!reference.success || reference.data.integrationId !== "merge") {
+          throw new IntegrationConnectionLinkError(
+            "INTEGRATION_CONNECTION_LINK_CREDENTIAL_UNAVAILABLE",
+          );
+        }
+        const encrypted = await config.credentialVault.read(reference.data);
+        if (!encrypted) {
+          throw new IntegrationConnectionLinkError(
+            "INTEGRATION_CONNECTION_LINK_CREDENTIAL_UNAVAILABLE",
+          );
+        }
+        const credential = await decryptIntegrationConnectionLinkCredential({
+          reference: reference.data,
+          credential: encrypted,
+          keyring: config.credentialKeyring,
+        });
+        if (credential.kind !== "merge") {
+          throw new IntegrationConnectionLinkError(
+            "INTEGRATION_CONNECTION_LINK_CREDENTIAL_MISMATCH",
+          );
+        }
+        return await operation(credential);
+      } catch (error) {
+        await reportIntegrationFailure(config.onFailure, {
+          phase: "request",
+          error,
+          integrationId: "merge",
+          connectionId: rawReference.connectionId,
+        });
+        throw error;
       }
-      const encrypted = await config.credentialVault.read(reference.data);
-      if (!encrypted) {
-        throw new IntegrationConnectionLinkError(
-          "INTEGRATION_CONNECTION_LINK_CREDENTIAL_UNAVAILABLE",
-        );
-      }
-      const credential = await decryptIntegrationConnectionLinkCredential({
-        reference: reference.data,
-        credential: encrypted,
-        keyring: config.credentialKeyring,
-      });
-      if (credential.kind !== "merge") {
-        throw new IntegrationConnectionLinkError(
-          "INTEGRATION_CONNECTION_LINK_CREDENTIAL_MISMATCH",
-        );
-      }
-      return operation(credential);
     },
 
     async revoke(rawReference: IntegrationCredentialReference): Promise<void> {
-      const reference =
-        IntegrationCredentialReferenceSchema.safeParse(rawReference);
-      if (!reference.success) {
-        throw new IntegrationConnectionLinkError(
-          "INTEGRATION_CONNECTION_LINK_CREDENTIAL_UNAVAILABLE",
-        );
+      try {
+        const reference =
+          IntegrationCredentialReferenceSchema.safeParse(rawReference);
+        if (!reference.success) {
+          throw new IntegrationConnectionLinkError(
+            "INTEGRATION_CONNECTION_LINK_CREDENTIAL_UNAVAILABLE",
+          );
+        }
+        await config.credentialVault.revoke(reference.data);
+      } catch (error) {
+        await reportIntegrationFailure(config.onFailure, {
+          phase: "disconnect",
+          error,
+          integrationId: rawReference.integrationId,
+          connectionId: rawReference.connectionId,
+        });
+        throw error;
       }
-      await config.credentialVault.revoke(reference.data);
     },
   };
 }

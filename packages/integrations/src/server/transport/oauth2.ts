@@ -46,12 +46,20 @@ export class OAuth2ProviderError extends Error {
     | "OAUTH2_API_BASE_UNAVAILABLE"
     | "OAUTH2_INVALID_API_PATH"
     | "OAUTH2_API_REQUEST_FAILED"
+    | "OAUTH2_PROVIDER_TIMEOUT"
     | "OAUTH2_CONFIGURATION_INVALID";
+  readonly status?: number;
+  readonly retryable?: boolean;
 
-  constructor(code: OAuth2ProviderError["code"]) {
+  constructor(
+    code: OAuth2ProviderError["code"],
+    options?: { status?: number; retryable?: boolean },
+  ) {
     super("The provider authorization could not be completed.");
     this.name = "OAuth2ProviderError";
     this.code = code;
+    this.status = options?.status;
+    this.retryable = options?.retryable;
   }
 }
 
@@ -188,7 +196,7 @@ async function withTimeout<T>(
   const timeout = new Promise<never>((_resolve, reject) => {
     timer = setTimeout(() => {
       controller.abort();
-      reject(new Error("Provider request timed out."));
+      reject(new OAuth2ProviderError("OAUTH2_PROVIDER_TIMEOUT"));
     }, timeoutMs);
   });
   try {
@@ -925,14 +933,26 @@ export function createOAuth2ProviderSdk(
     }
     try {
       return await withTimeout(requestTimeoutMs, async (signal) => {
-        const response = await fetcher(configuration.tokenEndpoint, {
-          method: "POST",
-          headers,
-          body,
-          signal,
-        });
+        let response: Response;
+        try {
+          response = await fetcher(configuration.tokenEndpoint, {
+            method: "POST",
+            headers,
+            body,
+            signal,
+          });
+        } catch (error) {
+          if (error instanceof OAuth2ProviderError) throw error;
+          throw new OAuth2ProviderError(failureCode, { retryable: true });
+        }
         if (!response.ok) {
-          throw new OAuth2ProviderError(failureCode);
+          throw new OAuth2ProviderError(failureCode, {
+            status: response.status,
+            retryable:
+              response.status === 408 ||
+              response.status === 429 ||
+              response.status >= 500,
+          });
         }
         return parseTokenResponse(
           await readJsonBody(response, maxTokenResponseBytes),
@@ -941,6 +961,12 @@ export function createOAuth2ProviderSdk(
       });
     } catch (error) {
       if (error instanceof OAuth2ProviderError) {
+        if (error.code === "OAUTH2_PROVIDER_TIMEOUT") {
+          throw new OAuth2ProviderError(failureCode, {
+            status: 504,
+            retryable: true,
+          });
+        }
         throw error;
       }
       throw new OAuth2ProviderError(failureCode);
@@ -1024,8 +1050,11 @@ export function createOAuth2ProviderSdk(
             signal,
           }),
         );
-      } catch {
-        throw new OAuth2ProviderError("OAUTH2_API_REQUEST_FAILED");
+      } catch (error) {
+        if (error instanceof OAuth2ProviderError) throw error;
+        throw new OAuth2ProviderError("OAUTH2_API_REQUEST_FAILED", {
+          retryable: true,
+        });
       }
     },
   };

@@ -103,6 +103,7 @@ jobs:
           bun run --filter @oppulence/integrations typecheck
           bun run --filter @oppulence/integrations build
           bun run --filter @oppulence/integrations test
+          bun run --filter @oppulence/integrations providers:coverage -- --surfaces --require-surfaces
 
   boundary-smoke-infinite-canvas:
     name: Infinite Canvas yjs-boundary smoke

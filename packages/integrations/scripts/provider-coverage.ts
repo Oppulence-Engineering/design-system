@@ -12,6 +12,7 @@ import {
   BUILT_IN_PROVIDER_PACKS,
   createBuiltInProviderSdkRegistry,
   getProviderPackCoverageReport,
+  getProviderPackSurfaceCoverageReport,
   getProviderSdkCoverageReport,
 } from "../src/server";
 
@@ -29,6 +30,9 @@ const registry = createBuiltInProviderSdkRegistry({
 
 const sdk = getProviderSdkCoverageReport(registry);
 const packs = getProviderPackCoverageReport(BUILT_IN_PROVIDER_PACKS);
+const surfaceCoverage = getProviderPackSurfaceCoverageReport(
+  BUILT_IN_PROVIDER_PACKS,
+);
 
 const executable = new Set(
   SIMSTUDIO_BASELINE.integrations
@@ -96,6 +100,33 @@ if (remainingFlagIndex !== -1) {
   for (const integration of unmapped) {
     console.log(
       `  ${integration.id.padEnd(28)} ${String(integration.operations.length).padStart(4)} actions  ${String(integration.triggers.length).padStart(3)} triggers  ${integration.sourceAuthType}`,
+    );
+  }
+}
+
+if (process.argv.includes("--surfaces")) {
+  console.log("\nsurface mappings");
+  console.log(`  mapped operations ${surfaceCoverage.mappedOperations}`);
+  console.log(`  mapped triggers   ${surfaceCoverage.mappedTriggers}`);
+  console.log(
+    `  unmapped operations ${surfaceCoverage.unmappedOperations.length}`,
+  );
+  console.log(
+    `  unmapped triggers   ${surfaceCoverage.unmappedTriggers.length}`,
+  );
+  if (surfaceCoverage.unmappedOperations.length) {
+    console.log("  first unmapped operations:");
+    for (const operationId of surfaceCoverage.unmappedOperations.slice(0, 20)) {
+      console.log(`    ${operationId}`);
+    }
+  }
+  if (
+    process.argv.includes("--require-surfaces") &&
+    (surfaceCoverage.unmappedOperations.length ||
+      surfaceCoverage.unmappedTriggers.length)
+  ) {
+    throw new Error(
+      "Provider surface coverage is incomplete for metadata-backed packs.",
     );
   }
 }

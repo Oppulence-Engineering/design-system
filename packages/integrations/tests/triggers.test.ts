@@ -30,6 +30,7 @@ function harness(
   sources: readonly IntegrationTriggerSource[],
   options: {
     onEvent?: (event: IntegrationTriggerEvent) => Promise<void>;
+    onFailure?: (observation: unknown) => void;
     now?: () => Date;
     maxAttempts?: number;
   } = {},
@@ -47,6 +48,7 @@ function harness(
     async audit(record) {
       audits.push(record);
     },
+    ...(options.onFailure ? { onFailure: options.onFailure } : {}),
     ...(options.now ? { now: options.now } : {}),
     ...(options.maxAttempts ? { maxAttempts: options.maxAttempts } : {}),
   });
@@ -177,6 +179,36 @@ describe("integration trigger runtime", () => {
 
     expect(attempts).toBe(3);
     expect(audits.at(-1)?.action).toBe("failed");
+  });
+
+  test("releases only the failed event so a provider retry can deliver it", async () => {
+    let attempts = 0;
+    let fail = true;
+    const { runtime, events } = harness(
+      [webhookSource([{ providerEvent: "record.created", externalId: "r" }])],
+      {
+        maxAttempts: 1,
+        async onEvent() {
+          attempts += 1;
+          if (fail) throw new Error("queue unavailable");
+        },
+      },
+    );
+    const deliver = () =>
+      runtime.deliver({
+        integrationId: "airtable",
+        triggerId: "airtable:airtable-webhook",
+        rawBody: new TextEncoder().encode("{}"),
+        headers: new Headers({ "x-signature": "valid" }),
+      });
+
+    await expect(deliver()).rejects.toMatchObject({
+      code: "INTEGRATION_TRIGGER_DELIVERY_FAILED",
+    });
+    fail = false;
+    await expect(deliver()).resolves.toMatchObject({ delivered: 1 });
+    expect(attempts).toBe(2);
+    expect(events).toHaveLength(2);
   });
 
   test("advances and resumes from the poll cursor", async () => {
@@ -413,6 +445,41 @@ describe("integration trigger runtime", () => {
     ).resolves.toMatchObject({ state: "stale" });
   });
 
+  test("marks a poll provider failure in trigger health", async () => {
+    let failed = false;
+    const { runtime } = harness([
+      {
+        kind: "poll",
+        integrationId: "airtable",
+        triggerId: "airtable:airtable-webhook",
+        intervalSeconds: 1,
+        async poll() {
+          if (failed) throw new Error("provider unavailable");
+          return { events: [] };
+        },
+      },
+    ]);
+
+    await runtime.poll({
+      reference,
+      subjectId: "team_123",
+      triggerId: "airtable:airtable-webhook",
+      force: true,
+    });
+    failed = true;
+    await expect(
+      runtime.poll({
+        reference,
+        subjectId: "team_123",
+        triggerId: "airtable:airtable-webhook",
+        force: true,
+      }),
+    ).rejects.toThrow();
+    await expect(
+      runtime.getHealth({ reference, triggerId: "airtable:airtable-webhook" }),
+    ).resolves.toMatchObject({ state: "failing", consecutiveFailures: 1 });
+  });
+
   test("rejects a source whose trigger ID is not namespaced by its provider", () => {
     expect(() =>
       createIntegrationTriggerRuntime({
@@ -465,6 +532,24 @@ describe("integration trigger runtime", () => {
     expect(forged?.status).toBe(401);
     expect(unknown?.status).toBe(404);
     expect(events).toHaveLength(1);
+  });
+
+  test("streams and validates trigger request body limits", async () => {
+    const { runtime } = harness([webhookSource([])]);
+    expect(() =>
+      createIntegrationTriggerRoutes({ runtime, maxBodyBytes: Number.NaN }),
+    ).toThrow(IntegrationTriggerError);
+    const routes = createIntegrationTriggerRoutes({
+      runtime,
+      maxBodyBytes: 1_024,
+    });
+    const response = await routes.handle(
+      new Request(
+        "https://app.example/integrations/airtable/triggers/airtable%3Aairtable-webhook",
+        { method: "POST", body: "x".repeat(2_000) },
+      ),
+    );
+    expect(response?.status).toBe(400);
   });
 
   test("counts registered trigger sources as executable coverage", () => {

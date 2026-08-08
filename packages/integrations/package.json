@@ -30,6 +30,11 @@
       "import": "./dist/documentation.js",
       "default": "./dist/documentation.js"
     },
+    "./discovery": {
+      "types": "./dist/discovery.d.ts",
+      "import": "./dist/discovery.js",
+      "default": "./dist/discovery.js"
+    },
     "./golden-journey": {
       "types": "./dist/golden-journey.d.ts",
       "import": "./dist/golden-journey.js",
@@ -65,10 +70,20 @@
       "import": "./dist/registry.js",
       "default": "./dist/registry.js"
     },
+    "./reliability": {
+      "types": "./dist/reliability.d.ts",
+      "import": "./dist/reliability.js",
+      "default": "./dist/reliability.js"
+    },
     "./support": {
       "types": "./dist/support.d.ts",
       "import": "./dist/support.js",
       "default": "./dist/support.js"
+    },
+    "./surfaces": {
+      "types": "./dist/surfaces.d.ts",
+      "import": "./dist/surfaces.js",
+      "default": "./dist/surfaces.js"
     },
     "./server": {
       "types": "./dist/server/index.d.ts",
@@ -87,8 +102,28 @@
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "files": [
-    "dist",
-    "README.md"
+    "README.md",
+    "dist/**/*.d.ts",
+    "dist/index.js",
+    "dist/catalog.js",
+    "dist/contracts.js",
+    "dist/connection.js",
+    "dist/documentation.js",
+    "dist/discovery.js",
+    "dist/golden-journey.js",
+    "dist/kit.js",
+    "dist/parity.js",
+    "dist/provider-protocols.js",
+    "dist/execution-strategy.js",
+    "dist/registry.js",
+    "dist/reliability.js",
+    "dist/support.js",
+    "dist/surfaces.js",
+    "dist/templates.js",
+    "dist/react.js",
+    "dist/server/index.js",
+    "dist/server/browser.js",
+    "dist/integrations.manifest.json"
   ],
   "publishConfig": {
     "access": "public"
@@ -106,7 +141,7 @@
     "build:root": "esbuild src/index.ts --bundle --platform=browser --format=esm --packages=external --outfile=dist/index.js",
     "build:server": "esbuild src/server/index.ts --bundle --platform=node --format=esm --packages=external --outfile=dist/server/index.js",
     "build:server-browser": "esbuild src/server/browser.ts --bundle --platform=browser --format=esm --outfile=dist/server/browser.js",
-    "build:subpaths": "bun build src/catalog.ts src/contracts.ts src/connection.ts src/documentation.ts src/golden-journey.ts src/kit.ts src/parity.ts src/provider-protocols.ts src/execution-strategy.ts src/registry.ts src/support.ts src/templates.ts --root src --outdir dist --target browser --format esm --packages=external",
+    "build:subpaths": "bun build src/catalog.ts src/contracts.ts src/connection.ts src/documentation.ts src/discovery.ts src/golden-journey.ts src/kit.ts src/parity.ts src/provider-protocols.ts src/execution-strategy.ts src/registry.ts src/reliability.ts src/support.ts src/surfaces.ts src/templates.ts --root src --outdir dist --target browser --format esm --packages=external",
     "clean": "rm -rf .turbo dist tsconfig.build.tsbuildinfo",
     "format": "prettier --write \"{src,tests,scripts}/**/*.{ts,tsx}\"",
     "lint": "prettier --check \"{src,tests,scripts}/**/*.{ts,tsx}\"",
@@ -121,6 +156,7 @@
     "providers:wire": "bun scripts/wire-provider.ts",
     "providers:openapi": "bun scripts/openapi-plan.ts",
     "providers:plan": "bun scripts/provider-plan.ts",
+    "providers:scaffold": "bun scripts/provider-scaffold.ts",
     "refresh:simstudio": "bun scripts/refresh-simstudio-baseline.ts",
     "test": "bun test tests --path-ignore-patterns='**/artifacts.test.ts'",
     "typecheck": "tsc --noEmit",
