@@ -9,7 +9,11 @@ import {
   type TrackProperties,
   useOpenPanel,
 } from "@openpanel/nextjs";
-import Script from "next/script";
+// `next/script.js`, not `next/script`: the bundle is ESM consumed by Node
+// (vitest, RSC), which does not apply Next's bundler-style extension
+// resolution. The bare specifier throws ERR_MODULE_NOT_FOUND. Same fix as
+// server.ts's `next/headers.js`.
+import Script from "next/script.js";
 import * as React from "react";
 import { useEffect, useMemo, useRef } from "react";
 import {
