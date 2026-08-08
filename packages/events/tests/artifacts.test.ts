@@ -30,4 +30,14 @@ describe("published artifacts", () => {
     expect(serverArtifact).toContain('from "next/headers.js"');
     expect(serverArtifact).not.toContain('from "next/headers"');
   });
+
+  // The server entry was fixed in #10; the client entry kept the bare specifier
+  // and broke every Node-run test whose module graph reached it
+  // (ERR_MODULE_NOT_FOUND on `next/script`). Guard both entries, not just one.
+  test("the client entry uses Node-resolvable Next.js imports", async () => {
+    const clientArtifact = await readArtifact("client.js");
+
+    expect(clientArtifact).toContain('from "next/script.js"');
+    expect(clientArtifact).not.toContain('from "next/script"');
+  });
 });
