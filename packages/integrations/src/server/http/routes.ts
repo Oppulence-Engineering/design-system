@@ -41,6 +41,10 @@ import {
   type IntegrationConnectionLinkRuntime,
   type IntegrationConnectionLinkSubject,
 } from "../transport/connection-link";
+import {
+  reportIntegrationFailure,
+  type IntegrationFailureObserver,
+} from "../../reliability";
 
 export interface IntegrationOAuthRoutesConfig extends IntegrationOAuthRuntimeConfig {
   /** Resolves the product's authenticated tenant/actor context for OAuth start. */
@@ -331,6 +335,8 @@ export interface IntegrationProviderExecutionRoutesConfig {
     },
     request: Request,
   ): Promise<void>;
+  /** Receives classified provider execution failures without raw inputs or credentials. */
+  onFailure?: IntegrationFailureObserver;
   basePath?: string;
   maxJsonBodyBytes?: number;
 }
@@ -358,9 +364,11 @@ export function createIntegrationProviderExecutionRoutes(
       if (!match || request.method !== "POST") {
         return undefined;
       }
+      let integrationId: string | undefined;
+      let connectionId: string | undefined;
       try {
-        const integrationId = decodeURIComponent(match[1] ?? "");
-        const connectionId = decodeURIComponent(match[2] ?? "");
+        integrationId = decodeURIComponent(match[1] ?? "");
+        connectionId = decodeURIComponent(match[2] ?? "");
         const operationId = decodeURIComponent(match[3] ?? "");
         const provider = config.providerRegistry.get(integrationId);
         if (!provider || !provider.operationIds.includes(operationId)) {
@@ -394,6 +402,12 @@ export function createIntegrationProviderExecutionRoutes(
           output: redactSecretShapedOutput(result.output),
         });
       } catch (error) {
+        await reportIntegrationFailure(config.onFailure, {
+          phase: "request",
+          error,
+          integrationId,
+          connectionId,
+        });
         return jsonError(error);
       }
     },

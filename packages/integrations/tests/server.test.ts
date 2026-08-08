@@ -5458,6 +5458,35 @@ describe("server OAuth runtime", () => {
     ).toBe("Bearer server-access-token");
   });
 
+  test("reports classified OAuth runtime failures without leaking provider errors", async () => {
+    const keyring = await createKeyring();
+    const fixture = createRuntimeFixture();
+    const failures: unknown[] = [];
+    const runtime = createIntegrationOAuthRuntime({
+      ...fixture.config,
+      credentialKeyring: keyring,
+      onFailure: (observation) => {
+        failures.push(observation);
+      },
+    });
+    const reference = createIntegrationCredentialReference({
+      connectionId: "missing-connection",
+      integrationId: "quickbooks",
+      product: "eigenn",
+    });
+
+    await expect(
+      runtime.request({ reference, path: "/missing" }),
+    ).rejects.toBeDefined();
+    expect(failures[0]).toMatchObject({
+      phase: "request",
+      integrationId: "quickbooks",
+      connectionId: "missing-connection",
+      failure: { code: "credential_invalid", retryable: false },
+    });
+    expect(JSON.stringify(failures)).not.toContain("server-access-token");
+  });
+
   test("revokes a newly saved credential when product finalization fails", async () => {
     const keyring = await createKeyring();
     const fixture = createRuntimeFixture();
@@ -6159,6 +6188,7 @@ describe("server financial and aggregation SDK adapters", () => {
 
   test("verifies Plaid and Merge webhooks before emitting redacted, idempotent sync signals", async () => {
     const received: unknown[] = [];
+    const failures: unknown[] = [];
     const { privateKey, publicKey } = await generateKeyPair("ES256");
     const keyId = "plaid-webhook-key";
     const key = await exportJWK(publicKey);
@@ -6197,6 +6227,9 @@ describe("server financial and aggregation SDK adapters", () => {
       },
       async onSyncRequired(input) {
         received.push(input);
+      },
+      onFailure(observation) {
+        failures.push(observation);
       },
       now: () => new Date("2026-07-31T18:00:00.000Z"),
     });
@@ -6282,6 +6315,11 @@ describe("server financial and aggregation SDK adapters", () => {
     );
     expect(invalidResponse?.status).toBe(401);
     expect(received).toHaveLength(2);
+    expect(failures.at(-1)).toMatchObject({
+      phase: "webhook",
+      integrationId: "merge",
+      failure: { code: "webhook_invalid", retryable: false },
+    });
   });
 
   test("executes every Brex, QuickBooks, Xero, Plaid, and Merge operation through its SDK adapter", async () => {

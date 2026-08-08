@@ -11,15 +11,18 @@ test("build emits every documented package entrypoint and the generated public m
     "catalog.js",
     "contracts.js",
     "connection.js",
+    "discovery.js",
     "documentation.js",
     "golden-journey.js",
     "kit.js",
     "parity.js",
     "provider-protocols.js",
     "execution-strategy.js",
+    "reliability.js",
     "react.js",
     "registry.js",
     "support.js",
+    "surfaces.js",
     "templates.js",
     "server/index.js",
     "server/browser.js",
@@ -27,6 +30,15 @@ test("build emits every documented package entrypoint and the generated public m
   ]) {
     expect(existsSync(resolve(distDirectory, entrypoint))).toBeTrue();
   }
+  expect(
+    existsSync(resolve(distDirectory, "integrations.discovery.json")),
+  ).toBeFalse();
+  expect(
+    existsSync(resolve(distDirectory, "integration-metadata.js")),
+  ).toBeFalse();
+  expect(
+    existsSync(resolve(distDirectory, "integration-metadata.d.ts")),
+  ).toBeFalse();
 
   const manifest = JSON.parse(
     readFileSync(resolve(distDirectory, "integrations.manifest.json"), "utf8"),
@@ -85,6 +97,23 @@ test(
     expect(typeof entry.getProviderExecutionStrategyReport).toBe("function");
     expect(typeof entry.createProductIntegrationKit).toBe("function");
     expect(typeof entry.runIntegrationGoldenJourney).toBe("function");
+    expect(entry.getIntegrationDiscovery).toBeUndefined();
+    expect(typeof entry.classifyIntegrationFailure).toBe("function");
+    expect(typeof entry.getIntegrationOutcomeReadiness).toBe("function");
+    expect(typeof entry.assertIntegrationOutcomeReadiness).toBe("function");
+
+    const discovery = await import(
+      `${resolve(distDirectory, "discovery.js")}?artifact-test`
+    );
+    expect(typeof discovery.getIntegrationDiscovery).toBe("function");
+    const reliability = await import(
+      `${resolve(distDirectory, "reliability.js")}?artifact-test`
+    );
+    expect(typeof reliability.planConnectionRecovery).toBe("function");
+    const surfaces = await import(
+      `${resolve(distDirectory, "surfaces.js")}?artifact-test`
+    );
+    expect(typeof surfaces.IntegrationSurfaceSchema.parse).toBe("function");
 
     const server = await import(
       `${resolve(distDirectory, "server/index.js")}?artifact-test`

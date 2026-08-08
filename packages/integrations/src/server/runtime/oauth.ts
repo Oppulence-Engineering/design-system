@@ -23,6 +23,10 @@ import {
   type OAuth2ProviderConfiguration,
   type OAuth2ProviderSdk,
 } from "../transport/oauth2";
+import {
+  reportIntegrationFailure,
+  type IntegrationFailureObserver,
+} from "../../reliability";
 
 const SAFE_RELATIVE_PATH = /^\/(?!\/)[A-Za-z0-9._~!$&'()*+,;=:@%/-]*$/;
 const UNSAFE_ENCODED_PATH_TOKENS = /%(?:2f|5c|3f|23)/iu;
@@ -149,6 +153,8 @@ export interface IntegrationOAuthRuntimeConfig {
     subjectId: string;
     providerMetadata: Readonly<Record<string, string>>;
   }): Promise<void>;
+  /** Receives classified failures only; raw provider errors never cross this seam. */
+  onFailure?: IntegrationFailureObserver;
 }
 
 export interface BeginIntegrationOAuthInput extends IntegrationOAuthSubject {
@@ -336,6 +342,28 @@ export function createIntegrationOAuthRuntime(
     );
   }
 
+  async function reportFailure(
+    phase: Parameters<typeof reportIntegrationFailure>[1]["phase"],
+    error: unknown,
+    reference?: IntegrationCredentialReference,
+  ): Promise<void> {
+    await reportIntegrationFailure(config.onFailure, {
+      phase,
+      error,
+      integrationId: reference?.integrationId,
+      connectionId: reference?.connectionId,
+    });
+  }
+
+  function isRefreshFailure(error: unknown): boolean {
+    return (
+      typeof error === "object" &&
+      error !== null &&
+      typeof (error as { code?: unknown }).code === "string" &&
+      (error as { code: string }).code.toLowerCase().includes("refresh")
+    );
+  }
+
   function resolveProvider(value: string): {
     integrationId: IntegrationId;
     provider: OAuth2ProviderSdk;
@@ -500,10 +528,20 @@ export function createIntegrationOAuthRuntime(
         product: authorization.product,
         subjectId: authorization.subjectId,
       });
-      const credential = await provider.exchangeAuthorizationCode(
-        input.code,
-        authorization.codeVerifier,
-      );
+      let credential: IntegrationOAuthCredential;
+      try {
+        credential = await provider.exchangeAuthorizationCode(
+          input.code,
+          authorization.codeVerifier,
+        );
+      } catch (error) {
+        await reportFailure("authorize", error, {
+          connectionId: "pending",
+          integrationId,
+          product: authorization.product,
+        });
+        throw error;
+      }
       const connectionId = `connection_${randomBase64Url(18)}`;
       const providerMetadata = provider.extractCallbackMetadata(
         input.providerCallbackParameters ?? new URLSearchParams(),
@@ -523,6 +561,13 @@ export function createIntegrationOAuthRuntime(
           providerMetadata,
         });
       } catch {
+        await reportFailure(
+          "connect",
+          new IntegrationRuntimeError(
+            "INTEGRATION_CONNECTION_FINALIZATION_FAILED",
+          ),
+          reference,
+        );
         await config.credentialVault.revoke(reference).catch(() => undefined);
         throw new IntegrationRuntimeError(
           "INTEGRATION_CONNECTION_FINALIZATION_FAILED",
@@ -542,16 +587,31 @@ export function createIntegrationOAuthRuntime(
       const reference = IntegrationCredentialReferenceSchema.parse(
         input.reference,
       );
-      const { reference: _reference, ...request } = input;
-      const { provider } = resolveProvider(reference.integrationId);
-      const credential = await getFreshCredential(reference);
-      let response = await provider.request(credential, request);
-      if (response.status !== 401 || !credential.refreshToken) {
+      try {
+        const { reference: _reference, ...request } = input;
+        const { provider } = resolveProvider(reference.integrationId);
+        const credential = await getFreshCredential(reference);
+        let response = await provider.request(credential, request);
+        if (response.status === 401 && credential.refreshToken) {
+          const refreshed = await refreshCredential(reference, credential);
+          response = await provider.request(refreshed, request);
+        }
+        if (!response.ok) {
+          await reportFailure(
+            "request",
+            { status: response.status },
+            reference,
+          );
+        }
         return response;
+      } catch (error) {
+        await reportFailure(
+          isRefreshFailure(error) ? "refresh" : "request",
+          error,
+          reference,
+        );
+        throw error;
       }
-      const refreshed = await refreshCredential(reference, credential);
-      response = await provider.request(refreshed, request);
-      return response;
     },
 
     /**
@@ -565,8 +625,17 @@ export function createIntegrationOAuthRuntime(
     ): Promise<T> {
       const reference =
         IntegrationCredentialReferenceSchema.parse(rawReference);
-      resolveProvider(reference.integrationId);
-      return operation(await getFreshCredential(reference));
+      try {
+        resolveProvider(reference.integrationId);
+        return await operation(await getFreshCredential(reference));
+      } catch (error) {
+        await reportFailure(
+          isRefreshFailure(error) ? "refresh" : "request",
+          error,
+          reference,
+        );
+        throw error;
+      }
     },
 
     async revokeCredential(
@@ -574,9 +643,14 @@ export function createIntegrationOAuthRuntime(
     ): Promise<void> {
       const parsedReference =
         IntegrationCredentialReferenceSchema.parse(reference);
-      await refreshLock.runExclusive(parsedReference, async () => {
-        await config.credentialVault.revoke(parsedReference);
-      });
+      try {
+        await refreshLock.runExclusive(parsedReference, async () => {
+          await config.credentialVault.revoke(parsedReference);
+        });
+      } catch (error) {
+        await reportFailure("disconnect", error, parsedReference);
+        throw error;
+      }
     },
   };
 }

@@ -1,0 +1,8 @@
+dist/integration-metadata.js
+dist/integration-metadata.d.ts
+dist/integration-metadata.js.map
+*.map
+dist/generated/
+scripts/
+src/
+tests/

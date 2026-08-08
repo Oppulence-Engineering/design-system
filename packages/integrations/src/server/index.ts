@@ -374,6 +374,8 @@ import {
   getProviderPackAdapterIssues,
   getProviderPackContractIssues,
   getProviderPackCoverageReport,
+  getProviderPackSurfaceCoverageReport,
+  resolveProviderPackSurface,
   ProviderPackContractError,
 } from "./core/provider-pack";
 import {
@@ -766,6 +768,8 @@ export {
   getProviderPackContractIssues,
   getProviderPackAdapterIssues,
   getProviderPackCoverageReport,
+  getProviderPackSurfaceCoverageReport,
+  resolveProviderPackSurface,
   ProviderPackContractError,
   createIntegrationTriggerRuntime,
   createIntegrationTriggerRoutes,
@@ -1044,6 +1048,7 @@ export type {
   ProviderPackContext,
   ProviderPackContractIssue,
   ProviderPackCoverageReport,
+  ProviderPackSurfaceCoverageReport,
   ProviderPackDisposition,
   ProviderPackOperationCoverage,
   ProviderPackTriggerCoverage,

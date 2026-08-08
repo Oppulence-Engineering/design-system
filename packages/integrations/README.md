@@ -11,6 +11,83 @@ server-only `@oppulence/integrations/server` entry for reusable OAuth2 and
 browser-Link provider clients, encrypted credential envelopes, token refresh,
 and mountable routes.
 
+## Internal provider metadata
+
+The separate `@oppulence/integrations/discovery` entry exposes an internal
+discovery projection for setup screens, documentation, auth validation, runtime
+selection, and provider planning. It describes the surfaces a provider offers
+(HTTP, SDK, MCP, CLI, or special), the credential fields each surface accepts,
+and the evidence used to verify those claims. It is metadata only: it never
+contains credential values, connection records, or OAuth state.
+
+```ts
+import {
+  getIntegrationDiscovery,
+  getIntegrationCredentials,
+  getIntegrationSurfaces,
+} from "@oppulence/integrations/discovery";
+
+const discovery = getIntegrationDiscovery("quickbooks");
+const surfaces = getIntegrationSurfaces("quickbooks");
+const credentials = getIntegrationCredentials("quickbooks");
+```
+
+Use the discovery manifest for an internal setup catalogue or provider review;
+use the public manifest for browser-facing catalogue data. Evidence is marked
+`unknown` until a scheduled or release-time verification job confirms it.
+
+## Connection failure and recovery contracts
+
+Provider-specific errors should be classified at the server boundary before
+they reach product UI or logs. The reliability helpers produce stable error
+codes, redact raw provider messages, and constrain recovery to an action the
+connection projection permits.
+
+```ts
+import {
+  classifyIntegrationFailure,
+  planConnectionRecovery,
+} from "@oppulence/integrations";
+
+const failure = classifyIntegrationFailure({
+  phase: "refresh",
+  error: providerError,
+});
+const recovery = planConnectionRecovery({
+  state: "attention",
+  permittedActions: ["reconnect", "inspect"],
+  safeIssue: {
+    code: failure.code,
+    summary: failure.summary,
+    recoverable: failure.retryable,
+    suggestedAction: failure.retryable ? "reconnect" : "inspect",
+  },
+});
+```
+
+The consuming product still owns credential storage, authorization, sync
+workers, and the actual reconnect or repair action. The package supplies the
+safe contract and deterministic decision so every integration can present the
+same recovery behavior.
+
+## Provider pack scaffolding
+
+Start a new provider pack from catalogue metadata and the typed provider-pack
+contract:
+
+```sh
+bun run providers:scaffold -- stripe --dry-run
+bun run providers:scaffold -- stripe
+```
+
+The non-dry run writes the provider module and registers its factory in the
+single built-in provider registry; deferred source actions remain explicit
+until the adapter is implemented.
+
+The generator refuses to overwrite an existing provider and leaves provider
+specific semantics explicit for SDK review, operation/trigger mapping, and
+support-contract promotion.
+
 ## Product resolver
 
 The owning product authorizes its request and adapts only safe connection data.
@@ -459,7 +536,10 @@ adapters that execute them. Provider modules export a
 configuration behind a uniform contract.
 
 ```ts
-import { assertProviderPackCoverage, createJiraPack } from "@oppulence/integrations/server";
+import {
+  assertProviderPackCoverage,
+  createJiraPack,
+} from "@oppulence/integrations/server";
 
 // Every pack has a contract test that calls this.
 assertProviderPackCoverage(createJiraPack(), { oauthRuntime });
@@ -495,13 +575,16 @@ in one of three shapes:
 
 The runtime owns replay suppression, bounded retries, cleanup on disconnect,
 audit records, and freshness reporting. Delivery keys are recorded before the
-product handler runs, so a concurrent redelivery cannot double-emit, and are
-released when the handler exhausts its attempts so the provider may retry.
+product handler runs, so a concurrent redelivery cannot double-emit. A failed
+event key is released when the handler exhausts its attempts so the provider
+may retry; successful event keys remain recorded.
 Events carry a safe projection; raw payloads, headers, and credentials never
 reach a product.
 
 `IntegrationTriggerStore` is the product seam for cursor and delivered-key
-persistence, mirroring `IntegrationCredentialVault`.
+persistence, mirroring `IntegrationCredentialVault`. Durable implementations
+must release only the failed event key with `deleteDelivery`; disconnect uses
+`deleteDeliveries` to clear the whole connection checkpoint.
 `createInMemoryIntegrationTriggerStore()` exists for tests and local
 development; trigger state must survive a restart in production. Pass
 `runtime.listSources()` to `getProviderSdkCoverageReport()` to include trigger

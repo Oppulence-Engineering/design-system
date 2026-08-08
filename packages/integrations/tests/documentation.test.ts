@@ -5,6 +5,10 @@ import {
   createPublicIntegrationManifest,
   serializePublicIntegrationManifest,
 } from "../src/documentation";
+import {
+  assertIntegrationOutcomeReadiness,
+  getIntegrationOutcomeReadiness,
+} from "../src/templates";
 import { IntegrationSupportContractSchema } from "../src/support";
 
 const functionalExtraDefinition = IntegrationDefinitionSchema.parse({
@@ -140,4 +144,83 @@ describe("public documentation manifest", () => {
       operationOrTriggerSupportedSimStudio: 0,
     });
   });
+
+  test("reports outcome readiness separately from catalogue presence", () => {
+    const outcomeTemplate = {
+      id: "functional-extra-eigenn-actuals",
+      integrationId: "functional-extra",
+      product: "eigenn" as const,
+      name: "Forecast actuals",
+      summary: "Use imported actuals to explain forecast variance.",
+      sourceOperationId: "functional-extra:import-actuals",
+      dataContractId: "ledger-actuals-v1",
+      requiredCapability: "ledger_actuals" as const,
+      successMetric: "Forecast variance includes reconciled actuals.",
+    };
+    const readiness = getIntegrationOutcomeReadiness(
+      [functionalExtraDefinition],
+      [functionalExtraContract],
+      [outcomeTemplate],
+    );
+    expect(readiness).toHaveLength(1);
+    expect(readiness.find((entry) => entry.product === "eigenn")).toEqual(
+      expect.objectContaining({
+        integrationId: "functional-extra",
+        hasSupportContract: true,
+        supportedOperations: 1,
+        ready: true,
+        issues: [],
+      }),
+    );
+
+    const catalogueOnly = getIntegrationOutcomeReadiness(
+      [functionalExtraDefinition],
+      [],
+    );
+    expect(
+      catalogueOnly.find((entry) => entry.product === "eigenn"),
+    ).toMatchObject({
+      ready: false,
+      hasSupportContract: false,
+    });
+
+    expect(
+      getIntegrationOutcomeReadiness(
+        [functionalExtraDefinition],
+        [functionalExtraContract],
+      ).find((entry) => entry.product === "eigenn"),
+    ).toMatchObject({
+      ready: false,
+      outcomeTemplateCount: 0,
+    });
+  });
+});
+
+test("outcome readiness can be enforced as a release gate", () => {
+  expect(() =>
+    assertIntegrationOutcomeReadiness(
+      [functionalExtraDefinition],
+      [functionalExtraContract],
+      [],
+    ),
+  ).toThrow("Integration outcome readiness is incomplete");
+  expect(() =>
+    assertIntegrationOutcomeReadiness(
+      [functionalExtraDefinition],
+      [functionalExtraContract],
+      [
+        {
+          id: "actuals-to-variance",
+          integrationId: "functional-extra",
+          product: "eigenn",
+          name: "Actuals to variance",
+          summary: "Use actuals to explain a forecast variance.",
+          sourceOperationId: "functional-extra:import-actuals",
+          dataContractId: "ledger-actuals-v1",
+          requiredCapability: "ledger_actuals",
+          successMetric: "Forecast variance is reconciled.",
+        },
+      ],
+    ),
+  ).not.toThrow();
 });
