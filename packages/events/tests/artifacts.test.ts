@@ -37,7 +37,20 @@ describe("published artifacts", () => {
   test("the client entry uses Node-resolvable Next.js imports", async () => {
     const clientArtifact = await readArtifact("client.js");
 
-    expect(clientArtifact).toContain('from "next/script.js"');
-    expect(clientArtifact).not.toContain('from "next/script"');
+    expect(clientArtifact).toContain("next/script.js");
+    expect(clientArtifact).not.toContain('next/script"');
+  });
+
+  test("the client entries use production JSX runtime", async () => {
+    const artifacts = await Promise.all([
+      readArtifact("client.js"),
+      readArtifact("identity.js"),
+    ]);
+
+    for (const artifact of artifacts) {
+      expect(artifact).not.toContain("jsxDEV");
+      expect(artifact).not.toContain("jsx-dev-runtime");
+      expect(artifact).toContain("react/jsx-runtime");
+    }
   });
 });
