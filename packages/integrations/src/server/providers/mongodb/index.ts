@@ -17,7 +17,6 @@ import {
   type ProtocolOperation,
 } from "../shared/clients/protocol";
 
-
 /**
  * MongoDB and Neo4j are drivers with a connection lifecycle, not HTTP clients,
  * so they belong on the protocol lane beside PostgreSQL rather than the vendor

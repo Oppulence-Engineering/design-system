@@ -10,7 +10,6 @@ import {
   requiredInputRecord,
 } from "../shared/sdk";
 
-
 type QuickBooksSdkClient = Record<string, unknown>;
 
 export interface QuickBooksProviderSdkConfig {

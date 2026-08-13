@@ -20,7 +20,6 @@ import {
   type SqlStatement,
 } from "../shared/clients/protocol-sql";
 
-
 export interface ClickHouseConnection {
   query(statement: SqlStatement): Promise<unknown>;
   command(statement: SqlStatement): Promise<unknown>;

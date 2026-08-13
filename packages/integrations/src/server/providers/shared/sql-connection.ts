@@ -18,7 +18,6 @@ import {
   type SqlStatement,
 } from "./clients/protocol-sql";
 
-
 /** The single call every SQL driver reduces to. */
 export interface SqlConnection {
   query(statement: SqlStatement): Promise<unknown>;

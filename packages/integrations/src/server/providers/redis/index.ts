@@ -16,7 +16,6 @@ import {
   type ProtocolOperation,
 } from "../shared/clients/protocol";
 
-
 export interface RedisConnection {
   send(command: readonly string[]): Promise<unknown>;
 }

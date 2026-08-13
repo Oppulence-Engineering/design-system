@@ -20,7 +20,6 @@ import {
   type VendorOperation,
 } from "../shared/clients/vendor";
 
-
 function invocationError(): IntegrationProviderSdkError {
   return new IntegrationProviderSdkError(
     "INTEGRATION_PROVIDER_SDK_INVOCATION_INVALID",
@@ -421,7 +420,9 @@ const SHOPIFY_OPERATIONS: Readonly<Record<string, VendorOperation>> = {
  * is never taken from operation input.
  */
 export const createShopifyClient: VendorClientFactory = (credential) => {
-  const { shopifyApi, ApiVersion, LATEST_API_VERSION } = requireOptionalSdk("@shopify/shopify-api") as {
+  const { shopifyApi, ApiVersion, LATEST_API_VERSION } = requireOptionalSdk(
+    "@shopify/shopify-api",
+  ) as {
     shopifyApi(config: Record<string, unknown>): {
       clients: {
         Graphql: new (options: { session: unknown }) => ShopifyGraphqlClient;

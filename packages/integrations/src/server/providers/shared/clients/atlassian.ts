@@ -17,7 +17,6 @@ import {
   type SdkMethodTarget,
 } from "../sdk";
 
-
 type AtlassianInput = Readonly<Record<string, unknown>>;
 
 /**

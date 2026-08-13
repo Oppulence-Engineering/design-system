@@ -6,7 +6,6 @@ import type { IntegrationProviderPack } from "../../../core/provider-pack";
 import type { IntegrationOAuthRuntime } from "../../../runtime/oauth";
 import { ProviderSdkInvocationSchema } from "../sdk";
 
-
 /**
  * Structural view of the fluent builder returned by
  * `@microsoft/microsoft-graph-client`. Typing it here keeps every Graph pack
@@ -57,7 +56,9 @@ export interface MicrosoftGraphOperation {
 export function createMicrosoftGraphClient(
   accessToken: string,
 ): MicrosoftGraphClient {
-  const { Client } = requireOptionalSdk("@microsoft/microsoft-graph-client") as {
+  const { Client } = requireOptionalSdk(
+    "@microsoft/microsoft-graph-client",
+  ) as {
     Client: {
       init(options: {
         authProvider: (

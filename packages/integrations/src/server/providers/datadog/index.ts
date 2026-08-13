@@ -21,7 +21,6 @@ import {
   type VendorOperation,
 } from "../shared/clients/vendor";
 
-
 function invocationError(): IntegrationProviderSdkError {
   return new IntegrationProviderSdkError(
     "INTEGRATION_PROVIDER_SDK_INVOCATION_INVALID",
@@ -214,7 +213,9 @@ const DATADOG_OPERATIONS: Readonly<Record<string, VendorOperation>> = {
  * leak it, so it is not accepted as operation input.
  */
 export const createDatadogClient: VendorClientFactory = (credential) => {
-  const { client, v1, v2 } = requireOptionalSdk("@datadog/datadog-api-client") as {
+  const { client, v1, v2 } = requireOptionalSdk(
+    "@datadog/datadog-api-client",
+  ) as {
     client: {
       createConfiguration(options: Record<string, unknown>): unknown;
       setServerVariables(

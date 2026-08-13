@@ -24,7 +24,6 @@ import {
   type VendorOperation,
 } from "../shared/clients/vendor";
 
-
 function invocationError(): IntegrationProviderSdkError {
   return new IntegrationProviderSdkError(
     "INTEGRATION_PROVIDER_SDK_INVOCATION_INVALID",
@@ -187,7 +186,9 @@ const MAPS_DEFERRED_REASON =
 
 /** The Maps SDK reads its key from each request's params. */
 export const createGoogleMapsClient: VendorClientFactory = (credential) => {
-  const { Client } = requireOptionalSdk("@googlemaps/google-maps-services-js") as {
+  const { Client } = requireOptionalSdk(
+    "@googlemaps/google-maps-services-js",
+  ) as {
     Client: new (config?: Record<string, unknown>) => SdkMethodTarget;
   };
   const client = new Client({});

@@ -1,8 +1,5 @@
 import { IntegrationProviderSdkError } from "../../core/provider-sdk";
-import {
-  importOptionalSdk,
-  lazyAsyncClient,
-} from "../shared/optional-sdk";
+import { importOptionalSdk, lazyAsyncClient } from "../shared/optional-sdk";
 import type { IntegrationProviderPack } from "../../core/provider-pack";
 import {
   definedFields,
@@ -20,7 +17,6 @@ import {
   type VendorInput,
   type VendorOperation,
 } from "../shared/clients/vendor";
-
 
 /** Trello identifiers are 24-character hex object IDs. */
 function trelloId(input: VendorInput, ...names: string[]): string {

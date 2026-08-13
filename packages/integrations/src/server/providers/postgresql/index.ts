@@ -21,7 +21,6 @@ import {
   type SqlStatement,
 } from "../shared/clients/protocol-sql";
 
-
 /** The single call every SQL driver reduces to. */
 function sqlOperations(
   integrationId: string,

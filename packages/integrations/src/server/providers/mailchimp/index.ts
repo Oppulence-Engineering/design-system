@@ -5,7 +5,6 @@ import { IntegrationProviderSdkError } from "../../core/provider-sdk";
 import type { IntegrationProviderSdk } from "../../core/provider-sdk";
 import { ProviderSdkInvocationSchema } from "../shared/sdk";
 
-
 interface MailchimpSdkClient {
   setConfig(configuration: { apiKey: string; server: string }): void;
   [resource: string]: unknown;
@@ -33,7 +32,9 @@ function mailchimpServerFromApiKey(apiKey: string): string {
 }
 
 function createMailchimpClient(apiKey: string): MailchimpSdkClient {
-  const MailchimpApiClient = requireOptionalSdk("@mailchimp/mailchimp_marketing/src/ApiClient") as new () => MailchimpSdkClient;
+  const MailchimpApiClient = requireOptionalSdk(
+    "@mailchimp/mailchimp_marketing/src/ApiClient",
+  ) as new () => MailchimpSdkClient;
   const client = new MailchimpApiClient();
   client.setConfig({ apiKey, server: mailchimpServerFromApiKey(apiKey) });
   return client;

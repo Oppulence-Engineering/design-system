@@ -17,7 +17,6 @@ import {
   type VendorOperation,
 } from "../shared/clients/vendor";
 
-
 /** Box object IDs are numeric strings. */
 function boxId(input: VendorInput, ...names: string[]): string {
   const value = requiredInputString(input, ...names);
@@ -184,7 +183,9 @@ const BOX_OPERATIONS: Readonly<Record<string, VendorOperation>> = {
 
 /** Box's generated SDK takes an auth object; a developer token is the token. */
 export const createBoxClient: VendorClientFactory = (credential) => {
-  const { BoxClient, BoxDeveloperTokenAuth } = requireOptionalSdk("box-typescript-sdk-gen") as {
+  const { BoxClient, BoxDeveloperTokenAuth } = requireOptionalSdk(
+    "box-typescript-sdk-gen",
+  ) as {
     BoxClient: new (options: { auth: unknown }) => SdkMethodTarget;
     BoxDeveloperTokenAuth: new (options: { token: string }) => unknown;
   };

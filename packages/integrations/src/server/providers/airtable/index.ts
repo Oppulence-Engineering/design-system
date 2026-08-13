@@ -16,7 +16,6 @@ import {
   requiredInputString,
 } from "../shared/sdk";
 
-
 interface AirtableSdkRecord {
   id?: string;
   fields?: Record<string, unknown>;

@@ -59,7 +59,7 @@ export function requireOptionalSdk<T = unknown>(specifier: string): T {
  *   loaded, at the point of use rather than at import time.
  */
 export async function importOptionalSdk<T = unknown>(
-  specifier: string
+  specifier: string,
 ): Promise<T> {
   // The indirection through a variable matters here too: a literal would let a
   // bundler pull the SDK into the module graph and parse it at build time.
@@ -82,9 +82,7 @@ export async function importOptionalSdk<T = unknown>(
  * @param build - Resolves the real client, called at most once.
  * @returns A stand-in that forwards calls to the built client.
  */
-export function lazyAsyncClient<T extends object>(
-  build: () => Promise<T>
-): T {
+export function lazyAsyncClient<T extends object>(build: () => Promise<T>): T {
   let pending: Promise<T> | null = null;
   const client = () => {
     pending ??= build();
@@ -110,7 +108,7 @@ export function lazyAsyncClient<T extends object>(
 
         return (current as (...callArgs: unknown[]) => unknown).apply(
           receiver,
-          args
+          args,
         );
       },
     });

@@ -154,7 +154,9 @@ async function connectSsh(credential: {
   readonly apiKey: string;
   readonly fields: Readonly<Record<string, string>>;
 }): Promise<{ client: SshConnection; close: () => Promise<void> }> {
-  const { Client } = requireOptionalSdk("ssh2") as { Client: new () => Ssh2Client };
+  const { Client } = requireOptionalSdk("ssh2") as {
+    Client: new () => Ssh2Client;
+  };
   const connection = new Client();
   await new Promise<void>((resolve, reject) => {
     connection

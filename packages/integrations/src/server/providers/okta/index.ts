@@ -17,7 +17,6 @@ import {
   type VendorOperation,
 } from "../shared/clients/vendor";
 
-
 function userId(input: VendorInput): string {
   return requiredInputString(input, "userId", "id", "login");
 }

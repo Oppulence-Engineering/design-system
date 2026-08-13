@@ -22,7 +22,6 @@ import {
   type VendorOperation,
 } from "../shared/clients/vendor";
 
-
 function invocationError(): IntegrationProviderSdkError {
   return new IntegrationProviderSdkError(
     "INTEGRATION_PROVIDER_SDK_INVOCATION_INVALID",

@@ -18,7 +18,6 @@ import {
   type VendorOperation,
 } from "../shared/clients/vendor";
 
-
 /**
  * A Salesforce object name is part of the REST path and of SOQL, so it can
  * never be a bound value. Standard and custom objects are both plain

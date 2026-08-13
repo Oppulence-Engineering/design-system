@@ -24,7 +24,6 @@ import {
   type VendorOperation,
 } from "../shared/clients/vendor";
 
-
 function pagination(input: VendorInput): Record<string, unknown> {
   return definedFields({
     limit: optionalInputNumber(input, "limit"),
@@ -278,7 +277,9 @@ const CLERK_OPERATIONS: Readonly<Record<string, VendorOperation>> = {
  * still lives in the encrypted envelope.
  */
 export const createClerkClient: VendorClientFactory = (credential) => {
-  const { createClerkClient: create } = requireOptionalSdk("@clerk/backend") as {
+  const { createClerkClient: create } = requireOptionalSdk(
+    "@clerk/backend",
+  ) as {
     createClerkClient(config: { secretKey: string }): SdkMethodTarget;
   };
   return create({ secretKey: vendorToken(credential) });

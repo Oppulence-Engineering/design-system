@@ -119,7 +119,9 @@ async function connectSftp(credential: {
   readonly apiKey: string;
   readonly fields: Readonly<Record<string, string>>;
 }): Promise<{ client: SftpConnection; close: () => Promise<void> }> {
-  const SftpClient = requireOptionalSdk("ssh2-sftp-client") as new () => SftpSdkClient;
+  const SftpClient = requireOptionalSdk(
+    "ssh2-sftp-client",
+  ) as new () => SftpSdkClient;
   const client = new SftpClient();
   await client.connect(connectionConfig(credential));
   return {
