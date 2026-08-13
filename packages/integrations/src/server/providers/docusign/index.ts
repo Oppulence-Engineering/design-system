@@ -1,6 +1,5 @@
-import { createRequire } from "node:module";
-
 import { IntegrationProviderSdkError } from "../../core/provider-sdk";
+import { requireOptionalSdk } from "../shared/optional-sdk";
 import type { IntegrationProviderPack } from "../../core/provider-pack";
 import {
   definedFields,
@@ -21,8 +20,6 @@ import {
   type VendorInput,
   type VendorOperation,
 } from "../shared/clients/vendor";
-
-const deskRequire = createRequire(import.meta.url);
 
 function invocationError(): IntegrationProviderSdkError {
   return new IntegrationProviderSdkError(
@@ -187,7 +184,7 @@ const DOCUSIGN_OPERATIONS: Readonly<Record<string, VendorOperation>> = {
  * token rather than accepted as operation input.
  */
 export const createDocuSignClient: VendorClientFactory = (credential) => {
-  const docusign = deskRequire("docusign-esign") as {
+  const docusign = requireOptionalSdk("docusign-esign") as {
     ApiClient: new (config?: Record<string, unknown>) => {
       setBasePath(path: string): void;
       addDefaultHeader(name: string, value: string): void;

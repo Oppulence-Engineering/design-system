@@ -1,6 +1,5 @@
-import { createRequire } from "node:module";
-
 import { z } from "zod";
+import { requireOptionalSdk } from "../shared/optional-sdk";
 
 import { IntegrationProviderSdkError } from "../../core/provider-sdk";
 import type { IntegrationProviderPack } from "../../core/provider-pack";
@@ -24,8 +23,6 @@ import {
   type VendorInput,
   type VendorOperation,
 } from "../shared/clients/vendor";
-
-const mapsRequire = createRequire(import.meta.url);
 
 function invocationError(): IntegrationProviderSdkError {
   return new IntegrationProviderSdkError(
@@ -189,7 +186,9 @@ const MAPS_DEFERRED_REASON =
 
 /** The Maps SDK reads its key from each request's params. */
 export const createGoogleMapsClient: VendorClientFactory = (credential) => {
-  const { Client } = mapsRequire("@googlemaps/google-maps-services-js") as {
+  const { Client } = requireOptionalSdk(
+    "@googlemaps/google-maps-services-js",
+  ) as {
     Client: new (config?: Record<string, unknown>) => SdkMethodTarget;
   };
   const client = new Client({});

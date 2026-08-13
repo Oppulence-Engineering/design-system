@@ -1,6 +1,5 @@
-import { createRequire } from "node:module";
-
 import { IntegrationProviderSdkError } from "../../core/provider-sdk";
+import { requireOptionalSdk } from "../shared/optional-sdk";
 import type { IntegrationProviderPack } from "../../core/provider-pack";
 import {
   definedFields,
@@ -18,8 +17,6 @@ import {
   type VendorInput,
   type VendorOperation,
 } from "../shared/clients/vendor";
-
-const xRequire = createRequire(import.meta.url);
 
 function invocationError(): IntegrationProviderSdkError {
   return new IntegrationProviderSdkError(
@@ -204,7 +201,7 @@ const X_OPERATIONS: Readonly<Record<string, VendorOperation>> = {
  * v2 client is the read/write surface the source actions map onto.
  */
 export const createXClient: VendorClientFactory = (credential) => {
-  const { TwitterApi } = xRequire("twitter-api-v2") as {
+  const { TwitterApi } = requireOptionalSdk("twitter-api-v2") as {
     TwitterApi: new (token: string) => SdkMethodTarget;
   };
   return new TwitterApi(vendorToken(credential));

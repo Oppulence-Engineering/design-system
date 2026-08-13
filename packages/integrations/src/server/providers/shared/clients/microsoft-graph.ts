@@ -1,13 +1,10 @@
-import { createRequire } from "node:module";
-
 import { SIMSTUDIO_BASELINE } from "../../../../catalog";
+import { requireOptionalSdk } from "../optional-sdk";
 import { IntegrationProviderSdkError } from "../../../core/provider-sdk";
 import type { IntegrationProviderSdk } from "../../../core/provider-sdk";
 import type { IntegrationProviderPack } from "../../../core/provider-pack";
 import type { IntegrationOAuthRuntime } from "../../../runtime/oauth";
 import { ProviderSdkInvocationSchema } from "../sdk";
-
-const graphRequire = createRequire(import.meta.url);
 
 /**
  * Structural view of the fluent builder returned by
@@ -59,7 +56,9 @@ export interface MicrosoftGraphOperation {
 export function createMicrosoftGraphClient(
   accessToken: string,
 ): MicrosoftGraphClient {
-  const { Client } = graphRequire("@microsoft/microsoft-graph-client") as {
+  const { Client } = requireOptionalSdk(
+    "@microsoft/microsoft-graph-client",
+  ) as {
     Client: {
       init(options: {
         authProvider: (

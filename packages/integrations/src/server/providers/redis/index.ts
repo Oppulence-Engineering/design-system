@@ -1,6 +1,5 @@
-import { createRequire } from "node:module";
-
 import type { IntegrationProviderPack } from "../../core/provider-pack";
+import { requireOptionalSdk } from "../shared/optional-sdk";
 import {
   optionalInputNumber,
   optionalInputString,
@@ -16,8 +15,6 @@ import {
   type ProtocolInput,
   type ProtocolOperation,
 } from "../shared/clients/protocol";
-
-const redisRequire = createRequire(import.meta.url);
 
 export interface RedisConnection {
   send(command: readonly string[]): Promise<unknown>;
@@ -240,7 +237,7 @@ async function connectRedis(credential: {
     credential,
     "password",
   );
-  const { createClient } = redisRequire("redis") as {
+  const { createClient } = requireOptionalSdk("redis") as {
     createClient(config: Record<string, unknown>): RedisSdkClient;
   };
   const client = createClient({

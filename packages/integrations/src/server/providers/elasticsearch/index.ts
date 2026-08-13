@@ -1,6 +1,5 @@
-import { createRequire } from "node:module";
-
 import { IntegrationProviderSdkError } from "../../core/provider-sdk";
+import { requireOptionalSdk } from "../shared/optional-sdk";
 import type { IntegrationProviderPack } from "../../core/provider-pack";
 import {
   definedFields,
@@ -22,8 +21,6 @@ import {
   type VendorInput,
   type VendorOperation,
 } from "../shared/clients/vendor";
-
-const datastoreRequire = createRequire(import.meta.url);
 
 function invocationError(): IntegrationProviderSdkError {
   return new IntegrationProviderSdkError(
@@ -146,7 +143,7 @@ const ELASTICSEARCH_OPERATIONS: Readonly<Record<string, VendorOperation>> = {
  * the connection. Either an API key or a cloud ID plus key identifies it.
  */
 export const createElasticsearchClient: VendorClientFactory = (credential) => {
-  const { Client } = datastoreRequire("@elastic/elasticsearch") as {
+  const { Client } = requireOptionalSdk("@elastic/elasticsearch") as {
     Client: new (config: Record<string, unknown>) => SdkMethodTarget;
   };
   const cloudId = vendorField(credential, "cloudId");

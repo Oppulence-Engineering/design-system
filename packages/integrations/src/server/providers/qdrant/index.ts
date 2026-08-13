@@ -1,6 +1,5 @@
-import { createRequire } from "node:module";
-
 import { IntegrationProviderSdkError } from "../../core/provider-sdk";
+import { requireOptionalSdk } from "../shared/optional-sdk";
 import type { IntegrationProviderPack } from "../../core/provider-pack";
 import {
   definedFields,
@@ -22,8 +21,6 @@ import {
   type VendorInput,
   type VendorOperation,
 } from "../shared/clients/vendor";
-
-const datastoreRequire = createRequire(import.meta.url);
 
 function invocationError(): IntegrationProviderSdkError {
   return new IntegrationProviderSdkError(
@@ -74,7 +71,7 @@ const QDRANT_OPERATIONS: Readonly<Record<string, VendorOperation>> = {
 
 /** Qdrant is self-hosted or cloud, so the URL comes from the connection. */
 export const createQdrantClient: VendorClientFactory = (credential) => {
-  const { QdrantClient } = datastoreRequire("@qdrant/js-client-rest") as {
+  const { QdrantClient } = requireOptionalSdk("@qdrant/js-client-rest") as {
     QdrantClient: new (config: {
       url: string;
       apiKey?: string;

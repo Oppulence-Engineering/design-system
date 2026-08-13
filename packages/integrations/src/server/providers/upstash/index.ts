@@ -1,6 +1,5 @@
-import { createRequire } from "node:module";
-
 import { IntegrationProviderSdkError } from "../../core/provider-sdk";
+import { requireOptionalSdk } from "../shared/optional-sdk";
 import type { IntegrationProviderPack } from "../../core/provider-pack";
 import {
   definedFields,
@@ -22,8 +21,6 @@ import {
   type VendorInput,
   type VendorOperation,
 } from "../shared/clients/vendor";
-
-const datastoreRequire = createRequire(import.meta.url);
 
 function invocationError(): IntegrationProviderSdkError {
   return new IntegrationProviderSdkError(
@@ -191,7 +188,7 @@ const UPSTASH_OPERATIONS: Readonly<Record<string, VendorOperation>> = {
 
 /** Upstash's REST URL identifies the database; the token authenticates. */
 export const createUpstashClient: VendorClientFactory = (credential) => {
-  const { Redis } = datastoreRequire("@upstash/redis") as {
+  const { Redis } = requireOptionalSdk("@upstash/redis") as {
     Redis: new (config: { url: string; token: string }) => SdkMethodTarget;
   };
   return new Redis({

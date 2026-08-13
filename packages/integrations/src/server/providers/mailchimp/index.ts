@@ -1,11 +1,9 @@
-import { createRequire } from "node:module";
 import { SIMSTUDIO_BASELINE } from "../../../catalog";
+import { requireOptionalSdk } from "../shared/optional-sdk";
 import type { IntegrationApiKeyRuntime } from "../../runtime/api-key";
 import { IntegrationProviderSdkError } from "../../core/provider-sdk";
 import type { IntegrationProviderSdk } from "../../core/provider-sdk";
 import { ProviderSdkInvocationSchema } from "../shared/sdk";
-
-const mailchimpRequire = createRequire(import.meta.url);
 
 interface MailchimpSdkClient {
   setConfig(configuration: { apiKey: string; server: string }): void;
@@ -34,7 +32,7 @@ function mailchimpServerFromApiKey(apiKey: string): string {
 }
 
 function createMailchimpClient(apiKey: string): MailchimpSdkClient {
-  const MailchimpApiClient = mailchimpRequire(
+  const MailchimpApiClient = requireOptionalSdk(
     "@mailchimp/mailchimp_marketing/src/ApiClient",
   ) as new () => MailchimpSdkClient;
   const client = new MailchimpApiClient();

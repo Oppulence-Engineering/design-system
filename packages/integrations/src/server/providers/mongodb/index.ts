@@ -1,6 +1,5 @@
-import { createRequire } from "node:module";
-
 import { z } from "zod";
+import { requireOptionalSdk } from "../shared/optional-sdk";
 
 import type { IntegrationProviderPack } from "../../core/provider-pack";
 import {
@@ -17,8 +16,6 @@ import {
   type ProtocolInput,
   type ProtocolOperation,
 } from "../shared/clients/protocol";
-
-const driverRequire = createRequire(import.meta.url);
 
 /**
  * MongoDB and Neo4j are drivers with a connection lifecycle, not HTTP clients,
@@ -177,7 +174,7 @@ async function connectMongo(credential: {
     uri: credential.fields.uri ?? credential.apiKey,
   });
   if (!parsed.success) throw protocolConfigurationError();
-  const { MongoClient } = driverRequire("mongodb") as {
+  const { MongoClient } = requireOptionalSdk("mongodb") as {
     MongoClient: new (uri: string, options?: unknown) => MongoSdkClient;
   };
   const client = new MongoClient(parsed.data.uri, {

@@ -1,6 +1,5 @@
-import { createRequire } from "node:module";
-
 import { IntegrationProviderSdkError } from "../../core/provider-sdk";
+import { requireOptionalSdk } from "../shared/optional-sdk";
 import type { IntegrationProviderPack } from "../../core/provider-pack";
 import {
   definedFields,
@@ -17,8 +16,6 @@ import {
   type VendorInput,
   type VendorOperation,
 } from "../shared/clients/vendor";
-
-const boxRequire = createRequire(import.meta.url);
 
 /** Box object IDs are numeric strings. */
 function boxId(input: VendorInput, ...names: string[]): string {
@@ -186,7 +183,7 @@ const BOX_OPERATIONS: Readonly<Record<string, VendorOperation>> = {
 
 /** Box's generated SDK takes an auth object; a developer token is the token. */
 export const createBoxClient: VendorClientFactory = (credential) => {
-  const { BoxClient, BoxDeveloperTokenAuth } = boxRequire(
+  const { BoxClient, BoxDeveloperTokenAuth } = requireOptionalSdk(
     "box-typescript-sdk-gen",
   ) as {
     BoxClient: new (options: { auth: unknown }) => SdkMethodTarget;

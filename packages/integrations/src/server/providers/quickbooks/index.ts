@@ -1,5 +1,5 @@
-import { createRequire } from "node:module";
 import type { IntegrationCredentialReference } from "../../transport/credentials";
+import { requireOptionalSdk } from "../shared/optional-sdk";
 import type { IntegrationOAuthRuntime } from "../../runtime/oauth";
 import { IntegrationProviderSdkError } from "../../core/provider-sdk";
 import type { IntegrationProviderSdk } from "../../core/provider-sdk";
@@ -9,8 +9,6 @@ import {
   optionalInputRecord,
   requiredInputRecord,
 } from "../shared/sdk";
-
-const quickBooksRequire = createRequire(import.meta.url);
 
 type QuickBooksSdkClient = Record<string, unknown>;
 
@@ -41,7 +39,7 @@ function createQuickBooksClient(input: {
   companyId: string;
   sandbox: boolean;
 }): QuickBooksSdkClient {
-  const QuickBooks = quickBooksRequire("node-quickbooks") as new (
+  const QuickBooks = requireOptionalSdk("node-quickbooks") as new (
     consumerKey: string,
     consumerSecret: string,
     oauthToken: string,

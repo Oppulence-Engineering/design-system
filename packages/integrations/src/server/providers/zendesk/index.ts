@@ -1,6 +1,5 @@
-import { createRequire } from "node:module";
-
 import { IntegrationProviderSdkError } from "../../core/provider-sdk";
+import { requireOptionalSdk } from "../shared/optional-sdk";
 import type { IntegrationProviderPack } from "../../core/provider-pack";
 import {
   definedFields,
@@ -21,8 +20,6 @@ import {
   type VendorInput,
   type VendorOperation,
 } from "../shared/clients/vendor";
-
-const deskRequire = createRequire(import.meta.url);
 
 function invocationError(): IntegrationProviderSdkError {
   return new IntegrationProviderSdkError(
@@ -172,7 +169,7 @@ const ZENDESK_OPERATIONS: Readonly<Record<string, VendorOperation>> = {
  * node-zendesk authenticates with an email plus an API token.
  */
 export const createZendeskClient: VendorClientFactory = (credential) => {
-  const { createClient } = deskRequire("node-zendesk") as {
+  const { createClient } = requireOptionalSdk("node-zendesk") as {
     createClient(config: Record<string, unknown>): SdkMethodTarget;
   };
   return createClient({

@@ -1,5 +1,5 @@
-import { createRequire } from "node:module";
 import { createHmac, timingSafeEqual } from "node:crypto";
+import { requireOptionalSdk } from "../shared/optional-sdk";
 
 import { SIMSTUDIO_BASELINE } from "../../../catalog";
 import type { IntegrationProviderPack } from "../../core/provider-pack";
@@ -23,8 +23,6 @@ import {
   type VendorInput,
   type VendorOperation,
 } from "../shared/clients/vendor";
-
-const clerkRequire = createRequire(import.meta.url);
 
 function pagination(input: VendorInput): Record<string, unknown> {
   return definedFields({
@@ -279,7 +277,9 @@ const CLERK_OPERATIONS: Readonly<Record<string, VendorOperation>> = {
  * still lives in the encrypted envelope.
  */
 export const createClerkClient: VendorClientFactory = (credential) => {
-  const { createClerkClient: create } = clerkRequire("@clerk/backend") as {
+  const { createClerkClient: create } = requireOptionalSdk(
+    "@clerk/backend",
+  ) as {
     createClerkClient(config: { secretKey: string }): SdkMethodTarget;
   };
   return create({ secretKey: vendorToken(credential) });
