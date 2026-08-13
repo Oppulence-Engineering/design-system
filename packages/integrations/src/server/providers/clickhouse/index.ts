@@ -1,6 +1,5 @@
-import { createRequire } from "node:module";
-
 import type { IntegrationProviderPack } from "../../core/provider-pack";
+import { requireOptionalSdk } from "../shared/optional-sdk";
 import { optionalInputString, requiredInputString } from "../shared/sdk";
 import {
   ClickHouseConnectionSchema,
@@ -21,7 +20,6 @@ import {
   type SqlStatement,
 } from "../shared/clients/protocol-sql";
 
-const clickhouseRequire = createRequire(import.meta.url);
 
 export interface ClickHouseConnection {
   query(statement: SqlStatement): Promise<unknown>;
@@ -301,7 +299,7 @@ async function connectClickHouse(credential: {
     credential,
     "password",
   );
-  const { createClient } = clickhouseRequire("@clickhouse/client") as {
+  const { createClient } = requireOptionalSdk("@clickhouse/client") as {
     createClient(config: Record<string, unknown>): ClickHouseSdkClient;
   };
   const protocol = settings.protocol ?? "https";

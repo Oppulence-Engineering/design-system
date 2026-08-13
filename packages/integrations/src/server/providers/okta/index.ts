@@ -1,6 +1,5 @@
-import { createRequire } from "node:module";
-
 import type { IntegrationProviderPack } from "../../core/provider-pack";
+import { requireOptionalSdk } from "../shared/optional-sdk";
 import {
   definedFields,
   optionalInputNumber,
@@ -18,7 +17,6 @@ import {
   type VendorOperation,
 } from "../shared/clients/vendor";
 
-const oktaRequire = createRequire(import.meta.url);
 
 function userId(input: VendorInput): string {
   return requiredInputString(input, "userId", "id", "login");
@@ -207,7 +205,7 @@ const OKTA_OPERATIONS: Readonly<Record<string, VendorOperation>> = {
  * credential envelope beside the API token.
  */
 export const createOktaClient: VendorClientFactory = (credential) => {
-  const { Client } = oktaRequire("@okta/okta-sdk-nodejs") as {
+  const { Client } = requireOptionalSdk("@okta/okta-sdk-nodejs") as {
     Client: new (config: Record<string, unknown>) => SdkMethodTarget;
   };
   const orgUrl = requiredVendorField(credential, "orgUrl");

@@ -1,6 +1,5 @@
-import { createRequire } from "node:module";
-
 import type { IntegrationProviderPack } from "../../core/provider-pack";
+import { requireOptionalSdk } from "../shared/optional-sdk";
 import type { SqlConnection } from "../shared/sql-connection";
 import type { SqlConnectionFactory } from "../shared/sql-connection";
 import type { SqlPackOptions } from "../shared/sql-connection";
@@ -22,7 +21,6 @@ import {
   type SqlStatement,
 } from "../shared/clients/protocol-sql";
 
-const databaseRequire = createRequire(import.meta.url);
 
 /** The single call every SQL driver reduces to. */
 function sqlOperations(
@@ -77,7 +75,7 @@ async function connectPostgres(credential: {
     credential,
     "password",
   );
-  const { Client } = databaseRequire("pg") as {
+  const { Client } = requireOptionalSdk("pg") as {
     Client: new (config: Record<string, unknown>) => PgClient;
   };
   const client = new Client({
@@ -119,7 +117,7 @@ async function connectMysql(credential: {
     credential,
     "password",
   );
-  const mysql = databaseRequire("mysql2/promise") as {
+  const mysql = requireOptionalSdk("mysql2/promise") as {
     createConnection(config: Record<string, unknown>): Promise<MysqlConnection>;
   };
   const connection = await mysql.createConnection({

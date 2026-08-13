@@ -1,6 +1,5 @@
-import { createRequire } from "node:module";
-
 import { IntegrationProviderSdkError } from "../../core/provider-sdk";
+import { requireOptionalSdk } from "../shared/optional-sdk";
 import type { IntegrationProviderPack } from "../../core/provider-pack";
 import {
   definedFields,
@@ -22,7 +21,6 @@ import {
   type VendorOperation,
 } from "../shared/clients/vendor";
 
-const supabaseRequire = createRequire(import.meta.url);
 
 function invocationError(): IntegrationProviderSdkError {
   return new IntegrationProviderSdkError(
@@ -374,7 +372,7 @@ const SUPABASE_OPERATIONS: Readonly<Record<string, VendorOperation>> = {
  * deployment value stored beside the key in the encrypted envelope.
  */
 export const createSupabaseClient: VendorClientFactory = (credential) => {
-  const { createClient } = supabaseRequire("@supabase/supabase-js") as {
+  const { createClient } = requireOptionalSdk("@supabase/supabase-js") as {
     createClient(
       url: string,
       key: string,

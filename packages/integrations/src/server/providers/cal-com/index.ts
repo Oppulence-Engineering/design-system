@@ -1,6 +1,5 @@
-import { createRequire } from "node:module";
-
 import { z } from "zod";
+import { requireOptionalSdk } from "../shared/optional-sdk";
 
 import { SIMSTUDIO_BASELINE } from "../../../catalog";
 
@@ -26,7 +25,6 @@ import {
   type VendorOperation,
 } from "../shared/clients/vendor";
 
-const calRequire = createRequire(import.meta.url);
 
 function invocationError(): IntegrationProviderSdkError {
   return new IntegrationProviderSdkError(
@@ -414,7 +412,7 @@ export function createCalComRestProviderSdk(
  * token. The client ID is deployment configuration alongside the token.
  */
 export const createCalComClient: VendorClientFactory = (credential) => {
-  const { Cal } = calRequire("@calcom/sdk") as {
+  const { Cal } = requireOptionalSdk("@calcom/sdk") as {
     Cal: new (
       clientId: string,
       authOptions: Record<string, unknown>,

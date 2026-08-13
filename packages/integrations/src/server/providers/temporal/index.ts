@@ -1,6 +1,5 @@
-import { createRequire } from "node:module";
-
 import { IntegrationProviderSdkError } from "../../core/provider-sdk";
+import { requireOptionalSdk } from "../shared/optional-sdk";
 import type { IntegrationProviderPack } from "../../core/provider-pack";
 import {
   definedFields,
@@ -20,7 +19,6 @@ import {
   type VendorOperation,
 } from "../shared/clients/vendor";
 
-const temporalRequire = createRequire(import.meta.url);
 
 function invocationError(): IntegrationProviderSdkError {
   return new IntegrationProviderSdkError(
@@ -329,7 +327,7 @@ const TEMPORAL_OPERATIONS: Readonly<Record<string, VendorOperation>> = {
  * are non-secret connection state, held beside the key.
  */
 export const createTemporalClient: VendorClientFactory = (credential) => {
-  const { Client, Connection } = temporalRequire("@temporalio/client") as {
+  const { Client, Connection } = requireOptionalSdk("@temporalio/client") as {
     Client: new (options: Record<string, unknown>) => TemporalClient;
     Connection: { lazy(options: Record<string, unknown>): unknown };
   };

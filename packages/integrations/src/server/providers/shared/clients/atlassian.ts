@@ -1,4 +1,8 @@
-import { createRequire } from "node:module";
+import {
+  importOptionalSdk,
+  lazyAsyncClient,
+  requireOptionalSdk,
+} from "../optional-sdk";
 
 import { SIMSTUDIO_BASELINE } from "../../../../catalog";
 import { IntegrationProviderSdkError } from "../../../core/provider-sdk";
@@ -13,7 +17,6 @@ import {
   type SdkMethodTarget,
 } from "../sdk";
 
-const atlassianRequire = createRequire(import.meta.url);
 
 type AtlassianInput = Readonly<Record<string, unknown>>;
 
@@ -56,7 +59,7 @@ export function createJiraClient(input: {
   accessToken: string;
   cloudId: string;
 }): SdkMethodTarget {
-  const { Version3Client } = atlassianRequire("jira.js") as {
+  const { Version3Client } = requireOptionalSdk("jira.js") as {
     Version3Client: new (config: unknown) => SdkMethodTarget;
   };
   return new Version3Client({
@@ -71,7 +74,7 @@ export function createJiraServiceDeskClient(input: {
   accessToken: string;
   cloudId: string;
 }): SdkMethodTarget {
-  const { ServiceDeskClient } = atlassianRequire("jira.js") as {
+  const { ServiceDeskClient } = requireOptionalSdk("jira.js") as {
     ServiceDeskClient: new (config: unknown) => SdkMethodTarget;
   };
   return new ServiceDeskClient({
@@ -90,23 +93,29 @@ export function createConfluenceClient(input: {
   accessToken: string;
   cloudId: string;
 }): SdkMethodTarget {
-  const { createV1Client, createV2Client } = atlassianRequire(
-    "confluence.js",
-  ) as {
-    createV1Client: (config: unknown) => Record<string, unknown>;
-    createV2Client: (config: unknown) => Record<string, unknown>;
-  };
-  const config = {
-    auth: {
-      type: "oauth2",
-      accessToken: input.accessToken,
-      cloudId: input.cloudId,
-    },
-  };
-  const v1 = createV1Client(config);
-  const v2 = createV2Client(config);
-  // v2 wins on overlapping group names; v1 fills the gaps it does not model.
-  return { ...v1, ...v2, v1, v2 } as SdkMethodTarget;
+  // `confluence.js` is ESM-only: its `exports` map declares no `require`
+  // condition, so a CommonJS require cannot load it from any directory.
+  // Imported dynamically behind a lazy facade, which keeps this factory
+  // synchronous and still defers the load until an operation runs.
+  return lazyAsyncClient(async () => {
+    const { createV1Client, createV2Client } = (await importOptionalSdk(
+      "confluence.js",
+    )) as {
+      createV1Client: (config: unknown) => Record<string, unknown>;
+      createV2Client: (config: unknown) => Record<string, unknown>;
+    };
+    const config = {
+      auth: {
+        type: "oauth2",
+        accessToken: input.accessToken,
+        cloudId: input.cloudId,
+      },
+    };
+    const v1 = createV1Client(config);
+    const v2 = createV2Client(config);
+    // v2 wins on overlapping group names; v1 fills the gaps it does not model.
+    return { ...v1, ...v2, v1, v2 } as SdkMethodTarget;
+  });
 }
 
 function invocationError(): IntegrationProviderSdkError {

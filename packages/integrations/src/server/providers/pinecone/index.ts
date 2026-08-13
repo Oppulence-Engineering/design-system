@@ -1,6 +1,5 @@
-import { createRequire } from "node:module";
-
 import { IntegrationProviderSdkError } from "../../core/provider-sdk";
+import { requireOptionalSdk } from "../shared/optional-sdk";
 import type { IntegrationProviderPack } from "../../core/provider-pack";
 import {
   definedFields,
@@ -23,7 +22,6 @@ import {
   type VendorOperation,
 } from "../shared/clients/vendor";
 
-const datastoreRequire = createRequire(import.meta.url);
 
 function invocationError(): IntegrationProviderSdkError {
   return new IntegrationProviderSdkError(
@@ -163,7 +161,7 @@ const PINECONE_OPERATIONS: Readonly<Record<string, VendorOperation>> = {
 };
 
 export const createPineconeClient: VendorClientFactory = (credential) => {
-  const { Pinecone } = datastoreRequire("@pinecone-database/pinecone") as {
+  const { Pinecone } = requireOptionalSdk("@pinecone-database/pinecone") as {
     Pinecone: new (config: { apiKey: string }) => SdkMethodTarget;
   };
   return new Pinecone({ apiKey: vendorToken(credential) });

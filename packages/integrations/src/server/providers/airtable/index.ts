@@ -1,5 +1,5 @@
-import { createRequire } from "node:module";
 import { z } from "zod";
+import { requireOptionalSdk } from "../shared/optional-sdk";
 import { SIMSTUDIO_BASELINE } from "../../../catalog";
 import type { IntegrationOAuthRuntime } from "../../runtime/oauth";
 import { IntegrationProviderSdkError } from "../../core/provider-sdk";
@@ -16,7 +16,6 @@ import {
   requiredInputString,
 } from "../shared/sdk";
 
-const airtableRequire = createRequire(import.meta.url);
 
 interface AirtableSdkRecord {
   id?: string;
@@ -55,7 +54,7 @@ export interface AirtableProviderSdkConfig {
 }
 
 function createAirtableClient(accessToken: string): AirtableSdkClient {
-  const Airtable = airtableRequire("airtable") as new (options: {
+  const Airtable = requireOptionalSdk("airtable") as new (options: {
     apiKey: string;
   }) => AirtableSdkClient;
   return new Airtable({ apiKey: accessToken });

@@ -1,6 +1,5 @@
-import { createRequire } from "node:module";
-
 import { IntegrationProviderSdkError } from "../../core/provider-sdk";
+import { requireOptionalSdk } from "../shared/optional-sdk";
 import type { IntegrationProviderPack } from "../../core/provider-pack";
 import {
   definedFields,
@@ -22,7 +21,6 @@ import {
   type VendorOperation,
 } from "../shared/clients/vendor";
 
-const deskRequire = createRequire(import.meta.url);
 
 function invocationError(): IntegrationProviderSdkError {
   return new IntegrationProviderSdkError(
@@ -249,7 +247,7 @@ const AZURE_DEVOPS_OPERATIONS: Readonly<Record<string, VendorOperation>> = {
 
 /** Azure DevOps is per-organization, so the org URL comes from the connection. */
 export const createAzureDevOpsClient: VendorClientFactory = (credential) => {
-  const azdev = deskRequire("azure-devops-node-api") as {
+  const azdev = requireOptionalSdk("azure-devops-node-api") as {
     getPersonalAccessTokenHandler(token: string): unknown;
     WebApi: new (url: string, handler: unknown) => AzureDevOpsConnection;
   };

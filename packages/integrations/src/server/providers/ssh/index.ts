@@ -1,4 +1,5 @@
 import { createRequire } from "node:module";
+import { requireOptionalSdk } from "../shared/optional-sdk";
 
 import type { IntegrationProviderPack } from "../../core/provider-pack";
 import {
@@ -20,7 +21,6 @@ import {
   MAX_OUTPUT_BYTES,
   remotePath,
   shellCommand,
-  sshRequire,
 } from "../shared/ssh-connection";
 import type {
   SftpConnection,
@@ -154,7 +154,7 @@ async function connectSsh(credential: {
   readonly apiKey: string;
   readonly fields: Readonly<Record<string, string>>;
 }): Promise<{ client: SshConnection; close: () => Promise<void> }> {
-  const { Client } = sshRequire("ssh2") as { Client: new () => Ssh2Client };
+  const { Client } = requireOptionalSdk("ssh2") as { Client: new () => Ssh2Client };
   const connection = new Client();
   await new Promise<void>((resolve, reject) => {
     connection

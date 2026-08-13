@@ -1,6 +1,5 @@
-import { createRequire } from "node:module";
-
 import { IntegrationProviderSdkError } from "../../core/provider-sdk";
+import { requireOptionalSdk } from "../shared/optional-sdk";
 import type { IntegrationProviderPack } from "../../core/provider-pack";
 import {
   definedFields,
@@ -23,7 +22,6 @@ import {
   type VendorOperation,
 } from "../shared/clients/vendor";
 
-const datastoreRequire = createRequire(import.meta.url);
 
 function invocationError(): IntegrationProviderSdkError {
   return new IntegrationProviderSdkError(
@@ -196,7 +194,7 @@ const ALGOLIA_OPERATIONS: Readonly<Record<string, VendorOperation>> = {
 
 /** Algolia's write key is the secret; the application ID identifies the app. */
 export const createAlgoliaClient: VendorClientFactory = (credential) => {
-  const { algoliasearch } = datastoreRequire("algoliasearch") as {
+  const { algoliasearch } = requireOptionalSdk("algoliasearch") as {
     algoliasearch(appId: string, apiKey: string): SdkMethodTarget;
   };
   return algoliasearch(

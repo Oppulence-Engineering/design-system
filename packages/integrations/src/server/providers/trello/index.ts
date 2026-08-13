@@ -1,6 +1,8 @@
-import { createRequire } from "node:module";
-
 import { IntegrationProviderSdkError } from "../../core/provider-sdk";
+import {
+  importOptionalSdk,
+  lazyAsyncClient,
+} from "../shared/optional-sdk";
 import type { IntegrationProviderPack } from "../../core/provider-pack";
 import {
   definedFields,
@@ -19,7 +21,6 @@ import {
   type VendorOperation,
 } from "../shared/clients/vendor";
 
-const trelloRequire = createRequire(import.meta.url);
 
 /** Trello identifiers are 24-character hex object IDs. */
 function trelloId(input: VendorInput, ...names: string[]): string {
@@ -235,15 +236,25 @@ const TRELLO_OPERATIONS: Readonly<Record<string, VendorOperation>> = {
  * every request. The key is deployment configuration and the token is the
  * per-connection credential, so they travel together in the envelope.
  */
-export const createTrelloClient: VendorClientFactory = (credential) => {
-  const { createTrelloClient: create } = trelloRequire("trello.js") as {
-    createTrelloClient(config: { key: string; token: string }): SdkMethodTarget;
-  };
-  return create({
-    key: requiredVendorField(credential, "apiKey"),
-    token: vendorToken(credential),
+export const createTrelloClient: VendorClientFactory = (credential) =>
+  // `trello.js` is ESM-only: its `exports` map declares no `require`
+  // condition, so a CommonJS require cannot load it from any directory.
+  // Imported dynamically behind a lazy facade, which keeps this factory
+  // synchronous and still defers the load until an operation runs.
+  lazyAsyncClient(async () => {
+    const { createTrelloClient: create } = (await importOptionalSdk(
+      "trello.js",
+    )) as {
+      createTrelloClient(config: {
+        key: string;
+        token: string;
+      }): SdkMethodTarget;
+    };
+    return create({
+      key: requiredVendorField(credential, "apiKey"),
+      token: vendorToken(credential),
+    });
   });
-};
 
 export function createTrelloPack(
   options: { clientFactory?: VendorClientFactory } = {},

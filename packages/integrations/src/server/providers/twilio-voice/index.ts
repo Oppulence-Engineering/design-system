@@ -1,6 +1,5 @@
-import { createRequire } from "node:module";
-
 import { z } from "zod";
+import { requireOptionalSdk } from "../shared/optional-sdk";
 
 import { IntegrationProviderSdkError } from "../../core/provider-sdk";
 import type { IntegrationProviderPack } from "../../core/provider-pack";
@@ -25,7 +24,6 @@ import {
   type VendorOperation,
 } from "../shared/clients/vendor";
 
-const mapsRequire = createRequire(import.meta.url);
 
 function invocationError(): IntegrationProviderSdkError {
   return new IntegrationProviderSdkError(
@@ -79,7 +77,7 @@ const TWILIO_VOICE_OPERATIONS: Readonly<Record<string, VendorOperation>> = {
 
 /** Twilio authenticates with an account SID and an auth token. */
 export const createTwilioClient: VendorClientFactory = (credential) => {
-  const twilio = mapsRequire("twilio") as (
+  const twilio = requireOptionalSdk("twilio") as (
     accountSid: string,
     authToken: string,
   ) => SdkMethodTarget;

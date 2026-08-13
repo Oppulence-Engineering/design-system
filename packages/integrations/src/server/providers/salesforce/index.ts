@@ -1,6 +1,5 @@
-import { createRequire } from "node:module";
-
 import { IntegrationProviderSdkError } from "../../core/provider-sdk";
+import { requireOptionalSdk } from "../shared/optional-sdk";
 import type { IntegrationProviderPack } from "../../core/provider-pack";
 import {
   optionalInputNumber,
@@ -19,7 +18,6 @@ import {
   type VendorOperation,
 } from "../shared/clients/vendor";
 
-const salesforceRequire = createRequire(import.meta.url);
 
 /**
  * A Salesforce object name is part of the REST path and of SOQL, so it can
@@ -301,7 +299,7 @@ const SALESFORCE_OPERATIONS: Readonly<Record<string, VendorOperation>> = {
  * than from operation input.
  */
 export const createSalesforceClient: VendorClientFactory = (credential) => {
-  const { Connection } = salesforceRequire("jsforce") as {
+  const { Connection } = requireOptionalSdk("jsforce") as {
     Connection: new (config: Record<string, unknown>) => SalesforceConnection;
   };
   return new Connection({

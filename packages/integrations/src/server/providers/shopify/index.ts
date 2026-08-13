@@ -1,6 +1,5 @@
-import { createRequire } from "node:module";
-
 import { IntegrationProviderSdkError } from "../../core/provider-sdk";
+import { requireOptionalSdk } from "../shared/optional-sdk";
 import type { IntegrationProviderPack } from "../../core/provider-pack";
 import {
   definedFields,
@@ -21,7 +20,6 @@ import {
   type VendorOperation,
 } from "../shared/clients/vendor";
 
-const shopifyRequire = createRequire(import.meta.url);
 
 function invocationError(): IntegrationProviderSdkError {
   return new IntegrationProviderSdkError(
@@ -423,9 +421,7 @@ const SHOPIFY_OPERATIONS: Readonly<Record<string, VendorOperation>> = {
  * is never taken from operation input.
  */
 export const createShopifyClient: VendorClientFactory = (credential) => {
-  const { shopifyApi, ApiVersion, LATEST_API_VERSION } = shopifyRequire(
-    "@shopify/shopify-api",
-  ) as {
+  const { shopifyApi, ApiVersion, LATEST_API_VERSION } = requireOptionalSdk("@shopify/shopify-api") as {
     shopifyApi(config: Record<string, unknown>): {
       clients: {
         Graphql: new (options: { session: unknown }) => ShopifyGraphqlClient;

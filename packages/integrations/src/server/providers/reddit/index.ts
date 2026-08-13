@@ -1,6 +1,5 @@
-import { createRequire } from "node:module";
-
 import { IntegrationProviderSdkError } from "../../core/provider-sdk";
+import { requireOptionalSdk } from "../shared/optional-sdk";
 import type { IntegrationProviderPack } from "../../core/provider-pack";
 import {
   definedFields,
@@ -19,7 +18,6 @@ import {
   type VendorOperation,
 } from "../shared/clients/vendor";
 
-const redditRequire = createRequire(import.meta.url);
 
 function invocationError(): IntegrationProviderSdkError {
   return new IntegrationProviderSdkError(
@@ -440,7 +438,7 @@ const REDDIT_OPERATIONS: Readonly<Record<string, VendorOperation>> = {
  * the same envelope as the per-connection token.
  */
 export const createRedditClient: VendorClientFactory = (credential) => {
-  const Snoowrap = redditRequire("snoowrap") as new (
+  const Snoowrap = requireOptionalSdk("snoowrap") as new (
     config: Record<string, unknown>,
   ) => SdkMethodTarget;
   return new Snoowrap({
