@@ -1,6 +1,6 @@
 {
   "name": "@oppulence/themes",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Brand theme CSS for Oppulence apps - Eigenn, Conduitt, and Cossistant Tailwind v4 themes",
   "type": "module",
   "exports": {
