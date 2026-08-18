@@ -381,6 +381,81 @@ jobs:
           git commit -m "chore: bump @oppulence/infinite-canvas to v${VERSION}" || echo "No changes to commit"
           git push || echo "Nothing to push"
 
+  publish-themes:
+    name: Publish @oppulence/themes
+    runs-on: ubuntu-latest
+    # Serialize after the other auto-bump jobs so the bot version-bump commits
+    # do not race on `git push` (the loser's push is silently swallowed).
+    needs:
+      [detect-changes, publish-design-system, publish-auth, publish-infinite-canvas]
+    if: |
+      always() &&
+      (needs.publish-design-system.result == 'success' || needs.publish-design-system.result == 'skipped') &&
+      (needs.publish-auth.result == 'success' || needs.publish-auth.result == 'skipped') &&
+      (needs.publish-infinite-canvas.result == 'success' || needs.publish-infinite-canvas.result == 'skipped') &&
+      (
+        github.event.inputs.package == 'themes' ||
+        github.event.inputs.package == 'all' ||
+        (github.event_name == 'push' && needs.detect-changes.outputs.themes == 'true')
+      )
+    permissions:
+      contents: write
+      id-token: write # npm provenance (OIDC trusted publishing)
+    defaults:
+      run:
+        working-directory: packages/themes
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.5
+
+      - name: Setup Node.js for npm publish
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Bump version
+        env:
+          VERSION_BUMP: ${{ github.event.inputs.version || 'patch' }}
+        run: |
+          PKG_NAME=$(node -p "require('./package.json').name")
+          LOCAL=$(node -p "require('./package.json').version")
+          NPM=$(npm view "$PKG_NAME" version 2>/dev/null || echo "0.0.0")
+          BASE=$(npx --yes semver "$LOCAL" "$NPM" | tail -1)
+          NEW=$(npx --yes semver -i "$VERSION_BUMP" "$BASE")
+          npm pkg set version="$NEW"
+          echo "Local: $LOCAL, NPM: $NPM, Base: $BASE → New: $NEW"
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+        working-directory: .
+
+      - name: Compile themes
+        # The build script compiles every theme with the Tailwind v4 CLI, so a
+        # broken extraction cannot publish. Lint is not run here: `npm pkg set`
+        # rewrites package.json, and a formatting disagreement must not block
+        # the deploy path. CI lints on every PR.
+        run: bun run build
+
+      - name: Publish to npm (with provenance)
+        run: npm publish --access public --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Commit version bump
+        working-directory: .
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git pull --rebase || true
+          git add packages/themes/package.json
+          VERSION=$(node -p "require('./packages/themes/package.json').version")
+          git commit -m "chore: bump @oppulence/themes to v${VERSION}" || echo "No changes to commit"
+          git push || echo "Nothing to push"
+
   publish-extracted-packages:
     name: Publish extracted packages
     runs-on: ubuntu-latest
@@ -396,7 +471,6 @@ jobs:
         github.event.inputs.package == 'events' ||
         github.event.inputs.package == 'import' ||
         github.event.inputs.package == 'integrations' ||
-        github.event.inputs.package == 'themes' ||
         github.event.inputs.package == 'extracted' ||
         github.event.inputs.package == 'all' ||
         (
@@ -407,8 +481,7 @@ jobs:
             needs.detect-changes.outputs.e_invoicing == 'true' ||
             needs.detect-changes.outputs.events == 'true' ||
             needs.detect-changes.outputs.import == 'true' ||
-            needs.detect-changes.outputs.integrations == 'true' ||
-            needs.detect-changes.outputs.themes == 'true'
+            needs.detect-changes.outputs.integrations == 'true'
           )
         )
       )
@@ -422,7 +495,6 @@ jobs:
       EVENTS_CHANGED: ${{ needs.detect-changes.outputs.events }}
       IMPORT_CHANGED: ${{ needs.detect-changes.outputs.import }}
       INTEGRATIONS_CHANGED: ${{ needs.detect-changes.outputs.integrations }}
-      THEMES_CHANGED: ${{ needs.detect-changes.outputs.themes }}
       REQUESTED_PACKAGE: ${{ github.event.inputs.package }}
       PUBLISH_ALL: ${{ github.event_name == 'release' || github.event.inputs.package == 'extracted' || github.event.inputs.package == 'all' }}
     steps:
@@ -505,7 +577,6 @@ jobs:
           publish_package events "$EVENTS_CHANGED"
           publish_package import "$IMPORT_CHANGED"
           publish_package integrations "$INTEGRATIONS_CHANGED"
-          publish_package themes "$THEMES_CHANGED"
 
           if (( ${#unbumped[@]} > 0 )); then
             echo "::error title=Nothing published::${#unbumped[@]} package(s) changed on this push and published nothing: ${unbumped[*]}"
