@@ -1,0 +1,1293 @@
+/* Eigenn theme — extracted from oppulence-canvas/apps/web/src/app/globals.css.
+   Import after "tailwindcss" in the app entry CSS. The app owns @source scanning,
+   fumadocs imports, and font files. */
+
+
+
+.docs-shell {
+  --fd-nav-height: 44px;
+  --fd-banner-height: 0px;
+  --fd-tocnav-height: 0px;
+  --color-fd-background: hsl(var(--background));
+  --color-fd-foreground: hsl(var(--foreground));
+  --color-fd-muted: hsl(var(--muted));
+  --color-fd-muted-foreground: hsl(var(--muted-foreground));
+  --color-fd-popover: hsl(var(--popover));
+  --color-fd-popover-foreground: hsl(var(--popover-foreground));
+  --color-fd-card: hsl(var(--card));
+  --color-fd-card-foreground: hsl(var(--card-foreground));
+  --color-fd-border: hsl(var(--border));
+  --color-fd-primary: hsl(var(--foreground));
+  --color-fd-primary-foreground: hsl(var(--background));
+  --color-fd-secondary: hsl(var(--secondary));
+  --color-fd-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-fd-accent: hsl(var(--accent));
+  --color-fd-accent-foreground: hsl(var(--accent-foreground));
+  --color-fd-ring: hsl(var(--ring));
+  font-family: var(--font-sans);
+}
+
+.docs-shell * {
+  border-color: hsl(var(--border));
+}
+
+.docs-shell ::selection {
+  background: hsl(var(--foreground));
+  color: hsl(var(--background));
+}
+
+.docs-shell .prose,
+.docs-shell #nd-page article {
+  font-family: var(--font-sans);
+}
+
+.docs-layout {
+  --fd-sidebar-width: 0px;
+  --fd-toc-width: 0px;
+  --fd-layout-width: 100%;
+  --fd-layout-offset: 0px;
+  --fd-page-width: 900px;
+  --fd-banner-height: 44px;
+  --docs-left-pane-width: min(22vw, 300px);
+  padding-top: 44px;
+}
+
+@media (min-width: 64rem) {
+  .docs-layout {
+    --fd-header-height: -1px;
+    --fd-layout-width: min(calc(100% - var(--docs-left-pane-width)), 1200px);
+    padding-inline-start: var(--docs-left-pane-width);
+  }
+}
+
+@media (min-width: 80rem) {
+  .docs-layout {
+    --fd-toc-width: 280px;
+  }
+
+  .docs-layout #nd-toc {
+    padding-block: 4rem;
+    padding-inline-start: 2rem;
+  }
+}
+
+.docs-layout #nd-toc > div,
+.docs-layout [data-toc-popover],
+.docs-layout [data-toc-popover] * {
+  scrollbar-width: none;
+}
+
+.docs-shell figure:has(.shiki),
+.docs-shell figure.shiki,
+.docs-shell [data-slot="tabs"]:has(.shiki),
+.docs-shell .bg-fd-card:has(.shiki) {
+  overflow: hidden;
+  border-radius: 0 !important;
+}
+
+.eigenn-app-screenshot {
+  width: 100%;
+  height: auto;
+  background: hsl(var(--muted));
+  object-fit: contain;
+}
+
+
+
+
+@theme {
+  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md:
+    0 0px 15px rgba(0 0 0 / 0.04), 0 0px 2px rgba(0 0 0 / 0.06);
+  --shadow-lg:
+    0 0px 20px rgba(0 0 0 / 0.04), 0 0px 5px rgba(0 0 0 / 0.06);
+  --shadow-xl:
+    0 0px 30px rgba(0 0 0 / 0.04), 0 0px 10px rgba(0 0 0 / 0.06);
+  --shadow-3xl:
+    0 0 50px rgba(0 0 0 / 0.02), 0 0 50px rgba(0 0 0 / 0.04);
+  --font-family-mono:
+    "JetBrains Mono", "SF Mono", Monaco, "Inconsolata", "Fira Code",
+    ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono",
+    "Courier New", monospace;
+  /* rico / @_heyrico clean UI blueprint — SF Pro system stack (regular + medium).
+     SF Pro is Apple-proprietary, so it is not shipped as a webfont; the
+     -apple-system / BlinkMacSystemFont keywords resolve to it on Apple
+     platforms, the named "SF Pro Text/Display" families cover browsers that
+     expose the installed font, then a neutral sans fallback for everyone else. */
+  --font-sf-pro: "SF Pro Text", "SF Pro Display", -apple-system,
+    BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-sf-pro-display: "SF Pro Display", "SF Pro Text", -apple-system,
+    BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-family-sans: var(--font-sf-pro);
+  --font-display: var(--font-sf-pro-display);
+  --font-mono: "GeistMono", var(--font-family-mono);
+  --font-sans: var(--font-sf-pro);
+  /* Neutralize legacy Inter references consumed by tailwind.config.mjs. */
+  --font-inter: var(--font-sf-pro);
+  --text-xxs: 0.65rem;
+
+  /* rico blueprint — global tracking, constrained type scale (12/13/14/24),
+     icon sizing (14 nav / 20 card), and per-element radii (8 nav / 16 card /
+     pill CTA). These sit in @theme so Tailwind v4 auto-generates the matching
+     utilities: text-caption/label/body-ui/title, tracking-ui, rounded-nav/card/
+     pill. Icon sizes are plain tokens consumed by the icon-nav/icon-card
+     @utility classes below. */
+  --tracking-ui: -0.15px;
+  --text-caption: 12px;
+  --text-caption--line-height: 1rem;
+  --text-caption--letter-spacing: -0.15px;
+  --text-label: 13px;
+  --text-label--line-height: 1.125rem;
+  --text-label--letter-spacing: -0.15px;
+  --text-body-ui: 14px;
+  --text-body-ui--line-height: 1.25rem;
+  --text-body-ui--letter-spacing: -0.15px;
+  --text-title: 24px;
+  --text-title--line-height: 1.875rem;
+  --text-title--letter-spacing: -0.15px;
+  --icon-nav: 14px;
+  --icon-card: 20px;
+  /* Square corners platform-wide. These are the tokens the card/nav rules and
+     the `rounded-card` / `rounded-nav` utilities resolve to, so zeroing them
+     here squares every surface at once instead of editing each call site.
+     `--radius-pill` is kept as a token for genuinely circular affordances
+     (avatars, status dots, spinners), which are not cards. */
+  --radius-nav: 0px;
+  --radius-card: 0px;
+  --radius-pill: 9999px;
+
+  --color-white: #ffffff;
+  --color-black: #000000;
+
+  --color-blue-50: oklch(0.97 0.014 254.604);
+  --color-blue-100: oklch(0.932 0.032 255.585);
+  --color-blue-200: oklch(0.882 0.059 254.128);
+  --color-blue-300: oklch(0.809 0.105 251.813);
+  --color-blue-400: oklch(0.707 0.165 254.624);
+  --color-blue-500: oklch(0.623 0.214 259.815);
+  --color-blue-600: oklch(0.546 0.245 262.881);
+  --color-blue-700: oklch(0.488 0.243 264.376);
+  --color-blue-800: oklch(0.424 0.199 265.638);
+  --color-blue-900: oklch(0.379 0.146 265.522);
+  --color-blue-950: oklch(0.282 0.091 267.935);
+  --color-blue: var(--color-blue-600);
+
+  --color-green-50: oklch(0.979 0.021 166.113);
+  --color-green-100: oklch(0.95 0.052 163.051);
+  --color-green-200: oklch(0.905 0.093 164.15);
+  --color-green-300: oklch(0.845 0.143 164.978);
+  --color-green-400: oklch(0.765 0.177 163.223);
+  --color-green-500: oklch(0.696 0.17 162.48);
+  --color-green-600: oklch(0.596 0.145 163.225);
+  --color-green-700: oklch(0.508 0.118 165.612);
+  --color-green-800: oklch(0.432 0.095 166.913);
+  --color-green-900: oklch(0.378 0.077 168.94);
+  --color-green-950: oklch(0.262 0.051 172.552);
+
+  --color-red-50: oklch(0.971 0.013 17.38);
+  --color-red-100: oklch(0.936 0.032 17.717);
+  --color-red-200: oklch(0.885 0.062 18.334);
+  --color-red-300: oklch(0.808 0.114 19.571);
+  --color-red-400: oklch(0.704 0.191 22.216);
+  --color-red-500: oklch(0.637 0.237 25.331);
+  --color-red-600: oklch(0.577 0.245 27.325);
+  --color-red-700: oklch(0.505 0.213 27.518);
+  --color-red-800: oklch(0.444 0.177 26.899);
+  --color-red-900: oklch(0.396 0.141 25.723);
+  --color-red-950: oklch(0.258 0.092 26.042);
+
+  --color-gray-50: oklch(0.985 0.002 247.839);
+  --color-gray-100: oklch(0.967 0.003 264.542);
+  --color-gray-200: oklch(0.928 0.006 264.531);
+  --color-gray-300: oklch(0.872 0.01 258.338);
+  --color-gray-400: oklch(0.707 0.022 261.325);
+  --color-gray-500: oklch(0.551 0.027 264.364);
+  --color-gray-600: oklch(0.446 0.03 256.802);
+  --color-gray-700: oklch(0.373 0.034 259.733);
+  --color-gray-800: oklch(0.278 0.033 256.848);
+  --color-gray-900: oklch(0.21 0.034 264.665);
+  --color-gray-950: oklch(0.13 0.028 261.692);
+
+  --color-polar-50: hsl(0, 0%, 85%);
+  --color-polar-100: hsl(0, 0%, 79%);
+  --color-polar-200: hsl(0, 0%, 68%);
+  --color-polar-300: hsl(0, 0%, 62%);
+  --color-polar-400: hsl(0, 0%, 52%);
+  --color-polar-500: hsl(0, 0%, 46%);
+  --color-polar-600: hsl(0, 0%, 16%);
+  --color-polar-700: hsl(0, 0%, 12%);
+  --color-polar-800: hsl(0, 0%, 9.5%);
+  --color-polar-900: hsl(0, 0%, 5%);
+  --color-polar-950: hsl(0, 0%, 0%);
+
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-sidebar: hsl(var(--sidebar-background));
+  --color-sidebar-foreground: hsl(var(--sidebar-foreground));
+  --color-sidebar-primary: hsl(var(--sidebar-primary));
+  --color-sidebar-primary-foreground: hsl(var(--sidebar-primary-foreground));
+  --color-sidebar-accent: hsl(var(--sidebar-accent));
+  --color-sidebar-accent-foreground: hsl(var(--sidebar-accent-foreground));
+  --color-sidebar-border: hsl(var(--sidebar-border));
+  --color-sidebar-ring: hsl(var(--sidebar-ring));
+
+  /* The shadcn radius scale, flattened to 0 so `rounded-sm|md|lg|xl|2xl|3xl`
+     and `rounded-4xl` all render square. `--radius` itself stays defined
+     because other rules reference it. */
+  --radius-lg: 0px;
+  --radius-md: 0px;
+  --radius-sm: 0px;
+  --radius-xl: 0px;
+  --radius-2xl: 0px;
+  --radius-3xl: 0px;
+  --radius-4xl: 0px;
+}
+
+/* Filter-system tokens — consumed exclusively by src/component/filter-ui/*.
+   Visual language: near-sharp 2px corners, zero-chroma neutral base with a
+   single hot accent reserved for active/attention states, and elevation via a
+   background tint ladder (bg-50…700) instead of shadows. Raw values live in
+   :root/.dark after the chadcn marker; this block only maps them to Tailwind
+   utilities (bg-filter-bg-100, text-filter-ink, rounded-filter, …). */
+@theme {
+  --radius-filter: 2px;
+  --color-filter-accent: var(--filter-accent);
+  --color-filter-accent-foreground: var(--filter-accent-foreground);
+  --color-chart-accent: var(--chart-accent);
+  --color-chart-accent-strong: var(--chart-accent-strong);
+  --color-chart-accent-soft: var(--chart-accent-soft);
+  --color-chart-accent-faint: var(--chart-accent-faint);
+  --color-filter-bg-50: var(--filter-bg-50);
+  --color-filter-bg-100: var(--filter-bg-100);
+  --color-filter-bg-200: var(--filter-bg-200);
+  --color-filter-bg-300: var(--filter-bg-300);
+  --color-filter-bg-400: var(--filter-bg-400);
+  --color-filter-bg-500: var(--filter-bg-500);
+  --color-filter-bg-600: var(--filter-bg-600);
+  --color-filter-bg-700: var(--filter-bg-700);
+  --color-filter-ink: var(--filter-ink);
+  --color-filter-ink-muted: var(--filter-ink-muted);
+  --color-filter-ink-faint: var(--filter-ink-faint);
+  --color-filter-border: var(--filter-border);
+}
+
+@utility font-mono {
+  font-family: var(--font-mono, var(--font-family-mono));
+}
+
+/* rico blueprint icon sizing — 14px for navigation, 20px for cards. */
+@utility icon-nav {
+  width: var(--icon-nav, 14px);
+  height: var(--icon-nav, 14px);
+}
+
+@utility icon-card {
+  width: var(--icon-card, 20px);
+  height: var(--icon-card, 20px);
+}
+
+/* App-wide zoom for the authenticated shell only (marketing is unaffected).
+   Lower = more content visible / denser. Tunable via --app-zoom. */
+:root {
+  --app-zoom: 0.9;
+}
+
+/* Scoped uniform zoom-out for the app shell. The height/max-height are divided
+   by the zoom so the shell still fills the dynamic viewport after scaling.
+   Applied on the app-shell root; the resizable panels stay pointer-consistent
+   because clientX and getBoundingClientRect share the same zoomed space. */
+.app-shell-zoom {
+  zoom: var(--app-zoom, 1);
+  height: calc(100dvh / var(--app-zoom, 1));
+  max-height: calc(100dvh / var(--app-zoom, 1));
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  [data-reduced-glass="true"] .backdrop-blur-sm,
+  [data-reduced-glass="true"] .backdrop-blur-md,
+  [data-reduced-glass="true"] .backdrop-blur-lg,
+  [data-reduced-glass="true"] .backdrop-blur-xl {
+    backdrop-filter: none !important;
+  }
+}
+
+@layer base {
+  html {
+    color-scheme: light dark;
+    @apply text-gray-900;
+    font-feature-settings: "cv01", "cv03", "cv04", "cv06", "cv11", "ss03";
+  }
+
+  html.dark {
+    @apply text-gray-200;
+  }
+
+  html:not(.dark) {
+    --lightningcss-light: initial;
+    --lightningcss-dark: ;
+  }
+
+  html.dark {
+    --lightningcss-light: ;
+    --lightningcss-dark: initial;
+  }
+
+  input[type="email"] {
+    font-feature-settings:
+      "cv01",
+      "cv03",
+      "cv04",
+      "cv06",
+      "cv11",
+      "ss03",
+      "calt" off;
+  }
+
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: hsl(var(--border));
+  }
+}
+
+/* App Store UI refinements */
+@layer components {
+  /* Ultra-minimal app list */
+  .app-list {
+    /* Spacing handled by space-y-4 in component */
+  }
+  .app-row {
+    /* Card styling handled inline in component */
+  }
+  /* Unified App card shell */
+  .app-card {
+    @apply flex w-full flex-col overflow-hidden rounded-none border border-border bg-card shadow-md transition-colors hover:bg-muted/35;
+  }
+
+  /* Buttons inside app cards and sheets */
+  .app-btn {
+    @apply rounded-none border border-border bg-card text-foreground shadow-sm transition-colors hover:bg-muted/50;
+  }
+  .app-btn:disabled {
+    @apply cursor-not-allowed opacity-60;
+  }
+
+  [data-slot="country-selector-content"],
+  [data-slot="currency-selector-content"] {
+    --selector-surface: hsl(var(--popover));
+    --selector-row-hover: hsl(var(--muted) / 0.65);
+    --selector-row-active: hsl(var(--muted));
+    --selector-border: hsl(var(--border));
+    --selector-text: hsl(var(--popover-foreground));
+    --selector-muted: hsl(var(--muted-foreground));
+
+    background: var(--selector-surface);
+    border-color: transparent;
+    border-radius: 0.75rem;
+    color: var(--selector-text);
+    box-shadow: var(--shadow-lg);
+  }
+
+  [data-slot="country-selector-content"] [cmdk-root],
+  [data-slot="currency-selector-content"] [cmdk-root],
+  [data-slot="country-selector-content"] [cmdk-list],
+  [data-slot="currency-selector-content"] [cmdk-list] {
+    background: var(--selector-surface);
+    color: var(--selector-text);
+  }
+
+  [data-slot="country-selector-content"] [cmdk-input],
+  [data-slot="currency-selector-content"] [cmdk-input] {
+    background: var(--selector-surface);
+    border-color: transparent;
+    caret-color: var(--selector-text);
+    color: var(--selector-text);
+    box-shadow: none;
+  }
+
+  [data-slot="country-selector-content"] [cmdk-input]::placeholder,
+  [data-slot="currency-selector-content"] [cmdk-input]::placeholder {
+    color: var(--selector-muted);
+  }
+
+  [data-slot="country-selector-content"] :focus-visible,
+  [data-slot="currency-selector-content"] :focus-visible {
+    outline: none;
+    box-shadow: none;
+  }
+
+  [data-slot="country-selector-content"] [cmdk-item],
+  [data-slot="currency-selector-content"] [cmdk-item] {
+    color: hsl(var(--popover-foreground) / 0.72);
+    border-radius: 0.5rem;
+    scroll-margin-block: 6px;
+  }
+
+  [data-slot="country-selector-content"] [cmdk-item]:hover,
+  [data-slot="currency-selector-content"] [cmdk-item]:hover {
+    background: var(--selector-row-hover);
+    color: var(--selector-text);
+  }
+
+  [data-slot="country-selector-content"] [cmdk-item][aria-selected="true"],
+  [data-slot="currency-selector-content"] [cmdk-item][aria-selected="true"] {
+    background: var(--selector-row-active);
+    color: var(--selector-text);
+  }
+
+  [data-slot="country-selector-content"] [cmdk-empty],
+  [data-slot="currency-selector-content"] [cmdk-empty] {
+    color: var(--selector-muted);
+  }
+
+  [data-slot="card"] {
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+    border-radius: var(--radius-card, 16px); /* rico blueprint: 16px cards */
+    color: hsl(var(--card-foreground));
+    box-shadow: var(--shadow-xs);
+  }
+
+  [data-slot="card"]:where(:hover, [data-state="open"]) {
+    background: hsl(var(--card-hover));
+  }
+
+  [data-slot="card-title"] {
+    color: hsl(var(--card-foreground));
+    letter-spacing: 0;
+  }
+
+  [data-slot="card-description"] {
+    color: hsl(var(--muted-foreground));
+  }
+
+  [data-slot="feature-card"] {
+    background: hsl(var(--border));
+  }
+
+  [data-grid-content],
+  [data-slot="feature-card-content"],
+  [data-slot="feature-card-illustration"] {
+    background: hsl(var(--card));
+    color: hsl(var(--card-foreground));
+  }
+
+  [data-slot="feature-card-title"],
+  [data-slot="feature-card-description"] {
+    color: hsl(var(--muted-foreground));
+  }
+
+  [data-slot="content"] {
+    border-color: hsl(var(--border));
+  }
+
+  [data-slot="navigation-menu-trigger"],
+  [data-slot="navigation-menu-link"] {
+    color: hsl(var(--foreground));
+    border-radius: var(--radius-nav, 8px); /* rico blueprint: 8px navigation */
+  }
+
+  [data-slot="navigation-menu-trigger"]:where(:hover, [data-state="open"]),
+  [data-slot="navigation-menu-link"]:hover {
+    background: hsl(var(--muted));
+    color: hsl(var(--foreground));
+  }
+
+  [data-slot="navigation-menu-content"],
+  [data-slot="navigation-menu-viewport"] {
+    background: hsl(var(--popover));
+    border-color: hsl(var(--border));
+    color: hsl(var(--popover-foreground));
+    box-shadow: var(--shadow-lg);
+  }
+
+  [data-slot="popover-content"],
+  [data-slot="dropdown-menu-content"],
+  [data-slot="dropdown-menu-sub-content"],
+  [data-slot="select-content"] {
+    background: hsl(var(--popover));
+    border-color: hsl(var(--border));
+    border-radius: 0.75rem;
+    color: hsl(var(--popover-foreground));
+    box-shadow: var(--shadow-lg);
+  }
+
+  [data-slot="select-trigger"],
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not(
+      [type="color"]
+    ),
+  textarea {
+    background: hsl(var(--background));
+    border-color: hsl(var(--input));
+    color: hsl(var(--foreground));
+  }
+
+  [data-slot="select-trigger"]:hover,
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not(
+      [type="color"]
+    ):hover,
+  textarea:hover {
+    border-color: hsl(var(--foreground) / 0.16);
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  img[src$="#gh-dark-mode-only"],
+  img[src$="#only-dark"] {
+    display: none;
+  }
+}
+
+/* Dark mode */
+
+#polar-bg-gradient {
+  font-size: 12px;
+  font-family: sans-serif;
+  --token-de3bbe02-efef-4dfe-a362-f6d5715de8ac: rgb(209, 223, 242);
+  --token-58f5305f-65b1-4075-86f8-f9ee69a3e917: #fefdf9;
+  --token-ec1cd941-31b3-45e1-ad4c-e85325e1620f: rgb(70, 103, 202);
+  --token-8c1bdbf3-9c17-469a-9d0d-53b702bebc4c: rgb(114, 115, 116);
+  --token-6d46fd94-9194-4d41-ac1f-b299fb0439bf: #303f78;
+  --token-7ea07a0f-ce97-4e5e-8a32-a0ab2739dff4: rgb(70, 103, 202);
+  --token-60634839-9e8c-4342-af21-7bacb8b78d0e: rgb(165, 194, 235);
+  --framer-aspect-ratio-supported: auto;
+  box-sizing: border-box;
+  -webkit-font-smoothing: inherit;
+  background: transparent;
+  flex: none;
+  height: 1284px;
+  left: calc(22.883597883597908% - 1344px / 2);
+  mix-blend-mode: multiply;
+  overflow: hidden;
+  pointer-events: none;
+  position: absolute;
+  top: -405px;
+  width: 1344px;
+  z-index: 10;
+}
+
+@media (max-width: 420px) {
+  #polar-bg-gradient {
+    left: calc(22.883597883597908% - 500px);
+    height: 140vh;
+    width: 200vw;
+  }
+}
+
+/* chadcn/ui */
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    /* rico blueprint text hierarchy (light): #292929 / #5D5D5D / #9E9E9E */
+    --foreground: 0 0% 16%; /* #292929 — primary ink */
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 16%; /* #292929 */
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 16%; /* #292929 */
+    --primary: 0 0% 0%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 96.5%;
+    --secondary-foreground: 0 0% 16%; /* #292929 */
+    --muted: 0 0% 96.5%;
+    --muted-foreground: 0 0% 36.5%; /* #5D5D5D — secondary ink */
+    --accent: 0 0% 96.5%;
+    --accent-foreground: 0 0% 0%;
+    --accent-hover: 0 0% 92%;
+    --destructive: 359 100% 61%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 91%;
+    --input: 0 0% 91%;
+    --ring: 0 0% 91%;
+    /* Square corners platform-wide; every rule that reads `--radius` (dialogs,
+       popovers, selectors) resolves to 0 rather than each being overridden. */
+    --radius: 0rem;
+    --brand: 221.2 83.2% 53.3%;
+    --brand-foreground: 0 0% 100%;
+    --brand-hover: 221.2 83.2% 48%;
+    --brand-subtle: 221.2 100% 96%;
+    --card-hover: 0 0% 96.5%;
+    --surface: 0 0% 100%;
+    --surface-foreground: 0 0% 0%;
+    --surface-hover: 0 0% 96.5%;
+    --surface-muted: 0 0% 98%;
+    --neutral-50: 0 0% 98%;
+    --neutral-100: 0 0% 96.5%;
+    --neutral-150: 0 0% 95%;
+    --neutral-200: 0 0% 91%;
+    --neutral-300: 0 0% 88%;
+    --neutral-400: 0 0% 60%;
+    --neutral-500: 0 0% 40%;
+    --neutral-600: 0 0% 30%;
+    --neutral-700: 0 0% 20%;
+    --neutral-800: 0 0% 10%;
+    --neutral-900: 0 0% 5%;
+    --neutral-950: 0 0% 0%;
+    --primary-2: hsl(var(--primary) / 0.1);
+    --primary-3: hsl(var(--primary) / 0.16);
+    --secondary-2: hsl(var(--secondary));
+    --secondary-3: hsl(var(--muted));
+    --tertiary: hsl(0 0% 62%); /* #9E9E9E — tertiary ink */
+    --tertiary-2: hsl(0 0% 62% / 0.72);
+    --tertiary-3: hsl(0 0% 62% / 0.56);
+    --filler: hsl(var(--muted));
+    --filler-2: hsl(var(--border));
+    --filler-3: hsl(var(--foreground) / 0.08);
+    --filler-txt: hsl(var(--muted-foreground));
+    --hover-1: hsl(var(--muted) / 0.65);
+    --hover-2: hsl(var(--muted));
+    --success: 162 72% 37%;
+    --success-foreground: 0 0% 100%;
+    --success-light: 162 72% 96%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 0%;
+    --warning-light: 38 92% 95%;
+    --error: 359 100% 61%;
+    --error-foreground: 0 0% 100%;
+    --error-light: 359 100% 96%;
+    --surface-tint: color-mix(
+      in oklab,
+      hsl(var(--card)) 88%,
+      hsl(var(--primary)) 12%
+    );
+    --glass-border: color-mix(
+      in oklab,
+      hsl(var(--foreground)) 12%,
+      transparent
+    );
+    --glass-blur: 16px;
+    --color-border-illustration: color-mix(
+      in oklab,
+      hsl(var(--foreground)) 10%,
+      transparent
+    );
+    --sidebar-background: 0 0% 96.5%;
+    --sidebar-foreground: 0 0% 0%;
+    --sidebar-primary: 221.2 83.2% 53.3%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 0 0% 94%;
+    --sidebar-accent-foreground: 0 0% 0%;
+    --sidebar-border: 0 0% 88%;
+    --sidebar-ring: 0 0% 91%;
+    --orbit-bg: hsl(0 0% 100%);
+    --orbit-bg-surface: hsl(0 0% 97%);
+    --orbit-bg-elevated: hsl(0 0% 90%);
+    --orbit-text: hsl(0 0% 11%);
+    --orbit-text-subtle: hsl(0 0% 60%);
+    --orbit-text-disabled: hsl(0 0% 32%);
+    --orbit-destructive: hsl(359 100% 61%);
+    /* filter-system tokens (light) — zero-chroma tint ladder + one hot accent */
+    --filter-accent: hsl(19 99% 44%);
+    --filter-accent-foreground: hsl(0 0% 100%);
+    --filter-bg-50: oklch(98.5% 0 0);
+    --filter-bg-100: oklch(98% 0 0);
+    --filter-bg-200: oklch(97% 0 0);
+    --filter-bg-300: oklch(96% 0 0);
+    --filter-bg-400: oklch(94% 0 0);
+    --filter-bg-500: oklch(92% 0 0);
+    --filter-bg-600: oklch(91% 0 0);
+    --filter-bg-700: oklch(86% 0 0);
+    --filter-ink: oklch(20% 0 0);
+    --filter-ink-muted: oklch(45% 0 0);
+    --filter-ink-faint: oklch(65% 0 0);
+    --filter-border: oklch(92% 0 0);
+    --color-graphic-stroke: #000000;
+    --color-graphic-dim: #cccccc;
+    /* Chart colors */
+    --chart-grid-stroke: #e6e6e6;
+    --chart-axis-text: #707070;
+    --chart-reference-line-stroke: #e6e6e6;
+    --chart-reference-label: #707070;
+    --chart-accent: hsl(19 99% 44%);
+    --chart-accent-strong: hsl(19 99% 36%);
+    --chart-accent-soft: hsl(27 96% 72%);
+    --chart-accent-faint: hsl(30 100% 94%);
+    --chart-actual-line: var(--chart-accent);
+    --chart-forecast-line: hsl(19 55% 54%);
+    --chart-tooltip-cursor: var(--chart-accent);
+    --chart-pattern-bg: white;
+    --chart-pattern-stroke: hsl(19 70% 44% / 0.45);
+    --chart-bar-fill: var(--chart-accent);
+    --chart-bar-fill-secondary: hsl(27 96% 72% / 0.48);
+    /* Neutral series fill, paired with --chart-accent on two-series charts
+       (retained vs churned). Deliberately a desaturated ink rather than a
+       second hue: this palette is monochrome + one accent, so identity comes
+       from neutral-vs-accent emphasis plus a legend, never from two hues. */
+    --chart-neutral: hsl(0 0% 42%);
+    --chart-neutral-soft: hsl(0 0% 42% / 0.35);
+    --chart-gradient-start: var(--chart-accent-soft);
+    --chart-gradient-end: var(--chart-accent);
+    --chart-line-secondary: hsl(19 55% 54%);
+
+    /* Extended colors from config */
+    --blue-50: #e5efff;
+    --blue-100: #cce0ff;
+    --blue-200: #99c0ff;
+    --blue-300: #66a1ff;
+    --blue-400: #3381ff;
+    --blue-500: #0062ff;
+    --blue-600: #0054db;
+    --blue-700: #0047b8;
+    --blue-800: #003994;
+    --blue-900: #002b70;
+    --blue-950: #00245e;
+
+    --green-50: #f0faf0;
+    --green-100: #e2f6e3;
+    --green-200: #c5edc6;
+    --green-300: #97de9a;
+    --green-400: #62c667;
+    --green-500: #3fab44;
+    --green-600: #2d8c31;
+    --green-700: #266f29;
+    --green-800: #235826;
+    --green-900: #1e4921;
+    --green-950: #0e2f11;
+
+    --red-50: #fdf3f3;
+    --red-100: #fde3e3;
+    --red-200: #fbcdcd;
+    --red-300: #f8a9a9;
+    --red-400: #f17878;
+    --red-500: #e64d4d;
+    --red-600: #d32f2f;
+    --red-700: #b12424;
+    --red-800: #922222;
+    --red-900: #6f1f1f;
+    --red-950: #420d0d;
+
+    --gray-50: hsl(0, 0%, 98%);
+    --gray-100: hsl(0, 0%, 96.5%);
+    --gray-200: hsl(0, 0%, 91%);
+    --gray-300: hsl(0, 0%, 88%);
+    --gray-400: hsl(0, 0%, 60%);
+    --gray-500: hsl(0, 0%, 40%);
+    --gray-600: hsl(0, 0%, 30%);
+    --gray-700: hsl(0, 0%, 20%);
+    --gray-800: hsl(0, 0%, 10%);
+    --gray-900: hsl(0, 0%, 5%);
+    --gray-950: hsl(0, 0%, 0%);
+
+    --polar-50: hsl(0, 0%, 85%);
+    --polar-100: hsl(0, 0%, 79%);
+    --polar-200: hsl(0, 0%, 68%);
+    --polar-300: hsl(0, 0%, 62%);
+    --polar-400: hsl(0, 0%, 52%);
+    --polar-500: hsl(0, 0%, 46%);
+    --polar-600: hsl(0, 0%, 16%);
+    --polar-700: hsl(0, 0%, 12%);
+    --polar-800: hsl(0, 0%, 9.5%);
+    --polar-900: hsl(0, 0%, 5%);
+    --polar-950: hsl(0, 0%, 0%);
+
+    /* Background images */
+    --grid-pattern: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACYAAAAmCAYAAACoPemuAAAACXBIWXMAABYlAAAWJQFJUiTwAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAABSSURBVHgB7dihEYBAEATBf/JPEksEOCgEAYw70W3OTp3cvYY5r/v57rGGElYJq4RVwiphlbBKWCWsElYJq4RVwiphlbBKWCWsElbtf/OcZuzHXh9bB88+HN8BAAAAAElFTkSuQmCC");
+    --grid-pattern-dark: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACYAAAAmCAYAAACoPemuAAAACXBIWXMAABYlAAAWJQFJUiTwAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAABTSURBVHgB7dihEYBAEATBf9LCEQj5ZwGFIIBxJ7rN2amTu9cw53U/3z3WUMIqYZWwSlglrBJWCauEVcIqYZWwSlglrBJWCauEVcKq/W+e04z92AukgAP/IH2i4wAAAABJRU5ErkJggg==");
+  }
+
+  .dark {
+    --background: 0 0% 0%;
+    --foreground: 0 0% 96%;
+    --card: 0 0% 4%;
+    --card-foreground: 0 0% 96%;
+    --popover: 0 0% 4%;
+    --popover-foreground: 0 0% 96%;
+    --primary: 0 0% 100%;
+    --primary-foreground: 0 0% 0%;
+    --secondary: 0 0% 7%;
+    --secondary-foreground: 0 0% 96%;
+    --muted: 0 0% 9%;
+    --muted-foreground: 0 0% 46%;
+    --accent: 0 0% 9%;
+    --accent-foreground: 0 0% 96%;
+    --accent-hover: 0 0% 13%;
+    --destructive: 359 100% 61%;
+    --destructive-foreground: 359 100% 61%;
+    --border: 0 0% 13%;
+    --input: 0 0% 13%;
+    --ring: 0 0% 13%;
+    --brand: 221.2 83.2% 53.3%;
+    --brand-foreground: 0 0% 100%;
+    --brand-hover: 221.2 83.2% 48%;
+    --brand-subtle: 0 0% 12%;
+    --card-hover: 0 0% 9%;
+    --surface: 0 0% 4%;
+    --surface-foreground: 0 0% 96%;
+    --surface-hover: 0 0% 9%;
+    --surface-muted: 0 0% 7%;
+    --neutral-50: 0 0% 0%;
+    --neutral-100: 0 0% 5%;
+    --neutral-150: 0 0% 8%;
+    --neutral-200: 0 0% 10%;
+    --neutral-300: 0 0% 20%;
+    --neutral-400: 0 0% 30%;
+    --neutral-500: 0 0% 40%;
+    --neutral-600: 0 0% 60%;
+    --neutral-700: 0 0% 88%;
+    --neutral-800: 0 0% 91%;
+    --neutral-900: 0 0% 96.5%;
+    --neutral-950: 0 0% 98%;
+    --primary-2: hsl(var(--primary) / 0.16);
+    --primary-3: hsl(var(--primary) / 0.24);
+    --secondary-2: hsl(var(--secondary));
+    --secondary-3: hsl(var(--muted));
+    --tertiary: hsl(var(--muted-foreground));
+    --tertiary-2: hsl(var(--muted-foreground) / 0.72);
+    --tertiary-3: hsl(var(--muted-foreground) / 0.56);
+    --filler: hsl(var(--muted));
+    --filler-2: hsl(var(--border));
+    --filler-3: hsl(var(--foreground) / 0.14);
+    --filler-txt: hsl(var(--muted-foreground));
+    --hover-1: hsl(var(--muted) / 0.72);
+    --hover-2: hsl(var(--muted));
+    --success: 162 72% 37%;
+    --success-foreground: 0 0% 100%;
+    --success-light: 162 72% 12%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 0%;
+    --warning-light: 38 92% 12%;
+    --error: 359 100% 61%;
+    --error-foreground: 0 0% 100%;
+    --error-light: 359 100% 12%;
+    --surface-tint: color-mix(
+      in oklab,
+      hsl(var(--card)) 88%,
+      hsl(var(--primary)) 12%
+    );
+    --glass-border: color-mix(
+      in oklab,
+      hsl(var(--foreground)) 18%,
+      transparent
+    );
+    --glass-blur: 18px;
+    --color-border-illustration: color-mix(
+      in oklab,
+      hsl(var(--foreground)) 16%,
+      transparent
+    );
+    --sidebar-background: 0 0% 0%;
+    --sidebar-foreground: 0 0% 96%;
+    --sidebar-primary: 221.2 83.2% 53.3%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 0 0% 9%;
+    --sidebar-accent-foreground: 0 0% 96%;
+    --sidebar-border: 0 0% 13%;
+    --sidebar-ring: 0 0% 13%;
+    --orbit-bg: hsl(0 0% 0%);
+    --orbit-bg-surface: hsl(0 0% 4%);
+    --orbit-bg-elevated: hsl(0 0% 9.5%);
+    --orbit-text: hsl(0 0% 94%);
+    --orbit-text-subtle: hsl(0 0% 52%);
+    --orbit-text-disabled: hsl(0 0% 32%);
+    --orbit-destructive: hsl(359 100% 61%);
+    /* filter-system tokens (dark) — flipped tint ladder, brightened accent */
+    --filter-accent: hsl(19 99% 52%);
+    --filter-accent-foreground: hsl(0 0% 100%);
+    --filter-bg-50: oklch(16% 0 0);
+    --filter-bg-100: oklch(17.5% 0 0);
+    --filter-bg-200: oklch(19.5% 0 0);
+    --filter-bg-300: oklch(22% 0 0);
+    --filter-bg-400: oklch(25% 0 0);
+    --filter-bg-500: oklch(28% 0 0);
+    --filter-bg-600: oklch(31% 0 0);
+    --filter-bg-700: oklch(34.5% 0 0);
+    --filter-ink: oklch(96% 0 0);
+    --filter-ink-muted: oklch(71% 0 0);
+    --filter-ink-faint: oklch(55% 0 0);
+    --filter-border: oklch(27% 0 0);
+    --color-graphic-stroke: #ffffff;
+    --color-graphic-dim: rgb(60 60 60);
+    /* Chart colors */
+    --chart-grid-stroke: #1d1d1d;
+    --chart-axis-text: #666666;
+    --chart-reference-line-stroke: #333333;
+    --chart-reference-label: #666666;
+    --chart-accent: hsl(19 99% 52%);
+    --chart-accent-strong: hsl(19 99% 60%);
+    --chart-accent-soft: hsl(27 92% 66%);
+    --chart-accent-faint: hsl(19 72% 17%);
+    --chart-actual-line: var(--chart-accent);
+    --chart-forecast-line: hsl(23 72% 68%);
+    --chart-tooltip-cursor: var(--chart-accent);
+    --chart-pattern-bg: #0c0c0c;
+    --chart-pattern-stroke: hsl(19 85% 58% / 0.52);
+    --chart-bar-fill: var(--chart-accent);
+    --chart-bar-fill-secondary: hsl(27 92% 66% / 0.44);
+    /* Dark-mode neutral is re-stepped against the dark surface, not an
+       inverted copy of the light value. */
+    --chart-neutral: hsl(0 0% 68%);
+    --chart-neutral-soft: hsl(0 0% 68% / 0.32);
+    --chart-gradient-start: var(--chart-accent-soft);
+    --chart-gradient-end: var(--chart-accent);
+    --chart-line-secondary: hsl(23 72% 68%);
+    /* Extended colors from config - dark mode variants */
+    --blue-50: #00245e;
+    --blue-100: #002b70;
+    --blue-200: #003994;
+    --blue-300: #0047b8;
+    --blue-400: #0054db;
+    --blue-500: #0062ff;
+    --blue-600: #3381ff;
+    --blue-700: #66a1ff;
+    --blue-800: #99c0ff;
+    --blue-900: #cce0ff;
+    --blue-950: #e5efff;
+
+    --green-50: #0e2f11;
+    --green-100: #1e4921;
+    --green-200: #235826;
+    --green-300: #266f29;
+    --green-400: #2d8c31;
+    --green-500: #3fab44;
+    --green-600: #62c667;
+    --green-700: #97de9a;
+    --green-800: #c5edc6;
+    --green-900: #e2f6e3;
+    --green-950: #f0faf0;
+
+    --red-50: #420d0d;
+    --red-100: #6f1f1f;
+    --red-200: #922222;
+    --red-300: #b12424;
+    --red-400: #d32f2f;
+    --red-500: #e64d4d;
+    --red-600: #f17878;
+    --red-700: #f8a9a9;
+    --red-800: #fbcdcd;
+    --red-900: #fde3e3;
+    --red-950: #fdf3f3;
+
+    --gray-50: hsl(0, 0%, 0%);
+    --gray-100: hsl(0, 0%, 5%);
+    --gray-200: hsl(0, 0%, 10%);
+    --gray-300: hsl(0, 0%, 20%);
+    --gray-400: hsl(0, 0%, 30%);
+    --gray-500: hsl(0, 0%, 40%);
+    --gray-600: hsl(0, 0%, 60%);
+    --gray-700: hsl(0, 0%, 88%);
+    --gray-800: hsl(0, 0%, 91%);
+    --gray-900: hsl(0, 0%, 96.5%);
+    --gray-950: hsl(0, 0%, 98%);
+
+    --polar-50: hsl(0, 0%, 0%);
+    --polar-100: hsl(0, 0%, 5%);
+    --polar-200: hsl(0, 0%, 9.5%);
+    --polar-300: hsl(0, 0%, 12%);
+    --polar-400: hsl(0, 0%, 16%);
+    --polar-500: hsl(0, 0%, 46%);
+    --polar-600: hsl(0, 0%, 52%);
+    --polar-700: hsl(0, 0%, 62%);
+    --polar-800: hsl(0, 0%, 68%);
+    --polar-900: hsl(0, 0%, 79%);
+    --polar-950: hsl(0, 0%, 85%);
+
+    /* Background images */
+    --grid-pattern: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACYAAAAmCAYAAACoPemuAAAACXBIWXMAABYlAAAWJQFJUiTwAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAABTSURBVHgB7dihEYBAEATBf9LCEQj5ZwGFIIBxJ7rN2amTu9cw53U/3z3WUMIqYZWwSlglrBJWCauEVcIqYZWwSlglrBJWCauEVcKq/W+e04z92AukgAP/IH2i4wAAAABJRU5ErkJggg==");
+    --grid-pattern-dark: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACYAAAAmCAYAAACoPemuAAAACXBIWXMAABYlAAAWJQFJUiTwAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAABTSURBVHgB7dihEYBAEATBf9LCEQj5ZwGFIIBxJ7rN2amTu9cw53U/3z3WUMIqYZWwSlglrBJWCauEVcIqYZWwSlglrBJWCauEVcKq/W+e04z92AukgAP/IH2i4wAAAABJRU5ErkJggg==");
+  }
+}
+
+/* Workflow Studio canvas tokens.
+ * Adapted from Sim Studio (github.com/simstudioai/sim), Apache-2.0.
+ * Kept unlayered on purpose: token definitions must beat any layered rule,
+ * and a missing definition fails ugly — border-color falls back to
+ * currentColor (black) and SVG edge strokes disappear entirely. */
+:root,
+.light {
+  --workflow-canvas: #fefefe;
+  --workflow-card: #ffffff;
+  --workflow-border: #e0e0e0;
+  --workflow-edge: #e0e0e0;
+  --workflow-ring-selected: #33b4ff;
+  --workflow-ring-executing: #22c55e;
+  --workflow-ring-pending: #ea580c;
+  --workflow-error: #ef4444;
+  --workflow-accent: #33c482;
+  --workflow-text-primary: #1a1a1a;
+  --workflow-text-secondary: #525252;
+  --workflow-text-tertiary: #5c5c5c;
+  --workflow-text-muted: #707070;
+}
+
+.dark {
+  --workflow-canvas: #1b1b1b;
+  --workflow-card: #232323;
+  --workflow-border: #3d3d3d;
+  --workflow-edge: #454545;
+  --workflow-ring-pending: #ff6600;
+  --workflow-text-primary: #e6e6e6;
+  --workflow-text-secondary: #cccccc;
+  --workflow-text-tertiary: #b3b3b3;
+  --workflow-text-muted: #787878;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+    /* Smooth transitions for interactive elements */
+    /* transition-property:
+      color, background-color, border-color, opacity, box-shadow, transform;
+    transition-duration: 150ms;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); */
+  }
+
+  body {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    @apply bg-background text-foreground antialiased;
+    /* rico blueprint: -0.15px tracking, inherited app-wide from the body. */
+    letter-spacing: var(--tracking-ui, -0.15px);
+    /* Improved text rendering */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Refined typography hierarchy */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-semibold text-foreground;
+    letter-spacing: var(--tracking-ui, -0.15px);
+    text-wrap: balance;
+  }
+
+  p {
+    @apply leading-relaxed;
+    text-wrap: pretty;
+  }
+
+  /* Smooth focus states */
+  :focus-visible {
+    @apply ring-2 ring-ring ring-offset-2 ring-offset-background outline-none;
+  }
+
+  /* Clean selection highlight */
+  ::selection {
+    @apply bg-primary/20 text-foreground;
+  }
+
+  /* Subtle scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply rounded-full bg-border/50;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-border;
+  }
+
+  /* Thin scrollbar on Firefox */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--border) / 0.5) transparent;
+  }
+
+  /* Ensure body and html scrollbar consistency */
+  html,
+  body {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--border) / 0.5) transparent;
+  }
+
+}
+
+/* Shiki */
+
+pre.shiki {
+  overflow: auto;
+  background-color: transparent !important;
+}
+
+html:not(.dark) .prose-pre\:bg-gray-100 pre.shiki {
+  background-color: var(--color-gray-100) !important;
+}
+
+.dark .dark\:prose-pre\:bg-polar-800 pre.shiki {
+  background-color: var(--color-polar-800) !important;
+}
+
+@media (prefers-color-scheme: dark) {
+  .shiki,
+  .shiki span {
+    color: var(--shiki-dark) !important;
+    /* Optional, if you also want font styles */
+    font-style: var(--shiki-dark-font-style) !important;
+    font-weight: var(--shiki-dark-font-weight) !important;
+    text-decoration: var(--shiki-dark-text-decoration) !important;
+  }
+}
+
+
+
+@custom-variant dark (&:is(.dark *));
+
+/* Hover styles only on devices with a real pointer (Sim Studio pattern).
+   Block form with @slot is required here: the shorthand form cannot combine
+   an at-rule with a nested selector and emits unparsable CSS. */
+@custom-variant hover-hover {
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      @slot;
+    }
+  }
+}
+
+/* Scrollbars are styled — not hidden — app-wide; see the "Subtle scrollbar
+   styling" rules in `@layer base` above, which give every scroll container a thin
+   8px thumb and leave the html/body page scrollbar hidden.
+
+   A universal-selector rule hiding every scrollbar used to sit here. Being
+   unlayered, it outranked those base-layer rules no matter their specificity, so it
+   silently killed the styling above and stripped the scroll affordance from every
+   overflow container in the app — you could scroll, but nothing told you that you
+   could, and nothing showed you where you were. Opt into hiding per element
+   instead: the `.no-scrollbar` utility or the `scrollbar-hide` plugin loaded above.
+   Enforced by tests/unit/global-css-contract.test.ts. */
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  :where(
+      [class~="bg-background/5"],
+      [class~="bg-background/8"],
+      [class~="bg-background/10"],
+      [class~="bg-background/25"],
+      [class~="bg-background/50"],
+      [class~="bg-background/60"],
+      [class~="bg-background/70"],
+      [class~="bg-background/80"],
+      [class~="bg-background/90"],
+      [class~="bg-background/95"],
+      [class~="bg-background/[0.08]"],
+      [class~="bg-background/[0.12]"],
+      [class~="bg-foreground/3"],
+      [class~="bg-foreground/5"],
+      [class~="bg-foreground/10"],
+      [class~="bg-white/[0.03]"],
+      [class~="bg-white/[0.04]"],
+      [class~="bg-white/[0.06]"],
+      [class~="bg-white/[0.08]"],
+      [class~="bg-white/10"]
+    ) {
+    background-color: color-mix(
+      in oklab,
+      hsl(var(--background)) 94%,
+      hsl(var(--foreground)) 6%
+    ) !important;
+  }
+
+  :where(
+      [class~="border-white/5"],
+      [class~="border-white/10"],
+      [class~="border-white/15"],
+      [class~="border-white/20"],
+      [class~="border-white/25"],
+      [class~="border-white/30"],
+      [class~="border-white/40"],
+      [class~="border-white/[0.06]"],
+      [class~="border-white/[0.12]"],
+      [class~="border-white/[0.15]"],
+      [class~="border-white/[0.16]"],
+      [class~="border-foreground/10"],
+      [class~="border-foreground/15"],
+      [class~="border-foreground/25"]
+    ) {
+    border-color: hsl(var(--border)) !important;
+  }
+
+  :where(
+      [class~="backdrop-blur"],
+      [class~="backdrop-blur-sm"],
+      [class~="backdrop-blur-md"],
+      [class~="backdrop-blur-lg"],
+      [class~="backdrop-blur-xl"],
+      [class~="backdrop-blur-2xl"],
+      [class~="backdrop-blur-3xl"],
+      [class~="backdrop-filter"]
+    ) {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+
+  /* Removed: this forced `border-radius: var(--radius) !important` back onto
+     any `.rounded-none` element that also carried a border/bg/shadow/ring
+     class, so components that explicitly asked for square corners were
+     re-rounded anyway. Corners are square platform-wide now, so the override
+     has nothing left to normalize. */
+
+  :where([class~="shadow-xl"], [class~="shadow-2xl"]):is(
+      [class*="border"],
+      [class*="bg-"]
+    ) {
+    box-shadow: var(--shadow-lg) !important;
+  }
+}
+
+/*
+ * B-052: keep Plaid Link clickable under a Radix modal pointer-lock.
+ *
+ * Radix modal dialogs (DismissableLayer with disableOutsidePointerEvents) set
+ * `pointer-events: none` inline on <body> and only restore it when NO modal
+ * layer remains. Plaid Link appends its iframes as DIRECT CHILDREN of <body>
+ * — outside any dialog content node that gets pointer events re-enabled — so
+ * the iframes INHERIT the lock: the consent pane renders but every click
+ * falls through it into the app dialog behind. An explicit `auto` on the
+ * iframe overrides the inherited `none` (pointer-events is inherited; a child
+ * with its own value is hit-testable even under a body-level lock).
+ *
+ * Selectors verified against https://cdn.plaid.com/link/v2/stable/link-initialize.js
+ * (resolves to link/2.0.2488, checked 2026-07-17): the main frame is created
+ * with id="plaid-link-iframe-<n>" (title "Plaid Link") and the handshake
+ * frame with id="plaid-link-open-iframe" (title "Plaid Link Open"); no `name`
+ * attribute is set. Both srcs live under https://cdn.plaid.com/link/ — the
+ * src selector is the belt-and-braces fallback if Plaid ever renames the ids.
+ */
+iframe[id^="plaid-link-"],
+iframe[src^="https://cdn.plaid.com/link/"] {
+  pointer-events: auto !important;
+}
