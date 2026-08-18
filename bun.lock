@@ -257,7 +257,7 @@
     },
     "packages/events": {
       "name": "@oppulence/events",
-      "version": "1.0.2",
+      "version": "1.1.2",
       "dependencies": {
         "@openpanel/nextjs": "^1.0.8",
         "@openpanel/sdk": "1.3.1",
@@ -350,7 +350,7 @@
     },
     "packages/integrations": {
       "name": "@oppulence/integrations",
-      "version": "0.3.0",
+      "version": "0.3.1",
       "dependencies": {
         "@aws-sdk/client-appconfig": "3.1101.0",
         "@aws-sdk/client-athena": "3.1101.0",
@@ -455,6 +455,16 @@
         "react",
         "react-dom",
       ],
+    },
+    "packages/themes": {
+      "name": "@oppulence/themes",
+      "version": "0.1.0",
+      "dependencies": {
+        "tw-animate-css": "^1.4.0",
+      },
+      "peerDependencies": {
+        "tailwindcss": "^4.0.0",
+      },
     },
     "packages/typescript-config": {
       "name": "@repo/typescript-config",
@@ -1095,6 +1105,8 @@
     "@oppulence/infinite-canvas": ["@oppulence/infinite-canvas@workspace:packages/infinite-canvas"],
 
     "@oppulence/integrations": ["@oppulence/integrations@workspace:packages/integrations"],
+
+    "@oppulence/themes": ["@oppulence/themes@workspace:packages/themes"],
 
     "@peculiar/asn1-schema": ["@peculiar/asn1-schema@2.6.0", "", { "dependencies": { "asn1js": "^3.0.6", "pvtsutils": "^1.3.6", "tslib": "^2.8.1" } }, "sha512-xNLYLBFTBKkCzEZIw842BxytQQATQv+lDTCEMZ8C196iJcJJMBUZxrhSTxLaohMyKK8QlzRNTRkUmanucnDSqg=="],
 
