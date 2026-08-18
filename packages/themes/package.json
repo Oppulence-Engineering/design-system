@@ -32,10 +32,20 @@
     "css",
     "tailwindcss"
   ],
+  "scripts": {
+    "clean": "rm -rf .turbo node_modules",
+    "lint": "prettier --check .",
+    "typecheck": "echo 'CSS-only package: no TypeScript to check'",
+    "build": "tailwindcss -i check/eigenn.css -o /dev/null && tailwindcss -i check/conduitt.css -o /dev/null && tailwindcss -i check/cossistant.css -o /dev/null"
+  },
   "dependencies": {
     "tw-animate-css": "^1.4.0"
   },
   "peerDependencies": {
     "tailwindcss": "^4.0.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.1.8",
+    "tailwindcss": "^4.1.8"
   }
 }
