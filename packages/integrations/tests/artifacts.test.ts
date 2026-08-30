@@ -60,6 +60,14 @@ test("build emits every documented package entrypoint and the generated public m
     functionallySupported: 0,
     operationOrTriggerSupported: 0,
   });
+
+  const logosReactBundle = readFileSync(
+    resolve(distDirectory, "logos-react.js"),
+    "utf8",
+  );
+  expect(logosReactBundle).toContain('from "./logos.js"');
+  expect(logosReactBundle).not.toContain("data:image/");
+  expect(Buffer.byteLength(logosReactBundle)).toBeLessThan(10_000);
 });
 
 test("declares a browser-only stub for the server export", () => {

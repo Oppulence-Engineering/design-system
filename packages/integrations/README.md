@@ -26,7 +26,9 @@ import {
 } from "@oppulence/integrations/logos";
 
 const stripe = getIntegrationLogo("stripe");
-// stripe.dataUri, stripe.mediaType, stripe.sourceUrl, stripe.license
+// stripe.dataUri, stripe.mediaType, stripe.sourceUrl
+// stripe.copyrightLicense describes the artwork copyright only.
+// stripe.trademarkNotice covers separate brand and trademark rights.
 
 const imageSource = getIntegrationLogoDataUri("stripe");
 ```
@@ -39,11 +41,12 @@ import { IntegrationLogo } from "@oppulence/integrations/logos/react";
 <IntegrationLogo integrationId="stripe" className="size-8" />;
 ```
 
-The data URI is package-owned and requires no runtime request to an icon or
+The data URI is package-bundled and requires no runtime request to an icon or
 brand API. A strict Content Security Policy should allow `data:` in `img-src`.
 Use canonical catalogue IDs; unknown future IDs return `undefined`, `false`, or
-the React component's `fallback`. Provenance and trademark notices are in
-`THIRD_PARTY_NOTICES.md`.
+the React component's `fallback`. A logo's copyright license does not grant
+trademark rights. Per-logo metadata and `THIRD_PARTY_NOTICES.md` retain that
+distinction.
 
 ## Internal provider metadata
 

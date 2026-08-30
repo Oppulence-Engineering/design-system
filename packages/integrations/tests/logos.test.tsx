@@ -25,7 +25,8 @@ describe("integration logos", () => {
       expect(logo?.dataUri).toStartWith(`data:${logo?.mediaType};base64,`);
       expect(logo?.sourceUrl).toStartWith("https://");
       expect(logo?.retrievedFrom).toStartWith("https://");
-      expect(logo?.license.length).toBeGreaterThan(0);
+      expect(logo?.copyrightLicense.length).toBeGreaterThan(0);
+      expect(logo?.trademarkNotice).toContain("trademarks");
       expect(getIntegrationLogoDataUri(integrationId)).toBe(logo?.dataUri);
       expect(hasIntegrationLogo(integrationId)).toBeTrue();
     }

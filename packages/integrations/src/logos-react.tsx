@@ -2,7 +2,7 @@
 
 import * as React from "react";
 
-import { getIntegrationLogo } from "./logos";
+import { getIntegrationLogo } from "./logos.js";
 
 export interface IntegrationLogoProps extends Omit<
   React.ComponentPropsWithoutRef<"img">,
@@ -18,7 +18,7 @@ export interface IntegrationLogoProps extends Omit<
 
 /**
  * Render a locally bundled integration mark without a third-party image request.
- * The package owns the data URI, so CSP can allow it with `img-src data:`.
+ * The package bundles the data URI, so CSP can allow it with `img-src data:`.
  */
 export function IntegrationLogo({
   integrationId,

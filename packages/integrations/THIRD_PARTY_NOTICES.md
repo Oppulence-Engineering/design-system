@@ -3,6 +3,10 @@
 `@oppulence/integrations/logos` bundles provider marks as data URIs so product
 clients do not need to call a third-party logo service at runtime.
 
+`IntegrationLogoAsset.copyrightLicense` reports the copyright license covering
+the source artwork only. It is not a trademark license. Every asset also exposes
+`trademarkNotice` so applications do not conflate those separate rights.
+
 ## Sim Studio integration icons
 
 Most catalogue marks were rendered from the integration icon components in

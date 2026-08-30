@@ -150,7 +150,7 @@
   "license": "MIT",
   "scripts": {
     "build": "tsc -p tsconfig.build.json && bun run build:root && bun run build:subpaths && bun run build:server && bun run build:server-browser && bun run build:react && bun run build:logos-react && bun run build:manifest && bun run verify:artifacts",
-    "build:logos-react": "bun build src/logos-react.tsx --outfile dist/logos-react.js --target browser --format esm --packages=external --banner='\"use client\";'",
+    "build:logos-react": "esbuild src/logos-react.tsx --bundle --platform=browser --format=esm --packages=external --external:./logos.js --outfile=dist/logos-react.js",
     "build:manifest": "bun scripts/build-public-manifest.ts",
     "build:react": "bun build src/react.tsx --outdir dist --target browser --format esm --packages=external --banner='\"use client\";'",
     "build:root": "esbuild src/index.ts --bundle --platform=browser --format=esm --packages=external --outfile=dist/index.js",

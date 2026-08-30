@@ -1,6 +1,9 @@
 import generatedLogoData from "./generated/integration-logos.json";
 
-export const INTEGRATION_LOGO_MANIFEST_VERSION = 1 as const;
+export const INTEGRATION_LOGO_MANIFEST_VERSION = 2 as const;
+
+export const INTEGRATION_LOGO_TRADEMARK_NOTICE =
+  "Product names and logos may be trademarks of their respective owners; use remains subject to each owner's brand guidelines.";
 
 export type IntegrationLogoMediaType = "image/png" | "image/svg+xml";
 export type IntegrationLogoSource =
@@ -20,8 +23,10 @@ export interface IntegrationLogoAsset {
   sourceUrl: string;
   /** Exact URL from which the generated asset was retrieved. */
   retrievedFrom: string;
-  /** Asset license or trademark-use notice. */
-  license: string;
+  /** Copyright license covering the source artwork, not any trademark rights. */
+  copyrightLicense: string;
+  /** Trademark rights are separate from the copyright license. */
+  trademarkNotice: typeof INTEGRATION_LOGO_TRADEMARK_NOTICE;
 }
 
 interface GeneratedLogoFile {
@@ -31,7 +36,10 @@ interface GeneratedLogoFile {
     simpleIcons: string;
     simStudioCommit: string;
   };
-  logos: Record<string, Omit<IntegrationLogoAsset, "integrationId">>;
+  logos: Record<
+    string,
+    Omit<IntegrationLogoAsset, "integrationId" | "trademarkNotice">
+  >;
 }
 
 const generated = generatedLogoData as GeneratedLogoFile;
@@ -50,7 +58,11 @@ export const INTEGRATION_LOGOS: Readonly<Record<string, IntegrationLogoAsset>> =
     Object.fromEntries(
       Object.entries(generated.logos).map(([integrationId, asset]) => [
         integrationId,
-        Object.freeze({ integrationId, ...asset }),
+        Object.freeze({
+          integrationId,
+          ...asset,
+          trademarkNotice: INTEGRATION_LOGO_TRADEMARK_NOTICE,
+        }),
       ]),
     ),
   );

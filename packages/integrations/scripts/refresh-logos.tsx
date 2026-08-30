@@ -30,8 +30,8 @@ type LogoSourceKey =
   | "vendor-favicon";
 
 interface GeneratedLogo {
+  copyrightLicense: string;
   dataUri: string;
-  license: string;
   mediaType: "image/png" | "image/svg+xml";
   retrievedFrom: string;
   source: LogoSourceKey;
@@ -184,8 +184,8 @@ async function simStudioLogos(): Promise<Record<string, GeneratedLogo>> {
         return [
           record.id,
           {
+            copyrightLicense: "Apache-2.0",
             dataUri: svgDataUri(svg),
-            license: "Apache-2.0",
             mediaType: "image/svg+xml",
             retrievedFrom: SIMSTUDIO_ICONS_URL,
             source: "simstudio",
@@ -211,8 +211,8 @@ async function simpleIconLogo(
   const svg = rawSvg.replace(/<svg\b/u, `<svg fill="#${icon.hex}"`);
   validateSvg(integrationId, svg);
   return {
+    copyrightLicense: icon.license?.type ?? "CC0-1.0",
     dataUri: svgDataUri(svg),
-    license: icon.license?.type ?? "CC0-1.0",
     mediaType: "image/svg+xml",
     retrievedFrom: assetUrl,
     source: "simple-icons",
@@ -232,8 +232,8 @@ function iconifyLogo(
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" width="64" height="64">${definition.body}</svg>`;
   validateSvg(integrationId, svg);
   return {
+    copyrightLicense: "CC0-1.0",
     dataUri: svgDataUri(svg),
-    license: "CC0-1.0",
     mediaType: "image/svg+xml",
     retrievedFrom: ICONIFY_LOGOS_DATA_URL,
     source: "iconify-svg-logos",
@@ -252,8 +252,8 @@ async function faviconLogo(
     throw new Error(`${integrationId} favicon is unexpectedly small.`);
   }
   return {
+    copyrightLicense: "No open-source license asserted",
     dataUri: `data:image/png;base64,${bytes.toString("base64")}`,
-    license: "Trademark; usage is subject to the brand owner's guidelines.",
     mediaType: "image/png",
     retrievedFrom: assetUrl,
     source: "vendor-favicon",
@@ -326,7 +326,7 @@ async function main(): Promise<void> {
     generatedPath,
     `${JSON.stringify(
       {
-        version: 1,
+        version: 2,
         sourceVersions: {
           iconifySvgLogos: ICONIFY_LOGOS_VERSION,
           simpleIcons: SIMPLE_ICONS_VERSION,
