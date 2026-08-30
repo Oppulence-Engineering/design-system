@@ -15,6 +15,8 @@ test("build emits every documented package entrypoint and the generated public m
     "documentation.js",
     "golden-journey.js",
     "kit.js",
+    "logos.js",
+    "logos-react.js",
     "parity.js",
     "provider-protocols.js",
     "execution-strategy.js",
@@ -101,6 +103,7 @@ test(
     expect(typeof entry.classifyIntegrationFailure).toBe("function");
     expect(typeof entry.getIntegrationOutcomeReadiness).toBe("function");
     expect(typeof entry.assertIntegrationOutcomeReadiness).toBe("function");
+    expect(entry.getIntegrationLogo).toBeUndefined();
 
     const discovery = await import(
       `${resolve(distDirectory, "discovery.js")}?artifact-test`
@@ -114,6 +117,17 @@ test(
       `${resolve(distDirectory, "surfaces.js")}?artifact-test`
     );
     expect(typeof surfaces.IntegrationSurfaceSchema.parse).toBe("function");
+    const logos = await import(
+      `${resolve(distDirectory, "logos.js")}?artifact-test`
+    );
+    expect(logos.INTEGRATION_LOGO_IDS).toHaveLength(261);
+    expect(logos.getIntegrationLogo("stripe")?.dataUri).toStartWith(
+      "data:image/svg+xml;base64,",
+    );
+    const logoReact = await import(
+      `${resolve(distDirectory, "logos-react.js")}?artifact-test`
+    );
+    expect(typeof logoReact.IntegrationLogo).toBe("function");
 
     const server = await import(
       `${resolve(distDirectory, "server/index.js")}?artifact-test`
