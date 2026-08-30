@@ -68,6 +68,13 @@ test("build emits every documented package entrypoint and the generated public m
   expect(logosReactBundle).toContain('from "./logos.js"');
   expect(logosReactBundle).not.toContain("data:image/");
   expect(Buffer.byteLength(logosReactBundle)).toBeLessThan(10_000);
+
+  const logosReactDeclaration = readFileSync(
+    resolve(distDirectory, "logos-react.d.ts"),
+    "utf8",
+  );
+  expect(logosReactDeclaration).toContain("package bundles the data URI");
+  expect(logosReactDeclaration).not.toContain("package owns the data URI");
 });
 
 test("declares a browser-only stub for the server export", () => {
