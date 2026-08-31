@@ -62,7 +62,12 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Run unit tests
-        run: bun run --filter @comp/storybook test:unit
+        run: |
+          # Storybook imports design-system components that now consume the
+          # integrations logo subpaths. Build their ignored dist entrypoints
+          # before Vite resolves the workspace package in a fresh checkout.
+          bun run --filter @oppulence/integrations build
+          bun run --filter @comp/storybook test:unit
 
   test-infinite-canvas:
     name: Infinite Canvas Tests

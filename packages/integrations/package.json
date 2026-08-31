@@ -45,6 +45,16 @@
       "import": "./dist/kit.js",
       "default": "./dist/kit.js"
     },
+    "./logos": {
+      "types": "./dist/logos.d.ts",
+      "import": "./dist/logos.js",
+      "default": "./dist/logos.js"
+    },
+    "./logos/react": {
+      "types": "./dist/logos-react.d.ts",
+      "import": "./dist/logos-react.js",
+      "default": "./dist/logos-react.js"
+    },
     "./parity": {
       "types": "./dist/parity.d.ts",
       "import": "./dist/parity.js",
@@ -103,6 +113,8 @@
   "types": "./dist/index.d.ts",
   "files": [
     "README.md",
+    "THIRD_PARTY_NOTICES.md",
+    "licenses/*.txt",
     "dist/**/*.d.ts",
     "dist/index.js",
     "dist/catalog.js",
@@ -112,6 +124,8 @@
     "dist/discovery.js",
     "dist/golden-journey.js",
     "dist/kit.js",
+    "dist/logos.js",
+    "dist/logos-react.js",
     "dist/parity.js",
     "dist/provider-protocols.js",
     "dist/execution-strategy.js",
@@ -135,13 +149,14 @@
   },
   "license": "MIT",
   "scripts": {
-    "build": "tsc -p tsconfig.build.json && bun run build:root && bun run build:subpaths && bun run build:server && bun run build:server-browser && bun run build:react && bun run build:manifest && bun run verify:artifacts",
+    "build": "tsc -p tsconfig.build.json && bun run build:root && bun run build:subpaths && bun run build:server && bun run build:server-browser && bun run build:react && bun run build:logos-react && bun run build:manifest && bun run verify:artifacts",
+    "build:logos-react": "esbuild src/logos-react.tsx --bundle --platform=browser --format=esm --packages=external --external:./logos.js --outfile=dist/logos-react.js",
     "build:manifest": "bun scripts/build-public-manifest.ts",
     "build:react": "bun build src/react.tsx --outdir dist --target browser --format esm --packages=external --banner='\"use client\";'",
     "build:root": "esbuild src/index.ts --bundle --platform=browser --format=esm --packages=external --outfile=dist/index.js",
     "build:server": "esbuild src/server/index.ts --bundle --platform=node --format=esm --packages=external --outfile=dist/server/index.js",
     "build:server-browser": "esbuild src/server/browser.ts --bundle --platform=browser --format=esm --outfile=dist/server/browser.js",
-    "build:subpaths": "bun build src/catalog.ts src/contracts.ts src/connection.ts src/documentation.ts src/discovery.ts src/golden-journey.ts src/kit.ts src/parity.ts src/provider-protocols.ts src/execution-strategy.ts src/registry.ts src/reliability.ts src/support.ts src/surfaces.ts src/templates.ts --root src --outdir dist --target browser --format esm --packages=external",
+    "build:subpaths": "bun build src/catalog.ts src/contracts.ts src/connection.ts src/documentation.ts src/discovery.ts src/golden-journey.ts src/kit.ts src/logos.ts src/parity.ts src/provider-protocols.ts src/execution-strategy.ts src/registry.ts src/reliability.ts src/support.ts src/surfaces.ts src/templates.ts --root src --outdir dist --target browser --format esm --packages=external",
     "clean": "rm -rf .turbo dist tsconfig.build.tsbuildinfo",
     "format": "prettier --write \"{src,tests,scripts}/**/*.{ts,tsx}\"",
     "lint": "prettier --check \"{src,tests,scripts}/**/*.{ts,tsx}\"",
@@ -154,6 +169,7 @@
     "providers:sync": "bun scripts/sync-gate.ts",
     "providers:verify": "bun scripts/verify-spec-fidelity.ts",
     "providers:wire": "bun scripts/wire-provider.ts",
+    "refresh:logos": "bun scripts/refresh-logos.tsx",
     "providers:openapi": "bun scripts/openapi-plan.ts",
     "providers:plan": "bun scripts/provider-plan.ts",
     "providers:scaffold": "bun scripts/provider-scaffold.ts",

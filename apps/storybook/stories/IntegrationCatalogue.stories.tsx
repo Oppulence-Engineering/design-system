@@ -168,26 +168,40 @@ export const ConnectionDetailSheet: Story = {
   },
 };
 
+const logoFixtureEntries = directory.entries
+  .filter((entry) =>
+    [
+      "github",
+      "slack",
+      "stripe",
+      "attio",
+      "rocketlane",
+      "sixtyfour-ai",
+    ].includes(entry.integration.id),
+  )
+  .map((entry) =>
+    ["attio", "rocketlane", "sixtyfour-ai"].includes(entry.integration.id)
+      ? {
+          ...entry,
+          integration: {
+            ...entry.integration,
+            id: `future-${entry.integration.id}`,
+          },
+        }
+      : entry,
+  );
+
 /**
- * Logos come from Simple Icons, which covers roughly half the catalogue and
- * none of the B2B long tail. Anything without a mark gets a tinted monogram,
- * so a row never renders a gap where a logo should be.
+ * Every current catalogue entry has a bundled mark. Unknown future providers
+ * still get a tinted monogram, so forward-compatible rows never render a gap
+ * where a logo should be.
  */
 export const LogosAndMonograms: Story = {
   args: {
     directory: {
       product: "eigenn",
-      // Three with a real brand mark, three without.
-      entries: directory.entries.filter((entry) =>
-        [
-          "github",
-          "slack",
-          "stripe",
-          "attio",
-          "rocketlane",
-          "sixtyfour-ai",
-        ].includes(entry.integration.id),
-      ),
+      // Three current providers with marks, three simulated future providers.
+      entries: logoFixtureEntries,
     },
     detailsById,
     onAction: fn(),

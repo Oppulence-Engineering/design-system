@@ -11,6 +11,43 @@ server-only `@oppulence/integrations/server` entry for reusable OAuth2 and
 browser-Link provider clients, encrypted credential envelopes, token refresh,
 and mountable routes.
 
+## Integration logos
+
+Every canonical catalogue integration has a locally bundled logo. Import the
+dedicated subpath so applications that do not render logos keep the roughly
+one-megabyte asset catalogue out of their browser bundle.
+
+```ts
+import {
+  getIntegrationLogo,
+  getIntegrationLogoDataUri,
+  hasIntegrationLogo,
+  INTEGRATION_LOGO_IDS,
+} from "@oppulence/integrations/logos";
+
+const stripe = getIntegrationLogo("stripe");
+// stripe.dataUri, stripe.mediaType, stripe.sourceUrl
+// stripe.copyrightLicense describes the artwork copyright only.
+// stripe.trademarkNotice covers separate brand and trademark rights.
+
+const imageSource = getIntegrationLogoDataUri("stripe");
+```
+
+React clients can use the optional component entrypoint:
+
+```tsx
+import { IntegrationLogo } from "@oppulence/integrations/logos/react";
+
+<IntegrationLogo integrationId="stripe" className="size-8" />;
+```
+
+The data URI is package-bundled and requires no runtime request to an icon or
+brand API. A strict Content Security Policy should allow `data:` in `img-src`.
+Use canonical catalogue IDs; unknown future IDs return `undefined`, `false`, or
+the React component's `fallback`. A logo's copyright license does not grant
+trademark rights. Per-logo metadata and `THIRD_PARTY_NOTICES.md` retain that
+distinction.
+
 ## Internal provider metadata
 
 The separate `@oppulence/integrations/discovery` entry exposes an internal
