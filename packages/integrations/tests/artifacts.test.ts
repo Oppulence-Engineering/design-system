@@ -1,5 +1,6 @@
-import { existsSync, readFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { existsSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join, resolve } from "node:path";
 
 import { expect, test } from "bun:test";
 
@@ -320,7 +321,7 @@ test("the server bundle statically imports no vendor SDK", () => {
 
   expect(
     vendorSpecifiers,
-    "load these SDKs with requireOptionalSdk or importOptionalSdk",
+    "load these SDKs with a literal await import() in the client factory",
   ).toEqual([]);
 });
 
@@ -351,6 +352,79 @@ test(
     console.log(`server import growth: ${JSON.stringify(growth)}`);
 
     expect(growth.heapMb).toBeLessThan(SERVER_IMPORT_HEAP_BUDGET_MB);
+  },
+  ARTIFACT_IMPORT_TIMEOUT_MS,
+);
+
+// The Canvas worker ships one `bun build` bundle with no vendor packages in
+// node_modules. A provider SDK must therefore be inside the bundle, and it must
+// still load only on first use.
+test(
+  "a bundled consumer runs provider SDKs without node_modules",
+  async () => {
+    const workDirectory = mkdtempSync(join(tmpdir(), "integrations-bundle-"));
+    const entry = join(workDirectory, "entry.ts");
+    writeFileSync(
+      entry,
+      `
+      import { heapStats } from "bun:jsc";
+      globalThis.fetch = async () =>
+        new Response(JSON.stringify({ message: "stubbed rejection" }), {
+          status: 403,
+          headers: { "content-type": "application/json" },
+        });
+      const sample = () => {
+        Bun.gc(true);
+        return heapStats().heapSize;
+      };
+      const before = sample();
+      const server = await import(${JSON.stringify(resolve(distDirectory, "server/index.js"))});
+      const importMb = Math.round((sample() - before) / 2 ** 20);
+      const apiKeyRuntime = {
+        withCredential: (_reference, operation) =>
+          operation({ apiKey: "fake-key", fields: {} }),
+      };
+      const errors = {};
+      for (const [create, integrationId, operationId, input] of [
+        [server.createVercelProviderSdk, "vercel", "vercel:list-projects", {}],
+        [server.createGitHubProviderSdk, "github", "github:get-repository-info", { owner: "o", repo: "r" }],
+      ]) {
+        const reference = server.createIntegrationCredentialReference({
+          connectionId: "c1",
+          integrationId,
+          product: "eigenn",
+        });
+        try {
+          await create({ apiKeyRuntime }).execute({ integrationId, operationId, reference, input });
+          errors[integrationId] = "resolved";
+        } catch (error) {
+          errors[integrationId] = String(error);
+        }
+      }
+      console.log(JSON.stringify({ importMb, errors }));
+    `,
+    );
+    const build = await Bun.build({
+      entrypoints: [entry],
+      target: "bun",
+      outdir: join(workDirectory, "out"),
+    });
+    expect(build.success, build.logs.join("\n")).toBeTrue();
+
+    const result = Bun.spawnSync([process.execPath, "out/entry.js"], {
+      cwd: workDirectory,
+    });
+    expect(result.exitCode, result.stderr.toString()).toBe(0);
+    const report = JSON.parse(result.stdout.toString()) as {
+      importMb: number;
+      errors: Record<string, string>;
+    };
+    console.log(`bundled consumer: ${JSON.stringify(report)}`);
+
+    expect(report.importMb).toBeLessThan(SERVER_IMPORT_HEAP_BUDGET_MB);
+    // The stubbed vendor rejection proves the SDK loaded and sent a request.
+    expect(report.errors.vercel).toContain("stubbed rejection");
+    expect(report.errors.github).toContain("stubbed rejection");
   },
   ARTIFACT_IMPORT_TIMEOUT_MS,
 );

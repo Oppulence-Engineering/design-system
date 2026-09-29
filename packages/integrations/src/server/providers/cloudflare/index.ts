@@ -1,4 +1,3 @@
-import { requireOptionalSdk } from "../shared/optional-sdk";
 import { z } from "zod";
 import { SIMSTUDIO_BASELINE } from "../../../catalog";
 import type { IntegrationApiKeyRuntime } from "../../runtime/api-key";
@@ -26,9 +25,10 @@ export interface CloudflareProviderSdkConfig {
   clientFactory?: CloudflareClientFactory;
 }
 
-function createCloudflareClient(apiKey: string): CloudflareSdkClient {
-  const { default: Cloudflare } =
-    requireOptionalSdk<typeof import("cloudflare")>("cloudflare");
+async function createCloudflareClient(
+  apiKey: string,
+): Promise<CloudflareSdkClient> {
+  const { default: Cloudflare } = await import("cloudflare");
   return new Cloudflare({ apiToken: apiKey }) as unknown as CloudflareSdkClient;
 }
 
@@ -275,7 +275,7 @@ export function createCloudflareProviderSdk(
         async (credential) => ({
           operationId: invocation.operationId,
           output: await invokeSdkMethod(
-            clientFactory(credential.apiKey),
+            await clientFactory(credential.apiKey),
             requestFactory(invocation.input),
           ),
         }),

@@ -1,4 +1,3 @@
-import { requireOptionalSdk } from "../shared/optional-sdk";
 import { SIMSTUDIO_BASELINE } from "../../../catalog";
 import type { IntegrationApiKeyRuntime } from "../../runtime/api-key";
 import { IntegrationProviderSdkError } from "../../core/provider-sdk";
@@ -24,9 +23,10 @@ export interface IntercomProviderSdkConfig {
   clientFactory?: IntercomClientFactory;
 }
 
-function createIntercomClient(apiKey: string): IntercomSdkClient {
-  const { IntercomClient } =
-    requireOptionalSdk<typeof import("intercom-client")>("intercom-client");
+async function createIntercomClient(
+  apiKey: string,
+): Promise<IntercomSdkClient> {
+  const { IntercomClient } = await import("intercom-client");
   return new IntercomClient({ token: apiKey }) as unknown as IntercomSdkClient;
 }
 
@@ -446,7 +446,7 @@ export function createIntercomProviderSdk(
         async (credential) => ({
           operationId: invocation.operationId,
           output: await invokeSdkMethod(
-            clientFactory(credential.apiKey),
+            await clientFactory(credential.apiKey),
             requestFactory(invocation.input),
           ),
         }),

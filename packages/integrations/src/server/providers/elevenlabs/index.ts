@@ -1,5 +1,4 @@
 import { Buffer } from "node:buffer";
-import { requireOptionalSdk } from "../shared/optional-sdk";
 import { SIMSTUDIO_BASELINE } from "../../../catalog";
 import type { IntegrationApiKeyRuntime } from "../../runtime/api-key";
 import { IntegrationProviderSdkError } from "../../core/provider-sdk";
@@ -25,10 +24,10 @@ export interface ElevenLabsProviderSdkConfig {
   maxAudioBytes?: number;
 }
 
-function createElevenLabsClient(apiKey: string): ElevenLabsSdkClient {
-  const { ElevenLabsClient } = requireOptionalSdk<
-    typeof import("@elevenlabs/elevenlabs-js")
-  >("@elevenlabs/elevenlabs-js");
+async function createElevenLabsClient(
+  apiKey: string,
+): Promise<ElevenLabsSdkClient> {
+  const { ElevenLabsClient } = await import("@elevenlabs/elevenlabs-js");
   return new ElevenLabsClient({ apiKey }) as unknown as ElevenLabsSdkClient;
 }
 
@@ -371,7 +370,7 @@ export function createElevenLabsProviderSdk(
         invocation.reference,
         async (credential) => {
           const response = await invokeSdkMethod(
-            clientFactory(credential.apiKey),
+            await clientFactory(credential.apiKey),
             request,
           );
           return {

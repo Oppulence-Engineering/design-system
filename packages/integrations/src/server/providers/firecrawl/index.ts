@@ -1,5 +1,4 @@
 import { Buffer } from "node:buffer";
-import { requireOptionalSdk } from "../shared/optional-sdk";
 import { SIMSTUDIO_BASELINE } from "../../../catalog";
 import type { IntegrationApiKeyRuntime } from "../../runtime/api-key";
 import { IntegrationProviderSdkError } from "../../core/provider-sdk";
@@ -26,10 +25,10 @@ export interface FirecrawlProviderSdkConfig {
   maxFileBytes?: number;
 }
 
-function createFirecrawlClient(apiKey: string): FirecrawlSdkClient {
-  const { default: Firecrawl } = requireOptionalSdk<
-    typeof import("@mendable/firecrawl-js")
-  >("@mendable/firecrawl-js");
+async function createFirecrawlClient(
+  apiKey: string,
+): Promise<FirecrawlSdkClient> {
+  const { default: Firecrawl } = await import("@mendable/firecrawl-js");
   return new Firecrawl({ apiKey }) as unknown as FirecrawlSdkClient;
 }
 
@@ -381,7 +380,7 @@ export function createFirecrawlProviderSdk(
         async (credential) => ({
           operationId: invocation.operationId,
           output: await invokeSdkMethod(
-            clientFactory(credential.apiKey),
+            await clientFactory(credential.apiKey),
             requestFactory(invocation.input, maximumFileBytes),
           ),
         }),

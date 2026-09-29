@@ -1,4 +1,3 @@
-import { requireOptionalSdk } from "../shared/optional-sdk";
 import type { IntegrationCredentialReference } from "../../transport/credentials";
 import type { IntegrationOAuthRuntime } from "../../runtime/oauth";
 import { IntegrationProviderSdkError } from "../../core/provider-sdk";
@@ -43,8 +42,7 @@ async function createXeroSdkClient(input: {
   accessToken: string;
   refreshToken?: string;
 }): Promise<XeroSdkClient> {
-  const { XeroClient } =
-    requireOptionalSdk<typeof import("xero-node")>("xero-node");
+  const { XeroClient } = await import("xero-node");
   const client = new XeroClient({
     clientId: input.clientId,
     clientSecret: input.clientSecret,

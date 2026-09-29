@@ -1,4 +1,3 @@
-import { requireOptionalSdk } from "../shared/optional-sdk";
 import { SIMSTUDIO_BASELINE } from "../../../catalog";
 import type { IntegrationApiKeyRuntime } from "../../runtime/api-key";
 import { IntegrationProviderSdkError } from "../../core/provider-sdk";
@@ -22,9 +21,8 @@ export interface YouTubeProviderSdkConfig {
   clientFactory?: YouTubeClientFactory;
 }
 
-function createYouTubeClient(apiKey: string): YouTubeSdkClient {
-  const { google } =
-    requireOptionalSdk<typeof import("googleapis")>("googleapis");
+async function createYouTubeClient(apiKey: string): Promise<YouTubeSdkClient> {
+  const { google } = await import("googleapis");
   return { youtube: google.youtube({ version: "v3", auth: apiKey }) };
 }
 
@@ -218,7 +216,7 @@ export function createYouTubeProviderSdk(
           operationId: invocation.operationId,
           output: sdkResponseData(
             await invokeSdkMethod(
-              clientFactory(credential.apiKey),
+              await clientFactory(credential.apiKey),
               requestFactory(invocation.input),
             ),
           ),

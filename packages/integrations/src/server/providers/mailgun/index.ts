@@ -1,4 +1,3 @@
-import { requireOptionalSdk } from "../shared/optional-sdk";
 import { SIMSTUDIO_BASELINE } from "../../../catalog";
 import type { IntegrationApiKeyRuntime } from "../../runtime/api-key";
 import { IntegrationProviderSdkError } from "../../core/provider-sdk";
@@ -28,9 +27,11 @@ export interface MailgunProviderSdkConfig {
   clientFactory?: MailgunClientFactory;
 }
 
-function createMailgunClient(apiKey: string, apiUrl: string): MailgunSdkClient {
-  const { default: Mailgun } =
-    requireOptionalSdk<typeof import("mailgun.js")>("mailgun.js");
+async function createMailgunClient(
+  apiKey: string,
+  apiUrl: string,
+): Promise<MailgunSdkClient> {
+  const { default: Mailgun } = await import("mailgun.js");
   return new Mailgun(FormData).client({
     username: "api",
     key: apiKey,
@@ -202,7 +203,7 @@ export function createMailgunProviderSdk(
         async (credential) => ({
           operationId: invocation.operationId,
           output: await invokeSdkMethod(
-            clientFactory(credential.apiKey, apiUrl),
+            await clientFactory(credential.apiKey, apiUrl),
             requestFactory(invocation.input),
           ),
         }),

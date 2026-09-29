@@ -1,6 +1,12 @@
 /**
  * Loads an optional vendor SDK at runtime, out of reach of bundlers.
  *
+ * Only for SDKs that break consumer bundlers. An SDK that bundles cleanly
+ * loads through a literal `await import("sdk")` in its client factory
+ * instead: consumer bundlers then ship it, and still evaluate it only on
+ * first use. A bundled consumer (for example a `bun build` worker image) has
+ * no `node_modules` to resolve an opaque specifier from at runtime.
+ *
  * Every provider here reaches its SDK through a lazy `require` that runs only
  * when that integration is actually invoked. `createRequire` is the right
  * mechanism, but a literal specifier still gets statically resolved: bundlers

@@ -2,7 +2,7 @@ import type { CountryCode, Products } from "plaid";
 import { z } from "zod";
 
 import { ProductSchema, type Product } from "../../contracts";
-import { requireOptionalSdk } from "../providers/shared/optional-sdk";
+import { lazyAsyncClient } from "../providers/shared/optional-sdk";
 import {
   createIntegrationCredentialReference,
   decryptIntegrationConnectionLinkCredential,
@@ -194,42 +194,45 @@ function optionalMetadata(
 }
 
 function createPlaidClient(config: PlaidConnectionLinkConfig): PlaidLinkSdk {
-  const {
-    Configuration: PlaidConfiguration,
-    PlaidApi,
-    PlaidEnvironments,
-  } = requireOptionalSdk<typeof import("plaid")>("plaid");
-  const environment = config.environment ?? "production";
-  return new PlaidApi(
-    new PlaidConfiguration({
-      basePath: PlaidEnvironments[environment],
-      baseOptions: {
-        headers: {
-          "PLAID-CLIENT-ID": config.clientId,
-          "PLAID-SECRET": config.secret,
+  // Callers use one method per client, so the facade can defer the import.
+  return lazyAsyncClient(async () => {
+    const {
+      Configuration: PlaidConfiguration,
+      PlaidApi,
+      PlaidEnvironments,
+    } = await import("plaid");
+    const environment = config.environment ?? "production";
+    return new PlaidApi(
+      new PlaidConfiguration({
+        basePath: PlaidEnvironments[environment],
+        baseOptions: {
+          headers: {
+            "PLAID-CLIENT-ID": config.clientId,
+            "PLAID-SECRET": config.secret,
+          },
         },
-      },
-    }),
-  ) as unknown as PlaidLinkSdk;
+      }),
+    ) as unknown as PlaidLinkSdk;
+  });
 }
 
 function createMergeClient(apiKey: string): MergeLinkSdk {
-  const Merge = requireOptionalSdk<
-    typeof import("@mergeapi/merge-sdk-typescript")
-  >("@mergeapi/merge-sdk-typescript");
-  const configuration = new Merge.Configuration({ apiKey });
-  return {
-    linkTokenCreate(input) {
-      return new Merge.Accounting.LinkTokenApi(configuration).linkTokenCreate(
-        input as never,
-      );
-    },
-    accountTokenRetrieve(input) {
-      return new Merge.Accounting.AccountTokenApi(
-        configuration,
-      ).accountTokenRetrieve(input);
-    },
-  };
+  return lazyAsyncClient(async (): Promise<MergeLinkSdk> => {
+    const Merge = await import("@mergeapi/merge-sdk-typescript");
+    const configuration = new Merge.Configuration({ apiKey });
+    return {
+      linkTokenCreate(input) {
+        return new Merge.Accounting.LinkTokenApi(configuration).linkTokenCreate(
+          input as never,
+        );
+      },
+      accountTokenRetrieve(input) {
+        return new Merge.Accounting.AccountTokenApi(
+          configuration,
+        ).accountTokenRetrieve(input);
+      },
+    };
+  });
 }
 
 async function saveConnectionLinkCredential(input: {
@@ -332,12 +335,11 @@ export function createIntegrationConnectionLinkRuntime(
         )().linkTokenCreate({
           client_name: plaidConfig.clientName ?? "Oppulence",
           country_codes: plaidConfig.countryCodes ?? [
-            requireOptionalSdk<typeof import("plaid")>("plaid").CountryCode.Us,
+            (await import("plaid")).CountryCode.Us,
           ],
           language: "en",
           products: plaidConfig.products ?? [
-            requireOptionalSdk<typeof import("plaid")>("plaid").Products
-              .Transactions,
+            (await import("plaid")).Products.Transactions,
           ],
           user: { client_user_id: subject.data.subjectId },
           ...(plaidConfig.webhook ? { webhook: plaidConfig.webhook } : {}),

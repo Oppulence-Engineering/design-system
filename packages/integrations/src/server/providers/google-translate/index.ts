@@ -1,4 +1,4 @@
-import { requireOptionalSdk } from "../shared/optional-sdk";
+import { lazyAsyncClient } from "../shared/optional-sdk";
 
 import { IntegrationProviderSdkError } from "../../core/provider-sdk";
 import type { IntegrationProviderPack } from "../../core/provider-pack";
@@ -35,17 +35,19 @@ function googleClient(
   service: "vault" | "bigquery" | "translate",
   version: string,
 ): VendorClientFactory {
-  return (credential) => {
-    const { google } =
-      requireOptionalSdk<typeof import("googleapis")>("googleapis");
-    const auth = new google.auth.OAuth2();
-    auth.setCredentials({ access_token: vendorToken(credential) });
-    const factory = google[service] as (options: {
-      version: string;
-      auth: unknown;
-    }) => unknown;
-    return factory({ version, auth }) as SdkMethodTarget;
-  };
+  // Vendor factories are synchronous, so the facade defers the SDK import to
+  // the first call. The literal specifier lets consumer bundlers include it.
+  return (credential) =>
+    lazyAsyncClient(async () => {
+      const { google } = await import("googleapis");
+      const auth = new google.auth.OAuth2();
+      auth.setCredentials({ access_token: vendorToken(credential) });
+      const factory = google[service] as (options: {
+        version: string;
+        auth: unknown;
+      }) => unknown;
+      return factory({ version, auth }) as SdkMethodTarget;
+    });
 }
 
 // ---------------------------------------------------------- Google Translate
@@ -78,18 +80,18 @@ const TRANSLATE_OPERATIONS: Readonly<Record<string, VendorOperation>> = {
  * The Translation API authenticates with an API key rather than a user token,
  * so the key is the credential and there is no per-tenant host.
  */
-const createGoogleTranslateClient: VendorClientFactory = (credential) => {
-  const { google } =
-    requireOptionalSdk<typeof import("googleapis")>("googleapis");
-  const factory = google.translate as (options: {
-    version: string;
-    auth: string;
-  }) => unknown;
-  return factory({
-    version: "v2",
-    auth: vendorToken(credential),
-  }) as SdkMethodTarget;
-};
+const createGoogleTranslateClient: VendorClientFactory = (credential) =>
+  lazyAsyncClient(async () => {
+    const { google } = await import("googleapis");
+    const factory = google.translate as (options: {
+      version: string;
+      auth: string;
+    }) => unknown;
+    return factory({
+      version: "v2",
+      auth: vendorToken(credential),
+    }) as SdkMethodTarget;
+  });
 
 export function createGoogleTranslatePack(
   options: { clientFactory?: VendorClientFactory } = {},

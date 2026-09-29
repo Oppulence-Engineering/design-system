@@ -1,4 +1,3 @@
-import { requireOptionalSdk } from "../shared/optional-sdk";
 import { SIMSTUDIO_BASELINE } from "../../../catalog";
 import type { IntegrationOAuthRuntime } from "../../runtime/oauth";
 import { IntegrationProviderSdkError } from "../../core/provider-sdk";
@@ -23,9 +22,10 @@ export interface GoogleFormsProviderSdkConfig {
   clientFactory?: GoogleFormsClientFactory;
 }
 
-function createGoogleFormsClient(accessToken: string): GoogleFormsSdkClient {
-  const { google } =
-    requireOptionalSdk<typeof import("googleapis")>("googleapis");
+async function createGoogleFormsClient(
+  accessToken: string,
+): Promise<GoogleFormsSdkClient> {
+  const { google } = await import("googleapis");
   const auth = new google.auth.OAuth2();
   auth.setCredentials({ access_token: accessToken });
   return { forms: google.forms({ version: "v1", auth }) };
@@ -246,7 +246,7 @@ export function createGoogleFormsProviderSdk(
           operationId: invocation.operationId,
           output: sdkResponseData(
             await invokeSdkMethod(
-              clientFactory(credential.accessToken),
+              await clientFactory(credential.accessToken),
               requestFactory(invocation.input),
             ),
           ),

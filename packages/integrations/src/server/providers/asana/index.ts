@@ -1,4 +1,3 @@
-import { requireOptionalSdk } from "../shared/optional-sdk";
 import { SIMSTUDIO_BASELINE } from "../../../catalog";
 import type { IntegrationOAuthRuntime } from "../../runtime/oauth";
 import { IntegrationProviderSdkError } from "../../core/provider-sdk";
@@ -43,7 +42,7 @@ export interface AsanaProviderSdkConfig {
   clientFactory?: AsanaClientFactory;
 }
 
-function createAsanaClient(accessToken: string): AsanaSdkClient {
+async function createAsanaClient(accessToken: string): Promise<AsanaSdkClient> {
   const {
     ApiClient: AsanaApiClient,
     ProjectsApi: AsanaProjectsApi,
@@ -51,7 +50,7 @@ function createAsanaClient(accessToken: string): AsanaSdkClient {
     StoriesApi: AsanaStoriesApi,
     TasksApi: AsanaTasksApi,
     WorkspacesApi: AsanaWorkspacesApi,
-  } = requireOptionalSdk<typeof import("asana")>("asana");
+  } = await import("asana");
   const apiClient = new AsanaApiClient();
   apiClient.authentications.token!.accessToken = accessToken;
   return {
@@ -239,7 +238,7 @@ export function createAsanaProviderSdk(
         invocation.reference,
         async (credential) => {
           const input = invocation.input;
-          const client = clientFactory(credential.accessToken);
+          const client = await clientFactory(credential.accessToken);
           let output: unknown;
           switch (invocation.operationId) {
             case "asana:get-task": {

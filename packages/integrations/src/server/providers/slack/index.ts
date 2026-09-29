@@ -1,4 +1,3 @@
-import { requireOptionalSdk } from "../shared/optional-sdk";
 import { SIMSTUDIO_BASELINE } from "../../../catalog";
 import type { IntegrationOAuthRuntime } from "../../runtime/oauth";
 import { IntegrationProviderSdkError } from "../../core/provider-sdk";
@@ -22,12 +21,11 @@ export interface SlackProviderSdkConfig {
   maxDownloadBytes?: number;
 }
 
-function createSlackClient(
+async function createSlackClient(
   accessToken: string,
   configuration: { timeout: number },
-): SlackApiClient {
-  const { WebClient } =
-    requireOptionalSdk<typeof import("@slack/web-api")>("@slack/web-api");
+): Promise<SlackApiClient> {
+  const { WebClient } = await import("@slack/web-api");
   return new WebClient(accessToken, {
     timeout: configuration.timeout,
   });
@@ -281,11 +279,11 @@ export function createSlackProviderSdk(
       return config.oauthRuntime.withCredential(
         invocation.reference,
         async (credential) => {
+          const client = await clientFactory(credential.accessToken, {
+            timeout,
+          });
           const result = asProviderResult(
-            await clientFactory(credential.accessToken, { timeout }).apiCall(
-              method,
-              slackParameters(invocation.input),
-            ),
+            await client.apiCall(method, slackParameters(invocation.input)),
           );
           return {
             operationId: invocation.operationId,

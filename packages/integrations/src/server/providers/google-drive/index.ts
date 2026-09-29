@@ -1,5 +1,4 @@
 import { Buffer } from "node:buffer";
-import { requireOptionalSdk } from "../shared/optional-sdk";
 import { SIMSTUDIO_BASELINE } from "../../../catalog";
 import type { IntegrationOAuthRuntime } from "../../runtime/oauth";
 import { IntegrationProviderSdkError } from "../../core/provider-sdk";
@@ -24,9 +23,10 @@ export interface GoogleDriveProviderSdkConfig {
   clientFactory?: GoogleDriveClientFactory;
 }
 
-function createGoogleDriveClient(accessToken: string): GoogleDriveSdkClient {
-  const { google } =
-    requireOptionalSdk<typeof import("googleapis")>("googleapis");
+async function createGoogleDriveClient(
+  accessToken: string,
+): Promise<GoogleDriveSdkClient> {
+  const { google } = await import("googleapis");
   const auth = new google.auth.OAuth2();
   auth.setCredentials({ access_token: accessToken });
   return google.drive({
@@ -437,7 +437,7 @@ export function createGoogleDriveProviderSdk(
       return config.oauthRuntime.withCredential(
         invocation.reference,
         async (credential) => {
-          const client = clientFactory(credential.accessToken);
+          const client = await clientFactory(credential.accessToken);
           const result =
             invocation.operationId === "google-drive:move-file"
               ? await invokeGoogleDriveMove(client, invocation.input)

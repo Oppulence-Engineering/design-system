@@ -1,4 +1,3 @@
-import { requireOptionalSdk } from "../shared/optional-sdk";
 import { SIMSTUDIO_BASELINE } from "../../../catalog";
 import type { IntegrationOAuthRuntime } from "../../runtime/oauth";
 import { IntegrationProviderSdkError } from "../../core/provider-sdk";
@@ -23,9 +22,10 @@ export interface GoogleTasksProviderSdkConfig {
   clientFactory?: GoogleTasksClientFactory;
 }
 
-function createGoogleTasksClient(accessToken: string): GoogleTasksSdkClient {
-  const { google } =
-    requireOptionalSdk<typeof import("googleapis")>("googleapis");
+async function createGoogleTasksClient(
+  accessToken: string,
+): Promise<GoogleTasksSdkClient> {
+  const { google } = await import("googleapis");
   const auth = new google.auth.OAuth2();
   auth.setCredentials({ access_token: accessToken });
   return { tasks: google.tasks({ version: "v1", auth }) };
@@ -196,7 +196,7 @@ export function createGoogleTasksProviderSdk(
           operationId: invocation.operationId,
           output: sdkResponseData(
             await invokeSdkMethod(
-              clientFactory(credential.accessToken),
+              await clientFactory(credential.accessToken),
               requestFactory(invocation.input),
             ),
           ),
