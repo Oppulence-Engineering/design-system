@@ -327,14 +327,18 @@ export function createIntegrationConnectionLinkRuntime(
         );
       }
       try {
-        const plaid = requireOptionalSdk<typeof import("plaid")>("plaid");
         const response = await (
           plaidConfig.clientFactory ?? (() => createPlaidClient(plaidConfig))
         )().linkTokenCreate({
           client_name: plaidConfig.clientName ?? "Oppulence",
-          country_codes: plaidConfig.countryCodes ?? [plaid.CountryCode.Us],
+          country_codes: plaidConfig.countryCodes ?? [
+            requireOptionalSdk<typeof import("plaid")>("plaid").CountryCode.Us,
+          ],
           language: "en",
-          products: plaidConfig.products ?? [plaid.Products.Transactions],
+          products: plaidConfig.products ?? [
+            requireOptionalSdk<typeof import("plaid")>("plaid").Products
+              .Transactions,
+          ],
           user: { client_user_id: subject.data.subjectId },
           ...(plaidConfig.webhook ? { webhook: plaidConfig.webhook } : {}),
           ...(plaidConfig.redirectUri
