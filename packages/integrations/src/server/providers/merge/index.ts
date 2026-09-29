@@ -1,4 +1,3 @@
-import { requireOptionalSdk } from "../shared/optional-sdk";
 import type { IntegrationConnectionLinkRuntime } from "../../transport/connection-link";
 import { IntegrationProviderSdkError } from "../../core/provider-sdk";
 import type { IntegrationProviderSdk } from "../../core/provider-sdk";
@@ -32,13 +31,11 @@ export interface MergeProviderSdkConfig {
   }) => MergeSdkClient;
 }
 
-function createMergeSdkClient(input: {
+async function createMergeSdkClient(input: {
   apiKey: string;
   accountToken: string;
-}): MergeSdkClient {
-  const Merge = requireOptionalSdk<
-    typeof import("@mergeapi/merge-sdk-typescript")
-  >("@mergeapi/merge-sdk-typescript");
+}): Promise<MergeSdkClient> {
+  const Merge = await import("@mergeapi/merge-sdk-typescript");
   const configuration = new Merge.Configuration({
     apiKey: input.apiKey,
     accessToken: input.accountToken,
@@ -137,7 +134,7 @@ export function createMergeProviderSdk(
         async (credential) => ({
           operationId: invocation.operationId,
           output: await request(
-            clientFactory({
+            await clientFactory({
               apiKey: config.apiKey,
               accountToken: credential.accountToken,
             }),

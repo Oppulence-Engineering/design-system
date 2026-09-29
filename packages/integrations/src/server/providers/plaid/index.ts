@@ -1,4 +1,3 @@
-import { requireOptionalSdk } from "../shared/optional-sdk";
 import type { IntegrationConnectionLinkRuntime } from "../../transport/connection-link";
 import { IntegrationProviderSdkError } from "../../core/provider-sdk";
 import type { IntegrationProviderSdk } from "../../core/provider-sdk";
@@ -35,16 +34,16 @@ export interface PlaidProviderSdkConfig {
   }) => PlaidSdkClient;
 }
 
-function createPlaidSdkClient(input: {
+async function createPlaidSdkClient(input: {
   clientId: string;
   secret: string;
   environment: "sandbox" | "development" | "production";
-}): PlaidSdkClient {
+}): Promise<PlaidSdkClient> {
   const {
     Configuration: PlaidConfiguration,
     PlaidApi,
     PlaidEnvironments,
-  } = requireOptionalSdk<typeof import("plaid")>("plaid");
+  } = await import("plaid");
   return new PlaidApi(
     new PlaidConfiguration({
       basePath: PlaidEnvironments[input.environment],
@@ -120,7 +119,7 @@ export function createPlaidProviderSdk(
         async (credential) => ({
           operationId: invocation.operationId,
           output: await request(
-            clientFactory({
+            await clientFactory({
               clientId: config.clientId,
               secret: config.secret,
               environment: config.environment ?? "production",

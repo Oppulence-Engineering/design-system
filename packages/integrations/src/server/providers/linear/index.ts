@@ -1,4 +1,3 @@
-import { requireOptionalSdk } from "../shared/optional-sdk";
 import { SIMSTUDIO_BASELINE } from "../../../catalog";
 import type { IntegrationOAuthRuntime } from "../../runtime/oauth";
 import { IntegrationProviderSdkError } from "../../core/provider-sdk";
@@ -26,9 +25,10 @@ export interface LinearProviderSdkConfig {
   clientFactory?: LinearClientFactory;
 }
 
-function createLinearClient(accessToken: string): LinearSdkClient {
-  const { LinearClient } =
-    requireOptionalSdk<typeof import("@linear/sdk")>("@linear/sdk");
+async function createLinearClient(
+  accessToken: string,
+): Promise<LinearSdkClient> {
+  const { LinearClient } = await import("@linear/sdk");
   return new LinearClient({ accessToken }) as unknown as LinearSdkClient;
 }
 
@@ -828,7 +828,7 @@ export function createLinearProviderSdk(
         async (credential) => ({
           operationId: invocation.operationId,
           output: await handler(
-            clientFactory(credential.accessToken),
+            await clientFactory(credential.accessToken),
             invocation.input,
           ),
         }),

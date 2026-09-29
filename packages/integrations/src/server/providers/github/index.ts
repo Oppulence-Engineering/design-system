@@ -7,7 +7,7 @@ import {
   optionalStringValue,
   toSnakeCase,
 } from "../shared/sdk";
-import { importOptionalSdk, lazyAsyncClient } from "../shared/optional-sdk";
+import { lazyAsyncClient } from "../shared/optional-sdk";
 
 interface GitHubApiClient {
   request(
@@ -26,8 +26,7 @@ export interface GitHubProviderSdkConfig {
 function createGitHubClient(apiKey: string): GitHubApiClient {
   // `@octokit/rest` is ESM-only, so a CommonJS require cannot load it.
   return lazyAsyncClient(async () => {
-    const { Octokit } =
-      await importOptionalSdk<typeof import("@octokit/rest")>("@octokit/rest");
+    const { Octokit } = await import("@octokit/rest");
     return new Octokit({
       auth: apiKey,
       userAgent: "@oppulence/integrations",

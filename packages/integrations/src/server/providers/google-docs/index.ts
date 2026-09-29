@@ -1,4 +1,3 @@
-import { requireOptionalSdk } from "../shared/optional-sdk";
 import { SIMSTUDIO_BASELINE } from "../../../catalog";
 import type { IntegrationOAuthRuntime } from "../../runtime/oauth";
 import { IntegrationProviderSdkError } from "../../core/provider-sdk";
@@ -24,9 +23,10 @@ export interface GoogleDocsProviderSdkConfig {
   clientFactory?: GoogleDocsClientFactory;
 }
 
-function createGoogleDocsClient(accessToken: string): GoogleDocsSdkClient {
-  const { google } =
-    requireOptionalSdk<typeof import("googleapis")>("googleapis");
+async function createGoogleDocsClient(
+  accessToken: string,
+): Promise<GoogleDocsSdkClient> {
+  const { google } = await import("googleapis");
   const auth = new google.auth.OAuth2();
   auth.setCredentials({ access_token: accessToken });
   return {
@@ -350,7 +350,7 @@ export function createGoogleDocsProviderSdk(
       return config.oauthRuntime.withCredential(
         invocation.reference,
         async (credential) => {
-          const client = clientFactory(credential.accessToken);
+          const client = await clientFactory(credential.accessToken);
           const output =
             invocation.operationId === "google-docs:create-document"
               ? await invokeGoogleDocsCreate(client, invocation.input)

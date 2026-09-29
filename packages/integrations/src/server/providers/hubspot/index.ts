@@ -1,4 +1,3 @@
-import { requireOptionalSdk } from "../shared/optional-sdk";
 import { SIMSTUDIO_BASELINE } from "../../../catalog";
 import type { IntegrationOAuthRuntime } from "../../runtime/oauth";
 import { IntegrationProviderSdkError } from "../../core/provider-sdk";
@@ -33,10 +32,8 @@ export interface HubSpotProviderSdkConfig {
   clientFactory?: HubSpotClientFactory;
 }
 
-function createHubSpotClient(): HubSpotApiClient {
-  const { Client: HubSpotClient } = requireOptionalSdk<
-    typeof import("@hubspot/api-client")
-  >("@hubspot/api-client");
+async function createHubSpotClient(): Promise<HubSpotApiClient> {
+  const { Client: HubSpotClient } = await import("@hubspot/api-client");
   return new HubSpotClient() as unknown as HubSpotApiClient;
 }
 
@@ -502,7 +499,7 @@ export function createHubSpotProviderSdk(
       return config.oauthRuntime.withCredential(
         invocation.reference,
         async (credential) => {
-          const client = clientFactory();
+          const client = await clientFactory();
           client.setAccessToken(credential.accessToken);
           return {
             operationId: invocation.operationId,

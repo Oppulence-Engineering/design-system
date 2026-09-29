@@ -1,4 +1,3 @@
-import { requireOptionalSdk } from "../shared/optional-sdk";
 import { SIMSTUDIO_BASELINE } from "../../../catalog";
 import type { IntegrationOAuthRuntime } from "../../runtime/oauth";
 import { IntegrationProviderSdkError } from "../../core/provider-sdk";
@@ -22,9 +21,10 @@ export interface GoogleMeetProviderSdkConfig {
   clientFactory?: GoogleMeetClientFactory;
 }
 
-function createGoogleMeetClient(accessToken: string): GoogleMeetSdkClient {
-  const { google } =
-    requireOptionalSdk<typeof import("googleapis")>("googleapis");
+async function createGoogleMeetClient(
+  accessToken: string,
+): Promise<GoogleMeetSdkClient> {
+  const { google } = await import("googleapis");
   const auth = new google.auth.OAuth2();
   auth.setCredentials({ access_token: accessToken });
   return { meet: google.meet({ version: "v2", auth }) };
@@ -165,7 +165,7 @@ export function createGoogleMeetProviderSdk(
           operationId: invocation.operationId,
           output: sdkResponseData(
             await invokeSdkMethod(
-              clientFactory(credential.accessToken),
+              await clientFactory(credential.accessToken),
               requestFactory(invocation.input),
             ),
           ),

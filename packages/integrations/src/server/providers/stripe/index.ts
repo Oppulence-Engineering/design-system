@@ -1,4 +1,3 @@
-import { requireOptionalSdk } from "../shared/optional-sdk";
 import { SIMSTUDIO_BASELINE } from "../../../catalog";
 import type { IntegrationApiKeyRuntime } from "../../runtime/api-key";
 import { IntegrationProviderSdkError } from "../../core/provider-sdk";
@@ -109,12 +108,12 @@ export interface StripeProviderSdkConfig {
   maxNetworkRetries?: number;
 }
 
-function createStripeClient(
+async function createStripeClient(
   apiKey: string,
   configuration: { timeout: number; maxNetworkRetries: number },
-): StripeSdkClient {
+): Promise<StripeSdkClient> {
   // The CommonJS export is the Stripe class itself; it has no `default` key.
-  const Stripe = requireOptionalSdk<typeof import("stripe").default>("stripe");
+  const Stripe = (await import("stripe")).default;
   return new Stripe(apiKey, {
     timeout: configuration.timeout,
     maxNetworkRetries: configuration.maxNetworkRetries,
@@ -395,7 +394,10 @@ export function createStripeProviderSdk(
         async (credential) => ({
           operationId: invocation.operationId,
           output: await executeStripeOperation(
-            clientFactory(credential.apiKey, { timeout, maxNetworkRetries }),
+            await clientFactory(credential.apiKey, {
+              timeout,
+              maxNetworkRetries,
+            }),
             invocation,
           ),
         }),

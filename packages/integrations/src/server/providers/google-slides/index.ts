@@ -1,5 +1,4 @@
 import { Buffer } from "node:buffer";
-import { requireOptionalSdk } from "../shared/optional-sdk";
 import { z } from "zod";
 import { SIMSTUDIO_BASELINE } from "../../../catalog";
 import type { IntegrationOAuthRuntime } from "../../runtime/oauth";
@@ -36,9 +35,10 @@ export interface GoogleSlidesProviderSdkConfig {
   maxExportBytes?: number;
 }
 
-function createGoogleSlidesClient(accessToken: string): GoogleSlidesSdkClient {
-  const { google } =
-    requireOptionalSdk<typeof import("googleapis")>("googleapis");
+async function createGoogleSlidesClient(
+  accessToken: string,
+): Promise<GoogleSlidesSdkClient> {
+  const { google } = await import("googleapis");
   const auth = new google.auth.OAuth2();
   auth.setCredentials({ access_token: accessToken });
   return {
@@ -303,7 +303,7 @@ export function createGoogleSlidesProviderSdk(
         invocation.reference,
         async (credential) => {
           const result = await invokeSdkMethod(
-            clientFactory(credential.accessToken),
+            await clientFactory(credential.accessToken),
             requestFactory(invocation.input),
           );
           if (invocation.operationId === "google-slides:export-presentation") {

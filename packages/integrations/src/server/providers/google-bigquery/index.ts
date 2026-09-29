@@ -1,4 +1,4 @@
-import { requireOptionalSdk } from "../shared/optional-sdk";
+import { lazyAsyncClient } from "../shared/optional-sdk";
 
 import { IntegrationProviderSdkError } from "../../core/provider-sdk";
 import type { IntegrationProviderPack } from "../../core/provider-pack";
@@ -35,17 +35,19 @@ function googleClient(
   service: "vault" | "bigquery" | "translate",
   version: string,
 ): VendorClientFactory {
-  return (credential) => {
-    const { google } =
-      requireOptionalSdk<typeof import("googleapis")>("googleapis");
-    const auth = new google.auth.OAuth2();
-    auth.setCredentials({ access_token: vendorToken(credential) });
-    const factory = google[service] as (options: {
-      version: string;
-      auth: unknown;
-    }) => unknown;
-    return factory({ version, auth }) as SdkMethodTarget;
-  };
+  // Vendor factories are synchronous, so the facade defers the SDK import to
+  // the first call. The literal specifier lets consumer bundlers include it.
+  return (credential) =>
+    lazyAsyncClient(async () => {
+      const { google } = await import("googleapis");
+      const auth = new google.auth.OAuth2();
+      auth.setCredentials({ access_token: vendorToken(credential) });
+      const factory = google[service] as (options: {
+        version: string;
+        auth: unknown;
+      }) => unknown;
+      return factory({ version, auth }) as SdkMethodTarget;
+    });
 }
 
 // ----------------------------------------------------------- Google BigQuery

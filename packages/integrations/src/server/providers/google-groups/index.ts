@@ -1,4 +1,3 @@
-import { requireOptionalSdk } from "../shared/optional-sdk";
 import { SIMSTUDIO_BASELINE } from "../../../catalog";
 import type { IntegrationOAuthRuntime } from "../../runtime/oauth";
 import { IntegrationProviderSdkError } from "../../core/provider-sdk";
@@ -22,9 +21,10 @@ export interface GoogleGroupsProviderSdkConfig {
   clientFactory?: GoogleGroupsClientFactory;
 }
 
-function createGoogleGroupsClient(accessToken: string): GoogleGroupsSdkClient {
-  const { google } =
-    requireOptionalSdk<typeof import("googleapis")>("googleapis");
+async function createGoogleGroupsClient(
+  accessToken: string,
+): Promise<GoogleGroupsSdkClient> {
+  const { google } = await import("googleapis");
   const auth = new google.auth.OAuth2();
   auth.setCredentials({ access_token: accessToken });
   return {
@@ -285,7 +285,7 @@ export function createGoogleGroupsProviderSdk(
           operationId: invocation.operationId,
           output: sdkResponseData(
             await invokeSdkMethod(
-              clientFactory(credential.accessToken),
+              await clientFactory(credential.accessToken),
               requestFactory(invocation.input),
             ),
           ),

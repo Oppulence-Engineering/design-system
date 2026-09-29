@@ -1,5 +1,4 @@
 import { Buffer } from "node:buffer";
-import { requireOptionalSdk } from "../shared/optional-sdk";
 import { SIMSTUDIO_BASELINE } from "../../../catalog";
 import type { IntegrationOAuthRuntime } from "../../runtime/oauth";
 import { IntegrationProviderSdkError } from "../../core/provider-sdk";
@@ -25,8 +24,10 @@ export interface DropboxProviderSdkConfig {
   clientFactory?: DropboxClientFactory;
 }
 
-function createDropboxClient(accessToken: string): DropboxSdkClient {
-  const { Dropbox } = requireOptionalSdk<typeof import("dropbox")>("dropbox");
+async function createDropboxClient(
+  accessToken: string,
+): Promise<DropboxSdkClient> {
+  const { Dropbox } = await import("dropbox");
   return new Dropbox({ accessToken }) as unknown as DropboxSdkClient;
 }
 
@@ -202,7 +203,7 @@ export function createDropboxProviderSdk(
         invocation.reference,
         async (credential) => {
           const input = invocation.input;
-          const client = clientFactory(credential.accessToken);
+          const client = await clientFactory(credential.accessToken);
           let output: unknown;
           switch (invocation.operationId) {
             case "dropbox:upload-file":

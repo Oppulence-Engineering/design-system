@@ -1,4 +1,3 @@
-import { requireOptionalSdk } from "../shared/optional-sdk";
 import { SIMSTUDIO_BASELINE } from "../../../catalog";
 import type { IntegrationApiKeyRuntime } from "../../runtime/api-key";
 import { IntegrationProviderSdkError } from "../../core/provider-sdk";
@@ -22,8 +21,8 @@ export interface ResendProviderSdkConfig {
   clientFactory?: ResendClientFactory;
 }
 
-function createResendClient(apiKey: string): ResendSdkClient {
-  const { Resend } = requireOptionalSdk<typeof import("resend")>("resend");
+async function createResendClient(apiKey: string): Promise<ResendSdkClient> {
+  const { Resend } = await import("resend");
   return { resend: new Resend(apiKey) };
 }
 
@@ -294,7 +293,7 @@ export function createResendProviderSdk(
           operationId: invocation.operationId,
           output: resendResponseData(
             await invokeSdkMethod(
-              clientFactory(credential.apiKey),
+              await clientFactory(credential.apiKey),
               requestFactory(invocation.input),
             ),
           ),

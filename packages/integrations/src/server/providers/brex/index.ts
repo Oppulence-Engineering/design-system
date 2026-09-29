@@ -1,4 +1,3 @@
-import { requireOptionalSdk } from "../shared/optional-sdk";
 import { SIMSTUDIO_BASELINE } from "../../../catalog";
 import type { IntegrationApiKeyRuntime } from "../../runtime/api-key";
 import { IntegrationProviderSdkError } from "../../core/provider-sdk";
@@ -26,8 +25,8 @@ export interface BrexProviderSdkConfig {
   clientFactory?: BrexClientFactory;
 }
 
-function createBrexClient(apiKey: string): BrexSdkClient {
-  const { Brex } = requireOptionalSdk<typeof import("brex")>("brex");
+async function createBrexClient(apiKey: string): Promise<BrexSdkClient> {
+  const { Brex } = await import("brex");
   return new Brex({ token: apiKey }) as unknown as BrexSdkClient;
 }
 
@@ -216,7 +215,7 @@ export function createBrexProviderSdk(
           operationId: invocation.operationId,
           output: normalizeSdkOutput(
             await invokeSdkMethod(
-              clientFactory(credential.apiKey),
+              await clientFactory(credential.apiKey),
               requestFactory(invocation.input, invocation),
             ),
           ),

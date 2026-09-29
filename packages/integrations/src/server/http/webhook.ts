@@ -14,7 +14,7 @@ import {
   reportIntegrationFailure,
   type IntegrationFailureObserver,
 } from "../../reliability";
-import { requireOptionalSdk } from "../providers/shared/optional-sdk";
+import { lazyAsyncClient } from "../providers/shared/optional-sdk";
 
 export type IntegrationWebhookProvider = "plaid" | "merge";
 
@@ -168,23 +168,26 @@ function eventName(parts: readonly (string | undefined)[]): string {
 function createPlaidClient(
   config: PlaidIntegrationWebhookConfig,
 ): PlaidWebhookSdk {
-  const {
-    Configuration: PlaidConfiguration,
-    PlaidApi,
-    PlaidEnvironments,
-  } = requireOptionalSdk<typeof import("plaid")>("plaid");
-  const environment = config.environment ?? "production";
-  return new PlaidApi(
-    new PlaidConfiguration({
-      basePath: PlaidEnvironments[environment],
-      baseOptions: {
-        headers: {
-          "PLAID-CLIENT-ID": config.clientId,
-          "PLAID-SECRET": config.secret,
+  // Callers use one method per client, so the facade can defer the import.
+  return lazyAsyncClient(async () => {
+    const {
+      Configuration: PlaidConfiguration,
+      PlaidApi,
+      PlaidEnvironments,
+    } = await import("plaid");
+    const environment = config.environment ?? "production";
+    return new PlaidApi(
+      new PlaidConfiguration({
+        basePath: PlaidEnvironments[environment],
+        baseOptions: {
+          headers: {
+            "PLAID-CLIENT-ID": config.clientId,
+            "PLAID-SECRET": config.secret,
+          },
         },
-      },
-    }),
-  ) as unknown as PlaidWebhookSdk;
+      }),
+    ) as unknown as PlaidWebhookSdk;
+  });
 }
 
 function keyCacheTtl(config: PlaidIntegrationWebhookConfig): number {

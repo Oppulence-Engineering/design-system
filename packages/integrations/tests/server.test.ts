@@ -1910,6 +1910,10 @@ describe("server vendor SDK adapters", () => {
           {},
           {
             get(_target, property) {
+              // A real SDK client is not thenable, and the adapter awaits it.
+              if (property === "then") {
+                return undefined;
+              }
               return async (args: unknown) => {
                 const method = String(property);
                 calls.push({ method, args: [args] });
@@ -2258,6 +2262,10 @@ describe("server vendor SDK adapters", () => {
             get(target, property, receiver) {
               if (Reflect.has(target, property)) {
                 return Reflect.get(target, property, receiver);
+              }
+              // A real SDK client is not thenable, and the adapter awaits it.
+              if (property === "then") {
+                return undefined;
               }
               return (...args: unknown[]) => {
                 calls.push({ method: String(property), args });

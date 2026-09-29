@@ -1,4 +1,3 @@
-import { requireOptionalSdk } from "../shared/optional-sdk";
 import { SIMSTUDIO_BASELINE } from "../../../catalog";
 import type { IntegrationApiKeyRuntime } from "../../runtime/api-key";
 import { IntegrationProviderSdkError } from "../../core/provider-sdk";
@@ -29,9 +28,8 @@ export interface SquareProviderSdkConfig {
   clientFactory?: SquareClientFactory;
 }
 
-function createSquareClient(apiKey: string): SquareSdkClient {
-  const { SquareClient } =
-    requireOptionalSdk<typeof import("square")>("square");
+async function createSquareClient(apiKey: string): Promise<SquareSdkClient> {
+  const { SquareClient } = await import("square");
   return new SquareClient({ token: apiKey }) as unknown as SquareSdkClient;
 }
 
@@ -405,7 +403,10 @@ export function createSquareProviderSdk(
         async (credential) => ({
           operationId: invocation.operationId,
           output: normalizeSdkOutput(
-            await invokeSdkMethod(clientFactory(credential.apiKey), request),
+            await invokeSdkMethod(
+              await clientFactory(credential.apiKey),
+              request,
+            ),
           ),
         }),
       );

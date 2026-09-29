@@ -1,4 +1,3 @@
-import { requireOptionalSdk } from "../shared/optional-sdk";
 import { SIMSTUDIO_BASELINE } from "../../../catalog";
 import type { IntegrationOAuthRuntime } from "../../runtime/oauth";
 import { IntegrationProviderSdkError } from "../../core/provider-sdk";
@@ -27,11 +26,10 @@ export interface GoogleCalendarProviderSdkConfig {
   clientFactory?: GoogleCalendarClientFactory;
 }
 
-function createGoogleCalendarClient(
+async function createGoogleCalendarClient(
   accessToken: string,
-): GoogleCalendarSdkClient {
-  const { google } =
-    requireOptionalSdk<typeof import("googleapis")>("googleapis");
+): Promise<GoogleCalendarSdkClient> {
+  const { google } = await import("googleapis");
   const auth = new google.auth.OAuth2();
   auth.setCredentials({ access_token: accessToken });
   return google.calendar({
@@ -448,7 +446,7 @@ export function createGoogleCalendarProviderSdk(
       return config.oauthRuntime.withCredential(
         invocation.reference,
         async (credential) => {
-          const client = clientFactory(credential.accessToken);
+          const client = await clientFactory(credential.accessToken);
           const result =
             invocation.operationId === "google-calendar:invite-attendees"
               ? await invokeGoogleCalendarInvite(client, invocation.input)

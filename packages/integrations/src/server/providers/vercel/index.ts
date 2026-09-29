@@ -1,4 +1,3 @@
-import { requireOptionalSdk } from "../shared/optional-sdk";
 import { z } from "zod";
 import { SIMSTUDIO_BASELINE } from "../../../catalog";
 import type { IntegrationApiKeyRuntime } from "../../runtime/api-key";
@@ -32,9 +31,8 @@ export interface VercelProviderSdkConfig {
   clientFactory?: VercelClientFactory;
 }
 
-function createVercelClient(apiKey: string): VercelSdkClient {
-  const { Vercel } =
-    requireOptionalSdk<typeof import("@vercel/sdk")>("@vercel/sdk");
+async function createVercelClient(apiKey: string): Promise<VercelSdkClient> {
+  const { Vercel } = await import("@vercel/sdk");
   return new Vercel({ bearerToken: apiKey }) as unknown as VercelSdkClient;
 }
 
@@ -880,7 +878,7 @@ export function createVercelProviderSdk(
         async (credential) => ({
           operationId: invocation.operationId,
           output: (await invokeVercelMethod(
-            clientFactory(credential.apiKey),
+            await clientFactory(credential.apiKey),
             request,
           )) ?? { success: true },
         }),

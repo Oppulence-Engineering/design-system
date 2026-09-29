@@ -1,4 +1,3 @@
-import { requireOptionalSdk } from "../shared/optional-sdk";
 import { SIMSTUDIO_BASELINE } from "../../../catalog";
 import type { IntegrationApiKeyRuntime } from "../../runtime/api-key";
 import { IntegrationProviderSdkError } from "../../core/provider-sdk";
@@ -22,9 +21,10 @@ export interface GoogleBooksProviderSdkConfig {
   clientFactory?: GoogleBooksClientFactory;
 }
 
-function createGoogleBooksClient(apiKey: string): GoogleBooksSdkClient {
-  const { google } =
-    requireOptionalSdk<typeof import("googleapis")>("googleapis");
+async function createGoogleBooksClient(
+  apiKey: string,
+): Promise<GoogleBooksSdkClient> {
+  const { google } = await import("googleapis");
   return { books: google.books({ version: "v1", auth: apiKey }) };
 }
 
@@ -122,7 +122,7 @@ export function createGoogleBooksProviderSdk(
           operationId: invocation.operationId,
           output: sdkResponseData(
             await invokeSdkMethod(
-              clientFactory(credential.apiKey),
+              await clientFactory(credential.apiKey),
               requestFactory(invocation.input),
             ),
           ),

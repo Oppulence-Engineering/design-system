@@ -1,5 +1,4 @@
 import { Buffer } from "node:buffer";
-import { requireOptionalSdk } from "../shared/optional-sdk";
 import { SIMSTUDIO_BASELINE } from "../../../catalog";
 import type { IntegrationOAuthRuntime } from "../../runtime/oauth";
 import { IntegrationProviderSdkError } from "../../core/provider-sdk";
@@ -26,9 +25,8 @@ export interface GmailProviderSdkConfig {
   maxAttachmentBytes?: number;
 }
 
-function createGmailClient(accessToken: string): GmailSdkClient {
-  const { google } =
-    requireOptionalSdk<typeof import("googleapis")>("googleapis");
+async function createGmailClient(accessToken: string): Promise<GmailSdkClient> {
+  const { google } = await import("googleapis");
   const auth = new google.auth.OAuth2();
   auth.setCredentials({ access_token: accessToken });
   return { gmail: google.gmail({ version: "v1", auth }) };
@@ -758,7 +756,7 @@ export function createGmailProviderSdk(
       return config.oauthRuntime.withCredential(
         invocation.reference,
         async (credential) => {
-          const client = clientFactory(credential.accessToken);
+          const client = await clientFactory(credential.accessToken);
           const result = requestFactory
             ? await invokeSdkMethod(client, requestFactory(invocation.input))
             : await executeGmailSpecialOperation(
