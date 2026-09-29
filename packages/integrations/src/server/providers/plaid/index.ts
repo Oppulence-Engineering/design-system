@@ -1,8 +1,4 @@
-import {
-  Configuration as PlaidConfiguration,
-  PlaidApi,
-  PlaidEnvironments,
-} from "plaid";
+import { requireOptionalSdk } from "../shared/optional-sdk";
 import type { IntegrationConnectionLinkRuntime } from "../../transport/connection-link";
 import { IntegrationProviderSdkError } from "../../core/provider-sdk";
 import type { IntegrationProviderSdk } from "../../core/provider-sdk";
@@ -44,6 +40,11 @@ function createPlaidSdkClient(input: {
   secret: string;
   environment: "sandbox" | "development" | "production";
 }): PlaidSdkClient {
+  const {
+    Configuration: PlaidConfiguration,
+    PlaidApi,
+    PlaidEnvironments,
+  } = requireOptionalSdk<typeof import("plaid")>("plaid");
   return new PlaidApi(
     new PlaidConfiguration({
       basePath: PlaidEnvironments[input.environment],

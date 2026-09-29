@@ -1,14 +1,8 @@
-import * as Merge from "@mergeapi/merge-sdk-typescript";
-import {
-  Configuration as PlaidConfiguration,
-  CountryCode,
-  PlaidApi,
-  PlaidEnvironments,
-  Products,
-} from "plaid";
+import type { CountryCode, Products } from "plaid";
 import { z } from "zod";
 
 import { ProductSchema, type Product } from "../../contracts";
+import { requireOptionalSdk } from "../providers/shared/optional-sdk";
 import {
   createIntegrationCredentialReference,
   decryptIntegrationConnectionLinkCredential,
@@ -200,6 +194,11 @@ function optionalMetadata(
 }
 
 function createPlaidClient(config: PlaidConnectionLinkConfig): PlaidLinkSdk {
+  const {
+    Configuration: PlaidConfiguration,
+    PlaidApi,
+    PlaidEnvironments,
+  } = requireOptionalSdk<typeof import("plaid")>("plaid");
   const environment = config.environment ?? "production";
   return new PlaidApi(
     new PlaidConfiguration({
@@ -215,6 +214,9 @@ function createPlaidClient(config: PlaidConnectionLinkConfig): PlaidLinkSdk {
 }
 
 function createMergeClient(apiKey: string): MergeLinkSdk {
+  const Merge = requireOptionalSdk<
+    typeof import("@mergeapi/merge-sdk-typescript")
+  >("@mergeapi/merge-sdk-typescript");
   const configuration = new Merge.Configuration({ apiKey });
   return {
     linkTokenCreate(input) {
@@ -325,13 +327,14 @@ export function createIntegrationConnectionLinkRuntime(
         );
       }
       try {
+        const plaid = requireOptionalSdk<typeof import("plaid")>("plaid");
         const response = await (
           plaidConfig.clientFactory ?? (() => createPlaidClient(plaidConfig))
         )().linkTokenCreate({
           client_name: plaidConfig.clientName ?? "Oppulence",
-          country_codes: plaidConfig.countryCodes ?? [CountryCode.Us],
+          country_codes: plaidConfig.countryCodes ?? [plaid.CountryCode.Us],
           language: "en",
-          products: plaidConfig.products ?? [Products.Transactions],
+          products: plaidConfig.products ?? [plaid.Products.Transactions],
           user: { client_user_id: subject.data.subjectId },
           ...(plaidConfig.webhook ? { webhook: plaidConfig.webhook } : {}),
           ...(plaidConfig.redirectUri

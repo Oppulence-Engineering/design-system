@@ -1,4 +1,4 @@
-import { google } from "googleapis";
+import { requireOptionalSdk } from "../shared/optional-sdk";
 import { SIMSTUDIO_BASELINE } from "../../../catalog";
 import type { IntegrationApiKeyRuntime } from "../../runtime/api-key";
 import { IntegrationProviderSdkError } from "../../core/provider-sdk";
@@ -23,6 +23,8 @@ export interface YouTubeProviderSdkConfig {
 }
 
 function createYouTubeClient(apiKey: string): YouTubeSdkClient {
+  const { google } =
+    requireOptionalSdk<typeof import("googleapis")>("googleapis");
   return { youtube: google.youtube({ version: "v3", auth: apiKey }) };
 }
 

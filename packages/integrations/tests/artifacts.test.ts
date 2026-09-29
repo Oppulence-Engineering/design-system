@@ -297,3 +297,60 @@ test("the browser server stub prevents accidental provider-runtime imports", asy
     import(`${resolve(distDirectory, "server/browser.js")}?artifact-test`),
   ).rejects.toThrow("server-only");
 });
+
+// Vendor SDKs must load on first use, never at import time: one static import
+// of `@vercel/sdk` alone costs every consumer ~590 MB of heap.
+const SERVER_STATIC_IMPORT_ALLOW_LIST = new Set(["zod", "jose"]);
+const SERVER_IMPORT_HEAP_BUDGET_MB = 150;
+
+test("the server bundle statically imports no vendor SDK", () => {
+  const bundle = readFileSync(
+    resolve(distDirectory, "server/index.js"),
+    "utf8",
+  );
+  const specifiers = [
+    ...bundle.matchAll(/^(?:import|export)\s[^;]*?from\s*"([^"]+)"/gmu),
+    ...bundle.matchAll(/^import\s*"([^"]+)"/gmu),
+  ].map((match) => match[1] ?? "");
+  const vendorSpecifiers = [...new Set(specifiers)].filter(
+    (specifier) =>
+      !specifier.startsWith("node:") &&
+      !SERVER_STATIC_IMPORT_ALLOW_LIST.has(specifier),
+  );
+
+  expect(
+    vendorSpecifiers,
+    "load these SDKs with requireOptionalSdk or importOptionalSdk",
+  ).toEqual([]);
+});
+
+test(
+  "importing the server bundle stays within the heap budget",
+  () => {
+    const probe = `
+      import { heapStats } from "bun:jsc";
+      const sample = () => {
+        Bun.gc(true);
+        return { heap: heapStats().heapSize, rss: process.memoryUsage().rss };
+      };
+      const before = sample();
+      await import(${JSON.stringify(resolve(distDirectory, "server/index.js"))});
+      const after = sample();
+      const mb = (bytes) => Math.round(bytes / 2 ** 20);
+      console.log(JSON.stringify({
+        heapMb: mb(after.heap - before.heap),
+        rssMb: mb(after.rss - before.rss),
+      }));
+    `;
+    const result = Bun.spawnSync([process.execPath, "-e", probe]);
+    expect(result.exitCode, result.stderr.toString()).toBe(0);
+    const growth = JSON.parse(result.stdout.toString()) as {
+      heapMb: number;
+      rssMb: number;
+    };
+    console.log(`server import growth: ${JSON.stringify(growth)}`);
+
+    expect(growth.heapMb).toBeLessThan(SERVER_IMPORT_HEAP_BUDGET_MB);
+  },
+  ARTIFACT_IMPORT_TIMEOUT_MS,
+);

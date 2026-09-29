@@ -1,5 +1,5 @@
 import { Buffer } from "node:buffer";
-import Firecrawl from "@mendable/firecrawl-js";
+import { requireOptionalSdk } from "../shared/optional-sdk";
 import { SIMSTUDIO_BASELINE } from "../../../catalog";
 import type { IntegrationApiKeyRuntime } from "../../runtime/api-key";
 import { IntegrationProviderSdkError } from "../../core/provider-sdk";
@@ -27,6 +27,9 @@ export interface FirecrawlProviderSdkConfig {
 }
 
 function createFirecrawlClient(apiKey: string): FirecrawlSdkClient {
+  const { default: Firecrawl } = requireOptionalSdk<
+    typeof import("@mendable/firecrawl-js")
+  >("@mendable/firecrawl-js");
   return new Firecrawl({ apiKey }) as unknown as FirecrawlSdkClient;
 }
 

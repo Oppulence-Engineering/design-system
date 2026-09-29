@@ -1,4 +1,4 @@
-import { LinearClient } from "@linear/sdk";
+import { requireOptionalSdk } from "../shared/optional-sdk";
 import { SIMSTUDIO_BASELINE } from "../../../catalog";
 import type { IntegrationOAuthRuntime } from "../../runtime/oauth";
 import { IntegrationProviderSdkError } from "../../core/provider-sdk";
@@ -27,6 +27,8 @@ export interface LinearProviderSdkConfig {
 }
 
 function createLinearClient(accessToken: string): LinearSdkClient {
+  const { LinearClient } =
+    requireOptionalSdk<typeof import("@linear/sdk")>("@linear/sdk");
   return new LinearClient({ accessToken }) as unknown as LinearSdkClient;
 }
 

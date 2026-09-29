@@ -1,4 +1,4 @@
-import * as Merge from "@mergeapi/merge-sdk-typescript";
+import { requireOptionalSdk } from "../shared/optional-sdk";
 import type { IntegrationConnectionLinkRuntime } from "../../transport/connection-link";
 import { IntegrationProviderSdkError } from "../../core/provider-sdk";
 import type { IntegrationProviderSdk } from "../../core/provider-sdk";
@@ -36,6 +36,9 @@ function createMergeSdkClient(input: {
   apiKey: string;
   accountToken: string;
 }): MergeSdkClient {
+  const Merge = requireOptionalSdk<
+    typeof import("@mergeapi/merge-sdk-typescript")
+  >("@mergeapi/merge-sdk-typescript");
   const configuration = new Merge.Configuration({
     apiKey: input.apiKey,
     accessToken: input.accountToken,

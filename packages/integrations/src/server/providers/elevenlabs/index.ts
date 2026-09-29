@@ -1,5 +1,5 @@
 import { Buffer } from "node:buffer";
-import { ElevenLabsClient } from "@elevenlabs/elevenlabs-js";
+import { requireOptionalSdk } from "../shared/optional-sdk";
 import { SIMSTUDIO_BASELINE } from "../../../catalog";
 import type { IntegrationApiKeyRuntime } from "../../runtime/api-key";
 import { IntegrationProviderSdkError } from "../../core/provider-sdk";
@@ -26,6 +26,9 @@ export interface ElevenLabsProviderSdkConfig {
 }
 
 function createElevenLabsClient(apiKey: string): ElevenLabsSdkClient {
+  const { ElevenLabsClient } = requireOptionalSdk<
+    typeof import("@elevenlabs/elevenlabs-js")
+  >("@elevenlabs/elevenlabs-js");
   return new ElevenLabsClient({ apiKey }) as unknown as ElevenLabsSdkClient;
 }
 
