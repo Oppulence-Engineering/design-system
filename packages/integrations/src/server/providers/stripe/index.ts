@@ -1,4 +1,4 @@
-import Stripe from "stripe";
+import { requireOptionalSdk } from "../shared/optional-sdk";
 import { SIMSTUDIO_BASELINE } from "../../../catalog";
 import type { IntegrationApiKeyRuntime } from "../../runtime/api-key";
 import { IntegrationProviderSdkError } from "../../core/provider-sdk";
@@ -113,6 +113,8 @@ function createStripeClient(
   apiKey: string,
   configuration: { timeout: number; maxNetworkRetries: number },
 ): StripeSdkClient {
+  // The CommonJS export is the Stripe class itself; it has no `default` key.
+  const Stripe = requireOptionalSdk<typeof import("stripe").default>("stripe");
   return new Stripe(apiKey, {
     timeout: configuration.timeout,
     maxNetworkRetries: configuration.maxNetworkRetries,

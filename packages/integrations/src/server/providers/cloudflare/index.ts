@@ -1,4 +1,4 @@
-import Cloudflare from "cloudflare";
+import { requireOptionalSdk } from "../shared/optional-sdk";
 import { z } from "zod";
 import { SIMSTUDIO_BASELINE } from "../../../catalog";
 import type { IntegrationApiKeyRuntime } from "../../runtime/api-key";
@@ -27,6 +27,8 @@ export interface CloudflareProviderSdkConfig {
 }
 
 function createCloudflareClient(apiKey: string): CloudflareSdkClient {
+  const { default: Cloudflare } =
+    requireOptionalSdk<typeof import("cloudflare")>("cloudflare");
   return new Cloudflare({ apiToken: apiKey }) as unknown as CloudflareSdkClient;
 }
 

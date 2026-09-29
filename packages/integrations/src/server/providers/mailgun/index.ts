@@ -1,4 +1,4 @@
-import Mailgun from "mailgun.js";
+import { requireOptionalSdk } from "../shared/optional-sdk";
 import { SIMSTUDIO_BASELINE } from "../../../catalog";
 import type { IntegrationApiKeyRuntime } from "../../runtime/api-key";
 import { IntegrationProviderSdkError } from "../../core/provider-sdk";
@@ -29,6 +29,8 @@ export interface MailgunProviderSdkConfig {
 }
 
 function createMailgunClient(apiKey: string, apiUrl: string): MailgunSdkClient {
+  const { default: Mailgun } =
+    requireOptionalSdk<typeof import("mailgun.js")>("mailgun.js");
   return new Mailgun(FormData).client({
     username: "api",
     key: apiKey,

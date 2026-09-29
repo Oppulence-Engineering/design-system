@@ -1,4 +1,4 @@
-import { Vercel } from "@vercel/sdk";
+import { requireOptionalSdk } from "../shared/optional-sdk";
 import { z } from "zod";
 import { SIMSTUDIO_BASELINE } from "../../../catalog";
 import type { IntegrationApiKeyRuntime } from "../../runtime/api-key";
@@ -33,6 +33,8 @@ export interface VercelProviderSdkConfig {
 }
 
 function createVercelClient(apiKey: string): VercelSdkClient {
+  const { Vercel } =
+    requireOptionalSdk<typeof import("@vercel/sdk")>("@vercel/sdk");
   return new Vercel({ bearerToken: apiKey }) as unknown as VercelSdkClient;
 }
 

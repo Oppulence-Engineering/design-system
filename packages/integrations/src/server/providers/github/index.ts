@@ -1,4 +1,3 @@
-import { Octokit } from "@octokit/rest";
 import { SIMSTUDIO_BASELINE } from "../../../catalog";
 import type { IntegrationApiKeyRuntime } from "../../runtime/api-key";
 import { IntegrationProviderSdkError } from "../../core/provider-sdk";
@@ -8,6 +7,7 @@ import {
   optionalStringValue,
   toSnakeCase,
 } from "../shared/sdk";
+import { importOptionalSdk, lazyAsyncClient } from "../shared/optional-sdk";
 
 interface GitHubApiClient {
   request(
@@ -24,10 +24,15 @@ export interface GitHubProviderSdkConfig {
 }
 
 function createGitHubClient(apiKey: string): GitHubApiClient {
-  return new Octokit({
-    auth: apiKey,
-    userAgent: "@oppulence/integrations",
-  }) as unknown as GitHubApiClient;
+  // `@octokit/rest` is ESM-only, so a CommonJS require cannot load it.
+  return lazyAsyncClient(async () => {
+    const { Octokit } =
+      await importOptionalSdk<typeof import("@octokit/rest")>("@octokit/rest");
+    return new Octokit({
+      auth: apiKey,
+      userAgent: "@oppulence/integrations",
+    }) as unknown as GitHubApiClient;
+  });
 }
 
 const GITHUB_OPERATION_IDS = Object.freeze(

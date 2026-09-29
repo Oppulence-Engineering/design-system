@@ -1,11 +1,4 @@
-import {
-  ApiClient as AsanaApiClient,
-  ProjectsApi as AsanaProjectsApi,
-  SectionsApi as AsanaSectionsApi,
-  StoriesApi as AsanaStoriesApi,
-  TasksApi as AsanaTasksApi,
-  WorkspacesApi as AsanaWorkspacesApi,
-} from "asana";
+import { requireOptionalSdk } from "../shared/optional-sdk";
 import { SIMSTUDIO_BASELINE } from "../../../catalog";
 import type { IntegrationOAuthRuntime } from "../../runtime/oauth";
 import { IntegrationProviderSdkError } from "../../core/provider-sdk";
@@ -51,6 +44,14 @@ export interface AsanaProviderSdkConfig {
 }
 
 function createAsanaClient(accessToken: string): AsanaSdkClient {
+  const {
+    ApiClient: AsanaApiClient,
+    ProjectsApi: AsanaProjectsApi,
+    SectionsApi: AsanaSectionsApi,
+    StoriesApi: AsanaStoriesApi,
+    TasksApi: AsanaTasksApi,
+    WorkspacesApi: AsanaWorkspacesApi,
+  } = requireOptionalSdk<typeof import("asana")>("asana");
   const apiClient = new AsanaApiClient();
   apiClient.authentications.token!.accessToken = accessToken;
   return {

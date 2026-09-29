@@ -1,4 +1,4 @@
-import { Client as HubSpotClient } from "@hubspot/api-client";
+import { requireOptionalSdk } from "../shared/optional-sdk";
 import { SIMSTUDIO_BASELINE } from "../../../catalog";
 import type { IntegrationOAuthRuntime } from "../../runtime/oauth";
 import { IntegrationProviderSdkError } from "../../core/provider-sdk";
@@ -34,6 +34,9 @@ export interface HubSpotProviderSdkConfig {
 }
 
 function createHubSpotClient(): HubSpotApiClient {
+  const { Client: HubSpotClient } = requireOptionalSdk<
+    typeof import("@hubspot/api-client")
+  >("@hubspot/api-client");
   return new HubSpotClient() as unknown as HubSpotApiClient;
 }
 

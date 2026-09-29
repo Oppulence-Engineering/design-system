@@ -1,4 +1,4 @@
-import { Gitlab } from "@gitbeaker/rest";
+import { requireOptionalSdk } from "../shared/optional-sdk";
 import { SIMSTUDIO_BASELINE } from "../../../catalog";
 import type { IntegrationApiKeyRuntime } from "../../runtime/api-key";
 import { IntegrationProviderSdkError } from "../../core/provider-sdk";
@@ -44,6 +44,8 @@ function normalizeGitLabHost(value: string): string {
 }
 
 function createGitLabClient(apiKey: string, host: string): GitLabSdkClient {
+  const { Gitlab } =
+    requireOptionalSdk<typeof import("@gitbeaker/rest")>("@gitbeaker/rest");
   return new Gitlab({ token: apiKey, host }) as unknown as GitLabSdkClient;
 }
 

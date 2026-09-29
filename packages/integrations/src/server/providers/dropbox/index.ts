@@ -1,5 +1,5 @@
 import { Buffer } from "node:buffer";
-import { Dropbox } from "dropbox";
+import { requireOptionalSdk } from "../shared/optional-sdk";
 import { SIMSTUDIO_BASELINE } from "../../../catalog";
 import type { IntegrationOAuthRuntime } from "../../runtime/oauth";
 import { IntegrationProviderSdkError } from "../../core/provider-sdk";
@@ -26,6 +26,7 @@ export interface DropboxProviderSdkConfig {
 }
 
 function createDropboxClient(accessToken: string): DropboxSdkClient {
+  const { Dropbox } = requireOptionalSdk<typeof import("dropbox")>("dropbox");
   return new Dropbox({ accessToken }) as unknown as DropboxSdkClient;
 }
 

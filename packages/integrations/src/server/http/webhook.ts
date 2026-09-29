@@ -7,11 +7,6 @@ import {
   type JWK,
   type JWTPayload,
 } from "jose";
-import {
-  Configuration as PlaidConfiguration,
-  PlaidApi,
-  PlaidEnvironments,
-} from "plaid";
 import { z } from "zod";
 
 import { ProductSchema, type Product } from "../../contracts";
@@ -19,6 +14,7 @@ import {
   reportIntegrationFailure,
   type IntegrationFailureObserver,
 } from "../../reliability";
+import { requireOptionalSdk } from "../providers/shared/optional-sdk";
 
 export type IntegrationWebhookProvider = "plaid" | "merge";
 
@@ -172,6 +168,11 @@ function eventName(parts: readonly (string | undefined)[]): string {
 function createPlaidClient(
   config: PlaidIntegrationWebhookConfig,
 ): PlaidWebhookSdk {
+  const {
+    Configuration: PlaidConfiguration,
+    PlaidApi,
+    PlaidEnvironments,
+  } = requireOptionalSdk<typeof import("plaid")>("plaid");
   const environment = config.environment ?? "production";
   return new PlaidApi(
     new PlaidConfiguration({

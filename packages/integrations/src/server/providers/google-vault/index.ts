@@ -1,4 +1,4 @@
-import { google } from "googleapis";
+import { requireOptionalSdk } from "../shared/optional-sdk";
 
 import { IntegrationProviderSdkError } from "../../core/provider-sdk";
 import type { IntegrationProviderPack } from "../../core/provider-pack";
@@ -36,6 +36,8 @@ function googleClient(
   version: string,
 ): VendorClientFactory {
   return (credential) => {
+    const { google } =
+      requireOptionalSdk<typeof import("googleapis")>("googleapis");
     const auth = new google.auth.OAuth2();
     auth.setCredentials({ access_token: vendorToken(credential) });
     const factory = google[service] as (options: {

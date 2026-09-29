@@ -1,4 +1,4 @@
-import { WebClient } from "@slack/web-api";
+import { requireOptionalSdk } from "../shared/optional-sdk";
 import { SIMSTUDIO_BASELINE } from "../../../catalog";
 import type { IntegrationOAuthRuntime } from "../../runtime/oauth";
 import { IntegrationProviderSdkError } from "../../core/provider-sdk";
@@ -26,6 +26,8 @@ function createSlackClient(
   accessToken: string,
   configuration: { timeout: number },
 ): SlackApiClient {
+  const { WebClient } =
+    requireOptionalSdk<typeof import("@slack/web-api")>("@slack/web-api");
   return new WebClient(accessToken, {
     timeout: configuration.timeout,
   });
