@@ -504,6 +504,15 @@ export type ActivationTrackInput<N extends ActivationEventName> = {
   properties: ActivationEventProperties<N>;
 };
 
+/**
+ * Result of {@link ActivationTracker.track}.
+ *
+ * `sent: true` means the event was accepted for dispatch, not that OpenPanel
+ * received it: the server tracker is fire-and-forget and drops async network
+ * errors. `transport_error` covers only a tracker that throws synchronously.
+ * Never use this result to keep or delete a ledger row; the ledger is the
+ * record of truth and is written before `track` is called.
+ */
 export type ActivationTrackResult =
   | { sent: true }
   | {
