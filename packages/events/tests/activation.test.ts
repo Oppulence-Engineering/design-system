@@ -1,20 +1,29 @@
-import { describe, expect, it } from "bun:test";
+import { afterEach, describe, expect, it } from "bun:test";
 import {
   ACTIVATION_EVENTS,
   createActivationTracker,
   listActivationEvents,
 } from "../src/activation";
-import { isEmissionEnabled } from "../src/gate";
-import type { ServerTracker, TrackProperties } from "../src/server-tracker";
+import {
+  isEmissionEnabled,
+  isEmissionEnabledFromProcessEnv,
+} from "../src/gate";
+import {
+  createServerTracker,
+  type ServerTracker,
+  type TrackProperties,
+} from "../src/server-tracker";
 
 type Call =
   | { kind: "track"; name: string; properties?: TrackProperties }
   | { kind: "group"; payload: unknown };
 
-const recordingTracker = (options: { throws?: boolean } = {}) => {
+const recordingTracker = (
+  options: { throws?: boolean; enabled?: boolean } = {},
+) => {
   const calls: Call[] = [];
   const tracker: ServerTracker = {
-    enabled: true,
+    enabled: options.enabled ?? true,
     track: (name, properties) => {
       if (options.throws) throw new Error("network down");
       calls.push({ kind: "track", name, properties });
@@ -31,7 +40,7 @@ const recordingTracker = (options: { throws?: boolean } = {}) => {
 const occurredAt = new Date("2026-10-05T12:00:00.000Z");
 
 describe("activation tracker", () => {
-  it("sends the product event and the shared lifecycle event it feeds, grouped by workspace", () => {
+  it("sends the product event and the shared lifecycle event it feeds, grouped by workspace and stamped with the domain time", () => {
     const { calls, tracker } = recordingTracker();
     const activation = createActivationTracker({
       tracker,
@@ -67,6 +76,7 @@ describe("activation tracker", () => {
         app_version: "1.4.0",
         source: "server",
         occurred_at: "2026-10-05T12:00:00.000Z",
+        __timestamp: "2026-10-05T12:00:00.000Z",
       });
     }
     expect(calls[1]).toMatchObject({
@@ -77,17 +87,34 @@ describe("activation tracker", () => {
     });
   });
 
-  it("sends nothing outside production", () => {
+  it("omits the profile for a system-caused outcome instead of guessing one", () => {
+    const { calls, tracker } = recordingTracker();
+    createActivationTracker({
+      tracker,
+      product: "eigenn",
+      environment: "production",
+    }).track("eigenn_current_position_ready", {
+      workspaceId: "team_1",
+      profileId: null,
+      occurredAt,
+      properties: {},
+    });
+
+    expect(
+      calls[0]?.kind === "track" && calls[0].properties,
+    ).not.toHaveProperty("profileId");
+  });
+
+  it("sends nothing outside production or when the tracker is not wired", () => {
     for (const environment of ["staging", "development", "test"] as const) {
       const { calls, tracker } = recordingTracker();
-      const activation = createActivationTracker({
+      const result = createActivationTracker({
         tracker,
         product: "eigenn",
         environment,
-      });
-
-      const result = activation.track("eigenn_first_scenario_created", {
+      }).track("eigenn_first_scenario_created", {
         workspaceId: "team_1",
+        profileId: "user_1",
         occurredAt,
         properties: { scenario_id: "sc_1" },
       });
@@ -95,6 +122,20 @@ describe("activation tracker", () => {
       expect(result).toEqual({ sent: false, reason: "environment" });
       expect(calls).toEqual([]);
     }
+
+    const { calls, tracker } = recordingTracker({ enabled: false });
+    const result = createActivationTracker({
+      tracker,
+      product: "eigenn",
+      environment: "production",
+    }).track("eigenn_first_scenario_created", {
+      workspaceId: "team_1",
+      profileId: "user_1",
+      occurredAt,
+      properties: { scenario_id: "sc_1" },
+    });
+    expect(result).toEqual({ sent: false, reason: "disabled" });
+    expect(calls).toEqual([]);
   });
 
   it("rejects properties that break the event contract", () => {
@@ -119,6 +160,7 @@ describe("activation tracker", () => {
     ]) {
       const result = activation.track("conduitt_first_payment_recovered", {
         workspaceId: "org_1",
+        profileId: null,
         occurredAt,
         properties,
       });
@@ -127,6 +169,7 @@ describe("activation tracker", () => {
     expect(
       activation.track("conduitt_first_payment_recovered", {
         workspaceId: "",
+        profileId: null,
         occurredAt,
         properties: base,
       }),
@@ -134,31 +177,48 @@ describe("activation tracker", () => {
     expect(calls).toEqual([]);
   });
 
-  it("refuses another product's event and events with no persisted state", () => {
+  it("refuses another product's event, uninstrumented events, and direct sends of fed lifecycle steps", () => {
     const { calls, tracker } = recordingTracker();
-    const activation = createActivationTracker({
+    const conduitt = createActivationTracker({
       tracker,
       product: "conduitt",
       environment: "production",
     });
-
-    const crossProduct = activation.track(
-      // @ts-expect-error an Eigenn event is not trackable by the Conduitt tracker
-      "eigenn_first_scenario_created",
-      { workspaceId: "org_1", occurredAt, properties: { scenario_id: "s" } },
-    );
-    const uninstrumented = createActivationTracker({
+    const eigenn = createActivationTracker({
       tracker,
       product: "eigenn",
       environment: "production",
-    }).track(
+    });
+
+    const crossProduct = conduitt.track(
+      // @ts-expect-error an Eigenn event is not trackable by the Conduitt tracker
+      "eigenn_first_scenario_created",
+      {
+        workspaceId: "org_1",
+        profileId: null,
+        occurredAt,
+        properties: { scenario_id: "s" },
+      },
+    );
+    const uninstrumented = eigenn.track(
       // @ts-expect-error not_instrumented events have no backing record yet
       "eigenn_first_plan_committed",
-      { workspaceId: "team_1", occurredAt, properties: {} },
+      { workspaceId: "team_1", profileId: null, occurredAt, properties: {} },
+    );
+    const fedStep = eigenn.track(
+      // @ts-expect-error fed lifecycle steps are sent only by product events
+      "data_source_connected",
+      {
+        workspaceId: "team_1",
+        profileId: null,
+        occurredAt,
+        properties: { outcome: "manual" },
+      },
     );
 
     expect(crossProduct).toEqual({ sent: false, reason: "wrong_product" });
     expect(uninstrumented).toEqual({ sent: false, reason: "not_instrumented" });
+    expect(fedStep).toEqual({ sent: false, reason: "fed_only" });
     expect(calls).toEqual([]);
   });
 
@@ -173,13 +233,14 @@ describe("activation tracker", () => {
     expect(
       activation.track("eigenn_current_position_ready", {
         workspaceId: "team_1",
+        profileId: null,
         occurredAt,
         properties: {},
       }),
     ).toEqual({ sent: false, reason: "transport_error" });
   });
 
-  it("upserts the workspace group with only allow-listed properties", () => {
+  it("upserts the workspace group, dropping only the properties that break the contract", () => {
     const { calls, tracker } = recordingTracker();
     const activation = createActivationTracker({
       tracker,
@@ -187,15 +248,17 @@ describe("activation tracker", () => {
       environment: "production",
     });
 
+    const fromUntypedCaller = {
+      plan: "growth",
+      trial_state: "unpaid",
+      connection_state: "flaky",
+      owner_email: "ceo@acme.com",
+    };
     activation.upsertWorkspace({
       workspaceId: "team_1",
       name: "Acme",
-      properties: {
-        plan: "growth",
-        trial_state: "trialing",
-        // @ts-expect-error unknown keys are not part of the group contract
-        owner_email: "ceo@acme.com",
-      },
+      // @ts-expect-error out-of-enum values and unknown keys break the contract
+      properties: fromUntypedCaller,
     });
 
     expect(calls).toEqual([
@@ -207,7 +270,7 @@ describe("activation tracker", () => {
           name: "Acme",
           properties: {
             plan: "growth",
-            trial_state: "trialing",
+            trial_state: "unpaid",
             product: "eigenn",
           },
         },
@@ -228,37 +291,78 @@ describe("activation event dictionary", () => {
       }
       if (definition.feeds) {
         expect(names.has(definition.feeds)).toBe(true);
-        expect(ACTIVATION_EVENTS[definition.feeds].product).toBe("shared");
+        const fed = listActivationEvents().find(
+          (event) => event.name === definition.feeds,
+        );
+        expect(fed?.fedOnly).toBe(true);
       }
     }
   });
 });
 
 describe("emission gate", () => {
-  it("lets the deployment environment override a production build", () => {
-    expect(
-      isEmissionEnabled({
-        isProduction: true,
-        explicitOptIn: false,
-        environment: "staging",
-      }),
-    ).toBe(false);
-    expect(
-      isEmissionEnabled({
-        isProduction: true,
-        explicitOptIn: false,
-        environment: "production",
-      }),
-    ).toBe(true);
-    expect(
-      isEmissionEnabled({ isProduction: true, explicitOptIn: false }),
-    ).toBe(true);
-    expect(
-      isEmissionEnabled({
-        isProduction: false,
-        explicitOptIn: true,
-        environment: "development",
-      }),
-    ).toBe(true);
+  it("sends only from production, lets an opt-in enable local development, and never sends from staging or test", () => {
+    const cases = [
+      [{ environment: "production" }, true],
+      [{ environment: "staging", explicitOptIn: true }, false],
+      [{ environment: "test", explicitOptIn: true }, false],
+      [{ environment: "development", explicitOptIn: true }, true],
+      [{ environment: "development" }, false],
+      [{ isProduction: true }, true],
+      [{ explicitOptIn: true }, true],
+      [{}, false],
+    ] as const;
+
+    for (const [input, expected] of cases) {
+      expect(
+        isEmissionEnabled({
+          isProduction: false,
+          explicitOptIn: false,
+          ...input,
+        }),
+      ).toBe(expected);
+    }
+  });
+});
+
+describe("process-env gate and server tracker", () => {
+  const saved = { ...process.env };
+  const realFetch = globalThis.fetch;
+  afterEach(() => {
+    process.env = { ...saved };
+    globalThis.fetch = realFetch;
+  });
+
+  it("reads NODE_ENV at runtime when no deployment environment is set", () => {
+    delete process.env.OPENPANEL_ENVIRONMENT;
+    delete process.env.NEXT_PUBLIC_OPENPANEL_ENVIRONMENT;
+    delete process.env.NEXT_PUBLIC_ENABLE_OPENPANEL;
+
+    process.env.NODE_ENV = "production";
+    expect(isEmissionEnabledFromProcessEnv()).toBe(true);
+    process.env.NODE_ENV = "development";
+    expect(isEmissionEnabledFromProcessEnv()).toBe(false);
+  });
+
+  it("does not attach an identified user to later events that name no profile", async () => {
+    process.env.OPENPANEL_ENVIRONMENT = "production";
+    const bodies: Array<{ type: string; payload: Record<string, unknown> }> =
+      [];
+    globalThis.fetch = (async (_url: unknown, init?: { body?: unknown }) => {
+      bodies.push(JSON.parse(String(init?.body)));
+      return new Response("{}", { status: 200 });
+    }) as typeof fetch;
+
+    const tracker = createServerTracker({
+      clientId: "client",
+      clientSecret: "secret",
+    });
+    tracker.identify({ profileId: "user_a" });
+    tracker.track("system_event", { groups: ["org_b"] });
+    await new Promise((resolve) => setTimeout(resolve, 10));
+
+    const trackBody = bodies.find((body) => body.type === "track");
+    expect(trackBody?.payload).not.toHaveProperty("profileId");
+    expect(bodies.some((body) => body.type === "identify")).toBe(true);
   });
 });

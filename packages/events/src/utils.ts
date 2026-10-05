@@ -15,6 +15,7 @@ import type {
   TrackingOptions,
   UserIdentification,
 } from "./types";
+import { readRuntimeEnv } from "./gate";
 
 /**
  * Configuration for the event queue
@@ -325,7 +326,7 @@ export function getDeviceContext(): Partial<EventContext> {
   if (typeof window === "undefined") {
     return {
       platform: "server",
-      environment: process.env.NODE_ENV as
+      environment: readRuntimeEnv("NODE_ENV") as
         | "production"
         | "staging"
         | "development",

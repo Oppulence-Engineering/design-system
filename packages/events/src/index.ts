@@ -8,6 +8,8 @@
 // Core Type Exports
 // ============================================================================
 
+import { readRuntimeEnv } from "./gate";
+
 export {
   type AnalyticsClient,
   type AnalyticsConfig,
@@ -157,6 +159,7 @@ export {
   type EmissionGateInput,
   isEmissionEnabled,
   isEmissionEnabledFromProcessEnv,
+  readRuntimeEnv,
 } from "./gate";
 
 // ============================================================================
@@ -499,7 +502,7 @@ export const DEFAULT_CONFIG = {
   flushInterval: 5000,
   maxRetries: 3,
   retryDelay: 1000,
-  debug: process.env.NODE_ENV === "development",
+  debug: readRuntimeEnv("NODE_ENV") === "development",
   trackInDevelopment: false,
   trackAttributes: true,
   trackScreenViews: true,
