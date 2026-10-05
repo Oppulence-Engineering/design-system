@@ -181,8 +181,14 @@ Rules:
 2. Deduplicate in the product: insert a unique ledger row per
    `(workspace, event)` and call `track` only when the insert succeeds.
 3. Only `production` sends. Other environments return
-   `{ sent: false, reason: "environment" }`.
-4. Do not rename an event. Bump its `version` when its meaning changes.
+   `{ sent: false, reason: "environment" }`. A tracker without credentials
+   returns `{ sent: false, reason: "disabled" }`.
+4. Pass `profileId` on every call: the acting user, or `null` for a
+   system-caused outcome.
+5. Shared lifecycle steps (`data_source_connected`, `setup_completed`,
+   `first_valuable_outcome`, `repeat_valuable_outcome`) are sent only through
+   a product event's `feeds`. They cannot be tracked directly.
+6. Do not rename an event. Bump its `version` when its meaning changes.
 
 ```ts
 import { createActivationTracker } from "@oppulence/events/activation";
@@ -197,7 +203,7 @@ const activation = createActivationTracker({
 
 activation.track("conduitt_first_payment_recovered", {
   workspaceId: organizationId,
-  profileId: userId,
+  profileId: null, // a webhook caused it, not a user
   occurredAt: payment.paidAt,
   properties: {
     invoice_id: invoice.id,
@@ -210,19 +216,28 @@ activation.track("conduitt_first_payment_recovered", {
 ```
 
 Every event carries `groups: [workspaceId]`, `workspace_id`, `product`,
-`environment`, `app_version`, `event_version`, `source`, and `occurred_at`.
+`environment`, `app_version`, `event_version`, `source`, `occurred_at`, and
+`__timestamp` (so OpenPanel places it at the domain time, not the send time).
 Use `activation.upsertWorkspace(...)` to set workspace group properties.
 
 The emission gate reads `OPENPANEL_ENVIRONMENT` (or
-`NEXT_PUBLIC_OPENPANEL_ENVIRONMENT`). When it is set, it wins over
-`NODE_ENV`, so a staging build with `NODE_ENV=production` does not send.
+`NEXT_PUBLIC_OPENPANEL_ENVIRONMENT`) first:
+
+| `OPENPANEL_ENVIRONMENT` | Sends                                                |
+| ----------------------- | ---------------------------------------------------- |
+| `production`            | yes                                                  |
+| `staging`, `test`       | never, even with `NEXT_PUBLIC_ENABLE_OPENPANEL=true` |
+| `development`           | only with `NEXT_PUBLIC_ENABLE_OPENPANEL=true`        |
+| unset                   | `NODE_ENV=production` or the opt-in                  |
+
+Server code reads these variables when it runs, not when it is built.
 
 ## Quick Start
 
 ### Server-Side Tracking
 
 ```typescript
-import { setupAnalytics, AuthenticationEvents } from '@oppulence/events';
+import { setupAnalytics, AuthenticationEvents } from "@oppulence/events";
 
 // Setup analytics
 const analytics = await setupAnalytics({
@@ -234,8 +249,8 @@ const analytics = await setupAnalytics({
 await analytics.track({
   event: AuthenticationEvents.SignIn.name,
   properties: {
-    method: 'email',
-    provider: 'google',
+    method: "email",
+    provider: "google",
   },
 });
 ```
@@ -279,12 +294,12 @@ function MyComponent() {
 ### Authentication Events
 
 ```typescript
-import { AuthenticationEvents } from '@oppulence/events';
+import { AuthenticationEvents } from "@oppulence/events";
 
 // Sign in
 await analytics.track({
   event: AuthenticationEvents.SignIn.name,
-  properties: { method: 'email' },
+  properties: { method: "email" },
 });
 
 // Sign out
@@ -295,20 +310,20 @@ await analytics.track({
 // Registration
 await analytics.track({
   event: AuthenticationEvents.Registered.name,
-  properties: { source: 'website' },
+  properties: { source: "website" },
 });
 ```
 
 ### Banking Events
 
 ```typescript
-import { BankingEvents } from '@oppulence/events';
+import { BankingEvents } from "@oppulence/events";
 
 // Bank connection completed
 await analytics.track({
   event: BankingEvents.ConnectBankCompleted.name,
   properties: {
-    provider: 'plaid',
+    provider: "plaid",
     accountCount: 3,
   },
 });
@@ -317,8 +332,8 @@ await analytics.track({
 await analytics.track({
   event: BankingEvents.ConnectBankFailed.name,
   properties: {
-    provider: 'plaid',
-    error: 'Connection timeout',
+    provider: "plaid",
+    error: "Connection timeout",
   },
 });
 ```
@@ -326,13 +341,13 @@ await analytics.track({
 ### Transaction Events
 
 ```typescript
-import { TransactionEvents } from '@oppulence/events';
+import { TransactionEvents } from "@oppulence/events";
 
 // Export transactions
 await analytics.track({
   event: TransactionEvents.ExportTransactions.name,
   properties: {
-    format: 'csv',
+    format: "csv",
     count: 150,
   },
 });
@@ -341,7 +356,7 @@ await analytics.track({
 await analytics.track({
   event: TransactionEvents.ImportTransactions.name,
   properties: {
-    source: 'csv',
+    source: "csv",
     count: 50,
     success: true,
   },
@@ -357,29 +372,29 @@ import {
   AuthTracker,
   BankingTracker,
   TransactionTracker,
-} from '@oppulence/events';
+} from "@oppulence/events";
 
 const authTracker = new AuthTracker(analytics);
 const bankingTracker = new BankingTracker(analytics);
 const transactionTracker = new TransactionTracker(analytics);
 
 // Use preset methods
-await authTracker.signIn({ userId: 'user-123', method: 'email' });
-await bankingTracker.connectCompleted({ provider: 'plaid', accountCount: 3 });
-await transactionTracker.export({ format: 'csv', count: 150 });
+await authTracker.signIn({ userId: "user-123", method: "email" });
+await bankingTracker.connectCompleted({ provider: "plaid", accountCount: 3 });
+await transactionTracker.export({ format: "csv", count: 150 });
 ```
 
 ### Error Tracking
 
 ```typescript
-import { captureError } from '@oppulence/events';
+import { captureError } from "@oppulence/events";
 
 try {
   await riskyOperation();
 } catch (error) {
   await captureError(analytics, error, {
-    operation: 'riskyOperation',
-    context: { userId: 'user-123' },
+    operation: "riskyOperation",
+    context: { userId: "user-123" },
   });
 }
 ```
@@ -387,13 +402,13 @@ try {
 ### Performance Tracking
 
 ```typescript
-import { trackPerformance } from '@oppulence/events';
+import { trackPerformance } from "@oppulence/events";
 
 const start = performance.now();
 await heavyOperation();
 const duration = performance.now() - start;
 
-await trackPerformance(analytics, 'heavyOperation', duration, {
+await trackPerformance(analytics, "heavyOperation", duration, {
   itemCount: 1000,
 });
 ```
@@ -401,7 +416,7 @@ await trackPerformance(analytics, 'heavyOperation', duration, {
 ### Event Batching
 
 ```typescript
-import { EventQueue, createEventBatch } from '@oppulence/events';
+import { EventQueue, createEventBatch } from "@oppulence/events";
 
 const queue = new EventQueue({
   batchSize: 10,
@@ -410,8 +425,8 @@ const queue = new EventQueue({
 
 // Queue events
 queue.enqueue({
-  event: 'Page Viewed',
-  properties: { page: '/dashboard' },
+  event: "Page Viewed",
+  properties: { page: "/dashboard" },
 });
 
 // Flush manually
@@ -421,13 +436,13 @@ await queue.flush();
 ### Consent Management
 
 ```typescript
-import { ConsentManager } from '@oppulence/events';
+import { ConsentManager } from "@oppulence/events";
 
 const consentManager = new ConsentManager();
 
 // Check consent
 if (await consentManager.hasConsent(userId)) {
-  await analytics.track({ event: 'User Action' });
+  await analytics.track({ event: "User Action" });
 }
 
 // Update consent
@@ -442,7 +457,7 @@ await consentManager.updateConsent(userId, {
 ### Setup
 
 ```typescript
-import { setupAnalytics, ServerAnalytics } from '@oppulence/events';
+import { setupAnalytics, ServerAnalytics } from "@oppulence/events";
 
 // Simple setup
 const analytics = await setupAnalytics({
@@ -464,13 +479,15 @@ const analytics = new ServerAnalytics({
 ### Middleware
 
 ```typescript
-import { analyticsMiddleware } from '@oppulence/events';
+import { analyticsMiddleware } from "@oppulence/events";
 
 // Express middleware
-app.use(analyticsMiddleware({
-  getUserId: (req) => req.user?.id,
-  getEmail: (req) => req.user?.email,
-}));
+app.use(
+  analyticsMiddleware({
+    getUserId: (req) => req.user?.id,
+    getEmail: (req) => req.user?.email,
+  }),
+);
 ```
 
 ## Client-Side Analytics
@@ -518,11 +535,11 @@ function MyComponent() {
 ### HOC Usage
 
 ```typescript
-import { withAnalytics } from '@oppulence/events';
+import { withAnalytics } from "@oppulence/events";
 
 const TrackedComponent = withAnalytics(MyComponent, {
   trackOnMount: true,
-  event: 'Component Mounted',
+  event: "Component Mounted",
 });
 ```
 
@@ -538,26 +555,30 @@ import {
   VaultEvents,
   InboxEvents,
   SupportEvents,
-} from '@oppulence/events';
+} from "@oppulence/events";
 
 // Get event definition
-const eventDef = getEventDefinition('auth.sign_in');
+const eventDef = getEventDefinition("auth.sign_in");
 // { name: 'auth.sign_in', category: 'authentication', ... }
 ```
 
 ### Event Registry
 
 ```typescript
-import { LogEvents, getEventsByChannel, getEventsBySeverity } from '@oppulence/events';
+import {
+  LogEvents,
+  getEventsByChannel,
+  getEventsBySeverity,
+} from "@oppulence/events";
 
 // Get all events
 const allEvents = LogEvents;
 
 // Filter by channel
-const analyticsEvents = getEventsByChannel('analytics');
+const analyticsEvents = getEventsByChannel("analytics");
 
 // Filter by severity
-const errorEvents = getEventsBySeverity('error');
+const errorEvents = getEventsBySeverity("error");
 ```
 
 ### Utilities
@@ -568,18 +589,18 @@ import {
   enrichEventWithContext,
   getDeviceContext,
   sanitizeProperties,
-} from '@oppulence/events';
+} from "@oppulence/events";
 
 // Create metadata
 const metadata = createEventMetadata({
-  source: 'web',
-  version: '1.0.0',
+  source: "web",
+  version: "1.0.0",
 });
 
 // Enrich with context
 const enriched = enrichEventWithContext(event, {
-  userId: 'user-123',
-  sessionId: 'session-456',
+  userId: "user-123",
+  sessionId: "session-456",
 });
 
 // Get device context
@@ -639,4 +660,4 @@ Private - Oppulence Engineering
 
 **Built with ❤️ by Oppulence Engineering**
 
-*Comprehensive event tracking and analytics for the Canvas platform.*
+_Comprehensive event tracking and analytics for the Canvas platform._

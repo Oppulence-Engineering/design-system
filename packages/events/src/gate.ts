@@ -5,9 +5,10 @@
  *   (corinthian-api, packages/worker, apps/web, workbench) imports from here
  *   so adjusting the rule once flips everything in lockstep.
  *
- * The default rule: emit when an explicit opt-in flag is set, or when the
- * deployment environment is production. `OPENPANEL_ENVIRONMENT` names the
- * deployment; without it, `NODE_ENV=production` decides. Dev/test runs are no-ops by default so casual
+ * The rule: `OPENPANEL_ENVIRONMENT` names the deployment and decides first.
+ * `production` sends; `staging` and `test` never send, even with the opt-in;
+ * `development` sends only with the explicit opt-in. Without it,
+ * `NODE_ENV=production` or the opt-in decides. Dev/test runs are no-ops by default so casual
  * `bun run local` / `bun --filter X dev` sessions never burn through the
  * OpenPanel quota.
  */
@@ -28,8 +29,8 @@ export interface EmissionGateInput {
   explicitOptIn: boolean;
   /**
    * The deployment environment (`OPENPANEL_ENVIRONMENT`). When set, it wins
-   * over `isProduction`: staging builds run with `NODE_ENV=production` and
-   * must not write to production projects.
+   * over `isProduction` and over a staging/test opt-in: staging builds run
+   * with `NODE_ENV=production` and must not write to production projects.
    */
   environment?: string;
 }
@@ -46,13 +47,23 @@ export interface EmissionGateInput {
  *   ```
  */
 export function isEmissionEnabled(input: EmissionGateInput): boolean {
-  if (input.explicitOptIn) {
-    return true;
+  switch (input.environment) {
+    case "production":
+      return true;
+    case "staging":
+    case "test":
+      // Staging and CI share production client ids and secrets; an opt-in
+      // left in a secret must never route their traffic into production.
+      return false;
+    case "development":
+      return input.explicitOptIn;
+    case undefined:
+    case "":
+      return input.isProduction || input.explicitOptIn;
+    default:
+      // An unrecognized name (e.g. "preview") does not prove production.
+      return false;
   }
-  if (input.environment) {
-    return input.environment === "production";
-  }
-  return input.isProduction;
 }
 
 /**
@@ -64,16 +75,35 @@ export function isEmissionEnabled(input: EmissionGateInput): boolean {
  * pass `import.meta.env.PROD` and `import.meta.env.VITE_ENABLE_OPENPANEL`.
  */
 export function isEmissionEnabledFromProcessEnv(): boolean {
-  if (typeof process === "undefined") {
+  if (!globalThis.process?.env) {
     return false;
   }
   return isEmissionEnabled({
-    isProduction: process.env.NODE_ENV === "production",
-    explicitOptIn: process.env.NEXT_PUBLIC_ENABLE_OPENPANEL === "true",
+    isProduction: readRuntimeEnv("NODE_ENV") === "production",
+    explicitOptIn: readRuntimeEnv("NEXT_PUBLIC_ENABLE_OPENPANEL") === "true",
+    // `||`, not `??`: an empty private value must not hide a public one.
     environment:
-      process.env.OPENPANEL_ENVIRONMENT ??
-      process.env.NEXT_PUBLIC_OPENPANEL_ENVIRONMENT,
+      readRuntimeEnv("OPENPANEL_ENVIRONMENT") ||
+      readRuntimeEnv("NEXT_PUBLIC_OPENPANEL_ENVIRONMENT") ||
+      undefined,
   });
+}
+
+/**
+ * Reads an environment variable when the code runs, not when it is built.
+ *
+ * Bundlers replace the literal `process.env.NODE_ENV` at build time. This
+ * package is built once and published, so a folded value shipped
+ * `isProduction: false` and `debug: true` to every production server.
+ * Indexing through a binding keeps the read dynamic.
+ *
+ * @param name - Variable name.
+ * @returns The value, or `undefined` outside Node.
+ */
+export function readRuntimeEnv(name: string): string | undefined {
+  const env: Record<string, string | undefined> | undefined =
+    globalThis.process?.env;
+  return env?.[name];
 }
 
 /**

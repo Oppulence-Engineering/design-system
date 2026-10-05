@@ -7,7 +7,7 @@
 import { OpenPanel, type TrackProperties } from "@openpanel/nextjs";
 import { waitUntil } from "@vercel/functions";
 import { cookies } from "next/headers.js";
-import { isEmissionEnabledFromProcessEnv } from "./gate";
+import { isEmissionEnabledFromProcessEnv, readRuntimeEnv } from "./gate";
 import {
   type AnalyticsClient,
   type EventContext,
@@ -104,14 +104,14 @@ export class ServerAnalytics implements AnalyticsClient {
       clientSecret: clientSecret || "",
     });
 
-    this.debug = config?.debug ?? process.env.NODE_ENV === "development";
+    this.debug = config?.debug ?? readRuntimeEnv("NODE_ENV") === "development";
     this.transformEvent = config?.transformEvent;
     this.filterEvent = config?.filterEvent;
 
     // Set initial context
     this.context = {
       ...getDeviceContext(),
-      environment: (process.env.NODE_ENV || "development") as
+      environment: (readRuntimeEnv("NODE_ENV") || "development") as
         | "production"
         | "staging"
         | "development",
@@ -198,8 +198,9 @@ export class ServerAnalytics implements AnalyticsClient {
         console.log("Track:", formatEventForLogging(enrichedEvent));
       }
 
-      // Skip tracking in non-production if not in debug mode
-      if (process.env.NODE_ENV !== "production" && !this.debug) {
+      // Apply the deployment gate here too: callers can construct
+      // ServerAnalytics directly and bypass setupAnalytics.
+      if (!isEmissionEnabledFromProcessEnv()) {
         return;
       }
 
@@ -517,7 +518,7 @@ export async function createTracker(config?: ServerAnalyticsConfig): Promise<{
           status: EventStatus.COMPLETED,
         });
       } catch (error) {
-        if (process.env.NODE_ENV === "development") {
+        if (readRuntimeEnv("NODE_ENV") === "development") {
           console.error("Track error:", error);
         }
       }

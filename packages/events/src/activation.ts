@@ -74,9 +74,19 @@ export type ActivationEventDefinition = {
   readonly description: string;
   /** The database record that proves the event happened. */
   readonly backingRecord: string;
-  /** `workspace_once`: the caller holds a unique ledger row per workspace. */
-  readonly dedup: "workspace_once" | "none";
+  /**
+   * `workspace_once`: the caller holds a unique ledger row per workspace.
+   * `user_once`: the user row insert is the guard (no workspace exists yet).
+   * `none`: repeatable.
+   */
+  readonly dedup: "workspace_once" | "user_once" | "none";
   readonly feeds?: SharedEventName;
+  /**
+   * Set on shared lifecycle steps that only product events send (through
+   * `feeds`). A direct send would bypass the product's ledger row and could
+   * send the step twice for one workspace.
+   */
+  readonly fedOnly?: true;
   readonly properties: z.ZodObject;
 };
 
@@ -95,9 +105,10 @@ export const ACTIVATION_EVENTS = {
     kind: "milestone",
     version: 1,
     status: "instrumented",
-    description: "A user record was persisted after the auth callback.",
+    description:
+      "A user record was persisted after the auth callback. Sent once per user, at the user insert.",
     backingRecord: "users",
-    dedup: "workspace_once",
+    dedup: "user_once",
     properties: z.object({ method: z.string().max(40).optional() }),
   },
   workspace_created: {
@@ -113,6 +124,7 @@ export const ACTIVATION_EVENTS = {
   },
   data_source_connected: {
     product: "shared",
+    fedOnly: true,
     kind: "milestone",
     version: 1,
     status: "instrumented",
@@ -123,6 +135,7 @@ export const ACTIVATION_EVENTS = {
   },
   setup_completed: {
     product: "shared",
+    fedOnly: true,
     kind: "milestone",
     version: 1,
     status: "instrumented",
@@ -134,6 +147,7 @@ export const ACTIVATION_EVENTS = {
   },
   first_valuable_outcome: {
     product: "shared",
+    fedOnly: true,
     kind: "milestone",
     version: 1,
     status: "instrumented",
@@ -145,6 +159,7 @@ export const ACTIVATION_EVENTS = {
   },
   repeat_valuable_outcome: {
     product: "shared",
+    fedOnly: true,
     kind: "repeat",
     version: 1,
     status: "instrumented",
@@ -482,12 +497,18 @@ type Dictionary = typeof ACTIVATION_EVENTS;
 export type ActivationEventName = keyof Dictionary;
 
 /** Events a given product's server tracker may send (its own + shared). */
+/**
+ * Events a given product's server tracker may send: its own and the shared
+ * ones, minus uninstrumented events and fed-only lifecycle steps.
+ */
 export type TrackableActivationEvent<P extends ActivationProduct> = {
-  [N in ActivationEventName]: Dictionary[N]["status"] extends "instrumented"
-    ? Dictionary[N]["product"] extends P | "shared"
-      ? N
-      : never
-    : never;
+  [N in ActivationEventName]: Dictionary[N] extends { fedOnly: true }
+    ? never
+    : Dictionary[N]["status"] extends "instrumented"
+      ? Dictionary[N]["product"] extends P | "shared"
+        ? N
+        : never
+      : never;
 }[ActivationEventName];
 
 export type ActivationEventProperties<N extends ActivationEventName> = z.input<
@@ -495,10 +516,20 @@ export type ActivationEventProperties<N extends ActivationEventName> = z.input<
 >;
 
 export type ActivationTrackInput<N extends ActivationEventName> = {
-  /** Canonical workspace id: Eigenn `teams.id`, Conduitt `organizations.id`. */
-  workspaceId: string;
-  /** Canonical application user id. Omit for system-caused outcomes. */
-  profileId?: string;
+  /**
+   * Canonical workspace id: Eigenn `teams.id`, Conduitt `organizations.id`.
+   * Per-user events (`dedup: "user_once"`, e.g. signup) may pass `null`
+   * because no workspace exists yet; they are sent without a group.
+   */
+  workspaceId: Dictionary[N]["dedup"] extends "user_once"
+    ? string | null
+    : string;
+  /**
+   * Canonical application user id, or `null` for a system-caused outcome
+   * (webhook, job). Required so every call site decides explicitly; `null`
+   * sends no profile rather than a guessed one.
+   */
+  profileId: string | null;
   /** When the backing record says the outcome happened. */
   occurredAt: Date;
   properties: ActivationEventProperties<N>;
@@ -519,16 +550,33 @@ export type ActivationTrackResult =
       sent: false;
       reason:
         | "environment"
+        | "disabled"
+        | "fed_only"
         | "invalid_properties"
         | "wrong_product"
         | "not_instrumented"
         | "transport_error";
     };
 
+/**
+ * Workspace group properties. Unknown keys never reach OpenPanel, and each
+ * field is checked on its own: a value that breaks the contract is dropped
+ * while the rest of the update still goes out.
+ */
 export const WorkspaceGroupPropertiesSchema = z
   .object({
     plan: z.string().max(60),
-    trial_state: z.enum(["none", "trialing", "active", "past_due", "canceled"]),
+    trial_state: z.enum([
+      "none",
+      "trialing",
+      "active",
+      "past_due",
+      "unpaid",
+      "incomplete",
+      "incomplete_expired",
+      "paused",
+      "canceled",
+    ]),
     created_at: z.string(),
     company_size_bucket: z.string().max(20),
     industry: z.string().max(60),
@@ -537,8 +585,32 @@ export const WorkspaceGroupPropertiesSchema = z
   })
   .partial();
 
+const GROUP_PROPERTY_FIELDS: Readonly<Record<string, z.ZodType>> =
+  WorkspaceGroupPropertiesSchema.shape;
+
+function validGroupProperties(
+  properties: Readonly<Record<string, unknown>>,
+): Record<string, unknown> {
+  return Object.fromEntries(
+    Object.entries(properties).flatMap(([key, value]) => {
+      // Own keys only: `constructor` and friends must not resolve.
+      const field = Object.hasOwn(GROUP_PROPERTY_FIELDS, key)
+        ? GROUP_PROPERTY_FIELDS[key]
+        : undefined;
+      const parsed = field?.safeParse(value);
+      return parsed?.success && parsed.data !== undefined
+        ? [[key, parsed.data]]
+        : [];
+    }),
+  );
+}
+
+/** Workspace display name: a company name, trimmed and bounded. */
+const WorkspaceNameSchema = z.string().trim().min(1).max(120);
+
 export type WorkspaceGroupInput = {
   workspaceId: string;
+  /** The workspace (company) display name. Never a person's name or email. */
   name: string;
   properties: z.input<typeof WorkspaceGroupPropertiesSchema>;
 };
@@ -559,10 +631,25 @@ export type ActivationTrackerConfig<P extends ActivationProduct> = {
 };
 
 const SharedInputSchema = z.object({
-  workspaceId: z.string().min(1),
-  profileId: z.string().min(1).optional(),
+  workspaceId: z.string().min(1).nullable(),
+  profileId: z.string().min(1).nullable(),
   occurredAt: z.date(),
 });
+
+type RejectReason = Extract<ActivationTrackResult, { sent: false }>["reason"];
+
+function rejectReason(
+  definition: ActivationEventDefinition | undefined,
+  product: ActivationProduct,
+): RejectReason | null {
+  if (!definition || definition.status !== "instrumented") {
+    return "not_instrumented";
+  }
+  if (definition.product !== "shared" && definition.product !== product) {
+    return "wrong_product";
+  }
+  return definition.fedOnly ? "fed_only" : null;
+}
 
 const DEFINITIONS: Readonly<Record<string, ActivationEventDefinition>> =
   ACTIVATION_EVENTS;
@@ -585,7 +672,11 @@ export function listActivationEvents(): ReadonlyArray<
  *
  * Only `production` sends. Every other environment returns
  * `{ sent: false, reason: "environment" }`, so staging, CI, and local runs
- * can never reach a production funnel.
+ * can never reach a production funnel. A tracker without credentials (or with
+ * its gate closed) returns `{ sent: false, reason: "disabled" }`.
+ *
+ * Events carry `__timestamp` = `occurredAt`, so OpenPanel places them at the
+ * domain time, not the send time (delayed webhooks, retries, backfills).
  *
  * @example
  *   const activation = createActivationTracker({
@@ -605,14 +696,16 @@ export function createActivationTracker<P extends ActivationProduct>(
     version: number,
   ) => ({
     ...(input.profileId ? { profileId: input.profileId } : {}),
-    groups: [input.workspaceId],
-    workspace_id: input.workspaceId,
+    ...(input.workspaceId
+      ? { groups: [input.workspaceId], workspace_id: input.workspaceId }
+      : {}),
     product: config.product,
     environment: config.environment,
     app_version: config.appVersion ?? "unknown",
     event_version: version,
     source: "server",
     occurred_at: input.occurredAt.toISOString(),
+    __timestamp: input.occurredAt.toISOString(),
   });
 
   const send = (name: string, properties: TrackProperties): boolean => {
@@ -627,22 +720,24 @@ export function createActivationTracker<P extends ActivationProduct>(
   return {
     track(name, input) {
       const definition = definitionFor(name);
-      if (!definition || definition.status !== "instrumented") {
-        return { sent: false, reason: "not_instrumented" };
-      }
-      if (
-        definition.product !== "shared" &&
-        definition.product !== config.product
-      ) {
-        return { sent: false, reason: "wrong_product" };
+      const rejected = rejectReason(definition, config.product);
+      if (rejected || !definition) {
+        return { sent: false, reason: rejected ?? "not_instrumented" };
       }
       const shared = SharedInputSchema.safeParse(input);
       const properties = definition.properties.safeParse(input.properties);
-      if (!(shared.success && properties.success)) {
+      const workspaceMissing =
+        shared.success &&
+        shared.data.workspaceId === null &&
+        definition.dedup !== "user_once";
+      if (!(shared.success && properties.success) || workspaceMissing) {
         return { sent: false, reason: "invalid_properties" };
       }
       if (config.environment !== "production") {
         return { sent: false, reason: "environment" };
+      }
+      if (!config.tracker.enabled) {
+        return { sent: false, reason: "disabled" };
       }
       const sent = send(name, {
         ...properties.data,
@@ -659,16 +754,15 @@ export function createActivationTracker<P extends ActivationProduct>(
 
     upsertWorkspace(input) {
       if (config.environment !== "production") return;
-      const properties = WorkspaceGroupPropertiesSchema.strip().safeParse(
-        input.properties,
-      );
-      if (!properties.success) return;
+      const name = WorkspaceNameSchema.safeParse(input.name);
+      if (!(name.success && input.workspaceId)) return;
+      const defined = validGroupProperties(input.properties);
       try {
         config.tracker.upsertGroup({
           id: input.workspaceId,
           type: "workspace",
-          name: input.name,
-          properties: { ...properties.data, product: config.product },
+          name: name.data,
+          properties: { ...defined, product: config.product },
         });
       } catch {
         // Best-effort: group metadata must never break the caller.

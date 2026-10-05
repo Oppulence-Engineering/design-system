@@ -50,6 +50,9 @@ describe("published artifacts", () => {
     expect(manifest.exports["./identity"].import).toBe(
       manifest.exports["./client"].import,
     );
+    expect(manifest.exports["./identity"].types).toBe(
+      manifest.exports["./client"].types,
+    );
     expect(clientArtifact).toContain("useAnalyticsIdentify");
   });
 
@@ -60,4 +63,18 @@ describe("published artifacts", () => {
     expect(artifact).not.toContain("jsx-dev-runtime");
     expect(artifact).toContain("react/jsx-runtime");
   });
+
+  // Bun folds the literal `process.env.NODE_ENV` at build time. The published
+  // server entries once shipped `isProduction: false` and `debug: true`, so
+  // the gate ignored NODE_ENV and production servers logged every event.
+  test.each(["gate.js", "server-tracker.js", "server.js", "index.js"])(
+    "%s reads NODE_ENV when it runs, not when it is built",
+    async (artifactName) => {
+      const artifact = await readArtifact(artifactName);
+
+      expect(artifact).toContain('readRuntimeEnv("NODE_ENV")');
+      expect(artifact).not.toContain("isProduction: false");
+      expect(artifact).not.toMatch(/debug: true,|config\?\.debug \?\? true/);
+    },
+  );
 });

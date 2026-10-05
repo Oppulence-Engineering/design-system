@@ -1,6 +1,6 @@
 {
   "name": "@oppulence/events",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Typed analytics events and OpenPanel adapters for Oppulence applications",
   "type": "module",
   "sideEffects": false,
@@ -31,7 +31,7 @@
       "default": "./dist/events.js"
     },
     "./identity": {
-      "types": "./dist/identity.d.ts",
+      "types": "./dist/client.d.ts",
       "import": "./dist/client.js",
       "default": "./dist/client.js"
     },
@@ -61,6 +61,8 @@
   "types": "./dist/index.d.ts",
   "files": [
     "dist",
+    "!dist/identity.js",
+    "!dist/identity.js.map",
     "README.md"
   ],
   "publishConfig": {

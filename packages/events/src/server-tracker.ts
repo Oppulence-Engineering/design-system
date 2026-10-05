@@ -233,12 +233,18 @@ export function createServerTracker(
     },
     identify(args) {
       try {
-        const result = op.identify({
-          profileId: args.profileId,
-          email: args.email,
-          firstName: args.firstName,
-          lastName: args.lastName,
-          properties: args.properties,
+        // `op.identify` stores the profile on this shared client, and every
+        // later `track` without a profileId inherits it. One server process
+        // serves many tenants, so send the identify payload directly.
+        const result = op.send({
+          type: "identify",
+          payload: {
+            profileId: args.profileId,
+            email: args.email,
+            firstName: args.firstName,
+            lastName: args.lastName,
+            properties: args.properties,
+          },
         });
         ignoreAnalyticsRejection(result);
       } catch {
