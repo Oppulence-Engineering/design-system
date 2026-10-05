@@ -17,7 +17,11 @@
  * framework-agnostic `@openpanel/sdk` and works in any Node context.
  */
 
-import { OpenPanel, type TrackProperties } from "@openpanel/sdk";
+import {
+  OpenPanel,
+  type TrackProperties,
+  type UpsertGroupPayload,
+} from "@openpanel/sdk";
 import { count, eq } from "drizzle-orm";
 import { isEmissionEnabledFromProcessEnv } from "./gate";
 
@@ -26,7 +30,7 @@ import { isEmissionEnabledFromProcessEnv } from "./gate";
  * payloads without a direct `@openpanel/sdk` dependency. The shape is
  * `Record<string, unknown>` with optional `profileId` and `groups` fields.
  */
-export type { TrackProperties } from "@openpanel/sdk";
+export type { TrackProperties, UpsertGroupPayload } from "@openpanel/sdk";
 
 // Drizzle's strict generics for `PgTable`/`PgColumn` don't compose across
 // multiple drizzle-orm installs in the workspace. We accept the db/table/
@@ -119,9 +123,18 @@ export interface ServerTracker {
    */
   identify: (args: IdentifyArgs) => void;
   /**
+   * Creates or updates an OpenPanel group (a workspace). No-op when disabled.
+   */
+  upsertGroup: (payload: UpsertGroupPayload) => void;
+  /**
    * Fires `eventName` only when the org's row-count on `table` is exactly 1
    * (post-insert). Run this AFTER the row has been inserted so the count
    * includes the new row. Errors are swallowed.
+   *
+   * @deprecated The count is not idempotent: a retry or a concurrent insert
+   *   can fire the event twice or never. Use a unique ledger row per
+   *   (workspace, event) and `createActivationTracker` from
+   *   `@oppulence/events/activation`.
    */
   fireOnceForOrg: (args: FireOnceArgs) => Promise<void>;
 }
@@ -157,6 +170,9 @@ export const NOOP_SERVER_TRACKER: ServerTracker = {
     // intentional no-op
   },
   identify: () => {
+    // intentional no-op
+  },
+  upsertGroup: () => {
     // intentional no-op
   },
   fireOnceForOrg: async () => {
@@ -225,6 +241,13 @@ export function createServerTracker(
           properties: args.properties,
         });
         ignoreAnalyticsRejection(result);
+      } catch {
+        // Best-effort.
+      }
+    },
+    upsertGroup(payload) {
+      try {
+        ignoreAnalyticsRejection(op.upsertGroup(payload));
       } catch {
         // Best-effort.
       }

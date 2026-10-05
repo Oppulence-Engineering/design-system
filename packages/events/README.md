@@ -10,6 +10,7 @@
 - [Overview](#overview)
 - [Features](#features)
 - [Installation](#installation)
+- [Activation Events](#activation-events)
 - [Quick Start](#quick-start)
 - [Event Types](#event-types)
 - [Usage Examples](#usage-examples)
@@ -167,6 +168,54 @@ export function AnalyticsUserTracker() {
   return null;
 }
 ```
+
+## Activation Events
+
+`@oppulence/events/activation` holds the canonical activation dictionary for
+Conduitt and Eigenn and a typed server tracker for it.
+
+Rules:
+
+1. Send an activation event only after the product database proves the
+   outcome. Never send one from a click.
+2. Deduplicate in the product: insert a unique ledger row per
+   `(workspace, event)` and call `track` only when the insert succeeds.
+3. Only `production` sends. Other environments return
+   `{ sent: false, reason: "environment" }`.
+4. Do not rename an event. Bump its `version` when its meaning changes.
+
+```ts
+import { createActivationTracker } from "@oppulence/events/activation";
+import { tracker } from "./analytics"; // createServerTracker(...)
+
+const activation = createActivationTracker({
+  tracker,
+  product: "conduitt",
+  environment: env.OPENPANEL_ENVIRONMENT,
+  appVersion: env.APP_VERSION,
+});
+
+activation.track("conduitt_first_payment_recovered", {
+  workspaceId: organizationId,
+  profileId: userId,
+  occurredAt: payment.paidAt,
+  properties: {
+    invoice_id: invoice.id,
+    payment_id: payment.id,
+    amount_minor: 12_500,
+    currency: "USD",
+  },
+});
+// Also sends `first_valuable_outcome` with `product: "conduitt"`.
+```
+
+Every event carries `groups: [workspaceId]`, `workspace_id`, `product`,
+`environment`, `app_version`, `event_version`, `source`, and `occurred_at`.
+Use `activation.upsertWorkspace(...)` to set workspace group properties.
+
+The emission gate reads `OPENPANEL_ENVIRONMENT` (or
+`NEXT_PUBLIC_OPENPANEL_ENVIRONMENT`). When it is set, it wins over
+`NODE_ENV`, so a staging build with `NODE_ENV=production` does not send.
 
 ## Quick Start
 

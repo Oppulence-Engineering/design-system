@@ -9,14 +9,11 @@ const readArtifact = (name: string): Promise<string> =>
   readFile(path.join(DIST_ROOT, name), "utf8");
 
 describe("published artifacts", () => {
-  test.each(["client.js", "identity.js"])(
-    "%s starts with the React client directive",
-    async (artifactName) => {
-      const artifact = await readArtifact(artifactName);
+  test("client.js starts with the React client directive", async () => {
+    const artifact = await readArtifact("client.js");
 
-      expect(artifact.startsWith(CLIENT_DIRECTIVE)).toBe(true);
-    },
-  );
+    expect(artifact.startsWith(CLIENT_DIRECTIVE)).toBe(true);
+  });
 
   test("the root entry remains server-safe", async () => {
     const rootArtifact = await readArtifact("index.js");
@@ -41,16 +38,26 @@ describe("published artifacts", () => {
     expect(clientArtifact).not.toContain('next/script"');
   });
 
-  test("the client entries use production JSX runtime", async () => {
-    const artifacts = await Promise.all([
-      readArtifact("client.js"),
-      readArtifact("identity.js"),
-    ]);
+  // identity.js once inlined its own copy of client.tsx, so its
+  // useAnalytics() read a second React context and threw inside every
+  // AnalyticsProvider. Consumers had to patch the dist file by hand.
+  test("the identity export shares the client entry's React context", async () => {
+    const manifest = JSON.parse(
+      await readFile(path.resolve(import.meta.dir, "../package.json"), "utf8"),
+    );
+    const clientArtifact = await readArtifact("client.js");
 
-    for (const artifact of artifacts) {
-      expect(artifact).not.toContain("jsxDEV");
-      expect(artifact).not.toContain("jsx-dev-runtime");
-      expect(artifact).toContain("react/jsx-runtime");
-    }
+    expect(manifest.exports["./identity"].import).toBe(
+      manifest.exports["./client"].import,
+    );
+    expect(clientArtifact).toContain("useAnalyticsIdentify");
+  });
+
+  test("the client entry uses production JSX runtime", async () => {
+    const artifact = await readArtifact("client.js");
+
+    expect(artifact).not.toContain("jsxDEV");
+    expect(artifact).not.toContain("jsx-dev-runtime");
+    expect(artifact).toContain("react/jsx-runtime");
   });
 });
