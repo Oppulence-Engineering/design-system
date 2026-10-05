@@ -516,8 +516,14 @@ export type ActivationEventProperties<N extends ActivationEventName> = z.input<
 >;
 
 export type ActivationTrackInput<N extends ActivationEventName> = {
-  /** Canonical workspace id: Eigenn `teams.id`, Conduitt `organizations.id`. */
-  workspaceId: string;
+  /**
+   * Canonical workspace id: Eigenn `teams.id`, Conduitt `organizations.id`.
+   * Per-user events (`dedup: "user_once"`, e.g. signup) may pass `null`
+   * because no workspace exists yet; they are sent without a group.
+   */
+  workspaceId: Dictionary[N]["dedup"] extends "user_once"
+    ? string | null
+    : string;
   /**
    * Canonical application user id, or `null` for a system-caused outcome
    * (webhook, job). Required so every call site decides explicitly; `null`
@@ -587,7 +593,10 @@ function validGroupProperties(
 ): Record<string, unknown> {
   return Object.fromEntries(
     Object.entries(properties).flatMap(([key, value]) => {
-      const field = GROUP_PROPERTY_FIELDS[key];
+      // Own keys only: `constructor` and friends must not resolve.
+      const field = Object.hasOwn(GROUP_PROPERTY_FIELDS, key)
+        ? GROUP_PROPERTY_FIELDS[key]
+        : undefined;
       const parsed = field?.safeParse(value);
       return parsed?.success && parsed.data !== undefined
         ? [[key, parsed.data]]
@@ -622,7 +631,7 @@ export type ActivationTrackerConfig<P extends ActivationProduct> = {
 };
 
 const SharedInputSchema = z.object({
-  workspaceId: z.string().min(1),
+  workspaceId: z.string().min(1).nullable(),
   profileId: z.string().min(1).nullable(),
   occurredAt: z.date(),
 });
@@ -687,8 +696,9 @@ export function createActivationTracker<P extends ActivationProduct>(
     version: number,
   ) => ({
     ...(input.profileId ? { profileId: input.profileId } : {}),
-    groups: [input.workspaceId],
-    workspace_id: input.workspaceId,
+    ...(input.workspaceId
+      ? { groups: [input.workspaceId], workspace_id: input.workspaceId }
+      : {}),
     product: config.product,
     environment: config.environment,
     app_version: config.appVersion ?? "unknown",
@@ -716,7 +726,11 @@ export function createActivationTracker<P extends ActivationProduct>(
       }
       const shared = SharedInputSchema.safeParse(input);
       const properties = definition.properties.safeParse(input.properties);
-      if (!(shared.success && properties.success)) {
+      const workspaceMissing =
+        shared.success &&
+        shared.data.workspaceId === null &&
+        definition.dedup !== "user_once";
+      if (!(shared.success && properties.success) || workspaceMissing) {
         return { sent: false, reason: "invalid_properties" };
       }
       if (config.environment !== "production") {

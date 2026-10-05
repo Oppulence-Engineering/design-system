@@ -198,8 +198,9 @@ export class ServerAnalytics implements AnalyticsClient {
         console.log("Track:", formatEventForLogging(enrichedEvent));
       }
 
-      // Skip tracking in non-production if not in debug mode
-      if (readRuntimeEnv("NODE_ENV") !== "production" && !this.debug) {
+      // Apply the deployment gate here too: callers can construct
+      // ServerAnalytics directly and bypass setupAnalytics.
+      if (!isEmissionEnabledFromProcessEnv()) {
         return;
       }
 

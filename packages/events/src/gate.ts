@@ -57,8 +57,12 @@ export function isEmissionEnabled(input: EmissionGateInput): boolean {
       return false;
     case "development":
       return input.explicitOptIn;
-    default:
+    case undefined:
+    case "":
       return input.isProduction || input.explicitOptIn;
+    default:
+      // An unrecognized name (e.g. "preview") does not prove production.
+      return false;
   }
 }
 
@@ -77,9 +81,11 @@ export function isEmissionEnabledFromProcessEnv(): boolean {
   return isEmissionEnabled({
     isProduction: readRuntimeEnv("NODE_ENV") === "production",
     explicitOptIn: readRuntimeEnv("NEXT_PUBLIC_ENABLE_OPENPANEL") === "true",
+    // `||`, not `??`: an empty private value must not hide a public one.
     environment:
-      readRuntimeEnv("OPENPANEL_ENVIRONMENT") ??
-      readRuntimeEnv("NEXT_PUBLIC_OPENPANEL_ENVIRONMENT"),
+      readRuntimeEnv("OPENPANEL_ENVIRONMENT") ||
+      readRuntimeEnv("NEXT_PUBLIC_OPENPANEL_ENVIRONMENT") ||
+      undefined,
   });
 }
 

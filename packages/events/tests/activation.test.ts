@@ -105,6 +105,36 @@ describe("activation tracker", () => {
     ).not.toHaveProperty("profileId");
   });
 
+  it("sends signup without a workspace group, but rejects a missing workspace for workspace events", () => {
+    const { calls, tracker } = recordingTracker();
+    const activation = createActivationTracker({
+      tracker,
+      product: "conduitt",
+      environment: "production",
+    });
+
+    const signup = activation.track("signup_completed", {
+      workspaceId: null,
+      profileId: "user_1",
+      occurredAt,
+      properties: {},
+    });
+    const noWorkspace = activation.track("conduitt_first_payment_reconciled", {
+      // @ts-expect-error workspace events need a workspace
+      workspaceId: null,
+      profileId: null,
+      occurredAt,
+      properties: { payment_id: "pay_1" },
+    });
+
+    expect(signup).toEqual({ sent: true });
+    expect(noWorkspace).toEqual({ sent: false, reason: "invalid_properties" });
+    expect(calls).toHaveLength(1);
+    expect(
+      calls[0]?.kind === "track" && calls[0].properties,
+    ).not.toHaveProperty("groups");
+  });
+
   it("sends nothing outside production or when the tracker is not wired", () => {
     for (const environment of ["staging", "development", "test"] as const) {
       const { calls, tracker } = recordingTracker();
@@ -253,6 +283,7 @@ describe("activation tracker", () => {
       trial_state: "unpaid",
       connection_state: "flaky",
       owner_email: "ceo@acme.com",
+      constructor: "x",
     };
     activation.upsertWorkspace({
       workspaceId: "team_1",
@@ -308,6 +339,8 @@ describe("emission gate", () => {
       [{ environment: "test", explicitOptIn: true }, false],
       [{ environment: "development", explicitOptIn: true }, true],
       [{ environment: "development" }, false],
+      [{ environment: "preview", isProduction: true }, false],
+      [{ environment: "", isProduction: true }, true],
       [{ isProduction: true }, true],
       [{ explicitOptIn: true }, true],
       [{}, false],
@@ -344,6 +377,14 @@ describe("process-env gate and server tracker", () => {
     expect(isEmissionEnabledFromProcessEnv()).toBe(false);
   });
 
+  it("lets a public staging name win over an empty private one", () => {
+    process.env.NODE_ENV = "production";
+    process.env.OPENPANEL_ENVIRONMENT = "";
+    process.env.NEXT_PUBLIC_OPENPANEL_ENVIRONMENT = "staging";
+
+    expect(isEmissionEnabledFromProcessEnv()).toBe(false);
+  });
+
   it("does not attach an identified user to later events that name no profile", async () => {
     process.env.OPENPANEL_ENVIRONMENT = "production";
     const bodies: Array<{ type: string; payload: Record<string, unknown> }> =
@@ -359,9 +400,12 @@ describe("process-env gate and server tracker", () => {
     });
     tracker.identify({ profileId: "user_a" });
     tracker.track("system_event", { groups: ["org_b"] });
-    await new Promise((resolve) => setTimeout(resolve, 10));
+    for (let attempt = 0; attempt < 50 && bodies.length < 2; attempt++) {
+      await new Promise((resolve) => setTimeout(resolve, 10));
+    }
 
     const trackBody = bodies.find((body) => body.type === "track");
+    expect(trackBody).toBeDefined();
     expect(trackBody?.payload).not.toHaveProperty("profileId");
     expect(bodies.some((body) => body.type === "identify")).toBe(true);
   });
