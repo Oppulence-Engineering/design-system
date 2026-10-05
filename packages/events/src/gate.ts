@@ -5,8 +5,9 @@
  *   (corinthian-api, packages/worker, apps/web, workbench) imports from here
  *   so adjusting the rule once flips everything in lockstep.
  *
- * The default rule: emit only when the runtime is production OR an explicit
- * opt-in flag is set. Dev/test runs are no-ops by default so casual
+ * The default rule: emit when an explicit opt-in flag is set, or when the
+ * deployment environment is production. `OPENPANEL_ENVIRONMENT` names the
+ * deployment; without it, `NODE_ENV=production` decides. Dev/test runs are no-ops by default so casual
  * `bun run local` / `bun --filter X dev` sessions never burn through the
  * OpenPanel quota.
  */
@@ -25,6 +26,12 @@ export interface EmissionGateInput {
    * `NEXT_PUBLIC_ENABLE_OPENPANEL=true` before `bun run local`).
    */
   explicitOptIn: boolean;
+  /**
+   * The deployment environment (`OPENPANEL_ENVIRONMENT`). When set, it wins
+   * over `isProduction`: staging builds run with `NODE_ENV=production` and
+   * must not write to production projects.
+   */
+  environment?: string;
 }
 
 /**
@@ -39,7 +46,13 @@ export interface EmissionGateInput {
  *   ```
  */
 export function isEmissionEnabled(input: EmissionGateInput): boolean {
-  return input.isProduction || input.explicitOptIn;
+  if (input.explicitOptIn) {
+    return true;
+  }
+  if (input.environment) {
+    return input.environment === "production";
+  }
+  return input.isProduction;
 }
 
 /**
@@ -57,6 +70,9 @@ export function isEmissionEnabledFromProcessEnv(): boolean {
   return isEmissionEnabled({
     isProduction: process.env.NODE_ENV === "production",
     explicitOptIn: process.env.NEXT_PUBLIC_ENABLE_OPENPANEL === "true",
+    environment:
+      process.env.OPENPANEL_ENVIRONMENT ??
+      process.env.NEXT_PUBLIC_OPENPANEL_ENVIRONMENT,
   });
 }
 

@@ -1,6 +1,6 @@
 {
   "name": "@oppulence/events",
-  "version": "1.1.2",
+  "version": "1.2.0",
   "description": "Typed analytics events and OpenPanel adapters for Oppulence applications",
   "type": "module",
   "sideEffects": false,
@@ -32,8 +32,8 @@
     },
     "./identity": {
       "types": "./dist/identity.d.ts",
-      "import": "./dist/identity.js",
-      "default": "./dist/identity.js"
+      "import": "./dist/client.js",
+      "default": "./dist/client.js"
     },
     "./gate": {
       "types": "./dist/gate.d.ts",
@@ -49,6 +49,11 @@
       "types": "./dist/types.d.ts",
       "import": "./dist/types.js",
       "default": "./dist/types.js"
+    },
+    "./activation": {
+      "types": "./dist/activation.d.ts",
+      "import": "./dist/activation.js",
+      "default": "./dist/activation.js"
     }
   },
   "main": "./dist/index.js",
@@ -69,8 +74,8 @@
   "license": "MIT",
   "scripts": {
     "build": "tsc -p tsconfig.build.json && bun run build:server && bun run build:client && bun run verify:artifacts",
-    "build:client": "bun build --production src/client.tsx src/identity.ts --root src --outdir dist --target browser --format esm --packages=external --banner='\"use client\";'",
-    "build:server": "bun build src/index.ts src/server.ts src/corinthian.ts src/events.ts src/gate.ts src/server-tracker.ts src/types.ts --root src --outdir dist --target node --format esm --packages=external",
+    "build:client": "bun build --production src/client.tsx --root src --outdir dist --target browser --format esm --packages=external --banner='\"use client\";'",
+    "build:server": "bun build src/index.ts src/server.ts src/corinthian.ts src/events.ts src/gate.ts src/server-tracker.ts src/types.ts src/activation.ts --root src --outdir dist --target node --format esm --packages=external",
     "clean": "rm -rf .turbo dist tsconfig.build.tsbuildinfo",
     "format": "prettier --write \"{src,tests}/**/*.{ts,tsx}\"",
     "lint": "prettier --check \"{src,tests}/**/*.{ts,tsx}\"",
