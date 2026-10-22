@@ -1,7 +1,10 @@
 {
   "name": "@oppulence/design-system-monorepo",
   "private": true,
-  "workspaces": ["apps/*", "packages/*"],
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
@@ -12,8 +15,8 @@
     "storybook": "turbo run dev --filter=@comp/storybook"
   },
   "devDependencies": {
-    "prettier": "^3.7.4",
-    "turbo": "^2.7.1",
+    "prettier": "^3.9.10",
+    "turbo": "^2.11.10",
     "typescript": "5.9.2"
   },
   "overrides": {
@@ -22,7 +25,8 @@
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "esbuild": "0.25.12",
-    "zod": "4.4.3"
+    "zod": "4.4.3",
+    "proxy-addr": "^2.0.8"
   },
   "packageManager": "bun@1.2.5",
   "engines": {
