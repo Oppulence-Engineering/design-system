@@ -41,3 +41,6 @@ yarn-error.log*
 .playwright-mcp
 # Firebase
 firebase-debug.log
+
+# code-review-graph database (built per session)
+.code-review-graph/
