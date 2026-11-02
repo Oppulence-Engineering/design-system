@@ -415,12 +415,13 @@ export const ACTIVATION_EVENTS = {
     version: 1,
     status: "instrumented",
     description:
-      "The server computed and saved the first comparison of at least two of the workspace's saved scenarios. Opening the comparison view does not count.",
+      "Every projection in the first comparison of saved scenarios against the baseline was computed, and the comparison was saved. Opening the comparison view does not count.",
     backingRecord: "scenario_comparisons",
     dedup: "workspace_once",
     properties: z.object({
       comparison_id: id,
-      scenario_count: z.number().int().min(2),
+      // Saved scenarios compared; the baseline is always the other side.
+      scenario_count: z.number().int().min(1),
     }),
   },
   eigenn_first_recommendation_generated: {

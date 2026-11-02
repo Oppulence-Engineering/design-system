@@ -248,12 +248,12 @@ describe("activation tracker", () => {
     ).toEqual({ sent: true });
     expect(calls).toHaveLength(5);
 
-    // One scenario is not a comparison; a review needs an outcome; a repeat
-    // needs a second week.
+    // A comparison needs a saved scenario against the baseline; a review
+    // needs an outcome; a repeat needs a second week.
     expect(
       send("eigenn_first_scenario_comparison_completed", {
         comparison_id: "cmp_1",
-        scenario_count: 1,
+        scenario_count: 0,
       }),
     ).toEqual({ sent: false, reason: "invalid_properties" });
     expect(
