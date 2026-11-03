@@ -26,8 +26,7 @@ export interface XeroProviderSdkConfig {
   clientSecret: string;
   /** Reads the selected tenant ID from the product's durable connection record. */
   tenantId:
-    | string
-    | ((reference: IntegrationCredentialReference) => Promise<string>);
+    string | ((reference: IntegrationCredentialReference) => Promise<string>);
   clientFactory?: (input: {
     clientId: string;
     clientSecret: string;

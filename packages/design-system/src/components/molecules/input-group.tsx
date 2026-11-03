@@ -88,12 +88,7 @@ function InputGroupButton({
 }: Omit<ButtonPrimitive.Props, "className" | "type"> &
   VariantProps<typeof inputGroupButtonVariants> & {
     variant?:
-      | "default"
-      | "outline"
-      | "secondary"
-      | "ghost"
-      | "destructive"
-      | "link";
+      "default" | "outline" | "secondary" | "ghost" | "destructive" | "link";
     type?: "button" | "submit" | "reset";
   }) {
   return (

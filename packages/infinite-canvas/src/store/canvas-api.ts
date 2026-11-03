@@ -37,12 +37,7 @@ import type { DocumentStoreState } from "./document-store";
 import type { SessionState } from "./session-store";
 
 export type CanvasStatus =
-  | "seeding"
-  | "syncing"
-  | "ready"
-  | "outdated"
-  | "connected"
-  | "error";
+  "seeding" | "syncing" | "ready" | "outdated" | "connected" | "error";
 
 export interface CanvasApi {
   document: {

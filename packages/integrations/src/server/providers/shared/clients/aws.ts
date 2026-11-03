@@ -106,8 +106,7 @@ export function awsClientFactory(
   return ({ region, credentials }) => {
     const module = awsRequire(packageName) as Record<string, unknown>;
     const Client = module[clientExport] as
-      | (new (config: unknown) => AwsSdkClient)
-      | undefined;
+      (new (config: unknown) => AwsSdkClient) | undefined;
     if (typeof Client !== "function") {
       throw new IntegrationProviderSdkError(
         "INTEGRATION_PROVIDER_SDK_CONFIGURATION_INVALID",
@@ -123,8 +122,7 @@ function awsCommandFactory(
   return (command) => {
     const module = awsRequire(packageName) as Record<string, unknown>;
     const Command = module[command] as
-      | (new (input: unknown) => unknown)
-      | undefined;
+      (new (input: unknown) => unknown) | undefined;
     if (typeof Command !== "function") {
       throw new IntegrationProviderSdkError(
         "INTEGRATION_PROVIDER_SDK_CONFIGURATION_INVALID",

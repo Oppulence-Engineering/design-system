@@ -317,12 +317,7 @@ export const sendToBack = (ctx: CommandContext, ids?: readonly NodeId[]) =>
 /* ---------- Align & distribute (§14b) ---------- */
 
 export type AlignEdge =
-  | "left"
-  | "hcenter"
-  | "right"
-  | "top"
-  | "vcenter"
-  | "bottom";
+  "left" | "hcenter" | "right" | "top" | "vcenter" | "bottom";
 export type DistributeAxis = "horizontal" | "vertical";
 
 interface PositionedNode {

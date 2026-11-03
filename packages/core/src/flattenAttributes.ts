@@ -325,12 +325,7 @@ export function unflattenAttributes(
     Object.keys(obj)[0] === ""
   ) {
     return rehydrateNull(obj[""]) as
-      | string
-      | number
-      | boolean
-      | Record<string, unknown>
-      | null
-      | undefined;
+      string | number | boolean | Record<string, unknown> | null | undefined;
   }
 
   if (Object.keys(obj).length === 0) {
@@ -487,12 +482,7 @@ function rehydrateCircular(value: unknown): unknown {
  */
 export function primitiveValueOrflattenedAttributes(
   obj:
-    | Record<string, unknown>
-    | unknown[]
-    | string
-    | boolean
-    | number
-    | undefined,
+    Record<string, unknown> | unknown[] | string | boolean | number | undefined,
   prefix: string | undefined,
 ): Attributes | string | number | boolean | undefined {
   if (

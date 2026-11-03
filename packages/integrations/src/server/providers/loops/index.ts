@@ -150,11 +150,7 @@ const ACTIONS: readonly RestAction<any>[] = [
       "Retrieve all mailing lists from your Loops account. Returns each list with its ID, name, description, and public/private status.",
     method: "GET",
     url: "/v1/lists",
-    input: z
-      .object({
-        /* no declared parameters */
-      })
-      .strict(),
+    input: z.object({/* no declared parameters */}).strict(),
   },
   {
     action: "list-transactional-emails",

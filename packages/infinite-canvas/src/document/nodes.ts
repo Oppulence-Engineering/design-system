@@ -113,11 +113,7 @@ export interface GroupNode extends SceneNodeBase {
 }
 
 export type SceneNode =
-  | FrameNode
-  | ElementNode
-  | TextNode
-  | ComponentNode
-  | GroupNode;
+  FrameNode | ElementNode | TextNode | ComponentNode | GroupNode;
 export type SceneNodeType = SceneNode["type"];
 
 export type NodeMap = Record<string, SceneNode>;

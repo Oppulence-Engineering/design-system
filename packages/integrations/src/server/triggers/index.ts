@@ -200,10 +200,7 @@ export interface IntegrationTriggerRuntimeConfig {
 }
 
 export type IntegrationTriggerHealthState =
-  | "healthy"
-  | "stale"
-  | "failing"
-  | "unregistered";
+  "healthy" | "stale" | "failing" | "unregistered";
 
 export interface IntegrationTriggerHealth {
   integrationId: string;

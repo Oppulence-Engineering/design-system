@@ -111,12 +111,7 @@ export function useIntegrationDirectory(): IntegrationDirectoryState {
 }
 
 export type IntegrationConnectionLinkPhase =
-  | "idle"
-  | "preparing"
-  | "ready"
-  | "completing"
-  | "connected"
-  | "failed";
+  "idle" | "preparing" | "ready" | "completing" | "connected" | "failed";
 
 interface IntegrationConnectionLinkButtonBaseProps {
   /** Reuse a product fetch wrapper when it injects CSRF protection or tracing. */
