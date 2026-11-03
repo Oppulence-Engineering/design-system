@@ -530,9 +530,17 @@ jobs:
             local package_dir="$1"
             local changed_flag="$2"
 
-            [[ "$PUBLISH_ALL" == "true" ]] ||
-              [[ "$REQUESTED_PACKAGE" == "$package_dir" ]] ||
-              [[ "$changed_flag" == "true" ]]
+            if [[ "$PUBLISH_ALL" == "true" ]]; then
+              return 0
+            fi
+            # A manual run that names one package publishes only that one. On
+            # a manual run the change filter reports every package as changed
+            # (run 41620578030), so the flags would pull in all of them.
+            if [[ -n "$REQUESTED_PACKAGE" ]]; then
+              [[ "$REQUESTED_PACKAGE" == "$package_dir" ]]
+              return
+            fi
+            [[ "$changed_flag" == "true" ]]
           }
 
           # Packages that changed on this push but had nothing to publish,
