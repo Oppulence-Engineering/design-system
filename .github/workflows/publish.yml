@@ -507,14 +507,23 @@ jobs:
       - name: Setup Node.js for npm publish
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
-          node-version: 20
+          node-version: 24
           registry-url: "https://registry.npmjs.org"
+
+      # npm trusted publishing (OIDC, using this job's id-token permission)
+      # needs npm >= 11.5.1 on Node >= 22.14. The npm bundled with Node 20 was
+      # too old, so every publish fell back to NPM_TOKEN, which npm refuses
+      # for the @oppulence scope (E404 on PUT).
+      - name: Install an npm that supports trusted publishing
+        run: npm install -g npm@11.21.1
 
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
       - name: Validate and publish changed packages
         env:
+          # Used only for a package with no trusted publisher on npmjs.com;
+          # npm authenticates with OIDC first.
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           should_publish() {
