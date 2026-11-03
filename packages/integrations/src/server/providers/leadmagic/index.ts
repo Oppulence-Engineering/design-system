@@ -91,11 +91,7 @@ const ACTIONS: readonly RestAction<any>[] = [
       "Retrieve the current credit balance for the authenticated LeadMagic account. This endpoint is free and consumes no credits.",
     method: "GET",
     url: "/v1/credits",
-    input: z
-      .object({
-        /* no declared parameters */
-      })
-      .strict(),
+    input: z.object({/* no declared parameters */}).strict(),
   },
 ];
 

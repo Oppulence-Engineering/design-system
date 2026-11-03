@@ -62,8 +62,7 @@ class ZodIpcMessageHandler<
 > {
   readonly #schema: TListenCatalog;
   readonly #handlers:
-    | ZodIpcMessageHandlers<TListenCatalog, TEmitCatalog>
-    | undefined;
+    ZodIpcMessageHandlers<TListenCatalog, TEmitCatalog> | undefined;
   readonly #sender: ZodIpcMessageSender<TEmitCatalog>;
 
   constructor(

@@ -21,12 +21,7 @@ export interface SignOutButtonProps {
    * @default "ghost"
    */
   variant?:
-    | "default"
-    | "destructive"
-    | "outline"
-    | "secondary"
-    | "ghost"
-    | "link";
+    "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
 
   /**
    * Button size.

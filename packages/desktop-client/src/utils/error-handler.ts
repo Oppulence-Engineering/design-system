@@ -40,8 +40,7 @@ export type ErrorHandlerOptions = {
  * @template E - The type of the error value
  */
 export type Result<T, E = DesktopClientError> =
-  | { success: true; data: T }
-  | { success: false; error: E };
+  { success: true; data: T } | { success: false; error: E };
 
 /**
  * Centralized error handler for the desktop client. Provides utilities for

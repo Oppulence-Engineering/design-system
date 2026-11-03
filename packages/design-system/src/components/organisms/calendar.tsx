@@ -17,12 +17,7 @@ import { cn } from "../../../lib/utils";
 import { Button, buttonVariants } from "../atoms/button";
 
 type CalendarButtonVariant =
-  | "default"
-  | "outline"
-  | "secondary"
-  | "ghost"
-  | "destructive"
-  | "link";
+  "default" | "outline" | "secondary" | "ghost" | "destructive" | "link";
 
 interface CalendarBaseProps {
   buttonVariant?: CalendarButtonVariant;

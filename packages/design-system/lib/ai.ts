@@ -11,10 +11,7 @@ export type FileUIPart = {
 };
 
 export type ToolState =
-  | "input-streaming"
-  | "input-available"
-  | "output-available"
-  | "output-error";
+  "input-streaming" | "input-available" | "output-available" | "output-error";
 
 export type ToolUIPart = {
   type: string;

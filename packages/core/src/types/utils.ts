@@ -476,8 +476,8 @@ export type Jsonify<T> = T extends JsonPrimitive
         ? Jsonify<U>[]
         : T extends object
           ? {
-              [K in keyof T as Jsonify<T[K]> extends never
-                ? never
-                : K]: Jsonify<T[K]>;
+              [
+                K in keyof T as Jsonify<T[K]> extends never ? never : K
+              ]: Jsonify<T[K]>;
             }
           : never;

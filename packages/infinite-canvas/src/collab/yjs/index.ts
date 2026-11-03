@@ -241,16 +241,13 @@ export class YjsPresenceAdapter implements PresenceAdapter {
     for (const [clientId, state] of this.awareness.getStates()) {
       if (clientId === this.awareness.clientID) continue;
       const user = state.user as
-        | (LocalPresence & { access: CollabAccess })
-        | null
-        | undefined;
+        (LocalPresence & { access: CollabAccess }) | null | undefined;
       if (user == null) continue;
       const cursor =
         (state.cursor as { x: number; y: number } | null | undefined) ?? null;
       const selection = (state.selection as string[] | undefined) ?? [];
       const camera = state.camera as
-        | { x: number; y: number; zoom: number }
-        | undefined;
+        { x: number; y: number; zoom: number } | undefined;
       const peer: PresencePeer = {
         clientId: user.clientId,
         userId: user.userId,

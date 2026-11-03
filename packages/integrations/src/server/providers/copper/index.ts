@@ -377,11 +377,7 @@ const ACTIONS: readonly RestAction<any>[] = [
     description: "List activity types",
     method: "GET",
     url: "/activity_types",
-    input: z
-      .object({
-        /* no declared parameters */
-      })
-      .strict(),
+    input: z.object({/* no declared parameters */}).strict(),
   },
   {
     action: "list-contact-types",
@@ -389,11 +385,7 @@ const ACTIONS: readonly RestAction<any>[] = [
     description: "List contact types",
     method: "GET",
     url: "/contact_types",
-    input: z
-      .object({
-        /* no declared parameters */
-      })
-      .strict(),
+    input: z.object({/* no declared parameters */}).strict(),
   },
   {
     action: "list-custom-activity-types",
@@ -401,11 +393,7 @@ const ACTIONS: readonly RestAction<any>[] = [
     description: "List all custom activity types",
     method: "GET",
     url: "/custom_activity_types",
-    input: z
-      .object({
-        /* no declared parameters */
-      })
-      .strict(),
+    input: z.object({/* no declared parameters */}).strict(),
   },
   {
     action: "list-custom-field-definitions",
@@ -413,11 +401,7 @@ const ACTIONS: readonly RestAction<any>[] = [
     description: "List custom field definitions",
     method: "GET",
     url: "/custom_field_definitions",
-    input: z
-      .object({
-        /* no declared parameters */
-      })
-      .strict(),
+    input: z.object({/* no declared parameters */}).strict(),
   },
   {
     action: "list-customer-sources",
@@ -425,11 +409,7 @@ const ACTIONS: readonly RestAction<any>[] = [
     description: "List customer sources",
     method: "GET",
     url: "/customer_sources",
-    input: z
-      .object({
-        /* no declared parameters */
-      })
-      .strict(),
+    input: z.object({/* no declared parameters */}).strict(),
   },
   {
     action: "list-lead-statuses",
@@ -437,11 +417,7 @@ const ACTIONS: readonly RestAction<any>[] = [
     description: "List lead statuses",
     method: "GET",
     url: "/lead_statuses",
-    input: z
-      .object({
-        /* no declared parameters */
-      })
-      .strict(),
+    input: z.object({/* no declared parameters */}).strict(),
   },
   {
     action: "list-loss-reasons",
@@ -449,11 +425,7 @@ const ACTIONS: readonly RestAction<any>[] = [
     description: "List loss reasons",
     method: "GET",
     url: "/loss_reasons",
-    input: z
-      .object({
-        /* no declared parameters */
-      })
-      .strict(),
+    input: z.object({/* no declared parameters */}).strict(),
   },
   {
     action: "list-pipeline-stages",
@@ -461,11 +433,7 @@ const ACTIONS: readonly RestAction<any>[] = [
     description: "List all pipeline stages",
     method: "GET",
     url: "/pipeline_stages",
-    input: z
-      .object({
-        /* no declared parameters */
-      })
-      .strict(),
+    input: z.object({/* no declared parameters */}).strict(),
   },
   {
     action: "list-pipelines",
@@ -473,11 +441,7 @@ const ACTIONS: readonly RestAction<any>[] = [
     description: "List pipelines",
     method: "GET",
     url: "/pipelines",
-    input: z
-      .object({
-        /* no declared parameters */
-      })
-      .strict(),
+    input: z.object({/* no declared parameters */}).strict(),
   },
   {
     action: "list-tags",
