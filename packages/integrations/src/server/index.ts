@@ -812,6 +812,8 @@ export type {
   IntegrationConnectionLinkRuntime,
   IntegrationConnectionLinkRuntimeConfig,
   IntegrationConnectionLinkSubject,
+  MergeCategory,
+  MergeClientOptions,
   MergeConnectionLinkConfig,
   MergeLinkSdk,
   PlaidConnectionLinkConfig,

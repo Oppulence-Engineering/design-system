@@ -350,7 +350,7 @@
     },
     "packages/integrations": {
       "name": "@oppulence/integrations",
-      "version": "0.3.3",
+      "version": "0.3.4",
       "dependencies": {
         "@aws-sdk/client-appconfig": "3.1101.0",
         "@aws-sdk/client-athena": "3.1101.0",

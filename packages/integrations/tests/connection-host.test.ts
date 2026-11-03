@@ -244,3 +244,56 @@ describe("a product's authorization denial during connection link", () => {
     });
   });
 });
+
+describe("Merge Link categories", () => {
+  test.each(["accounting", "hris"] as const)(
+    "creates a team-bound %s link",
+    async (category) => {
+      let requested: unknown;
+      const runtime = createIntegrationConnectionLinkRuntime({
+        credentialVault: {
+          async read() {
+            return undefined;
+          },
+          async save() {},
+          async revoke() {},
+        },
+        credentialKeyring: {
+          async getActiveKey() {
+            throw new Error("unused");
+          },
+          async getKey() {
+            return undefined;
+          },
+        },
+        merge: {
+          apiKey: "test-key",
+          category,
+          resolveEndUser: async () => ({
+            email: "owner@example.test",
+            organizationName: "Example",
+          }),
+          clientFactory: () => ({
+            async linkTokenCreate(input) {
+              requested = input;
+              return { link_token: "link-token" };
+            },
+            async accountTokenRetrieve() {
+              return { account_token: "account-token" };
+            },
+          }),
+        },
+      });
+      await runtime.createMergeLinkToken({
+        product: "eigenn",
+        subjectId: "team-1",
+      });
+      expect(requested).toMatchObject({
+        endUserDetailsRequest: {
+          end_user_origin_id: "team-1",
+          categories: [{ value: category, rawValue: category }],
+        },
+      });
+    },
+  );
+});
