@@ -211,13 +211,11 @@ export const NOOP_SERVER_TRACKER: ServerTracker = {
 export function createServerTracker(
   config: ServerTrackerConfig,
 ): ServerTracker {
-  if (
-    !(
-      config.clientId &&
-      config.clientSecret &&
-      isEmissionEnabledFromProcessEnv()
-    )
-  ) {
+  if (!(
+    config.clientId &&
+    config.clientSecret &&
+    isEmissionEnabledFromProcessEnv()
+  )) {
     return NOOP_SERVER_TRACKER;
   }
 

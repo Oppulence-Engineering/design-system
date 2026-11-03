@@ -112,9 +112,7 @@ export class ServerAnalytics implements AnalyticsClient {
     this.context = {
       ...getDeviceContext(),
       environment: (readRuntimeEnv("NODE_ENV") || "development") as
-        | "production"
-        | "staging"
-        | "development",
+        "production" | "staging" | "development",
       appVersion: process.env.NEXT_PUBLIC_APP_VERSION,
     };
 
