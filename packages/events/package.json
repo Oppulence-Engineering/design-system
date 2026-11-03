@@ -1,6 +1,6 @@
 {
   "name": "@oppulence/events",
-  "version": "1.2.1",
+  "version": "1.3.0",
   "description": "Typed analytics events and OpenPanel adapters for Oppulence applications",
   "type": "module",
   "sideEffects": false,

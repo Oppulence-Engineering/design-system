@@ -413,11 +413,16 @@ export const ACTIVATION_EVENTS = {
     product: "eigenn",
     kind: "milestone",
     version: 1,
-    status: "not_instrumented",
-    description: "No persisted comparison record exists yet.",
-    backingRecord: "none yet",
+    status: "instrumented",
+    description:
+      "Every projection in the first comparison of saved scenarios against the baseline was computed, and the comparison was saved. Opening the comparison view does not count.",
+    backingRecord: "scenario_comparisons",
     dedup: "workspace_once",
-    properties: z.object({}),
+    properties: z.object({
+      comparison_id: id,
+      // Saved scenarios compared; the baseline is always the other side.
+      scenario_count: z.number().int().min(1),
+    }),
   },
   eigenn_first_recommendation_generated: {
     product: "eigenn",
@@ -434,11 +439,15 @@ export const ACTIVATION_EVENTS = {
     product: "eigenn",
     kind: "milestone",
     version: 1,
-    status: "not_instrumented",
-    description: "No persisted review record exists yet.",
-    backingRecord: "none yet",
+    status: "instrumented",
+    description:
+      "A person approved or rejected the first assistant recommendation. Generating a recommendation does not count.",
+    backingRecord: "assistant_action_proposals (decided_by set)",
     dedup: "workspace_once",
-    properties: z.object({}),
+    properties: z.object({
+      proposal_id: id,
+      outcome: z.enum(["approved", "rejected"]),
+    }),
   },
   eigenn_first_decision_recorded: {
     product: "eigenn",
@@ -459,25 +468,26 @@ export const ACTIVATION_EVENTS = {
     product: "eigenn",
     kind: "milestone",
     version: 1,
-    status: "not_instrumented",
-    description: "No persisted plan-commit record exists yet.",
-    backingRecord: "none yet",
+    status: "instrumented",
+    description:
+      "A scenario was first promoted to an operating plan, and approved where the team requires approval.",
+    backingRecord: "budget_scenarios.source_scenario_id (+ approval_requests)",
     dedup: "workspace_once",
-    properties: z.object({}),
+    properties: z.object({ budget_scenario_id: id }),
   },
   eigenn_first_recurring_review_completed: {
     product: "eigenn",
     kind: "repeat",
-    version: 1,
+    version: 2,
     status: "instrumented",
     description:
-      "A decision moved to `revisited` while at least one checkpoint had a realized actual.",
-    backingRecord: "decisions + decision_checkpoints",
+      "A person recorded a decision review in a later UTC ISO week than the workspace's first one. Each review row is the repeatable record weekly retention is measured from.",
+    backingRecord: "decision_reviews",
     dedup: "workspace_once",
     feeds: "repeat_valuable_outcome",
     properties: z.object({
       decision_id: id,
-      checkpoint_count: z.number().int().positive(),
+      weeks_with_reviews: z.number().int().min(2),
     }),
   },
   eigenn_actual_vs_plan_reviewed: {

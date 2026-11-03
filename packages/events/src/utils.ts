@@ -327,9 +327,7 @@ export function getDeviceContext(): Partial<EventContext> {
     return {
       platform: "server",
       environment: readRuntimeEnv("NODE_ENV") as
-        | "production"
-        | "staging"
-        | "development",
+        "production" | "staging" | "development",
     };
   }
 

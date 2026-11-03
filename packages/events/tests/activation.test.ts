@@ -207,7 +207,68 @@ describe("activation tracker", () => {
     expect(calls).toEqual([]);
   });
 
-  it("refuses another product's event, uninstrumented events, and direct sends of fed lifecycle steps", () => {
+  it("sends the decision-workflow milestones only with the facts their records prove", () => {
+    const { calls, tracker } = recordingTracker();
+    const eigenn = createActivationTracker({
+      tracker,
+      product: "eigenn",
+      environment: "production",
+    });
+    const send = <N extends Parameters<typeof eigenn.track>[0]>(
+      name: N,
+      properties: Parameters<typeof eigenn.track<N>>[1]["properties"],
+    ) =>
+      eigenn.track(name, {
+        workspaceId: "team_1",
+        profileId: "user_1",
+        occurredAt,
+        properties,
+      });
+
+    expect(
+      send("eigenn_first_scenario_comparison_completed", {
+        comparison_id: "cmp_1",
+        scenario_count: 2,
+      }),
+    ).toEqual({ sent: true });
+    expect(
+      send("eigenn_first_recommendation_reviewed", {
+        proposal_id: "prop_1",
+        outcome: "rejected",
+      }),
+    ).toEqual({ sent: true });
+    expect(
+      send("eigenn_first_plan_committed", { budget_scenario_id: "bud_1" }),
+    ).toEqual({ sent: true });
+    expect(
+      send("eigenn_first_recurring_review_completed", {
+        decision_id: "dec_1",
+        weeks_with_reviews: 2,
+      }),
+    ).toEqual({ sent: true });
+    expect(calls).toHaveLength(5);
+
+    // A comparison needs a saved scenario against the baseline; a review
+    // needs an outcome; a repeat needs a second week.
+    expect(
+      send("eigenn_first_scenario_comparison_completed", {
+        comparison_id: "cmp_1",
+        scenario_count: 0,
+      }),
+    ).toEqual({ sent: false, reason: "invalid_properties" });
+    expect(
+      // @ts-expect-error a review records whether it approved or rejected
+      send("eigenn_first_recommendation_reviewed", { proposal_id: "prop_1" }),
+    ).toEqual({ sent: false, reason: "invalid_properties" });
+    expect(
+      send("eigenn_first_recurring_review_completed", {
+        decision_id: "dec_1",
+        weeks_with_reviews: 1,
+      }),
+    ).toEqual({ sent: false, reason: "invalid_properties" });
+  });
+
+  it("refuses another product's event and direct sends of fed lifecycle steps", () => {
     const { calls, tracker } = recordingTracker();
     const conduitt = createActivationTracker({
       tracker,
@@ -230,11 +291,6 @@ describe("activation tracker", () => {
         properties: { scenario_id: "s" },
       },
     );
-    const uninstrumented = eigenn.track(
-      // @ts-expect-error not_instrumented events have no backing record yet
-      "eigenn_first_plan_committed",
-      { workspaceId: "team_1", profileId: null, occurredAt, properties: {} },
-    );
     const fedStep = eigenn.track(
       // @ts-expect-error fed lifecycle steps are sent only by product events
       "data_source_connected",
@@ -247,7 +303,6 @@ describe("activation tracker", () => {
     );
 
     expect(crossProduct).toEqual({ sent: false, reason: "wrong_product" });
-    expect(uninstrumented).toEqual({ sent: false, reason: "not_instrumented" });
     expect(fedStep).toEqual({ sent: false, reason: "fed_only" });
     expect(calls).toEqual([]);
   });
