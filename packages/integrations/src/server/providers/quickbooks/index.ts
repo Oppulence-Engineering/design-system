@@ -19,8 +19,7 @@ export interface QuickBooksProviderSdkConfig {
   sandbox?: boolean;
   /** Reads the authorized realm ID from the product's durable connection record. */
   companyId:
-    | string
-    | ((reference: IntegrationCredentialReference) => Promise<string>);
+    string | ((reference: IntegrationCredentialReference) => Promise<string>);
   clientFactory?: (input: {
     clientId: string;
     clientSecret: string;

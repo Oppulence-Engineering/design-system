@@ -446,11 +446,7 @@ const ACTIONS: readonly RestAction<any>[] = [
     description: "List teammates",
     method: "GET",
     url: "/teammates",
-    input: z
-      .object({
-        /* no declared parameters */
-      })
-      .strict(),
+    input: z.object({/* no declared parameters */}).strict(),
   },
   {
     action: "get-teammate",

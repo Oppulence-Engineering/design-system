@@ -119,8 +119,7 @@ export interface IntegrationConnectionLinkRoutesConfig {
 
 class IntegrationRouteRequestError extends Error {
   readonly code:
-    | "INTEGRATION_REQUEST_INVALID"
-    | "INTEGRATION_REQUEST_TOO_LARGE";
+    "INTEGRATION_REQUEST_INVALID" | "INTEGRATION_REQUEST_TOO_LARGE";
 
   constructor(code: IntegrationRouteRequestError["code"]) {
     super("The integration request could not be processed.");

@@ -404,11 +404,7 @@ const ACTIONS: readonly RestAction<any>[] = [
       "Retrieve the current status of the Kalshi exchange (trading and exchange activity)",
     method: "GET",
     url: "/exchange/status",
-    input: z
-      .object({
-        /* no declared parameters */
-      })
-      .strict(),
+    input: z.object({/* no declared parameters */}).strict(),
   },
   {
     action: "create-order",

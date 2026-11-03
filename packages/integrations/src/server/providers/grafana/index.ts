@@ -129,11 +129,7 @@ const ACTIONS: readonly RestAction<any>[] = [
     description: "List all alert rules in the Grafana instance",
     method: "GET",
     url: "/api/v1/provisioning/alert-rules",
-    input: z
-      .object({
-        /* no declared parameters */
-      })
-      .strict(),
+    input: z.object({/* no declared parameters */}).strict(),
   },
   {
     action: "get-alert-rule",
@@ -510,11 +506,7 @@ const ACTIONS: readonly RestAction<any>[] = [
     description: "List all data sources configured in Grafana",
     method: "GET",
     url: "/api/datasources",
-    input: z
-      .object({
-        /* no declared parameters */
-      })
-      .strict(),
+    input: z.object({/* no declared parameters */}).strict(),
   },
   {
     action: "get-data-source",
@@ -649,11 +641,7 @@ const ACTIONS: readonly RestAction<any>[] = [
       "Check the health of the Grafana instance (version, database status)",
     method: "GET",
     url: "/api/health",
-    input: z
-      .object({
-        /* no declared parameters */
-      })
-      .strict(),
+    input: z.object({/* no declared parameters */}).strict(),
   },
 ];
 

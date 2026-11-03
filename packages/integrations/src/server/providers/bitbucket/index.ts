@@ -264,11 +264,7 @@ const ACTIONS: readonly RestAction<any>[] = [
     description: "Get current user",
     method: "GET",
     url: "/2.0/user",
-    input: z
-      .object({
-        /* no declared parameters */
-      })
-      .strict(),
+    input: z.object({/* no declared parameters */}).strict(),
   },
   {
     action: "list-emails",
@@ -276,11 +272,7 @@ const ACTIONS: readonly RestAction<any>[] = [
     description: "List email addresses for current user",
     method: "GET",
     url: "/2.0/user/emails",
-    input: z
-      .object({
-        /* no declared parameters */
-      })
-      .strict(),
+    input: z.object({/* no declared parameters */}).strict(),
   },
   {
     action: "get-email",
@@ -341,11 +333,7 @@ const ACTIONS: readonly RestAction<any>[] = [
     description: "Delete an app",
     method: "DELETE",
     url: "/2.0/addon",
-    input: z
-      .object({
-        /* no declared parameters */
-      })
-      .strict(),
+    input: z.object({/* no declared parameters */}).strict(),
     emptyResponse: "optional",
   },
 ];

@@ -24,10 +24,7 @@ const temporaryIconsPath = join(
 );
 
 type LogoSourceKey =
-  | "iconify-svg-logos"
-  | "simple-icons"
-  | "simstudio"
-  | "vendor-favicon";
+  "iconify-svg-logos" | "simple-icons" | "simstudio" | "vendor-favicon";
 
 interface GeneratedLogo {
   copyrightLicense: string;
@@ -170,8 +167,7 @@ async function simStudioLogos(): Promise<Record<string, GeneratedLogo>> {
       SIMSTUDIO_BASELINE.integrations.map((record) => {
         const componentName = componentNameFor(record, mapping);
         const Icon = icons[componentName] as
-          | ComponentType<SVGProps<SVGSVGElement>>
-          | undefined;
+          ComponentType<SVGProps<SVGSVGElement>> | undefined;
         if (!Icon) {
           throw new Error(
             `Upstream component ${componentName} for ${record.id} is missing.`,

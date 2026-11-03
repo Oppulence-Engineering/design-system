@@ -56,11 +56,7 @@ const ACTIONS: readonly RestAction<any>[] = [
     description: "List all AI models/platforms tracked in Profound",
     method: "GET",
     url: "/v1/org/models",
-    input: z
-      .object({
-        /* no declared parameters */
-      })
-      .strict(),
+    input: z.object({/* no declared parameters */}).strict(),
   },
   {
     action: "list-domains",

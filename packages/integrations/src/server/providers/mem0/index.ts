@@ -96,11 +96,7 @@ const ACTIONS: readonly RestAction<any>[] = [
     description: "Retrieve memories from Mem0 by ID or filter criteria",
     method: "GET",
     url: "/v1/memories/events/",
-    input: z
-      .object({
-        /* no declared parameters */
-      })
-      .strict(),
+    input: z.object({/* no declared parameters */}).strict(),
   },
 ];
 

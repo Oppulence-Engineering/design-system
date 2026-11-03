@@ -58,13 +58,7 @@ export type NodePosition = "static" | "relative" | "absolute";
 export interface NodeStyle {
   // layout
   display?:
-    | "block"
-    | "flex"
-    | "grid"
-    | "inline"
-    | "inline-block"
-    | "none"
-    | "contents";
+    "block" | "flex" | "grid" | "inline" | "inline-block" | "none" | "contents";
   position?: NodePosition;
   top?: Dimension;
   left?: Dimension;

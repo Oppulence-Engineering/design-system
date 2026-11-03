@@ -7,10 +7,7 @@ export const INTEGRATION_LOGO_TRADEMARK_NOTICE =
 
 export type IntegrationLogoMediaType = "image/png" | "image/svg+xml";
 export type IntegrationLogoSource =
-  | "iconify-svg-logos"
-  | "simple-icons"
-  | "simstudio"
-  | "vendor-favicon";
+  "iconify-svg-logos" | "simple-icons" | "simstudio" | "vendor-favicon";
 
 export interface IntegrationLogoAsset {
   /** Canonical catalogue ID. */

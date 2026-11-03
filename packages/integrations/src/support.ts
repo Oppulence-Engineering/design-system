@@ -642,9 +642,7 @@ export interface OperationTriggerCoverageReport {
 }
 
 type DescriptorDisposition =
-  | "supported"
-  | "intentionally-not-applicable"
-  | "not-yet-supported";
+  "supported" | "intentionally-not-applicable" | "not-yet-supported";
 
 function descriptorKey(
   integrationId: string,

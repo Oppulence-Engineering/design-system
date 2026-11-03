@@ -12,10 +12,7 @@ import type { OperationBatch } from "../operations/operations";
 
 export type CollabAccess = "read" | "comment" | "write";
 export type CollabStatus =
-  | "disconnected"
-  | "connecting"
-  | "connected"
-  | "error";
+  "disconnected" | "connecting" | "connected" | "error";
 
 /**
  * The document-store surface an adapter binds to. `applyRemote` MUST run the sanitize

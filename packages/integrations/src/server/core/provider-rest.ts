@@ -14,19 +14,11 @@ import type { IntegrationOAuthRuntime } from "../runtime/oauth";
 
 /** Matches SimStudio's HTTP method vocabulary. */
 export type IntegrationTypedRestMethod =
-  | "DELETE"
-  | "GET"
-  | "HEAD"
-  | "PATCH"
-  | "POST"
-  | "PUT";
+  "DELETE" | "GET" | "HEAD" | "PATCH" | "POST" | "PUT";
 
 /** Matches SimStudio's parameter visibility vocabulary. */
 export type IntegrationTypedRestParameterVisibility =
-  | "hidden"
-  | "llm-only"
-  | "user-only"
-  | "user-or-llm";
+  "hidden" | "llm-only" | "user-only" | "user-or-llm";
 
 export interface IntegrationTypedRestParameterItemSchema {
   readonly type?: string;
