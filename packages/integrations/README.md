@@ -308,6 +308,8 @@ const connectionLinkRuntime = createIntegrationConnectionLinkRuntime({
   },
   merge: {
     apiKey: env.MERGE_API_KEY,
+    category: "hris", // "accounting" remains the backward-compatible default.
+    region: "EU", // Select the region of the Merge account.
     // Product DB lookup only; the package owns Link token issuance and the
     // encrypted account token returned by Merge Link.
     resolveEndUser: lookupAuthorizedMergeEndUser,
@@ -525,7 +527,7 @@ package-owned Node SDK adapters after their OAuth connection is complete;
 products only read a non-secret company or tenant ID from their own connection
 row. Plaid runs Link issuance, public-token exchange, accounts, balances, Item
 status, and transaction sync through the official Node SDK. Merge adds a
-package-native Accounting Link connector and six normalized accounting actions
+package-native Accounting and HRIS Link connectors and six normalized accounting actions
 through Merge's TypeScript SDK.
 
 ## Provider execution lanes
@@ -681,3 +683,13 @@ and separate Sim Studio-only counters for catalogue-only, functionally
 supported, and operation-or-trigger-supported coverage. A `beta` or `shipped`
 label does not increase functional coverage until it has a parseable product
 support contract.
+
+### Merge category and region
+
+Merge Link accepts `category: "accounting" | "hris"` and `region: "US" | "EU"`.
+Existing callers default to Accounting in the US. Set the region explicitly for
+new installations. Both link-token creation and public-token exchange use the
+selected category and region. The account token remains encrypted in the vault;
+`onConnected` receives category and region metadata after the credential is saved.
+HRIS data models and privacy scopes remain the product's responsibility; the
+existing normalized Merge actions cover Accounting only.

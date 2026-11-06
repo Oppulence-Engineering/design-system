@@ -45,13 +45,20 @@ export interface PlaidLinkSdk {
   }>;
 }
 
+export const MergeCategorySchema = z.enum(["accounting", "hris"]);
+export type MergeCategory = z.infer<typeof MergeCategorySchema>;
+export interface MergeClientOptions {
+  category?: MergeCategory;
+  region?: "US" | "EU";
+}
+
 export interface MergeLinkSdk {
   linkTokenCreate(input: {
     endUserDetailsRequest: {
       end_user_email_address: string;
       end_user_organization_name: string;
       end_user_origin_id: string;
-      categories: Array<{ value: "accounting"; rawValue: "accounting" }>;
+      categories: Array<{ value: MergeCategory; rawValue: MergeCategory }>;
       integration?: string;
       link_expiry_mins?: number;
       should_create_magic_link_url?: boolean;
@@ -87,7 +94,9 @@ export interface PlaidConnectionLinkConfig {
 
 export interface MergeConnectionLinkConfig {
   apiKey: string;
-  /** The package restricts this connector to Merge Accounting. */
+  /** Defaults to accounting for existing consumers. */
+  category?: MergeCategory;
+  region?: "US" | "EU";
   integration?: string;
   linkExpiryMinutes?: number;
   createMagicLink?: boolean;
@@ -95,7 +104,10 @@ export interface MergeConnectionLinkConfig {
     email: string;
     organizationName: string;
   }>;
-  clientFactory?: (apiKey: string) => MergeLinkSdk;
+  clientFactory?: (
+    apiKey: string,
+    options?: MergeClientOptions,
+  ) => MergeLinkSdk;
 }
 
 export interface IntegrationConnectionLinkRuntimeConfig {
@@ -216,21 +228,63 @@ function createPlaidClient(config: PlaidConnectionLinkConfig): PlaidLinkSdk {
   });
 }
 
-function createMergeClient(apiKey: string): MergeLinkSdk {
+function createMergeClient(
+  apiKey: string,
+  options: MergeClientOptions = {},
+): MergeLinkSdk {
   return lazyAsyncClient(async (): Promise<MergeLinkSdk> => {
     const Merge = await import("@mergeapi/merge-sdk-typescript");
-    const configuration = new Merge.Configuration({ apiKey });
+    const category = MergeCategorySchema.parse(
+      options.category ?? "accounting",
+    );
+    const region = z.enum(["US", "EU"]).parse(options.region ?? "US");
+    const configuration = new Merge.Configuration({
+      apiKey,
+      basePath:
+        region === "EU"
+          ? "https://api-eu.merge.dev/api"
+          : "https://api.merge.dev/api",
+    });
+    if (category === "hris")
+      return {
+        linkTokenCreate(input) {
+          return new Merge.HRIS.LinkTokenApi(configuration).linkTokenCreate({
+            endUserDetailsRequest: {
+              ...input.endUserDetailsRequest,
+              categories: [
+                {
+                  value: Merge.HRIS.CategoriesEnumValues.Hris,
+                  rawValue: "hris",
+                },
+              ],
+            },
+          });
+        },
+        accountTokenRetrieve: (input) =>
+          new Merge.HRIS.AccountTokenApi(configuration).accountTokenRetrieve(
+            input,
+          ),
+      };
     return {
       linkTokenCreate(input) {
         return new Merge.Accounting.LinkTokenApi(configuration).linkTokenCreate(
-          input as never,
+          {
+            endUserDetailsRequest: {
+              ...input.endUserDetailsRequest,
+              categories: [
+                {
+                  value: Merge.Accounting.CategoriesEnumValues.Accounting,
+                  rawValue: "accounting",
+                },
+              ],
+            },
+          },
         );
       },
-      accountTokenRetrieve(input) {
-        return new Merge.Accounting.AccountTokenApi(
+      accountTokenRetrieve: (input) =>
+        new Merge.Accounting.AccountTokenApi(
           configuration,
-        ).accountTokenRetrieve(input);
-      },
+        ).accountTokenRetrieve(input),
     };
   });
 }
@@ -491,12 +545,22 @@ export function createIntegrationConnectionLinkRuntime(
         }
         const response = await (mergeConfig.clientFactory ?? createMergeClient)(
           mergeConfig.apiKey,
+          { category: mergeConfig.category, region: mergeConfig.region },
         ).linkTokenCreate({
           endUserDetailsRequest: {
             end_user_email_address: endUser.email,
             end_user_organization_name: endUser.organizationName,
             end_user_origin_id: subject.data.subjectId,
-            categories: [{ value: "accounting", rawValue: "accounting" }],
+            categories: [
+              {
+                value: MergeCategorySchema.parse(
+                  mergeConfig.category ?? "accounting",
+                ),
+                rawValue: MergeCategorySchema.parse(
+                  mergeConfig.category ?? "accounting",
+                ),
+              },
+            ],
             ...(mergeConfig.integration
               ? { integration: mergeConfig.integration }
               : {}),
@@ -574,6 +638,7 @@ export function createIntegrationConnectionLinkRuntime(
       try {
         const response = await (mergeConfig.clientFactory ?? createMergeClient)(
           mergeConfig.apiKey,
+          { category: mergeConfig.category, region: mergeConfig.region },
         ).accountTokenRetrieve({ publicToken: input.data.publicToken });
         if (!response?.account_token) {
           throw new Error("Missing Merge account token.");
@@ -591,7 +656,11 @@ export function createIntegrationConnectionLinkRuntime(
             accountToken: response.account_token,
             integrationName,
           },
-          providerMetadata: optionalMetadata({ integrationName }),
+          providerMetadata: optionalMetadata({
+            integrationName,
+            category: mergeConfig.category ?? "accounting",
+            region: mergeConfig.region ?? "US",
+          }),
         });
       } catch (error) {
         await reportIntegrationFailure(config.onFailure, {

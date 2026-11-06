@@ -6189,7 +6189,11 @@ describe("server financial and aggregation SDK adapters", () => {
       },
       {
         integrationId: "merge",
-        providerMetadata: { integrationName: "quickbooks" },
+        providerMetadata: {
+          integrationName: "quickbooks",
+          category: "accounting",
+          region: "US",
+        },
       },
     ]);
   });
