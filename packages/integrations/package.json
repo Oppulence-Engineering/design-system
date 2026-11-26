@@ -234,6 +234,7 @@
     "confluence.js": "3.0.3",
     "docusign-esign": "10.0.0",
     "dropbox": "10.39.0",
+    "google-maps-fetch": "0.1.8",
     "googleapis": "164.0.0",
     "intercom-client": "7.0.3",
     "jira.js": "5.4.0",

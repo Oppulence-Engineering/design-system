@@ -182,13 +182,11 @@ const MAPS_OPERATIONS: Readonly<Record<string, VendorOperation>> = {
  * the destination.
  */
 const MAPS_DEFERRED_REASON =
-  "@googlemaps/google-maps-services-js@3.4.2 does not cover this API, and it lives on its own Google Maps Platform host, which the single-host typed REST executor cannot address.";
+  "google-maps-fetch@0.1.8/compat does not cover this API, and it lives on its own Google Maps Platform host, which the single-host typed REST executor cannot address.";
 
 /** The Maps SDK reads its key from each request's params. */
 export const createGoogleMapsClient: VendorClientFactory = (credential) => {
-  const { Client } = requireOptionalSdk(
-    "@googlemaps/google-maps-services-js",
-  ) as {
+  const { Client } = requireOptionalSdk("google-maps-fetch/compat") as {
     Client: new (config?: Record<string, unknown>) => SdkMethodTarget;
   };
   const client = new Client({});
@@ -212,7 +210,7 @@ export function createGoogleMapsPack(
 ): IntegrationProviderPack {
   const pack = createVendorPack({
     integrationId: "google-maps",
-    driver: "@googlemaps/google-maps-services-js@3.4.2",
+    driver: "google-maps-fetch@0.1.8",
     transportKind: "api_key",
     operations: MAPS_OPERATIONS,
     clientFactory: options.clientFactory ?? createGoogleMapsClient,

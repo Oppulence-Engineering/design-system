@@ -171,7 +171,7 @@ const STRATEGY_OVERRIDES: Readonly<Record<string, StrategyOverride>> = {
   },
   "google-maps": {
     kind: "vendor_sdk_candidate",
-    packageName: "@googlemaps/google-maps-services-js",
+    packageName: "google-maps-fetch",
   },
   "google-meet": { kind: "installed_vendor_sdk", packageName: "googleapis" },
   "google-sheets": {
